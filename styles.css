@@ -23,6 +23,7 @@ body {
 
 /* Score Header Styles */
 .score-header {
+    margin-top: 30px;
     margin-bottom: 20px;
 }
 
@@ -245,6 +246,6 @@ body {
     }
 
     .stats-columns, .player-row {
-        grid-template-columns: 110px repeat(12, 60px);  
+        grid-template-columns: 100px repeat(12, 50px);  
     }
 }
