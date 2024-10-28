@@ -166,7 +166,7 @@ body {
 
 .stats-columns, .player-row {
     display: grid;
-    grid-template-columns: 160px repeat(13, minmax(45px, auto));
+    grid-template-columns: 160px repeat(12, minmax(40px, auto));  
     align-items: center;
     min-width: max-content;
 }
@@ -183,7 +183,7 @@ body {
 }
 
 .stats-columns > div, .player-row > div {
-    padding: 8px;
+    padding: 4px;
     text-align: center;
 }
 
@@ -228,6 +228,6 @@ body {
     }
 
     .stats-columns, .player-row {
-        grid-template-columns: 140px repeat(13, 80px);
+        grid-template-columns: 140px repeat(12, 70px);  
     }
 }
