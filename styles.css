@@ -17,6 +17,8 @@ body {
     background-color: var(--bg-primary);
     color: var(--text-primary);
     padding: 16px;
+    max-width: 1400px;  /* Add max-width to contain the content */
+    margin: 0 auto;     /* Center the content */
 }
 
 /* Score Header Styles */
@@ -195,7 +197,8 @@ body {
     display: flex;
     align-items: center;
     gap: 8px;
-    text-align: left !important;
+    text-align: left !importan t;
+    padding-right: 4px !important;  /* Added to override the general padding */
 }
 
 .player-row {
@@ -207,13 +210,26 @@ body {
     height: 35px;
     border-radius: 50%;
     background: #333;
+    flex-shrink: 0;  /* Added to prevent photo from shrinking */
 }
 
 .player-name {
     font-size: 14px;
+    white-space: nowrap;  /* Added to prevent name wrapping */
+    overflow: hidden;     /* Added to handle long names */
+    text-overflow: ellipsis;  /* Added to handle long names */
+}
+
+@media (min-width: 1024px) {  /* Add this new media query */
+    body {
+        padding: 16px 48px;  /* Increase padding on sides for desktop */
+    }
 }
 
 @media (max-width: 768px) {
+    body {
+        padding: 16px;  /* Keep original padding for mobile */
+    }
     .score-container {
         max-width: 300px;
     }
@@ -228,6 +244,6 @@ body {
     }
 
     .stats-columns, .player-row {
-        grid-template-columns: 140px repeat(12, 70px);  
+        grid-template-columns: 100px repeat(12, 60px);  
     }
 }
