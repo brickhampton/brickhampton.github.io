@@ -196,9 +196,9 @@ body {
     z-index: 1;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 9px;
     text-align: left !importan t;
-    padding-right: 5px !important;  /* Added to override the general padding */
+    padding-right: 4px !important;  /* Added to override the general padding */
 }
 
 .player-row {
@@ -230,6 +230,7 @@ body {
     body {
         padding: 16px;  /* Keep original padding for mobile */
     }
+
     .score-container {
         max-width: 300px;
     }
