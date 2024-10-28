@@ -245,6 +245,6 @@ body {
     }
 
     .stats-columns, .player-row {
-        grid-template-columns: 105px repeat(12, 60px);  
+        grid-template-columns: 110px repeat(12, 60px);  
     }
 }
