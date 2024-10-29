@@ -54,7 +54,7 @@ body {
 }
 
 .score {
-    font-size: 32px;
+    font-size: 36px;
     font-weight: bold;
 }
 
@@ -111,7 +111,7 @@ body {
 }
 
 .stat-value {
-    font-size: 24px;
+    font-size: 20px;
     font-weight: bold;
 }
 
