@@ -105,12 +105,27 @@ body {
     letter-spacing: 0.5px;
 }
 
-/* Add triagnle indicator */
+/* Add winner indicator */
 .winner {
     position: relative;  /* For positioning the triangle */
 }
 
+.winner::before {
+    /* Add white glow behind the crown */
+    content: '';
+    position: absolute;
+    top: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 5px;
+    height: 1px;
+    background: transparent;
+    box-shadow: 0 0 10px 4px rgba(255, 255, 255, 0.6),
+                0 0 30px 8px rgba(255, 255, 255, 0.4);
+}
+
 .winner::after {
+    /* Original crown shape */
     content: '';
     position: absolute;
     top: -14px;
@@ -123,16 +138,16 @@ body {
         0% 100%,
         100% 100%,
         100% 50%,
-        85% 50%,
-        85% 10%,
+        100% 10%,
         70% 50%,
         50% 10%,
         30% 50%,
-        15% 10%,
-        15% 50%,
+        0% 10%,
         0% 50%
     );
+    z-index: 1; /* Ensure crown stays above the glow */
 }
+
 
 /* Navigation Tabs */
 .nav-tabs {
