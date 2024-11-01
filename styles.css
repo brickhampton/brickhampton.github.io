@@ -31,15 +31,18 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 20px;
-    max-width: 400px;
+    gap: 40px; /* Increased gap for more spacing */
+    max-width: 600px;
     margin: 0 auto;
+    padding: 0 16px;
 }
 
 .team-score {
+    flex: 1;
     display: flex;
     align-items: center;
     gap: 12px;
+    min-width: 0; /* Allow flex items to shrink below content size */
 }
 
 .team-logo {
@@ -50,26 +53,80 @@ body {
 }
 
 .team-info {
-    text-align: center;
+    flex: 1;
+    min-width: 0;
+    text-align: center; /* Center align team info */
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Center children */
+}
+
+.team-score:last-child .team-info {
+    text-align: left; /* Left align second team */
+}
+
+
+.team-info {
+    transition: opacity 0.2s ease;
+}
+
+.team-info.winner .score,
+.team-info.winner .team-name {
+    color: #ffffff;
+    opacity: 1;
+}
+
+.team-info.loser .score,
+.team-info.loser .team-name {
+    color: #bfbfbf; /* Lighter gray (was #808080) */
+    opacity: 0.85; /* Increased opacity for better visibility */
 }
 
 .score {
     font-size: 36px;
     font-weight: bold;
+    line-height: 1.2;
 }
 
 .team-name {
     font-size: 14px;
     color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 140px; /* Limit width for long names */
 }
 
 .game-info {
+    flex: 0 0 auto;
     text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 140px; /* Increased minimum width */
+    padding: 0 20px; /* Added padding on sides */
 }
 
-.status {
-    font-size: 18px;
-    color: var(--text-secondary);
+.game-date {
+    font-size: 14px;
+    color: var(--text-primary);
+    margin-bottom: 2px; /* Small space between date and game number */
+}
+
+.game-number {
+    font-size: 12px;
+    color: var(--text-primary);
+    letter-spacing: 0.5px;
+}
+
+/* First team logo alignment */
+.team-score:first-child {
+    justify-content: flex-end; /* Push content to the right */
+}
+
+/* Second team logo alignment */
+.team-score:last-child {
+    justify-content: flex-start; /* Push content to the left */
 }
 
 /* Navigation Tabs */
@@ -221,6 +278,14 @@ body {
     text-overflow: ellipsis;  /* Added to handle long names */
 }
 
+
+.perfect-percentage {
+    color: #00ff8d !important; /* Adjusted to match the screenshot's green */
+    font-weight: bold;
+    text-shadow: 0 0 8px rgba(0, 255, 141, 0.8), /* Inner glow */
+                 0 0 12px rgba(0, 255, 141, 0.5); /* Outer glow */
+}
+
 @media (min-width: 1024px) {  /* Add this new media query */
     body {
         padding: 16px 48px;  /* Increase padding on sides for desktop */
@@ -233,9 +298,19 @@ body {
     }
 
     .score-container {
-        max-width: 300px;
+        gap: 20px;
+        padding: 0 12px;
+    }
+
+    .game-info {
+        min-width: 120px;
+        padding: 0 10px;
     }
     
+    .team-name {
+        max-width: 100px; /* Smaller max-width for mobile */
+    }
+
     .score {
         font-size: 32px;
     }
@@ -246,6 +321,6 @@ body {
     }
 
     .stats-columns, .player-row {
-        grid-template-columns: 100px repeat(12, 50px);  
+        grid-template-columns: 110px repeat(12, 50px);  
     }
 }
