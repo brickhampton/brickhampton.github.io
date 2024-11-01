@@ -40,17 +40,7 @@ body {
 .team-score {
     flex: 1;
     display: flex;
-    gap: 12px;
     min-width: 0;
-}
-
-.team-logo {
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    background: var(--accent-blue);
-    margin-top: 8px; /* This aligns it with the score number */
-    align-self: flex-start; /* This prevents it from being centered with the entire team-info section */
 }
 
 .team-info {
@@ -61,11 +51,6 @@ body {
     flex-direction: column;
     align-items: center;
 }
-
-.team-score:last-child .team-info {
-    text-align: left; /* Left align second team */
-}
-
 
 .team-info {
     transition: opacity 0.2s ease;
@@ -120,14 +105,34 @@ body {
     letter-spacing: 0.5px;
 }
 
-/* First team logo alignment */
-.team-score:first-child {
-    justify-content: flex-end; /* Push content to the right */
+/* Add triagnle indicator */
+.winner {
+    position: relative;  /* For positioning the triangle */
 }
 
-/* Second team logo alignment */
-.team-score:last-child {
-    justify-content: flex-start; /* Push content to the left */
+.winner-left::before,
+.winner-right::before {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.winner-left::before {
+    border-width: 6px 0 6px 8px;  /* Changed to left-pointing triangle */
+    border-color: transparent transparent transparent #ffffff;
+    left: -48px;  /* Increased distance to place it at screen edge */
+    border-radius: 1px;
+}
+
+.winner-right::before {
+    border-width: 6px 8px 6px 0;  /* Changed to right-pointing triangle */
+    border-color: transparent #ffffff transparent transparent;
+    right: -48px;  /* Increased distance to place it at screen edge */
+    border-radius: 1px;
 }
 
 /* Navigation Tabs */
@@ -256,7 +261,7 @@ body {
     display: flex;
     align-items: center;
     gap: 9px;
-    text-align: left !importan t;
+    text-align: left !important;
     padding-right: 4px !important;  /* Added to override the general padding */
 }
 
@@ -311,14 +316,27 @@ body {
     .team-name {
         max-width: 100px; /* Smaller max-width for mobile */
     }
-
+    
     .score {
         font-size: 32px;
+    }
+
+    .winner-left::before {
+        left: -12px;  /* Slightly closer on mobile */
+    }
+    
+    .winner-right::before {
+        right: -12px;  /* Slightly closer on mobile */
     }
 
     .team-stats {
         grid-template-columns: repeat(3, 1fr);
         grid-template-rows: auto auto;
+    }
+
+    .team-stats-wrapper {
+        margin: 15px 0;
+        padding: 15px;
     }
 
     .stats-columns, .player-row {

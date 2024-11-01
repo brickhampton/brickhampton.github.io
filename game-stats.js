@@ -130,13 +130,12 @@ class GameStats {
 
         // Apply winner/loser styling based on score comparison
         if (homeScore > awayScore) {
-            teamAInfo.classList.add('winner');
+            teamAInfo.classList.add('winner', 'winner-left');
             teamBInfo.classList.add('loser');
         } else if (awayScore > homeScore) {
             teamAInfo.classList.add('loser');
-            teamBInfo.classList.add('winner');
+            teamBInfo.classList.add('winner', 'winner-right');
         } else {
-            // In case of a tie, both teams get winner styling
             teamAInfo.classList.add('winner');
             teamBInfo.classList.add('winner');
         }
