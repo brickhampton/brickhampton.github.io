@@ -110,29 +110,28 @@ body {
     position: relative;  /* For positioning the triangle */
 }
 
-.winner-left::before,
-.winner-right::before {
+.winner::after {
     content: '';
     position: absolute;
-    width: 0;
-    height: 0;
-    border-style: solid;
-    top: 50%;
-    transform: translateY(-50%);
-}
-
-.winner-left::before {
-    border-width: 6px 0 6px 8px;  /* Changed to left-pointing triangle */
-    border-color: transparent transparent transparent #ffffff;
-    left: -48px;  /* Increased distance to place it at screen edge */
-    border-radius: 1px;
-}
-
-.winner-right::before {
-    border-width: 6px 8px 6px 0;  /* Changed to right-pointing triangle */
-    border-color: transparent #ffffff transparent transparent;
-    right: -48px;  /* Increased distance to place it at screen edge */
-    border-radius: 1px;
+    top: -14px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 14px;
+    height: 10px;
+    background: #FFD700;
+    clip-path: polygon(
+        0% 100%,
+        100% 100%,
+        100% 50%,
+        85% 50%,
+        85% 10%,
+        70% 50%,
+        50% 10%,
+        30% 50%,
+        15% 10%,
+        15% 50%,
+        0% 50%
+    );
 }
 
 /* Navigation Tabs */
@@ -321,12 +320,10 @@ body {
         font-size: 32px;
     }
 
-    .winner-left::before {
-        left: -12px;  /* Slightly closer on mobile */
-    }
-    
-    .winner-right::before {
-        right: -12px;  /* Slightly closer on mobile */
+    .winner::after {
+        width: 12px;
+        height: 8px;
+        top: -12px;
     }
 
     .team-stats {
