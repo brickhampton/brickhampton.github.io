@@ -8,7 +8,6 @@ const MATCH_RANGE = 'A:G';
 
 class GameStats {
     constructor() {
-        // Define the required stats for our webpage layout
         this.requiredStats = {
             player: ['player', 'name', 'player name'],
             pts: ['pts', 'points', 'total points'],
@@ -24,11 +23,55 @@ class GameStats {
             fta: ['fta', 'ft attempted', 'free throws attempted'],
             tsPercent: ['ts%', 'true shooting', 'true shooting percentage'],
             to: ['to', 'turnovers'],
-            eff: ['eff', 'efficiency']
+            eff: ['eff', 'efficiency'],
+            game: ['game', 'game number']
         };
         
         this.columnMap = {};
+        this.allGameData = [];
+        this.currentGameIndex = 0;
+        this.matchData = null;
         this.init();
+        this.setupGameNavigation();
+    }
+
+    setupGameNavigation() {
+        const navContainer = document.createElement('div');
+        navContainer.className = 'game-navigation';
+        navContainer.innerHTML = `
+            <button id="prevGame" class="nav-button">←</button>
+            <span id="gameIndicator"></span>
+            <button id="nextGame" class="nav-button">→</button>
+        `;
+
+        const scoreHeader = document.querySelector('.score-header');
+        scoreHeader.after(navContainer);
+
+        document.getElementById('prevGame').addEventListener('click', () => this.changeGame(-1));
+        document.getElementById('nextGame').addEventListener('click', () => this.changeGame(1));
+    }
+
+    changeGame(direction) {
+        const newIndex = this.currentGameIndex + direction;
+        if (newIndex >= 0 && newIndex < this.gameGroups.length) {
+            this.currentGameIndex = newIndex;
+            this.renderCurrentGame();
+            this.updateGameNavigation();
+            this.updateGameScore();
+        }
+    }
+
+    updateGameNavigation() {
+        const prevButton = document.getElementById('prevGame');
+        const nextButton = document.getElementById('nextGame');
+        const gameIndicator = document.getElementById('gameIndicator');
+
+        prevButton.disabled = this.currentGameIndex === 0;
+        nextButton.disabled = this.currentGameIndex === this.gameGroups.length - 1;
+
+        const currentGame = this.gameGroups[this.currentGameIndex][0];
+        const gameNumber = this.getValue(currentGame, 'game');
+        gameIndicator.textContent = `Game ${gameNumber}`;
     }
 
     async init() {
@@ -40,14 +83,50 @@ class GameStats {
             
             if (gameData.values && gameData.values.length > 0) {
                 this.mapHeadersToRequiredStats(gameData.values[0]);
-                this.renderGameData(gameData.values.slice(1));
-            }
-
-            if (matchData.values && matchData.values.length > 0) {
-                this.updateGameScore(matchData);
+                
+                // Group data by game number
+                const rows = gameData.values.slice(1);
+                this.gameGroups = this.groupByGame(rows);
+                
+                // Store match data
+                if (matchData.values && matchData.values.length > 0) {
+                    this.matchData = matchData;
+                }
+                
+                // Initialize with the latest game
+                this.currentGameIndex = this.gameGroups.length - 1;
+                this.renderCurrentGame();
+                this.updateGameNavigation();
+                this.updateGameScore();
             }
         } catch (error) {
             console.error('Error initializing game stats:', error);
+        }
+    }
+
+    groupByGame(rows) {
+        const gameMap = new Map();
+        
+        rows.forEach(row => {
+            const gameNumber = this.getValue(row, 'game');
+            if (!gameMap.has(gameNumber)) {
+                gameMap.set(gameNumber, []);
+            }
+            gameMap.get(gameNumber).push(row);
+        });
+
+        return Array.from(gameMap.values())
+            .sort((a, b) => {
+                const gameA = parseInt(this.getValue(a[0], 'game'));
+                const gameB = parseInt(this.getValue(b[0], 'game'));
+                return gameA - gameB;
+            });
+    }
+
+    renderCurrentGame() {
+        if (this.gameGroups && this.gameGroups.length > 0) {
+            const currentGameData = this.gameGroups[this.currentGameIndex];
+            this.renderGameData(currentGameData);
         }
     }
 
@@ -83,9 +162,11 @@ class GameStats {
         }
     }
 
-    updateGameScore(data) {
+    updateGameScore() {
+        if (!this.matchData || !this.matchData.values) return;
+
         // Get headers to find correct columns
-        const headers = data.values[0].map(header => header.toLowerCase().trim());
+        const headers = this.matchData.values[0].map(header => header.toLowerCase().trim());
         const homeIndex = headers.indexOf('home');
         const awayIndex = headers.indexOf('away');
         const opponentIndex = headers.indexOf('opponent');
@@ -98,21 +179,28 @@ class GameStats {
             return;
         }
 
-        // Get the most recent game (last row)
-        const lastGame = data.values[data.values.length - 1];
+        // Find the matching game in match history
+        const currentGame = this.gameGroups[this.currentGameIndex][0];
+        const currentGameNumber = this.getValue(currentGame, 'game');
+        
+        const matchRow = this.matchData.values.find(row => row[gameIndex] === currentGameNumber);
+        
+        if (!matchRow) {
+            console.error('No matching game found in match history');
+            return;
+        }
 
         // Update game info container
         const gameInfoHTML = `
-            <div class="game-date">${this.formatDate(lastGame[dateIndex])}</div>
-            <div class="game-number">Game ${lastGame[gameIndex]} • ${lastGame[seasonIndex]}</div>
+            <div class="game-date">${this.formatDate(matchRow[dateIndex])}</div>
+            <div class="game-number">Game ${matchRow[gameIndex]} • ${matchRow[seasonIndex]}</div>
         `;
 
-        // Update the DOM
         document.querySelector('.game-info').innerHTML = gameInfoHTML;
         
         // Get scores as numbers for comparison
-        const homeScore = parseInt(lastGame[homeIndex]) || 0;
-        const awayScore = parseInt(lastGame[awayIndex]) || 0;
+        const homeScore = parseInt(matchRow[homeIndex]) || 0;
+        const awayScore = parseInt(matchRow[awayIndex]) || 0;
 
         // Get team info elements
         const teamAInfo = document.getElementById('team-a-score').parentElement;
@@ -120,13 +208,13 @@ class GameStats {
 
         // Update team names and scores
         document.getElementById('team-a-name').textContent = 'Brickhampton';
-        document.getElementById('team-b-name').textContent = lastGame[opponentIndex];
+        document.getElementById('team-b-name').textContent = matchRow[opponentIndex];
         document.getElementById('team-a-score').textContent = homeScore;
         document.getElementById('team-b-score').textContent = awayScore;
 
         // Remove any existing winner/loser classes
-        teamAInfo.classList.remove('winner', 'loser');
-        teamBInfo.classList.remove('winner', 'loser');
+        teamAInfo.classList.remove('winner', 'loser', 'winner-left');
+        teamBInfo.classList.remove('winner', 'loser', 'winner-right');
 
         // Apply winner/loser styling based on score comparison
         if (homeScore > awayScore) {
@@ -224,7 +312,7 @@ class GameStats {
     }
 
     formatPercentage(made, attempts, isTS = false) {
-        if (attempts === 0) return '0.0';
+        if (attempts === 0) return '';
         const percentage = (made / attempts) * 100;
         
         // For TS%, we consider > 100% as perfect
@@ -246,8 +334,8 @@ class GameStats {
         return {
             made: madeNum,
             attempts: attemptsNum,
-            percentage: percentageResult.value,
-            isPerfect: percentageResult.isPerfect,
+            percentage: typeof percentageResult === 'string' ? percentageResult : percentageResult.value,
+            isPerfect: typeof percentageResult === 'string' ? false : percentageResult.isPerfect,
             display: `${madeNum}/${attemptsNum}`
         };
     }

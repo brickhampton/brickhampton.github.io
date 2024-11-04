@@ -120,8 +120,8 @@ body {
     width: 5px;
     height: 1px;
     background: transparent;
-    box-shadow: 0 0 10px 4px rgba(255, 255, 255, 0.6),
-                0 0 30px 8px rgba(255, 255, 255, 0.4);
+    box-shadow: 0 0 10px 4px rgba(255, 215, 0, 0.8),
+                0 0 30px 8px rgba(255, 200, 0, 0.6);
 }
 
 .winner::after {
@@ -306,6 +306,47 @@ body {
                  0 0 12px rgba(0, 255, 141, 0.5); /* Outer glow */
 }
 
+
+/* Game navigation */
+
+.game-navigation {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    margin: 20px 0;
+    padding: 10px;
+}
+
+.nav-button {
+    background: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 16px;
+}
+
+.nav-button:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--accent-blue);
+}
+
+.nav-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+#gameIndicator {
+    font-size: 14px;
+    color: var(--text-primary);
+    min-width: 80px;
+    text-align: center;
+}
+
+
 @media (min-width: 1024px) {  /* Add this new media query */
     body {
         padding: 16px 48px;  /* Increase padding on sides for desktop */
@@ -353,5 +394,14 @@ body {
 
     .stats-columns, .player-row {
         grid-template-columns: 110px repeat(12, 50px);  
+    }
+
+    .nav-button {
+        padding: 6px 12px;
+        font-size: 14px;
+    }
+    
+    .game-navigation {
+        gap: 12px;
     }
 }
