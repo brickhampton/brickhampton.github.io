@@ -83,20 +83,27 @@ body {
     max-width: 140px; /* Limit width for long names */
 }
 
+.game-status {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    /* margin-bottom: 4px; */
+}
+
 .game-info {
     flex: 0 0 auto;
     text-align: center;
     display: flex;
     flex-direction: column;
-    gap: 4px;
-    min-width: 140px; /* Increased minimum width */
-    padding: 0 20px; /* Added padding on sides */
+    gap: 2px;
+    min-width: 140px;
+    padding: 0 20px;
 }
 
 .game-date {
     font-size: 14px;
     color: var(--text-primary);
-    margin-bottom: 2px; /* Small space between date and game number */
+    margin-bottom: 0; /* Small space between date and game number */
 }
 
 .game-number {
@@ -240,10 +247,10 @@ body {
 }
 
 .stats-columns {
-    padding: 8px 0;
+    /* padding: 2px 0; */
     color: var(--text-secondary);
     font-size: 12px;
-    border-bottom: 1px solid var(--border-color);
+    /* border-bottom: 1px solid var(--border-color); */
     position: sticky;
     top: 0;
     background-color: var(--bg-primary);
@@ -267,8 +274,19 @@ body {
     padding-right: 4px !important;  /* Added to override the general padding */
 }
 
+.player-row > div:not(.fixed-column) {
+    font-weight: 600; /* Using 600 instead of 'bold' for a slightly softer bold that matches the design */
+    text-align: center;
+}
+
 .player-row {
-    border-bottom: 1px solid var(--border-color);
+    /* border-bottom: 1px solid var(--border-color); */
+    /* padding: 1px 0; */
+}
+
+.player-row .fixed-column {
+    font-weight: normal;
+    text-align: left;
 }
 
 .player-photo {
@@ -351,6 +369,10 @@ body {
         padding: 0 12px;
     }
 
+    .game-status {
+        font-size: 14px;
+    }
+
     .game-info {
         min-width: 120px;
         padding: 0 10px;
@@ -365,12 +387,12 @@ body {
     }
 
     .winner-left::before {
-        left: -16px;
+        left: -12px;
         border-width: 5px 0 5px 6px;
     }
     
     .winner-right::before {
-        right: -16px;
+        right: -12px;
         border-width: 5px 6px 5px 0;
     }
 

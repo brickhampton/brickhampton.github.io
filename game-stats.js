@@ -23,16 +23,19 @@ class GameStats {
             fta: ['fta', 'ft attempted', 'free throws attempted'],
             tsPercent: ['ts%', 'true shooting', 'true shooting percentage'],
             to: ['to', 'turnovers'],
-            eff: ['eff', 'efficiency'],
-            game: ['game', 'game number']
+            per: ['per', 'efficiency'],
+            game: ['game', 'game number'],
+            season: ['season'] // Add season to required stats
         };
         
         this.columnMap = {};
         this.allGameData = [];
         this.currentGameIndex = 0;
         this.matchData = null;
+        this.currentSort = { column: null, ascending: null };
         this.init();
         this.setupGameNavigation();
+        this.setupColumnSorting();
     }
 
     setupGameNavigation() {
@@ -71,7 +74,8 @@ class GameStats {
 
         const currentGame = this.gameGroups[this.currentGameIndex][0];
         const gameNumber = this.getValue(currentGame, 'game');
-        gameIndicator.textContent = `Game ${gameNumber}`;
+        const season = this.getValue(currentGame, 'season');
+        gameIndicator.textContent = `${season} Game ${gameNumber}`;
     }
 
     async init() {
@@ -84,17 +88,18 @@ class GameStats {
             if (gameData.values && gameData.values.length > 0) {
                 this.mapHeadersToRequiredStats(gameData.values[0]);
                 
-                // Group data by game number
-                const rows = gameData.values.slice(1);
-                this.gameGroups = this.groupByGame(rows);
-                
                 // Store match data
                 if (matchData.values && matchData.values.length > 0) {
                     this.matchData = matchData;
                 }
+
+                // Group data by game number
+                const rows = gameData.values.slice(1);
+                this.gameGroups = this.groupByGame(rows);
                 
-                // Initialize with the latest game
-                this.currentGameIndex = this.gameGroups.length - 1;
+                // Find the latest completed game
+                this.currentGameIndex = this.findLatestCompletedGameIndex();
+                
                 this.renderCurrentGame();
                 this.updateGameNavigation();
                 this.updateGameScore();
@@ -104,21 +109,89 @@ class GameStats {
         }
     }
 
+    findLatestCompletedGameIndex() {
+        if (!this.matchData || !this.matchData.values || !this.gameGroups) {
+            return 0;
+        }
+
+        const headers = this.matchData.values[0].map(header => header.toLowerCase().trim());
+        const dateIndex = headers.indexOf('date');
+        const seasonIndex = headers.indexOf('season');
+        const gameIndex = headers.indexOf('game');
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        // Loop through games in reverse order to find the latest completed game
+        for (let i = this.gameGroups.length - 1; i >= 0; i--) {
+            const currentGame = this.gameGroups[i][0];
+            const currentGameNumber = this.getValue(currentGame, 'game');
+            const currentSeason = this.getValue(currentGame, 'season');
+            
+            // Find matching match data
+            const matchRow = this.matchData.values.find(row => 
+                row[gameIndex] === currentGameNumber && 
+                row[seasonIndex] === currentSeason
+            );
+            
+            if (matchRow) {
+                const gameDate = new Date(matchRow[dateIndex]);
+                gameDate.setHours(0, 0, 0, 0);
+                
+                if (gameDate < today) {
+                    return i;
+                }
+            }
+        }
+        
+        // If no completed games found, return the first game
+        return 0;
+    }
+
     groupByGame(rows) {
         const gameMap = new Map();
         
         rows.forEach(row => {
             const gameNumber = this.getValue(row, 'game');
-            if (!gameMap.has(gameNumber)) {
-                gameMap.set(gameNumber, []);
+            const season = this.getValue(row, 'season');
+            const gameKey = `${season}-${gameNumber}`;
+            
+            if (!gameMap.has(gameKey)) {
+                gameMap.set(gameKey, []);
             }
-            gameMap.get(gameNumber).push(row);
+            gameMap.get(gameKey).push(row);
         });
 
+        // Custom season comparison function
+        const compareSeasons = (seasonA, seasonB) => {
+            // Define season order (add more seasons as needed)
+            const seasonOrder = {
+                'W24': 1,
+                'S24': 2,
+                'W25': 3,
+                'S25': 4
+                // Add future seasons with higher numbers
+                // 'F24': 3,
+                // 'W25': 4,
+                // etc.
+            };
+            
+            return seasonOrder[seasonA] - seasonOrder[seasonB];
+        };
+
+        // Convert to array and sort by season and game number
         return Array.from(gameMap.values())
             .sort((a, b) => {
+                const seasonA = this.getValue(a[0], 'season');
+                const seasonB = this.getValue(b[0], 'season');
                 const gameA = parseInt(this.getValue(a[0], 'game'));
                 const gameB = parseInt(this.getValue(b[0], 'game'));
+                
+                // First compare seasons using custom ordering
+                const seasonComparison = compareSeasons(seasonA, seasonB);
+                if (seasonComparison !== 0) {
+                    return seasonComparison;
+                }
+                // If seasons are the same, compare game numbers
                 return gameA - gameB;
             });
     }
@@ -162,6 +235,30 @@ class GameStats {
         }
     }
 
+    formatGameStatus(dateStr) {
+        const gameDate = new Date(dateStr);
+        const today = new Date();
+        // Reset time part to compare just the dates
+        today.setHours(0, 0, 0, 0);
+        gameDate.setHours(0, 0, 0, 0);
+        
+        return gameDate < today ? 'Final' : 'TBD';
+    }
+
+    formatDate(dateStr) {
+        try {
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric'
+            }).replace(',', ',');
+        } catch (error) {
+            console.error('Error formatting date:', error);
+            return dateStr;
+        }
+    }
+
     updateGameScore() {
         if (!this.matchData || !this.matchData.values) return;
 
@@ -174,26 +271,34 @@ class GameStats {
         const seasonIndex = headers.indexOf('season');
         const gameIndex = headers.indexOf('game');
 
-        if (homeIndex === -1 || awayIndex === -1 || opponentIndex === -1) {
+        if (homeIndex === -1 || awayIndex === -1 || opponentIndex === -1 || seasonIndex === -1) {
             console.error('Required columns not found in match_history');
             return;
         }
 
-        // Find the matching game in match history
+        // Find the matching game in match history using both season and game number
         const currentGame = this.gameGroups[this.currentGameIndex][0];
         const currentGameNumber = this.getValue(currentGame, 'game');
+        const currentSeason = this.getValue(currentGame, 'season');
         
-        const matchRow = this.matchData.values.find(row => row[gameIndex] === currentGameNumber);
+        const matchRow = this.matchData.values.find(row => 
+            row[gameIndex] === currentGameNumber && 
+            row[seasonIndex] === currentSeason
+        );
         
         if (!matchRow) {
             console.error('No matching game found in match history');
             return;
         }
 
+        // Get game status
+        const gameStatus = this.formatGameStatus(matchRow[dateIndex]);
+
         // Update game info container
         const gameInfoHTML = `
+            <div class="game-status">${gameStatus}</div>
             <div class="game-date">${this.formatDate(matchRow[dateIndex])}</div>
-            <div class="game-number">Game ${matchRow[gameIndex]} • ${matchRow[seasonIndex]}</div>
+            <div class="game-number">${currentSeason} Game ${matchRow[gameIndex]}</div>
         `;
 
         document.querySelector('.game-info').innerHTML = gameInfoHTML;
@@ -228,6 +333,7 @@ class GameStats {
             teamBInfo.classList.add('winner');
         }
     }
+
 
     mapHeadersToRequiredStats(headers) {
         const headerMap = headers.reduce((map, header, index) => {
@@ -312,7 +418,14 @@ class GameStats {
     }
 
     formatPercentage(made, attempts, isTS = false) {
-        if (attempts === 0) return '';
+        // Return empty values if there are no attempts
+        if (attempts === 0) {
+            return {
+                value: '',
+                isPerfect: false
+            };
+        }
+        
         const percentage = (made / attempts) * 100;
         
         // For TS%, we consider > 100% as perfect
@@ -334,8 +447,8 @@ class GameStats {
         return {
             made: madeNum,
             attempts: attemptsNum,
-            percentage: typeof percentageResult === 'string' ? percentageResult : percentageResult.value,
-            isPerfect: typeof percentageResult === 'string' ? false : percentageResult.isPerfect,
+            percentage: percentageResult.value, // This will now be empty string when 0/0
+            isPerfect: percentageResult.isPerfect,
             display: `${madeNum}/${attemptsNum}`
         };
     }
@@ -347,6 +460,107 @@ class GameStats {
             value: isPerfect ? Math.round(percentage) : percentage.toFixed(1),
             isPerfect
         };
+    }
+
+    setupColumnSorting() {
+        const statsColumns = document.querySelector('.stats-columns');
+        const columns = statsColumns.children;
+        
+        // Add sorting indicators and click handlers to all columns except the player name
+        Array.from(columns).forEach((column, index) => {
+            if (index === 0) return; // Skip the player name column
+            
+            // Wrap the existing text content in a span
+            const originalContent = column.textContent;
+            column.innerHTML = `
+                <div class="column-content">
+                    <span>${originalContent}</span>
+                    <span class="sort-indicator"></span>
+                </div>
+            `;
+            
+            column.style.cursor = 'pointer';
+            column.classList.add('sortable-column');
+            
+            // Add click handler
+            column.addEventListener('click', () => this.handleColumnSort(index));
+        });
+
+        // Add CSS for sort indicators
+        const style = document.createElement('style');
+        style.textContent = `
+            .sortable-column {
+                position: relative;
+                user-select: none;
+            }
+            .column-content {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 4px;
+            }
+            .sort-indicator {
+                display: inline-block;
+                width: 0;
+                height: 0;
+                opacity: 0;
+                transition: opacity 0.2s;
+            }
+            .sort-asc .column-content .sort-indicator {
+                opacity: 1;
+                border-left: 4px solid transparent;
+                border-right: 4px solid transparent;
+                border-bottom: 4px solid var(--accent-blue);
+            }
+            .sort-desc .column-content .sort-indicator {
+                opacity: 1;
+                border-left: 4px solid transparent;
+                border-right: 4px solid transparent;
+                border-top: 4px solid var(--accent-blue);
+            }
+            .sortable-column:hover {
+                color: var(--accent-blue);
+            }
+        `;
+        document.head.appendChild(style);
+    }
+
+    handleColumnSort(columnIndex) {
+        const columns = ['player', 'pts', 'reb', 'ast', 'stl', 'blk', 'fgPercent', 'fg', 'threeFg', 'ft', 'tsPercent', 'to', 'per'];
+        const column = columns[columnIndex];
+        
+        // Three-state cycling logic
+        if (this.currentSort.column !== column) {
+            // New column: start with descending
+            this.currentSort.column = column;
+            this.currentSort.ascending = false;
+        } else {
+            // Same column: cycle through states
+            if (this.currentSort.ascending === false) {
+                // Currently descending -> switch to ascending
+                this.currentSort.ascending = true;
+            } else if (this.currentSort.ascending === true) {
+                // Currently ascending -> clear sort
+                this.currentSort.column = null;
+                this.currentSort.ascending = null;
+            }
+        }
+
+        // Update visual indicators
+        this.updateSortIndicators(columnIndex);
+        
+        // Re-render the current game with the new sort
+        this.renderCurrentGame();
+    }
+
+    updateSortIndicators(columnIndex) {
+        const columns = document.querySelector('.stats-columns').children;
+        Array.from(columns).forEach((col, i) => {
+            col.classList.remove('sort-asc', 'sort-desc');
+            if (i === columnIndex && this.currentSort.ascending !== null) {
+                col.classList.add(this.currentSort.ascending ? 'sort-asc' : 'sort-desc');
+            }
+        });
     }
 
     renderGameData(rows) {
@@ -371,21 +585,68 @@ class GameStats {
 
             return {
                 name: this.getValue(row, 'player', ''),
-                pts: this.getValue(row, 'pts'),
-                reb: this.getValue(row, 'reb'),
-                ast: this.getValue(row, 'ast'),
-                stl: this.getValue(row, 'stl'),
-                blk: this.getValue(row, 'blk'),
+                pts: parseInt(this.getValue(row, 'pts')) || 0,
+                reb: parseInt(this.getValue(row, 'reb')) || 0,
+                ast: parseInt(this.getValue(row, 'ast')) || 0,
+                stl: parseInt(this.getValue(row, 'stl')) || 0,
+                blk: parseInt(this.getValue(row, 'blk')) || 0,
                 fgStats,
+                fgPercent: parseFloat(fgStats.percentage) || 0,
                 threeFgStats,
                 ftStats,
                 tsPercentage,
-                to: this.getValue(row, 'to'),
-                eff: this.getValue(row, 'eff')
+                to: parseInt(this.getValue(row, 'to')) || 0,
+                per: this.getValue(row, 'per')  // Keep as string to preserve formatting
             };
         });
 
-        // Calculate team totals and update display...
+        // Sort players if a sort is active
+        if (this.currentSort.column && this.currentSort.ascending !== null) {
+            players.sort((a, b) => {
+                let aValue, bValue;
+                
+                if (this.currentSort.column === 'per') {
+                    // For PER, convert to number for sorting
+                    aValue = parseInt(a.per) || 0;
+                    bValue = parseInt(b.per) || 0;
+                } else {
+                    // Rest of the sorting logic remains the same
+                    switch (this.currentSort.column) {
+                        case 'fgPercent':
+                            aValue = a.fgPercent;
+                            bValue = b.fgPercent;
+                            break;
+                        case 'tsPercent':
+                            aValue = parseFloat(a.tsPercentage.value);
+                            bValue = parseFloat(b.tsPercentage.value);
+                            break;
+                        case 'fg':
+                            aValue = a.fgStats.made;
+                            bValue = b.fgStats.made;
+                            break;
+                        case 'threeFg':
+                            aValue = a.threeFgStats.made;
+                            bValue = b.threeFgStats.made;
+                            break;
+                        case 'ft':
+                            aValue = a.ftStats.made;
+                            bValue = b.ftStats.made;
+                            break;
+                        default:
+                            aValue = a[this.currentSort.column];
+                            bValue = b[this.currentSort.column];
+                    }
+                }
+                
+                if (this.currentSort.ascending) {
+                    return aValue - bValue;
+                } else {
+                    return bValue - aValue;
+                }
+            });
+        }
+
+        // Calculate team totals and update display
         const teamStats = this.calculateTeamStats(players);
         this.updateTeamStats(teamStats);
         this.updatePlayerRows(players);
@@ -398,7 +659,7 @@ class GameStats {
         // Update FG
         const fgPercentage = this.formatPercentage(stats.fg.made, stats.fg.attempts);
         statValues[0].textContent = `${stats.fg.made}/${stats.fg.attempts}`;
-        percentages[0].textContent = `${fgPercentage.value}%`;
+        percentages[0].textContent = fgPercentage.value ? `${fgPercentage.value}%` : '';
         if (fgPercentage.isPerfect) {
             percentages[0].classList.add('perfect-percentage');
         } else {
@@ -408,7 +669,7 @@ class GameStats {
         // Update 3FG
         const threeFgPercentage = this.formatPercentage(stats.threeFg.made, stats.threeFg.attempts);
         statValues[1].textContent = `${stats.threeFg.made}/${stats.threeFg.attempts}`;
-        percentages[1].textContent = `${threeFgPercentage.value}%`;
+        percentages[1].textContent = threeFgPercentage.value ? `${threeFgPercentage.value}%` : '';
         if (threeFgPercentage.isPerfect) {
             percentages[1].classList.add('perfect-percentage');
         } else {
@@ -418,7 +679,7 @@ class GameStats {
         // Update FT
         const ftPercentage = this.formatPercentage(stats.ft.made, stats.ft.attempts);
         statValues[2].textContent = `${stats.ft.made}/${stats.ft.attempts}`;
-        percentages[2].textContent = `${ftPercentage.value}%`;
+        percentages[2].textContent = ftPercentage.value ? `${ftPercentage.value}%` : '';
         if (ftPercentage.isPerfect) {
             percentages[2].classList.add('perfect-percentage');
         } else {
@@ -450,7 +711,7 @@ class GameStats {
                 <div>${player.ftStats.display}</div>
                 <div class="${player.tsPercentage.isPerfect ? 'perfect-percentage' : ''}">${player.tsPercentage.value}</div>
                 <div>${player.to}</div>
-                <div>${player.eff}</div>
+                <div>${player.per}</div>
             </div>
         `).join('');
 
