@@ -121,27 +121,27 @@ body {
 .winner-right::before {
     content: '';
     position: absolute;
-    top: 50%;
+    /* Update vertical positioning to align with the score */
+    top: calc(36px/2); /* Half of the score font-size */
     width: 0;
     height: 0;
     border-style: solid;
-    transform: translateY(-50%);
+    /* Remove transform since we're explicitly positioning */
+    border-radius: 2px;
 }
 
 /* Left triangle (for home team) - pointing right */
 .winner-left::before {
-    left: -20px; /* Adjust position as needed */
+    left: -20px;
     border-width: 6px 0 6px 8px;
     border-color: transparent transparent transparent var(--text-primary);
-    border-radius: 2px;
 }
 
 /* Right triangle (for away team) - pointing left */
 .winner-right::before {
-    right: -20px; /* Adjust position as needed */
+    right: -20px;
     border-width: 6px 8px 6px 0;
     border-color: transparent var(--text-primary) transparent transparent;
-    border-radius: 2px;
 }
 
 /* Navigation Tabs */
@@ -241,7 +241,7 @@ body {
 
 .stats-columns, .player-row {
     display: grid;
-    grid-template-columns: 160px repeat(12, minmax(40px, auto));  
+    grid-template-columns: 160px repeat(12, minmax(40px, auto));
     align-items: center;
     min-width: max-content;
 }
@@ -271,17 +271,13 @@ body {
     align-items: center;
     gap: 9px;
     text-align: left !important;
-    padding-right: 4px !important;  /* Added to override the general padding */
+    padding-right: 4px !important;
 }
 
 .player-row > div:not(.fixed-column) {
-    font-weight: 600; /* Using 600 instead of 'bold' for a slightly softer bold that matches the design */
+    /* font-weight: 600; */
     text-align: center;
-}
-
-.player-row {
-    /* border-bottom: 1px solid var(--border-color); */
-    /* padding: 1px 0; */
+    padding: 4px;
 }
 
 .player-row .fixed-column {
@@ -388,11 +384,13 @@ body {
 
     .winner-left::before {
         left: -12px;
+        top: calc(32px/2); /* Half of the mobile score font-size */
         border-width: 5px 0 5px 6px;
     }
     
     .winner-right::before {
         right: -12px;
+        top: calc(32px/2); /* Half of the mobile score font-size */
         border-width: 5px 6px 5px 0;
     }
 

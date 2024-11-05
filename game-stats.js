@@ -470,50 +470,43 @@ class GameStats {
         Array.from(columns).forEach((column, index) => {
             if (index === 0) return; // Skip the player name column
             
-            // Wrap the existing text content in a span
+            // Modify the wrapper structure to maintain alignment
             const originalContent = column.textContent;
-            column.innerHTML = `
-                <div class="column-content">
-                    <span>${originalContent}</span>
-                    <span class="sort-indicator"></span>
-                </div>
-            `;
+            column.innerHTML = originalContent;
             
+            // Add sort indicator as a pseudo-element using a class
             column.style.cursor = 'pointer';
             column.classList.add('sortable-column');
             
             // Add click handler
             column.addEventListener('click', () => this.handleColumnSort(index));
         });
-
-        // Add CSS for sort indicators
+    
+        // Update CSS for sort indicators
         const style = document.createElement('style');
         style.textContent = `
             .sortable-column {
                 position: relative;
                 user-select: none;
-            }
-            .column-content {
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 gap: 4px;
             }
-            .sort-indicator {
+            .sort-asc::after,
+            .sort-desc::after {
+                content: '';
                 display: inline-block;
                 width: 0;
                 height: 0;
-                opacity: 0;
-                transition: opacity 0.2s;
+                margin-left: 4px;
             }
-            .sort-asc .column-content .sort-indicator {
-                opacity: 1;
+            .sort-asc::after {
                 border-left: 4px solid transparent;
                 border-right: 4px solid transparent;
                 border-bottom: 4px solid var(--accent-blue);
             }
-            .sort-desc .column-content .sort-indicator {
-                opacity: 1;
+            .sort-desc::after {
                 border-left: 4px solid transparent;
                 border-right: 4px solid transparent;
                 border-top: 4px solid var(--accent-blue);
