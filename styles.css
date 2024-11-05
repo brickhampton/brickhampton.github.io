@@ -23,9 +23,59 @@ body {
 
 /* Score Header Styles */
 .score-header {
-    margin-top: 30px;
-    margin-bottom: 20px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background-color: var(--bg-primary);
+    transition: all 0.3s ease;
+    padding: 16px 0;
+    margin-top: 0;
+    margin-bottom: 0;
 }
+
+.score-header.scrolled {
+    padding: 8px 0;
+}
+
+.score-header.scrolled .score {
+    font-size: 18px;
+}
+
+.score-header.scrolled .team-name {
+    font-size: 12px;
+}
+
+.score-header.scrolled .game-info {
+    transform: scale(0.9);
+}
+
+/* Hide date and game number when scrolled */
+.score-header.scrolled .game-date,
+.score-header.scrolled .game-number {
+    display: none;
+}
+
+/* Adjust game status display when scrolled */
+.score-header.scrolled .game-info {
+    padding: 0 10px;
+    transform: scale(0.9);
+}
+
+.score-header.scrolled .game-status {
+    font-size: 14px;
+    margin: 0;
+}
+
+.score-container, .game-info, .score, .team-name {
+    transition: all 0.3s ease;
+}
+
+/* Ensure game info stays centered vertically when scrolled */
+.game-info {
+    justify-content: center;
+    min-height: 24px; /* Add minimum height to prevent layout shift */
+}
+
 
 .score-container {
     display: flex;
@@ -122,7 +172,7 @@ body {
     content: '';
     position: absolute;
     /* Update vertical positioning to align with the score */
-    top: calc(36px/2); /* Half of the score font-size */
+    top: calc(36px/2 - 1px); /* Half of the score font-size */
     width: 0;
     height: 0;
     border-style: solid;
@@ -365,6 +415,10 @@ body {
         padding: 0 12px;
     }
 
+    .score-header.scrolled .score {
+        font-size: 16px; /* Half of the mobile 32px size */
+    }
+
     .game-status {
         font-size: 14px;
     }
@@ -384,13 +438,13 @@ body {
 
     .winner-left::before {
         left: -12px;
-        top: calc(32px/2); /* Half of the mobile score font-size */
+        top: calc(32px/2 - 1px); /* Half of the mobile score font-size */
         border-width: 5px 0 5px 6px;
     }
     
     .winner-right::before {
         right: -12px;
-        top: calc(32px/2); /* Half of the mobile score font-size */
+        top: calc(32px/2 - 1px); /* Half of the mobile score font-size */
         border-width: 5px 6px 5px 0;
     }
 

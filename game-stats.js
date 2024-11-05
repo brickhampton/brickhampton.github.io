@@ -35,6 +35,7 @@ class GameStats {
         this.currentSort = { column: null, ascending: null };
         this.init();
         this.setupGameNavigation();
+        this.setupScoreHeaderScroll();
         this.setupColumnSorting();
     }
 
@@ -52,6 +53,30 @@ class GameStats {
 
         document.getElementById('prevGame').addEventListener('click', () => this.changeGame(-1));
         document.getElementById('nextGame').addEventListener('click', () => this.changeGame(1));
+    }
+
+    setupScoreHeaderScroll() {
+        const scoreHeader = document.querySelector('.score-header');
+        let lastScrollTop = 0;
+        let ticking = false;
+    
+        window.addEventListener('scroll', () => {
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    
+            if (!ticking) {
+                window.requestAnimationFrame(() => {
+                    if (scrollTop > 50) {
+                        scoreHeader.classList.add('scrolled');
+                    } else {
+                        scoreHeader.classList.remove('scrolled');
+                    }
+                    lastScrollTop = scrollTop;
+                    ticking = false;
+                });
+    
+                ticking = true;
+            }
+        });
     }
 
     changeGame(direction) {
