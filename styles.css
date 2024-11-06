@@ -438,7 +438,7 @@ body {
 
     .winner-left::before {
         left: -12px;
-        top: calc(32px/2 -3px); /* Half of the mobile score font-size */
+        top: calc(32px/2 - 3px); /* Half of the mobile score font-size */
         border-width: 5px 0 5px 6px;
     }
     
