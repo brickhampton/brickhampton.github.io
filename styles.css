@@ -172,7 +172,7 @@ body {
     content: '';
     position: absolute;
     /* Update vertical positioning to align with the score */
-    top: calc(36px/2 - 2px); /* Half of the score font-size */
+    top: calc(36px/2 - 3px); /* Half of the score font-size */
     width: 0;
     height: 0;
     border-style: solid;
@@ -438,13 +438,13 @@ body {
 
     .winner-left::before {
         left: -12px;
-        top: calc(32px/2 - 2px); /* Half of the mobile score font-size */
+        top: calc(32px/2 -3px); /* Half of the mobile score font-size */
         border-width: 5px 0 5px 6px;
     }
     
     .winner-right::before {
         right: -12px;
-        top: calc(32px/2 - 2px); /* Half of the mobile score font-size */
+        top: calc(32px/2 - 3px); /* Half of the mobile score font-size */
         border-width: 5px 6px 5px 0;
     }
 
