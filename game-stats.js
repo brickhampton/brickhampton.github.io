@@ -4,7 +4,9 @@ const API_KEY = 'AIzaSyAq45prrww38ePuq3IZjQ1FLVqQd1a-Gdg';
 const SHEET_NAME = 'master_data';
 const MATCH_HISTORY_TAB = 'match_history';
 const RANGE = 'A:Z';
-const MATCH_RANGE = 'A:G';
+const MATCH_RANGE = 'A:H';
+const IMAGE_URLS_TAB = 'image_urls';
+const IMAGE_RANGE = 'A:B';  // Assuming column A is player name and B is image URL
 
 class GameStats {
     constructor() {
@@ -33,10 +35,13 @@ class GameStats {
         this.currentGameIndex = 0;
         this.matchData = null;
         this.currentSort = { column: null, ascending: null };
+        this.playerImages = {};  // Add this to store image URLs
+        console.log('GameStats initialized');
         this.init();
         this.setupGameNavigation();
         this.setupScoreHeaderScroll();
         this.setupColumnSorting();
+        this.setupGameInfoNavigation();
     }
 
     setupGameNavigation() {
@@ -54,6 +59,21 @@ class GameStats {
         document.getElementById('prevGame').addEventListener('click', () => this.changeGame(-1));
         document.getElementById('nextGame').addEventListener('click', () => this.changeGame(1));
     }
+
+
+    // Click to go to match history 
+    setupGameInfoNavigation() {
+        const gameInfo = document.querySelector('.game-info');
+        gameInfo.style.cursor = 'pointer';
+        
+        gameInfo.addEventListener('click', () => {
+            const currentGame = this.gameGroups[this.currentGameIndex][0];
+            const season = this.getValue(currentGame, 'season');
+            const gameNumber = this.getValue(currentGame, 'game');
+            window.location.href = `match_history/index.html?season=${season}&game=${gameNumber}`;
+        });
+    }
+    
 
     setupScoreHeaderScroll() {
         const scoreHeader = document.querySelector('.score-header');
@@ -105,10 +125,14 @@ class GameStats {
 
     async init() {
         try {
-            const [gameData, matchData] = await Promise.all([
+            console.log('Starting data fetch...');
+            const [gameData, matchData, imageData] = await Promise.all([
                 this.fetchSheetData(),
-                this.fetchMatchData()
+                this.fetchMatchData(),
+                this.fetchImageUrls()
             ]);
+            
+            console.log('Image data received:', imageData);
             
             if (gameData.values && gameData.values.length > 0) {
                 this.mapHeadersToRequiredStats(gameData.values[0]);
@@ -118,11 +142,16 @@ class GameStats {
                     this.matchData = matchData;
                 }
 
+                // Store image URLs
+                if (imageData.values && imageData.values.length > 0) {
+                    this.mapImageUrls(imageData.values);
+                    console.log('Mapped player images:', this.playerImages);
+                }
+
                 // Group data by game number
                 const rows = gameData.values.slice(1);
                 this.gameGroups = this.groupByGame(rows);
                 
-                // Find the latest completed game
                 this.currentGameIndex = this.findLatestCompletedGameIndex();
                 
                 this.renderCurrentGame();
@@ -132,6 +161,36 @@ class GameStats {
         } catch (error) {
             console.error('Error initializing game stats:', error);
         }
+    }
+
+    // Add this new method to fetch image URLs
+    async fetchImageUrls() {
+        const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${IMAGE_URLS_TAB}!${IMAGE_RANGE}?key=${API_KEY}`;
+        console.log('Fetching images from:', url);
+        try {
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            console.log('Image URL data fetched:', data);
+            return data;
+        } catch (error) {
+            console.error('Error fetching image URLs:', error);
+            return { values: [] }; // Return empty values if fetch fails
+        }
+    }
+
+    mapImageUrls(rows) {
+        // Skip header row and map player names to image URLs
+        rows.slice(1).forEach(row => {
+            if (row[0] && row[1]) {  // If we have both name and URL
+                const playerName = row[0].trim();
+                const imageUrl = row[1].trim();
+                this.playerImages[playerName] = imageUrl;
+                console.log(`Mapped ${playerName} to ${imageUrl}`);
+            }
+        });
     }
 
     findLatestCompletedGameIndex() {
@@ -260,14 +319,15 @@ class GameStats {
         }
     }
 
-    formatGameStatus(dateStr) {
+    // Update the formatGameStatus method to include game time
+    formatGameStatus(dateStr, gameTime) {
         const gameDate = new Date(dateStr);
         const today = new Date();
         // Reset time part to compare just the dates
         today.setHours(0, 0, 0, 0);
         gameDate.setHours(0, 0, 0, 0);
         
-        return gameDate < today ? 'Final' : 'TBD';
+        return gameDate < today ? 'Final' : gameTime || 'TBD';
     }
 
     formatDate(dateStr) {
@@ -295,6 +355,7 @@ class GameStats {
         const dateIndex = headers.indexOf('date');
         const seasonIndex = headers.indexOf('season');
         const gameIndex = headers.indexOf('game');
+        const timeIndex = headers.indexOf('time');  
 
         if (homeIndex === -1 || awayIndex === -1 || opponentIndex === -1 || seasonIndex === -1) {
             console.error('Required columns not found in match_history');
@@ -317,7 +378,8 @@ class GameStats {
         }
 
         // Get game status
-        const gameStatus = this.formatGameStatus(matchRow[dateIndex]);
+        const gameTime = timeIndex !== -1 ? matchRow[timeIndex] : null;
+        const gameStatus = this.formatGameStatus(matchRow[dateIndex], gameTime);
 
         // Update game info container
         const gameInfoHTML = `
@@ -353,7 +415,7 @@ class GameStats {
         } else if (awayScore > homeScore) {
             teamAInfo.classList.add('loser');
             teamBInfo.classList.add('winner', 'winner-right');
-        } else {
+        } else if (gameStatus === 'Final') {  // Only add winner classes if game is final
             teamAInfo.classList.add('winner');
             teamBInfo.classList.add('winner');
         }
@@ -583,26 +645,39 @@ class GameStats {
 
     renderGameData(rows) {
         const players = rows.map(row => {
-            // Calculate all shooting statistics
+            const playerName = this.getValue(row, 'player', '');
+            
+            // Check if this is an empty stats row
+            const hasStats = [
+                'pts', 'reb', 'ast', 'stl', 'blk', 
+                'fgm', 'fga', 'threeFgm', 'threeFga', 
+                'ftm', 'fta', 'to'
+            ].some(stat => {
+                const value = parseInt(this.getValue(row, stat)) || 0;
+                return value > 0;
+            });
+    
+            // Calculate all stats regardless of whether row is empty
             const fgStats = this.calculateShotStats(
                 this.getValue(row, 'fgm'),
                 this.getValue(row, 'fga')
             );
-
+    
             const threeFgStats = this.calculateShotStats(
                 this.getValue(row, 'threeFgm'),
                 this.getValue(row, 'threeFga')
             );
-
+    
             const ftStats = this.calculateShotStats(
                 this.getValue(row, 'ftm'),
                 this.getValue(row, 'fta')
             );
-
+    
             const tsPercentage = this.formatTSPercentage(this.getValue(row, 'tsPercent'));
-
-            return {
-                name: this.getValue(row, 'player', ''),
+    
+            const playerData = {
+                name: playerName,
+                imageUrl: this.playerImages[playerName] || '',
                 pts: parseInt(this.getValue(row, 'pts')) || 0,
                 reb: parseInt(this.getValue(row, 'reb')) || 0,
                 ast: parseInt(this.getValue(row, 'ast')) || 0,
@@ -614,8 +689,11 @@ class GameStats {
                 ftStats,
                 tsPercentage,
                 to: parseInt(this.getValue(row, 'to')) || 0,
-                per: this.getValue(row, 'per')  // Keep as string to preserve formatting
+                per: this.getValue(row, 'per'),
+                isEmpty: !hasStats  // Add flag to mark empty rows
             };
+    
+            return playerData;
         });
 
         // Sort players if a sort is active
@@ -664,10 +742,12 @@ class GameStats {
             });
         }
 
-        // Calculate team totals and update display
-        const teamStats = this.calculateTeamStats(players);
-        this.updateTeamStats(teamStats);
-        this.updatePlayerRows(players);
+    // Calculate team totals using ALL players (including empty rows)
+    const teamStats = this.calculateTeamStats(players);
+    this.updateTeamStats(teamStats);
+
+    // Only display non-empty player rows
+    this.updatePlayerRows(players.filter(player => !player.isEmpty));
     }
 
     updateTeamStats(stats) {
@@ -712,26 +792,31 @@ class GameStats {
 
     updatePlayerRows(players) {
         const container = document.querySelector('.scrollable-wrapper');
-        const playerRowsHTML = players.map(player => `
-            <div class="player-row">
-                <div class="fixed-column">
-                    <div class="player-photo"></div>
-                    <div class="player-name">${player.name}</div>
+        console.log('Rendering players with images:', players);
+        
+        const playerRowsHTML = players.map(player => {
+            console.log(`Rendering ${player.name} with image: ${player.imageUrl}`);
+            return `
+                <div class="player-row">
+                    <div class="fixed-column">
+                        <div class="player-photo" ${player.imageUrl ? `style="background-image: url('${player.imageUrl}');"` : ''}></div>
+                        <div class="player-name">${player.name}</div>
+                    </div>
+                    <div>${player.pts}</div>
+                    <div>${player.reb}</div>
+                    <div>${player.ast}</div>
+                    <div>${player.stl}</div>
+                    <div>${player.blk}</div>
+                    <div class="${player.fgStats.isPerfect ? 'perfect-percentage' : ''}">${player.fgStats.percentage}</div>
+                    <div>${player.fgStats.display}</div>
+                    <div>${player.threeFgStats.display}</div>
+                    <div>${player.ftStats.display}</div>
+                    <div class="${player.tsPercentage.isPerfect ? 'perfect-percentage' : ''}">${player.tsPercentage.value}</div>
+                    <div>${player.to}</div>
+                    <div>${player.per}</div>
                 </div>
-                <div>${player.pts}</div>
-                <div>${player.reb}</div>
-                <div>${player.ast}</div>
-                <div>${player.stl}</div>
-                <div>${player.blk}</div>
-                <div class="${player.fgStats.isPerfect ? 'perfect-percentage' : ''}">${player.fgStats.percentage}</div>
-                <div>${player.fgStats.display}</div>
-                <div>${player.threeFgStats.display}</div>
-                <div>${player.ftStats.display}</div>
-                <div class="${player.tsPercentage.isPerfect ? 'perfect-percentage' : ''}">${player.tsPercentage.value}</div>
-                <div>${player.to}</div>
-                <div>${player.per}</div>
-            </div>
-        `).join('');
+            `;
+        }).join('');
 
         // Clear existing player rows
         const existingRows = container.querySelectorAll('.player-row');
