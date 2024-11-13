@@ -48,16 +48,28 @@ class GameStats {
         const navContainer = document.createElement('div');
         navContainer.className = 'game-navigation';
         navContainer.innerHTML = `
-            <button id="prevGame" class="nav-button">←</button>
-            <span id="gameIndicator"></span>
-            <button id="nextGame" class="nav-button">→</button>
+            <button id="prevGame" class="nav-button"></button>
+            <button id="nextGame" class="nav-button"></button>
         `;
-
-        const scoreHeader = document.querySelector('.score-header');
-        scoreHeader.after(navContainer);
-
-        document.getElementById('prevGame').addEventListener('click', () => this.changeGame(-1));
-        document.getElementById('nextGame').addEventListener('click', () => this.changeGame(1));
+    
+        // Create a MutationObserver to wait for team-stats-wrapper
+        const observer = new MutationObserver((mutations, obs) => {
+            const teamStatsWrapper = document.querySelector('.team-stats-wrapper');
+            if (teamStatsWrapper) {
+                teamStatsWrapper.appendChild(navContainer);
+                obs.disconnect(); // Stop observing once we've added the navigation
+                
+                // Add event listeners
+                document.getElementById('prevGame').addEventListener('click', () => this.changeGame(-1));
+                document.getElementById('nextGame').addEventListener('click', () => this.changeGame(1));
+                
+                // Initial update of navigation state
+                this.updateGameNavigation();
+            }
+        });
+    
+        // Start observing the document with the configured parameters
+        observer.observe(document.body, { childList: true, subtree: true });
     }
 
 
@@ -104,23 +116,19 @@ class GameStats {
         if (newIndex >= 0 && newIndex < this.gameGroups.length) {
             this.currentGameIndex = newIndex;
             this.renderCurrentGame();
-            this.updateGameNavigation();
             this.updateGameScore();
+            this.updateGameNavigation();
         }
     }
 
     updateGameNavigation() {
         const prevButton = document.getElementById('prevGame');
         const nextButton = document.getElementById('nextGame');
-        const gameIndicator = document.getElementById('gameIndicator');
-
+        
+        if (!prevButton || !nextButton) return; // Guard clause if buttons don't exist yet
+        
         prevButton.disabled = this.currentGameIndex === 0;
         nextButton.disabled = this.currentGameIndex === this.gameGroups.length - 1;
-
-        const currentGame = this.gameGroups[this.currentGameIndex][0];
-        const gameNumber = this.getValue(currentGame, 'game');
-        const season = this.getValue(currentGame, 'season');
-        gameIndicator.textContent = `${season} Game ${gameNumber}`;
     }
 
     async init() {
@@ -505,7 +513,7 @@ class GameStats {
     }
 
     formatPercentage(made, attempts, isTS = false) {
-        // Return empty values if there are no attempts
+        // Return empty values if there are no attempts (for player stats)
         if (attempts === 0) {
             return {
                 value: '',
@@ -514,11 +522,27 @@ class GameStats {
         }
         
         const percentage = (made / attempts) * 100;
-        
-        // For TS%, we consider > 100% as perfect
         const isPerfect = isTS ? percentage >= 100 : percentage === 100;
+        const formattedNumber = isPerfect ? Math.round(percentage) : percentage.toFixed(1);
         
-        // Format number based on whether it's perfect
+        return {
+            value: formattedNumber,
+            isPerfect
+        };
+    }
+    
+    // Add a new method specifically for team stats
+    formatTeamPercentage(made, attempts, isTS = false) {
+        // Always show 0% for team stats when there are no attempts
+        if (attempts === 0) {
+            return {
+                value: '0.0',
+                isPerfect: false
+            };
+        }
+        
+        const percentage = (made / attempts) * 100;
+        const isPerfect = isTS ? percentage >= 100 : percentage === 100;
         const formattedNumber = isPerfect ? Math.round(percentage) : percentage.toFixed(1);
         
         return {
@@ -644,20 +668,20 @@ class GameStats {
     }
 
     renderGameData(rows) {
-        const players = rows.map(row => {
+        let players = rows.map(row => {
             const playerName = this.getValue(row, 'player', '');
             
-            // Check if this is an empty stats row
-            const hasStats = [
-                'pts', 'reb', 'ast', 'stl', 'blk', 
-                'fgm', 'fga', 'threeFgm', 'threeFga', 
+            // Check if all stat columns are empty
+            const hasAnyStats = [
+                'pts', 'reb', 'ast', 'stl', 'blk',
+                'fgm', 'fga', 'threeFgm', 'threeFga',
                 'ftm', 'fta', 'to'
-            ].some(stat => {
-                const value = parseInt(this.getValue(row, stat)) || 0;
-                return value > 0;
-            });
+            ].some(stat => parseInt(this.getValue(row, stat)) > 0);
     
-            // Calculate all stats regardless of whether row is empty
+            const isEmpty = !playerName;
+            const didNotPlay = playerName && !hasAnyStats;
+    
+            // Rest of the player data mapping stays the same...
             const fgStats = this.calculateShotStats(
                 this.getValue(row, 'fgm'),
                 this.getValue(row, 'fga')
@@ -675,7 +699,7 @@ class GameStats {
     
             const tsPercentage = this.formatTSPercentage(this.getValue(row, 'tsPercent'));
     
-            const playerData = {
+            return {
                 name: playerName,
                 imageUrl: this.playerImages[playerName] || '',
                 pts: parseInt(this.getValue(row, 'pts')) || 0,
@@ -690,23 +714,27 @@ class GameStats {
                 tsPercentage,
                 to: parseInt(this.getValue(row, 'to')) || 0,
                 per: this.getValue(row, 'per'),
-                isEmpty: !hasStats  // Add flag to mark empty rows
+                isEmpty,
+                didNotPlay
             };
-    
-            return playerData;
         });
-
-        // Sort players if a sort is active
+    
+        // Filter out empty rows
+        players = players.filter(player => !player.isEmpty);
+    
+        // Split players into active and DNP groups
+        const activePlayers = players.filter(player => !player.didNotPlay);
+        const dnpPlayers = players.filter(player => player.didNotPlay);
+    
+        // Sort only the active players if a sort is active
         if (this.currentSort.column && this.currentSort.ascending !== null) {
-            players.sort((a, b) => {
+            activePlayers.sort((a, b) => {
                 let aValue, bValue;
                 
                 if (this.currentSort.column === 'per') {
-                    // For PER, convert to number for sorting
                     aValue = parseInt(a.per) || 0;
                     bValue = parseInt(b.per) || 0;
                 } else {
-                    // Rest of the sorting logic remains the same
                     switch (this.currentSort.column) {
                         case 'fgPercent':
                             aValue = a.fgPercent;
@@ -741,49 +769,40 @@ class GameStats {
                 }
             });
         }
-
-    // Calculate team totals using ALL players (including empty rows)
-    const teamStats = this.calculateTeamStats(players);
-    this.updateTeamStats(teamStats);
-
-    // Only display non-empty player rows
-    this.updatePlayerRows(players.filter(player => !player.isEmpty));
+    
+        // Combine sorted active players with unsorted DNP players
+        players = [...activePlayers, ...dnpPlayers];
+    
+        // Calculate team stats using ALL players
+        const teamStats = this.calculateTeamStats(players);
+        this.updateTeamStats(teamStats);
+    
+        // Update the display with the combined sorted list
+        this.updatePlayerRows(players);
     }
 
     updateTeamStats(stats) {
         const statValues = document.querySelectorAll('.stat-value');
         const percentages = document.querySelectorAll('.stat-value-percentage');
-
+    
         // Update FG
-        const fgPercentage = this.formatPercentage(stats.fg.made, stats.fg.attempts);
+        const fgPercentage = this.formatTeamPercentage(stats.fg.made, stats.fg.attempts);
         statValues[0].textContent = `${stats.fg.made}/${stats.fg.attempts}`;
-        percentages[0].textContent = fgPercentage.value ? `${fgPercentage.value}%` : '';
-        if (fgPercentage.isPerfect) {
-            percentages[0].classList.add('perfect-percentage');
-        } else {
-            percentages[0].classList.remove('perfect-percentage');
-        }
-
+        percentages[0].textContent = `${fgPercentage.value}%`;
+        percentages[0].classList.toggle('perfect-percentage', fgPercentage.isPerfect);
+    
         // Update 3FG
-        const threeFgPercentage = this.formatPercentage(stats.threeFg.made, stats.threeFg.attempts);
+        const threeFgPercentage = this.formatTeamPercentage(stats.threeFg.made, stats.threeFg.attempts);
         statValues[1].textContent = `${stats.threeFg.made}/${stats.threeFg.attempts}`;
-        percentages[1].textContent = threeFgPercentage.value ? `${threeFgPercentage.value}%` : '';
-        if (threeFgPercentage.isPerfect) {
-            percentages[1].classList.add('perfect-percentage');
-        } else {
-            percentages[1].classList.remove('perfect-percentage');
-        }
-
+        percentages[1].textContent = `${threeFgPercentage.value}%`;
+        percentages[1].classList.toggle('perfect-percentage', threeFgPercentage.isPerfect);
+    
         // Update FT
-        const ftPercentage = this.formatPercentage(stats.ft.made, stats.ft.attempts);
+        const ftPercentage = this.formatTeamPercentage(stats.ft.made, stats.ft.attempts);
         statValues[2].textContent = `${stats.ft.made}/${stats.ft.attempts}`;
-        percentages[2].textContent = ftPercentage.value ? `${ftPercentage.value}%` : '';
-        if (ftPercentage.isPerfect) {
-            percentages[2].classList.add('perfect-percentage');
-        } else {
-            percentages[2].classList.remove('perfect-percentage');
-        }
-
+        percentages[2].textContent = `${ftPercentage.value}%`;
+        percentages[2].classList.toggle('perfect-percentage', ftPercentage.isPerfect);
+    
         // Update other stats
         statValues[3].textContent = stats.reb;
         statValues[4].textContent = stats.ast;
@@ -792,10 +811,24 @@ class GameStats {
 
     updatePlayerRows(players) {
         const container = document.querySelector('.scrollable-wrapper');
-        console.log('Rendering players with images:', players);
         
         const playerRowsHTML = players.map(player => {
-            console.log(`Rendering ${player.name} with image: ${player.imageUrl}`);
+            if (player.didNotPlay) {
+                return `
+                    <div class="player-row">
+                        <div class="fixed-column">
+                            <div class="player-photo" style="
+                                ${player.imageUrl ? `background-image: url('${player.imageUrl}');` : ''}
+                                opacity: 0.6;
+                                filter: grayscale(20%);
+                            "></div>
+                            <div class="player-name" style="color: #808080; opacity: 0.7;">${player.name}</div>
+                        </div>
+                        <div style="grid-column: 2 / -1;"></div>
+                    </div>
+                `;
+            }
+            
             return `
                 <div class="player-row">
                     <div class="fixed-column">
@@ -817,7 +850,7 @@ class GameStats {
                 </div>
             `;
         }).join('');
-
+    
         // Clear existing player rows
         const existingRows = container.querySelectorAll('.player-row');
         existingRows.forEach(row => row.remove());

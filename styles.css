@@ -216,10 +216,10 @@ body {
 /* Team Stats Styles */
 .team-stats-wrapper {
     margin: 15px 0;
-    padding: 15px;
-    border: 1px solid var(--border-color);
+    padding: 15px 0;
+    /* border: 1px solid var(--border-color);
     border-radius: 8px;
-    background-color: rgba(255, 255, 255, 0.05);
+    background-color: rgba(255, 255, 255, 0.05); */
 }
 
 .team-stats {
@@ -375,38 +375,58 @@ body {
 .game-navigation {
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 16px;
-    margin: 20px 0;
-    padding: 10px;
+    justify-content: space-between;
+    position: absolute;
+    top: 50%;
+    left: -20px; /* Move further out to page edge */
+    right: -20px; /* Move further out to page edge */
+    transform: translateY(-50%);
+    pointer-events: none;
+    padding: 0;
 }
 
 .nav-button {
     background: transparent;
-    border: 1px solid var(--border-color);
+    border: none;
     color: var(--text-primary);
-    padding: 8px 16px;
-    border-radius: 4px;
     cursor: pointer;
     transition: all 0.2s ease;
-    font-size: 16px;
+    font-size: 36px;
+    pointer-events: auto;
+    padding: 20px;
+    opacity: 0.8;
+    line-height: 0;
+    height: 100px;
+    display: flex;
+    align-items: center;
+    border-radius: 12px; /* Add rounded corners */
+}
+
+#prevGame::before {
+    content: '‹';
+}
+
+#nextGame::before {
+    content: '›';
 }
 
 .nav-button:hover:not(:disabled) {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: var(--accent-blue);
+    color: var(--accent-blue);
+    opacity: 1;
+    backdrop-filter: blur(4px); /* Optional: adds a slight blur effect */
 }
 
 .nav-button:disabled {
-    opacity: 0.5;
+    opacity: 0.3;
     cursor: not-allowed;
 }
 
-#gameIndicator {
-    font-size: 14px;
-    color: var(--text-primary);
-    min-width: 80px;
-    text-align: center;
+/* Update team stats wrapper for proper positioning context */
+.team-stats-wrapper {
+    position: relative;
+    margin: 15px 0;
+    padding: 15px 0;
+    overflow: visible; /* Ensure arrows aren't cut off */
 }
 
 
@@ -466,19 +486,22 @@ body {
 
     .team-stats-wrapper {
         margin: 15px 0;
-        padding: 15px;
+        padding: 15px 0;
     }
 
     .stats-columns, .player-row {
         grid-template-columns: 110px repeat(12, 50px);  
     }
 
-    .nav-button {
-        padding: 6px 12px;
-        font-size: 14px;
+    .game-navigation {
+        left: -12px; /* Closer to edge on mobile */
+        right: -12px;
     }
     
-    .game-navigation {
-        gap: 12px;
+    .nav-button {
+        font-size: 36px;
+        padding: 15px;
+        height: 100px;
+        border-radius: 12px; /* Slightly smaller radius on mobile */
     }
 }
