@@ -197,20 +197,32 @@ body {
 /* Navigation Tabs */
 .nav-tabs {
     display: flex;
-    gap: 20px;
+    gap: 32px;
     margin: 20px 0;
     border-bottom: 1px solid var(--border-color);
+    border-top: 1px solid var(--border-color);
+    padding: 0;
 }
 
 .nav-tab {
-    padding: 10px 0;
-    color: var(--text-secondary);
+    padding: 10px 24px;
+    color: var(--text-primary);
     cursor: pointer;
+    position: relative;
+    transition: color 0.2s ease;
+    font-size: 15px;
+    font-weight: 600; /* Added bold font weight */
+    white-space: nowrap;
+}
+
+.nav-tab:hover {
+    color: var(--accent-blue);
 }
 
 .nav-tab.active {
     color: var(--accent-blue);
     border-bottom: 2px solid var(--accent-blue);
+    font-weight: 700; /* Slightly bolder for active tab */
 }
 
 /* Team Stats Styles */
@@ -477,6 +489,15 @@ body {
         right: -12px;
         top: calc(32px/2 - 3px); /* Half of the mobile score font-size */
         border-width: 5px 6px 5px 0;
+    }
+
+    .nav-tabs {
+        gap: 24px; /* Slightly smaller gap on mobile */
+    }
+
+    .nav-tab {
+        padding: 10px 16px; /* Slightly smaller padding on mobile */
+        font-size: 14px;
     }
 
     .team-stats {
