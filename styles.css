@@ -199,8 +199,8 @@ body {
     display: flex;
     justify-content: space-between;
     margin: 6px 0; /* Reduced from 20px to 12px */
-    border-bottom: 0.5px solid rgba(255, 255, 255, 0.08);
-    border-top: 0.5px solid rgba(255, 255, 255, 0.08);
+    border-bottom: 0.8px solid rgba(255, 255, 255, 0.10);
+    border-top: 0.8px solid rgba(255, 255, 255, 0.10);
     padding: 0 16px;
 }
 
