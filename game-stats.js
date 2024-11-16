@@ -131,6 +131,17 @@ class GameStats {
         nextButton.disabled = this.currentGameIndex === this.gameGroups.length - 1;
     }
 
+
+    findGameIndexBySeasonAndGame(season, gameNumber) {
+        if (!this.gameGroups) return 0;
+        
+        return this.gameGroups.findIndex(group => {
+            const gameSeason = this.getValue(group[0], 'season');
+            const gameNum = this.getValue(group[0], 'game');
+            return gameSeason === season && gameNum === gameNumber;
+        });
+    }
+
     async init() {
         try {
             console.log('Starting data fetch...');
@@ -160,7 +171,19 @@ class GameStats {
                 const rows = gameData.values.slice(1);
                 this.gameGroups = this.groupByGame(rows);
                 
-                this.currentGameIndex = this.findLatestCompletedGameIndex();
+                // Check URL parameters for specific game
+                const urlParams = new URLSearchParams(window.location.search);
+                const season = urlParams.get('season');
+                const game = urlParams.get('game');
+                
+                if (season && game) {
+                    // Find the specified game
+                    const gameIndex = this.findGameIndexBySeasonAndGame(season, game);
+                    this.currentGameIndex = gameIndex >= 0 ? gameIndex : this.findLatestCompletedGameIndex();
+                } else {
+                    // If no specific game requested, show the latest completed game
+                    this.currentGameIndex = this.findLatestCompletedGameIndex();
+                }
                 
                 this.renderCurrentGame();
                 this.updateGameNavigation();
