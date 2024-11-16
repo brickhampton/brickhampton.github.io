@@ -31,8 +31,15 @@ class MatchHistory {
         const date = new Date(dateStr);
         return date.toLocaleDateString('en-US', {
             month: 'short',
-            day: 'numeric',
-            year: 'numeric'
+            day: 'numeric'
+        });
+    }
+
+    formatTime(dateStr) {
+        const date = new Date(dateStr);
+        return date.toLocaleTimeString('en-US', {
+            hour: 'numeric',
+            minute: '2-digit'
         });
     }
 
@@ -41,7 +48,35 @@ class MatchHistory {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         gameDate.setHours(0, 0, 0, 0);
-        return gameDate < today ? 'Final' : 'TBD';
+        
+        const isPlayed = gameDate < today;
+        const formattedDate = this.formatDate(dateStr);
+        
+        if (isPlayed) {
+            return {
+                status: 'Final',
+                detail: formattedDate
+            };
+        } else {
+            return {
+                status: this.formatTime(dateStr),
+                detail: formattedDate
+            };
+        }
+    }
+
+    getScore(scoreStr) {
+        const score = parseInt(scoreStr);
+        return isNaN(score) ? 0 : score;
+    }
+
+    getWinnerLoserClasses(homeScore, awayScore, isPlayed) {
+        if (!isPlayed) return { home: '', away: '' };
+        
+        return {
+            home: homeScore > awayScore ? 'winner' : 'loser',
+            away: awayScore > homeScore ? 'winner' : 'loser'
+        };
     }
 
     renderMatches(data) {
@@ -57,33 +92,42 @@ class MatchHistory {
         const matches = data.slice(1).reverse(); // Reverse to show newest first
 
         matches.forEach(match => {
-            const homeScore = parseInt(match[homeIndex]);
-            const awayScore = parseInt(match[awayIndex]);
+            const homeScore = this.getScore(match[homeIndex]);
+            const awayScore = this.getScore(match[awayIndex]);
+            const gameDate = new Date(match[dateIndex]);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            gameDate.setHours(0, 0, 0, 0);
+            
+            const isPlayed = gameDate < today;
             const gameStatus = this.formatGameStatus(match[dateIndex]);
-            const gameDate = this.formatDate(match[dateIndex]);
+            const classes = this.getWinnerLoserClasses(homeScore, awayScore, isPlayed);
 
             const gameHTML = `
-                <a href="../index.html?season=${match[seasonIndex]}&game=${match[gameIndex]}" class="game-card">
+                <a href="../index.html?season=${encodeURIComponent(match[seasonIndex])}&game=${encodeURIComponent(match[gameIndex])}" class="game-card">
                     <div class="game-container">
-                        <div class="team-info ${homeScore > awayScore ? 'winner' : 'loser'}">
-                            <div class="team-logo"></div>
-                            <div class="team-details">
-                                <div class="team-name">Brickhampton</div>
-                                <div class="team-score">${homeScore}</div>
+                        <div class="teams-container">
+                            <div class="team-info ${classes.home}">
+                                <div class="team-logo"></div>
+                                <div class="team-details">
+                                    <div class="team-name">Brickhampton</div>
+                                    <div class="team-score">${homeScore}</div>
+                                </div>
                             </div>
-                        </div>
-                        <div class="team-info ${awayScore > homeScore ? 'winner' : 'loser'}">
-                            <div class="team-logo"></div>
-                            <div class="team-details">
-                                <div class="team-name">${match[opponentIndex]}</div>
-                                <div class="team-score">${awayScore}</div>
+                            <div class="team-info ${classes.away}">
+                                <div class="team-logo"></div>
+                                <div class="team-details">
+                                    <div class="team-name">${match[opponentIndex]}</div>
+                                    <div class="team-score">${awayScore}</div>
+                                </div>
                             </div>
                         </div>
                         <div class="game-meta">
-                            <div class="game-status">${gameStatus}</div>
-                            <div class="game-views">
-                                <span>Game ${match[gameIndex]}</span>
+                            <div class="game-status">
+                                <div class="status-text">${gameStatus.status}</div>
+                                <div class="status-date">${gameStatus.detail}</div>
                             </div>
+                            <div class="game-number">${match[seasonIndex]} Game ${match[gameIndex]}</div>
                         </div>
                     </div>
                 </a>

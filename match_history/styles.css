@@ -17,53 +17,59 @@ body {
     background-color: var(--bg-primary);
     color: var(--text-primary);
     padding: 16px;
-    max-width: 1400px;
+    max-width: 800px;
     margin: 0 auto;
 }
 
 .header {
-    padding: 20px 0;
-    border-bottom: 1px solid var(--border-color);
+    padding: 16px 0;
+    margin-bottom: 16px;
 }
 
 .header h1 {
     font-size: 24px;
     color: var(--text-primary);
+    font-weight: 600;
 }
 
 .games-list {
-    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
 }
 
 .game-card {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
-    margin-bottom: 12px;
+    border-bottom: 1px solid var(--border-color);
     cursor: pointer;
-    transition: all 0.2s ease;
     text-decoration: none;
     color: inherit;
     display: block;
+    padding: 20px 0;
 }
 
 .game-card:hover {
-    background: rgba(255, 255, 255, 0.1);
-    transform: translateY(-1px);
+    background-color: rgba(255, 255, 255, 0.03);
+}
+
+.game-card:last-child {
+    border-bottom: none;
 }
 
 .game-container {
-    padding: 16px;
-    display: grid;
-    grid-template-columns: auto 1fr auto;
+    display: flex;
+    justify-content: space-between;
     align-items: center;
-    gap: 16px;
+}
+
+.teams-container {
+    flex: 1;
+    margin-right: 16px;
 }
 
 .team-info {
     display: flex;
     align-items: center;
     gap: 12px;
+    margin: 8px 0;
 }
 
 .team-logo {
@@ -71,58 +77,81 @@ body {
     height: 32px;
     background: #333;
     border-radius: 50%;
+    flex-shrink: 0;
 }
 
 .team-details {
-    display: flex;
-    flex-direction: column;
-    min-width: 120px;
+    display: grid;
+    grid-template-columns: 1fr 60px;
+    align-items: center;
+    width: 100%;
+    gap: 8px;
 }
 
 .team-name {
     font-size: 16px;
-    font-weight: 600;
+    font-weight: 400;
 }
 
 .team-score {
     font-size: 24px;
-    font-weight: bold;
+    font-weight: 600;
+    text-align: right;
+}
+
+.winner .team-score {
+    color: var(--text-primary);
+}
+
+.loser .team-score {
+    color: var(--text-secondary);
+    opacity: 0.85;
 }
 
 .game-meta {
     text-align: right;
-    color: var(--text-secondary);
+    min-width: 100px;
 }
 
 .game-status {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+}
+
+.status-text {
     font-size: 16px;
     font-weight: 600;
     color: var(--text-primary);
 }
 
-.game-views {
+.status-date {
     font-size: 14px;
     color: var(--text-secondary);
-    display: flex;
-    align-items: center;
-    gap: 4px;
+}
+
+.game-number {
+    font-size: 14px;
+    color: var(--text-secondary);
     margin-top: 4px;
 }
 
-.winner .team-name,
-.winner .team-score {
+.winner .team-name {
     color: var(--text-primary);
 }
 
-.loser .team-name,
-.loser .team-score {
+.loser .team-name {
     color: var(--text-secondary);
 }
 
 @media (max-width: 768px) {
-    .game-container {
+    body {
         padding: 12px;
-        gap: 12px;
+    }
+
+    .game-card {
+        padding: 16px 0;
     }
 
     .team-logo {
@@ -138,7 +167,15 @@ body {
         font-size: 20px;
     }
 
-    .game-status {
+    .status-text {
         font-size: 14px;
+    }
+    
+    .status-date {
+        font-size: 12px;
+    }
+    
+    .game-number {
+        font-size: 12px;
     }
 }
