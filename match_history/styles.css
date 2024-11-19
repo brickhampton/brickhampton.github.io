@@ -3,7 +3,7 @@
     --text-primary: #ffffff;
     --text-secondary: #808080;
     --accent-blue: #1d9bf0;
-    --border-color: #333333;
+    --border-color: rgba(255, 255, 255, 0.10);
 }
 
 * {
@@ -22,8 +22,8 @@ body {
 }
 
 .header {
-    padding: 16px 0;
-    margin-bottom: 16px;
+    padding: 8px 0;
+    margin-bottom: 0px;
 }
 
 .header h1 {
@@ -38,12 +38,16 @@ body {
 }
 
 .game-card {
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 0.8px solid var(--border-color);
     cursor: pointer;
     text-decoration: none;
     color: inherit;
     display: block;
     padding: 20px 0;
+}
+
+.game-card.first-game {
+    border-top: 0.8px solid var(--border-color);
 }
 
 .game-card:hover {
@@ -63,6 +67,7 @@ body {
 .teams-container {
     flex: 1;
     margin-right: 16px;
+    position: relative; /* Added for positioning the line */
 }
 
 .team-info {
@@ -73,11 +78,15 @@ body {
 }
 
 .team-logo {
-    width: 32px;
-    height: 32px;
-    background: #333;
+    width: 35px;
+    height: 35px;
     border-radius: 50%;
     flex-shrink: 0;
+    background: #333;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    overflow: hidden;
 }
 
 .team-details {
@@ -86,6 +95,7 @@ body {
     align-items: center;
     width: 100%;
     gap: 8px;
+    position: relative; /* Added for positioning the line */
 }
 
 .team-name {
@@ -97,6 +107,18 @@ body {
     font-size: 24px;
     font-weight: 600;
     text-align: right;
+    padding-right: 32px; /* Increased padding to accommodate arrow */
+    position: relative;
+}
+
+.teams-container::after {
+    content: '';
+    position: absolute;
+    right: -16px; /* Position relative to teams container */
+    top: 8px; /* Align with top team score */
+    height: calc(100% - 16px); /* Stretch to bottom team score */
+    width: 1px;
+    background-color: var(--border-color);
 }
 
 .winner .team-score {
@@ -145,18 +167,139 @@ body {
     color: var(--text-secondary);
 }
 
+
+
+/* Add these styles for filters / buttons */
+.filters {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 0;  /* Remove margin to minimize gap */
+}
+
+.filter-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.filter-select {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    min-width: 120px;
+    outline: none;  /* Remove the border/outline when selecting */
+}
+
+.filter-select:focus {
+    outline: none;  /* Remove the border/outline when clicking/focusing */
+}
+
+.filter-select:hover {
+    color: var(--accent-blue);
+}
+
+/* Hide the Season label by adding display: none */
+.filter-label {
+    display: none;
+}
+
+.filter-select option {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+}
+
+.toggle-button {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    border: none;  /* Removed border */
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 15px;  /* Increased from 14px */
+    font-weight: 600;  /* Added bold weight */
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+}
+
+.toggle-button:hover {
+    color: var(--accent-blue);  /* Changed to modify text color instead of border */
+}
+
+.toggle-button.active {
+    background: var(--accent-blue);
+    color: var(--text-primary);  /* Keep text white when active */
+}
+
+/* Game card styles */
+.game-card {
+    border-bottom: 1px solid var(--border-color);
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    padding: 12px 0;
+}
+
+.game-card:last-child {
+    border-bottom: none;
+}
+
+.game-card.first-game {
+    border-top: 1px solid var(--border-color);
+}
+
+.game-card.future-game {
+    display: none;
+}
+
+.show-future .game-card.future-game {
+    display: block;
+}
+
+
+/* Winner indicator styles */
+.winner .team-score {
+    position: relative;
+}
+
+.winner .team-score::before {
+    content: '';
+    position: absolute;
+    top: 60%;  /* Changed from fixed 12px to 50% */
+    transform: translateY(-50%);  /* Added to center vertically */
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-radius: 2px;
+    right: -8px;  /* Adjusted to be closer to score */
+    border-width: 6px 8px 6px 0;
+    border-color: transparent var(--text-primary) transparent transparent;
+}
+
+
+
 @media (max-width: 768px) {
     body {
         padding: 12px;
     }
 
     .game-card {
-        padding: 16px 0;
+        padding: 10px 0;
     }
 
     .team-logo {
-        width: 28px;
-        height: 28px;
+        width: 32px;
+        height: 32px;
     }
 
     .team-name {
@@ -165,6 +308,17 @@ body {
 
     .team-score {
         font-size: 20px;
+        padding-right: 28px;
+    }
+
+    .teams-container::after {
+        right: -12px; /* Slightly adjusted for mobile */
+    }
+
+    .winner .team-score::before {
+        right: -3px;  /* Slightly adjusted position for mobile */
+        /* No need to adjust top position since we're using percentage */
+        border-width: 5px 7px 5px 0;  /* Slightly smaller triangle for mobile */
     }
 
     .status-text {
@@ -177,5 +331,26 @@ body {
     
     .game-number {
         font-size: 12px;
+    }
+
+    .filters {
+        padding: 12px 0;
+        flex-wrap: wrap;  /* Allow wrapping only when absolutely necessary */
+        gap: 8px;
+    }
+
+    .filter-select {
+        min-width: 100px;  /* Slightly smaller on mobile */
+    }
+
+    .toggle-button, 
+    .filter-select {
+        padding: 4px 8px;
+        font-size: 14px;  /* Slightly larger than original mobile size */
+        font-weight: 600;  /* Maintain bold weight on mobile */
+    }
+
+    .filter-label {
+        font-size: 13px;
     }
 }
