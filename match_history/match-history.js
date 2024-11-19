@@ -5,12 +5,12 @@ class MatchHistory {
         this.MATCH_HISTORY_TAB = 'match_history';
         this.MATCH_RANGE = 'A:H';
         this.IMAGE_URLS_TAB = 'image_urls';
-        this.IMAGE_RANGE = 'A:B';
+        this.IMAGE_RANGE = 'A:C'; // Updated to include column C
         this.filters = {
             season: 'all',
             showFuture: false
         };
-        this.teamLogos = {}; // Add this to store team logos
+        this.teamLogos = {}; // Store team logos and backgrounds
         this.init();
     }
 
@@ -24,7 +24,7 @@ class MatchHistory {
             if (matchData.values && matchData.values.length > 0) {
                 this.matchData = matchData;
                 
-                // Store team logos
+                // Store team logos and backgrounds
                 if (imageData.values && imageData.values.length > 0) {
                     this.mapTeamLogos(imageData.values);
                 }
@@ -47,12 +47,18 @@ class MatchHistory {
     }
 
     mapTeamLogos(rows) {
-        // Skip header row and map team names to logo URLs
+        // Skip header row and map team names to logo URLs and backgrounds
         rows.slice(1).forEach(row => {
-            if (row[0] && row[1]) {
+            if (row[0]) {
                 const teamName = row[0].trim();
-                const logoUrl = row[1].trim();
-                this.teamLogos[teamName] = logoUrl;
+                const logoUrl = row[1] ? row[1].trim() : '';
+                // Use the background CSS directly from the sheet
+                const backgroundColor = row[2] ? row[2].trim() : '#333';
+                
+                this.teamLogos[teamName] = {
+                    logo: logoUrl,
+                    background: backgroundColor
+                };
             }
         });
     }
@@ -87,7 +93,6 @@ class MatchHistory {
             this.renderMatches();
         });
 
-        // Optimized toggle handler
         const toggleButton = document.getElementById('futureGamesToggle');
         toggleButton.addEventListener('click', () => {
             this.filters.showFuture = !this.filters.showFuture;
@@ -104,14 +109,12 @@ class MatchHistory {
         const headers = this.matchData.values[0].map(header => header.toLowerCase().trim());
         const seasonIndex = headers.indexOf('season');
         
-        // Get unique seasons from data
         const seasons = new Set(
             this.matchData.values.slice(1)
                 .map(row => row[seasonIndex])
                 .filter(Boolean)
         );
         
-        // Convert to array and sort
         return Array.from(seasons).sort((a, b) => {
             const seasonOrder = {
                 'S25': 1,
@@ -119,7 +122,6 @@ class MatchHistory {
                 'S24': 3,
                 'W24': 4
             };
-            // Sort in ascending order (lower numbers appear first)
             return seasonOrder[a] - seasonOrder[b];
         });
     }
@@ -191,9 +193,8 @@ class MatchHistory {
         const timeIndex = headers.indexOf('time');
 
         const gamesList = document.getElementById('gamesList');
-        gamesList.innerHTML = ''; // Clear existing games
+        gamesList.innerHTML = '';
 
-        // Apply only season filter during render
         const matches = this.matchData.values.slice(1)
             .filter(match => this.filters.season === 'all' || match[seasonIndex] === this.filters.season)
             .reverse();
@@ -212,9 +213,9 @@ class MatchHistory {
             const gameStatus = this.formatGameStatus(match[dateIndex], gameTime);
             const classes = this.getWinnerLoserClasses(homeScore, awayScore, isPlayed);
 
-            // Get team logos
-            const brickhamptonLogo = this.teamLogos['Brickhampton'] || '';
-            const opponentLogo = this.teamLogos[match[opponentIndex]] || '';
+            // Get team logos and backgrounds
+            const brickhamptonInfo = this.teamLogos['Brickhampton'] || { logo: '', background: '#333' };
+            const opponentInfo = this.teamLogos[match[opponentIndex]] || { logo: '', background: '#333' };
 
             const classNames = ['game-card'];
             if (index === 0) classNames.push('first-game');
@@ -226,14 +227,26 @@ class MatchHistory {
                     <div class="game-container">
                         <div class="teams-container">
                             <div class="team-info ${classes.home}">
-                                <div class="team-logo" ${brickhamptonLogo ? `style="background-image: url('${brickhamptonLogo}');"` : ''}></div>
+                                <div class="team-logo" style="
+                                    ${brickhamptonInfo.background.includes('gradient') || brickhamptonInfo.background.includes('repeating') 
+                                        ? `background: ${brickhamptonInfo.background};` 
+                                        : `background-color: ${brickhamptonInfo.background};`}
+                                ">
+                                    ${brickhamptonInfo.logo ? `<div class="logo-image" style="background-image: url('${brickhamptonInfo.logo}')"></div>` : ''}
+                                </div>
                                 <div class="team-details">
                                     <div class="team-name">Brickhampton</div>
                                     <div class="team-score">${homeScore}</div>
                                 </div>
                             </div>
                             <div class="team-info ${classes.away}">
-                                <div class="team-logo" ${opponentLogo ? `style="background-image: url('${opponentLogo}');"` : ''}></div>
+                                <div class="team-logo" style="
+                                    ${opponentInfo.background.includes('gradient') || opponentInfo.background.includes('repeating') 
+                                        ? `background: ${opponentInfo.background};` 
+                                        : `background-color: ${opponentInfo.background};`}
+                                ">
+                                    ${opponentInfo.logo ? `<div class="logo-image" style="background-image: url('${opponentInfo.logo}')"></div>` : ''}
+                                </div>
                                 <div class="team-details">
                                     <div class="team-name">${match[opponentIndex]}</div>
                                     <div class="team-score">${awayScore}</div>
