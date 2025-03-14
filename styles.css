@@ -34,7 +34,7 @@ body {
 }
 
 .score-header.scrolled {
-    padding: 8px 0;
+    padding: 12px 0;
 }
 
 .score-header.scrolled .score {
@@ -527,12 +527,12 @@ body {
     
         /* Keep team logos beside scores even in mobile */
         .team-a-logo {
-            left: -42px;
+            left: -48px;
             top: 22px;
         }
         
         .team-b-logo {
-            right: -42px;
+            right: -48px;
             top: 22px;
         }
 
@@ -543,10 +543,10 @@ body {
         }
 
 
-.score-header.scrolled .team-logo {
-    width: 24px;
-    height: 24px;
-}
+    .score-header.scrolled .team-logo {
+        width: 22px;
+        height: 22px;
+    }
 
     .score-header.scrolled .score {
         font-size: 16px; /* Half of the mobile 32px size */
