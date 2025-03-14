@@ -42,7 +42,12 @@ body {
 }
 
 .score-header.scrolled .team-name {
-    font-size: 11px;
+    display: none;
+}
+
+/* Adjust spacing when team names are hidden */
+.score-header.scrolled .team-info {
+    gap: 0; /* Remove any gap that was meant for spacing with team name */
 }
 
 .score-header.scrolled .game-info {
@@ -50,9 +55,15 @@ body {
 }
 
 /* Hide date and game number when scrolled */
-.score-header.scrolled .game-date,
-.score-header.scrolled .game-number {
+.score-header.scrolled .game-date {
     display: none;
+}
+
+
+.score-header.scrolled .game-number {
+    display: block !important; /* Force display of game number */
+    font-size: 14px;
+    margin: 0;
 }
 
 /* Adjust game status display when scrolled */
@@ -62,8 +73,7 @@ body {
 }
 
 .score-header.scrolled .game-status {
-    font-size: 14px;
-    margin: 0;
+    display: none; 
 }
 
 .score-container, .game-info, .score, .team-name {
@@ -517,12 +527,12 @@ body {
     
         /* Keep team logos beside scores even in mobile */
         .team-a-logo {
-            left: -14px;
+            left: -18px;
             top: 22px;
         }
         
         .team-b-logo {
-            right: -14px;
+            right: -18px;
             top: 22px;
         }
 
@@ -560,13 +570,13 @@ body {
     }
 
     .winner-left::before {
-        left: -36px;
+        left: -42px;
         top: 15px; /* Half of the mobile score font-size */
         border-width: 6px 0 6px 8px;
     }
     
     .winner-right::before {
-        right: -36px;
+        right: -42px;
         top: 15px; /* Half of the mobile score font-size */
         border-width: 6px 8px 6px 0;
     }
