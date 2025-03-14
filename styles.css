@@ -523,12 +523,12 @@ body {
     
         /* Keep team logos beside scores even in mobile */
         .team-a-logo {
-            left: -30px;
+            left: -20px;
             top: 22px;
         }
         
         .team-b-logo {
-            right: -30px;
+            right: -20px;
             top: 22px;
         }
 
@@ -542,10 +542,20 @@ body {
     .score-header.scrolled .team-logo {
         width: 22px;
         height: 22px;
+        top: 50%; /* Center vertically with the score */
+        transform: translateY(-50%);
+    }
+
+    .score-header.scrolled .winner-left::before,
+    .score-header.scrolled .winner-right::before {
+        top: 50%; /* Center vertically with the score */
+        transform: translateY(-50%);
     }
 
     .score-header.scrolled .score {
         font-size: 16px; /* Half of the mobile 32px size */
+        margin-bottom: 0;
+        line-height: 1;
     }
 
     .game-status {
