@@ -81,10 +81,11 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 40px; /* Increased gap for more spacing */
-    max-width: 600px;
+    gap: 40px;
+    max-width: 800px; /* Increased from 600px to accommodate logos */
     margin: 0 auto;
-    padding: 0 16px;
+    padding: 0 40px; /* Increased to prevent logos from being cut off */
+    position: relative;
 }
 
 .team-score {
@@ -98,8 +99,9 @@ body {
     min-width: 0;
     text-align: center;
     display: flex;
-    flex-direction: column;
+    flex-direction: column !important; /* Force column layout */
     align-items: center;
+    position: relative;
 }
 
 .team-info {
@@ -130,7 +132,57 @@ body {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 140px; /* Limit width for long names */
+    max-width: 140px;
+    margin-top: 4px; /* Space between score and name */
+}
+
+/* Team logo styles - Add this to your styles.css */
+.team-info {
+    flex: 1;
+    min-width: 0;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+}
+
+.team-score {
+    flex: 1;
+    display: flex;
+    min-width: 0;
+    position: relative;
+}
+
+.team-logo {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    overflow: hidden;
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 5;
+}
+
+.team-a-logo {
+    left: 15px; /* Moved closer to center (was -40px) */
+    top: 33%;
+    transform: translateY(-50%);
+}
+
+.team-b-logo {
+    right: 15px; /* Moved closer to center (was -40px) */
+    top: 33%;
+    transform: translateY(-50%);
+}
+
+.logo-image {
+    width: 100%;
+    height: 100%;
+    background-position: center;
+    background-repeat: no-repeat;
 }
 
 .game-status {
@@ -182,14 +234,14 @@ body {
 
 /* Left triangle (for home team) - pointing right */
 .winner-left::before {
-    left: -24px;
+    left: -42px;
     border-width: 6px 0 6px 8px;
     border-color: transparent transparent transparent var(--text-primary);
 }
 
 /* Right triangle (for away team) - pointing left */
 .winner-right::before {
-    right: -24px;
+    right: -42px;
     border-width: 6px 8px 6px 0;
     border-color: transparent var(--text-primary) transparent transparent;
 }
@@ -453,9 +505,38 @@ body {
     }
 
     .score-container {
-        gap: 20px;
-        padding: 0 12px;
+        gap: 10px;
+        max-width: 100%;
+        padding: 0 40px; /* Keep padding for logos */
     }
+
+    .team-logo {
+        width: 28px;
+        height: 28px;
+    }
+    
+        /* Keep team logos beside scores even in mobile */
+        .team-a-logo {
+            left: -14px;
+            top: 22px;
+        }
+        
+        .team-b-logo {
+            right: -14px;
+            top: 22px;
+        }
+
+        .team-info {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+
+.score-header.scrolled .team-logo {
+    width: 24px;
+    height: 24px;
+}
 
     .score-header.scrolled .score {
         font-size: 16px; /* Half of the mobile 32px size */
@@ -479,13 +560,13 @@ body {
     }
 
     .winner-left::before {
-        left: -20px;
+        left: -36px;
         top: 15px; /* Half of the mobile score font-size */
         border-width: 6px 0 6px 8px;
     }
     
     .winner-right::before {
-        right: -20px;
+        right: -36px;
         top: 15px; /* Half of the mobile score font-size */
         border-width: 6px 8px 6px 0;
     }

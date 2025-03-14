@@ -6,7 +6,7 @@ const MATCH_HISTORY_TAB = 'match_history';
 const RANGE = 'A:Z';
 const MATCH_RANGE = 'A:H';
 const IMAGE_URLS_TAB = 'image_urls';
-const IMAGE_RANGE = 'A:B';  // Assuming column A is player name and B is image URL
+const IMAGE_RANGE = 'A:D';  // Assuming column A is player name and B is image URL
 
 class GameStats {
     constructor() {
@@ -36,6 +36,7 @@ class GameStats {
         this.matchData = null;
         this.currentSort = { column: null, ascending: null };
         this.playerImages = {};  // Add this to store image URLs
+        this.teamLogos = {}; 
         console.log('GameStats initialized');
         this.init();
         this.setupGameNavigation();
@@ -213,15 +214,46 @@ class GameStats {
     }
 
     mapImageUrls(rows) {
-        // Skip header row and map player names to image URLs
+        console.log('Raw image data rows:', rows);
+        
+        // Skip header row and map all player names and team names
         rows.slice(1).forEach(row => {
-            if (row[0] && row[1]) {  // If we have both name and URL
-                const playerName = row[0].trim();
-                const imageUrl = row[1].trim();
-                this.playerImages[playerName] = imageUrl;
-                console.log(`Mapped ${playerName} to ${imageUrl}`);
+            if (row[0]) {  // If we have a name
+                const name = row[0].trim();
+                const imageUrl = row[1] ? row[1].trim() : '';
+                const backgroundColor = row[2] ? row[2].trim() : '#333';
+                const zoom = row[3] ? row[3].trim() : '100%';
+                
+                console.log(`Processing row for "${name}": URL=${imageUrl}, BG=${backgroundColor}`);
+                
+                // Store as player image (for player photos in stats)
+                if (imageUrl && !name.startsWith('TEAM:')) {
+                    this.playerImages[name] = imageUrl;
+                }
+                
+                // Store as team logo - match history uses this format without TEAM: prefix
+                this.teamLogos[name] = {
+                    logo: imageUrl,
+                    background: backgroundColor,
+                    zoom: zoom
+                };
+                
+                // Also store with TEAM: prefix removed if it exists
+                if (name.startsWith('TEAM:')) {
+                    const teamName = name.substring(5).trim();
+                    this.teamLogos[teamName] = {
+                        logo: imageUrl,
+                        background: backgroundColor,
+                        zoom: zoom
+                    };
+                }
+                
+                console.log(`Mapped "${name}" to:`, this.teamLogos[name]);
             }
         });
+        
+        // Debug: log all team logos
+        console.log('All mapped team logos:', Object.keys(this.teamLogos).join(', '));
     }
 
     findLatestCompletedGameIndex() {
@@ -425,15 +457,77 @@ class GameStats {
         const homeScore = parseInt(matchRow[homeIndex]) || 0;
         const awayScore = parseInt(matchRow[awayIndex]) || 0;
 
-        // Get team info elements
-        const teamAInfo = document.getElementById('team-a-score').parentElement;
-        const teamBInfo = document.getElementById('team-b-score').parentElement;
-
-        // Update team names and scores
+        // After setting scores:
         document.getElementById('team-a-name').textContent = 'Brickhampton';
         document.getElementById('team-b-name').textContent = matchRow[opponentIndex];
         document.getElementById('team-a-score').textContent = homeScore;
         document.getElementById('team-b-score').textContent = awayScore;
+        
+        // Remove any existing logos
+        const existingLogoA = document.getElementById('team-a-logo');
+        const existingLogoB = document.getElementById('team-b-logo');
+        if (existingLogoA) existingLogoA.remove();
+        if (existingLogoB) existingLogoB.remove();
+        
+        // Get team containers
+        const teamAInfo = document.getElementById('team-a-score').parentElement;
+        const teamBInfo = document.getElementById('team-b-score').parentElement;
+    
+        // Get opponent name and log for debugging
+        const opponentName = matchRow[opponentIndex];
+        console.log('Looking for opponent:', opponentName);
+        console.log('Available teams:', Object.keys(this.teamLogos));
+
+        const brickhamptonInfo = this.teamLogos['Brickhampton'] || { logo: '', background: '#333', zoom: '100%' };
+        const opponentInfo = this.teamLogos[opponentName] || { logo: '', background: '#333', zoom: '100%' };
+    
+        // Create team A logo
+        const logoA = document.createElement('div');
+        logoA.id = 'team-a-logo';
+        logoA.className = 'team-logo team-a-logo';
+
+        // Set background style
+        if (brickhamptonInfo.background && brickhamptonInfo.background.includes('gradient')) {
+            logoA.style.background = brickhamptonInfo.background;
+        } else {
+            logoA.style.backgroundColor = brickhamptonInfo.background || '#333';
+        }
+
+        // Create and add the inner logo image if available
+        if (brickhamptonInfo.logo) {
+            const logoImgA = document.createElement('div');
+            logoImgA.className = 'logo-image';
+            logoImgA.style.backgroundImage = `url('${brickhamptonInfo.logo}')`;
+            logoImgA.style.backgroundSize = brickhamptonInfo.zoom || '100%';
+            logoA.appendChild(logoImgA);
+        }
+
+        // Insert into team info container
+        teamAInfo.appendChild(logoA);
+
+        // Create team B logo - similarly structured
+        const logoB = document.createElement('div');
+        logoB.id = 'team-b-logo';
+        logoB.className = 'team-logo team-b-logo';
+
+        // Set background style
+        if (opponentInfo.background && opponentInfo.background.includes('gradient')) {
+            logoB.style.background = opponentInfo.background;
+        } else {
+            logoB.style.backgroundColor = opponentInfo.background || '#333';
+        }
+
+        // Create and add the inner logo image if available
+        if (opponentInfo.logo) {
+            const logoImgB = document.createElement('div');
+            logoImgB.className = 'logo-image';
+            logoImgB.style.backgroundImage = `url('${opponentInfo.logo}')`;
+            logoImgB.style.backgroundSize = opponentInfo.zoom || '100%';
+            logoB.appendChild(logoImgB);
+        }
+
+        // Insert into team info container
+        teamBInfo.appendChild(logoB);
 
         // Remove any existing winner/loser classes
         teamAInfo.classList.remove('winner', 'loser', 'winner-left');
