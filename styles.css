@@ -527,12 +527,12 @@ body {
     
         /* Keep team logos beside scores even in mobile */
         .team-a-logo {
-            left: -30px;
+            left: -42px;
             top: 22px;
         }
         
         .team-b-logo {
-            right: -30px;
+            right: -42px;
             top: 22px;
         }
 
