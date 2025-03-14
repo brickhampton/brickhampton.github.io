@@ -139,7 +139,7 @@ body {
     overflow: hidden;
     text-overflow: ellipsis;
     max-width: 140px;
-    margin-top: -2px; /* Space between score and name */
+    margin-top: -3px; /* Space between score and name */
 }
 
 /* Team logo styles - Add this to your styles.css */
