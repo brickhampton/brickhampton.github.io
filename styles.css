@@ -47,7 +47,7 @@ body {
 
 /* Adjust spacing when team names are hidden */
 .score-header.scrolled .team-info {
-    gap: 0; /* Remove any gap that was meant for spacing with team name */
+    gap: 1px; /* Remove any gap that was meant for spacing with team name */
 }
 
 /* Hide date and game number when scrolled */
