@@ -42,7 +42,7 @@ body {
 }
 
 .score-header.scrolled .team-name {
-    display: none;
+    font-size: 10px;
 }
 
 /* Adjust spacing when team names are hidden */
@@ -137,13 +137,13 @@ body {
 }
 
 .team-name {
-    font-size: 14px;
+    font-size: 12px;
     color: var(--text-secondary);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     max-width: 140px;
-    margin-top: 4px; /* Space between score and name */
+    margin-top: -2px; /* Space between score and name */
 }
 
 /* Team logo styles - Add this to your styles.css */
@@ -527,12 +527,12 @@ body {
     
         /* Keep team logos beside scores even in mobile */
         .team-a-logo {
-            left: -18px;
+            left: -30px;
             top: 22px;
         }
         
         .team-b-logo {
-            right: -18px;
+            right: -30px;
             top: 22px;
         }
 
@@ -570,13 +570,13 @@ body {
     }
 
     .winner-left::before {
-        left: -42px;
+        left: -50px;
         top: 15px; /* Half of the mobile score font-size */
         border-width: 6px 0 6px 8px;
     }
     
     .winner-right::before {
-        right: -42px;
+        right: -50px;
         top: 15px; /* Half of the mobile score font-size */
         border-width: 6px 8px 6px 0;
     }
