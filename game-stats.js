@@ -260,14 +260,16 @@ class GameStats {
         if (!this.matchData || !this.matchData.values || !this.gameGroups) {
             return 0;
         }
-
+    
         const headers = this.matchData.values[0].map(header => header.toLowerCase().trim());
         const dateIndex = headers.indexOf('date');
+        const timeIndex = headers.indexOf('time');
         const seasonIndex = headers.indexOf('season');
         const gameIndex = headers.indexOf('game');
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-
+        
+        // Get current date and time
+        const now = new Date();
+        
         // Loop through games in reverse order to find the latest completed game
         for (let i = this.gameGroups.length - 1; i >= 0; i--) {
             const currentGame = this.gameGroups[i][0];
@@ -282,9 +284,31 @@ class GameStats {
             
             if (matchRow) {
                 const gameDate = new Date(matchRow[dateIndex]);
-                gameDate.setHours(0, 0, 0, 0);
                 
-                if (gameDate < today) {
+                // If we have a time value, incorporate it into the gameDate
+                if (timeIndex !== -1 && matchRow[timeIndex]) {
+                    const timeStr = matchRow[timeIndex].trim();
+                    // Parse time in format like "7:00 PM"
+                    const [timePart, ampm] = timeStr.split(' ');
+                    let [hours, minutes] = timePart.split(':').map(Number);
+                    
+                    // Convert to 24-hour format
+                    if (ampm && ampm.toUpperCase() === 'PM' && hours < 12) {
+                        hours += 12;
+                    } else if (ampm && ampm.toUpperCase() === 'AM' && hours === 12) {
+                        hours = 0;
+                    }
+                    
+                    // Set the time part of the gameDate
+                    gameDate.setHours(hours, minutes || 0, 0, 0);
+                } else {
+                    // If no time specified, set to end of day to ensure games without times
+                    // are considered complete only after the game day has passed
+                    gameDate.setHours(23, 59, 59, 999);
+                }
+                
+                // Check if current time is after game time
+                if (gameDate < now) {
                     return i;
                 }
             }
@@ -383,15 +407,33 @@ class GameStats {
     }
 
     // Update the formatGameStatus method to include game time
-    formatGameStatus(dateStr, gameTime) {
-        const gameDate = new Date(dateStr);
-        const today = new Date();
-        // Reset time part to compare just the dates
-        today.setHours(0, 0, 0, 0);
-        gameDate.setHours(0, 0, 0, 0);
+formatGameStatus(dateStr, gameTime) {
+    const gameDate = new Date(dateStr);
+    const now = new Date();
+    
+    // If we have a time value, incorporate it into the gameDate
+    if (gameTime) {
+        const timeStr = gameTime.trim();
+        // Parse time in format like "7:00 PM"
+        const [timePart, ampm] = timeStr.split(' ');
+        let [hours, minutes] = timePart.split(':').map(Number);
         
-        return gameDate < today ? 'Final' : gameTime || 'TBD';
+        // Convert to 24-hour format
+        if (ampm && ampm.toUpperCase() === 'PM' && hours < 12) {
+            hours += 12;
+        } else if (ampm && ampm.toUpperCase() === 'AM' && hours === 12) {
+            hours = 0;
+        }
+        
+        // Set the time part of the gameDate
+        gameDate.setHours(hours, minutes || 0, 0, 0);
+    } else {
+        // If no time specified, set to end of day
+        gameDate.setHours(23, 59, 59, 999);
     }
+    
+    return gameDate < now ? 'Final' : gameTime || 'TBD';
+}
 
     formatDate(dateStr) {
         try {
