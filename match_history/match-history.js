@@ -146,11 +146,30 @@ class MatchHistory {
 
     formatGameStatus(dateStr, gameTime) {
         const gameDate = new Date(dateStr);
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        gameDate.setHours(0, 0, 0, 0);
+        const now = new Date();
         
-        const isPlayed = gameDate < today;
+        // If we have a time value, incorporate it into the gameDate
+        if (gameTime) {
+            const timeStr = gameTime.trim();
+            // Parse time in format like "7:00 PM"
+            const [timePart, ampm] = timeStr.split(' ');
+            let [hours, minutes] = timePart.split(':').map(Number);
+            
+            // Convert to 24-hour format
+            if (ampm && ampm.toUpperCase() === 'PM' && hours < 12) {
+                hours += 12;
+            } else if (ampm && ampm.toUpperCase() === 'AM' && hours === 12) {
+                hours = 0;
+            }
+            
+            // Set the time part of the gameDate
+            gameDate.setHours(hours, minutes || 0, 0, 0);
+        } else {
+            // If no time specified, set to end of day
+            gameDate.setHours(23, 59, 59, 999);
+        }
+        
+        const isPlayed = gameDate < now;
         const formattedDate = this.formatDate(dateStr);
         
         if (isPlayed) {
@@ -173,6 +192,10 @@ class MatchHistory {
 
     getWinnerLoserClasses(homeScore, awayScore, isPlayed) {
         if (!isPlayed) return { home: '', away: '' };
+        
+        if (homeScore === awayScore) {
+            return { home: 'tie', away: 'tie' };
+        }
         
         return {
             home: homeScore > awayScore ? 'winner' : 'loser',
@@ -199,19 +222,46 @@ class MatchHistory {
             .filter(match => this.filters.season === 'all' || match[seasonIndex] === this.filters.season)
             .reverse();
 
-        matches.forEach((match, index) => {
-            const homeScore = this.getScore(match[homeIndex]);
-            const awayScore = this.getScore(match[awayIndex]);
-            const gameDate = new Date(match[dateIndex]);
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            gameDate.setHours(0, 0, 0, 0);
-            
-            const isPlayed = gameDate < today;
-            const isFutureGame = !isPlayed;
-            const gameTime = timeIndex !== -1 ? match[timeIndex] : null;
-            const gameStatus = this.formatGameStatus(match[dateIndex], gameTime);
-            const classes = this.getWinnerLoserClasses(homeScore, awayScore, isPlayed);
+            matches.forEach((match, index) => {
+                const homeScore = this.getScore(match[homeIndex]);
+                const awayScore = this.getScore(match[awayIndex]);
+                const gameDate = new Date(match[dateIndex]);
+                const now = new Date();
+                const gameTime = timeIndex !== -1 ? match[timeIndex] : null;
+                
+                // New time-aware isPlayed logic
+                let isPlayed = false;
+                
+                if (gameTime) {
+                    const timeStr = gameTime.trim();
+                    const [timePart, ampm] = timeStr.split(' ');
+                    let [hours, minutes] = timePart.split(':').map(Number);
+                    
+                    // Convert to 24-hour format
+                    if (ampm && ampm.toUpperCase() === 'PM' && hours < 12) {
+                        hours += 12;
+                    } else if (ampm && ampm.toUpperCase() === 'AM' && hours === 12) {
+                        hours = 0;
+                    }
+                    
+                    // Set the time part of the gameDate
+                    gameDate.setHours(hours, minutes || 0, 0, 0);
+                    isPlayed = gameDate < now;
+                } else {
+                    // If no time specified, use date comparison only
+                    const todayCopy = new Date(now);
+                    const gameDateCopy = new Date(gameDate);
+                    
+                    // Reset time parts for date-only comparison
+                    todayCopy.setHours(0, 0, 0, 0);
+                    gameDateCopy.setHours(0, 0, 0, 0);
+                    
+                    isPlayed = gameDateCopy < todayCopy;
+                }
+                
+                const isFutureGame = !isPlayed;
+                const gameStatus = this.formatGameStatus(match[dateIndex], gameTime);
+                const classes = this.getWinnerLoserClasses(homeScore, awayScore, isPlayed);
 
             // Get team logos and backgrounds
             const brickhamptonInfo = this.teamLogos['Brickhampton'] || { logo: '', background: '#333' };
