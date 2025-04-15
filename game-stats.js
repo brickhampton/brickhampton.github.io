@@ -1,3 +1,13 @@
+/**
+ * Game Statistics Management
+ * Fetches and displays basketball game statistics from Google Sheets
+ */
+
+// Initialize the app when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    new GameStats();
+});
+
 // Configuration
 const SPREADSHEET_ID = '1vIxVfJnDiYpgD_3rqwA2R8ztHTJYf9rnkxogBcXBYnY';
 const API_KEY = 'AIzaSyAq45prrww38ePuq3IZjQ1FLVqQd1a-Gdg';
@@ -6,11 +16,40 @@ const MATCH_HISTORY_TAB = 'match_history';
 const RANGE = 'A:Z';
 const MATCH_RANGE = 'A:H';
 const IMAGE_URLS_TAB = 'image_urls';
-const IMAGE_RANGE = 'A:D';  // Assuming column A is player name and B is image URL
+const IMAGE_RANGE = 'A:D';  // Column A is player name and B is image URL
 
 class GameStats {
     constructor() {
-        this.requiredStats = {
+        // Initialize data structures
+        this.requiredStats = this.initRequiredStats();
+        this.columnMap = {};
+        this.allGameData = [];
+        this.currentGameIndex = 0;
+        this.matchData = null;
+        this.currentSort = { column: null, ascending: null };
+        this.playerImages = {};
+        this.teamLogos = {};
+        
+        console.log('GameStats initialized');
+        
+        // Initialize the application
+        this.init();
+        
+        // Setup UI elements and event listeners
+        this.setupGameNavigation();
+        this.setupScoreHeaderScroll();
+        this.setupColumnSorting();
+        this.setupGameInfoNavigation();
+        this.setupThemeToggle();
+        this.setupSidePanel();
+        this.setupColorToggle();
+    }
+
+    /**
+     * Initialize required statistics mapping
+     */
+    initRequiredStats() {
+        return {
             player: ['player', 'name', 'player name'],
             pts: ['pts', 'points', 'total points'],
             reb: ['reb', 'rebounds', 'total rebounds'],
@@ -27,231 +66,18 @@ class GameStats {
             to: ['to', 'turnovers'],
             per: ['per', 'efficiency'],
             game: ['game', 'game number'],
-            season: ['season'] // Add season to required stats
+            season: ['season']
         };
-        
-        this.columnMap = {};
-        this.allGameData = [];
-        this.currentGameIndex = 0;
-        this.matchData = null;
-        this.currentSort = { column: null, ascending: null };
-        this.playerImages = {};  // Add this to store image URLs
-        this.teamLogos = {}; 
-        console.log('GameStats initialized');
-        this.init();
-        this.setupGameNavigation();
-        this.setupScoreHeaderScroll();
-        this.setupColumnSorting();
-        this.setupGameInfoNavigation();
-        this.setupThemeToggle();
-        this.setupSidePanel();
-        this.setupColorToggle();
     }
 
-    setupThemeToggle() {
-        const themeToggle = document.getElementById('themeToggle');
-        const moonIcon = document.getElementById('moonIcon');
-        const sunIcon = document.getElementById('sunIcon');
-        
-        // Check for saved theme preference or use device preference
-        const savedTheme = localStorage.getItem('theme');
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        
-        // Set initial theme without transition on first load
-        if (savedTheme === 'light' || (!savedTheme && !prefersDark)) {
-            document.documentElement.setAttribute('data-theme', 'light');
-            moonIcon.style.display = 'none';
-            sunIcon.style.display = 'block';
-        }
-        
-        // Add a small delay on first load to prevent transition flash
-        setTimeout(() => {
-            document.body.classList.add('theme-transition-ready');
-        }, 100);
-        
-        // Theme toggle click handler
-        themeToggle.addEventListener('click', () => {
-            // Get current theme
-            const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
-            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-            
-            // Apply transition class to ensure smooth transition
-            document.body.classList.add('theme-transitioning');
-            
-            // Switch theme attribute
-            document.documentElement.setAttribute('data-theme', newTheme);
-            
-            // Save preference
-            localStorage.setItem('theme', newTheme);
-            
-            // Update icon with a slight delay to make transition smoother
-            if (newTheme === 'light') {
-                // Fade out moon then fade in sun
-                moonIcon.style.opacity = '0';
-                setTimeout(() => {
-                    moonIcon.style.display = 'none';
-                    sunIcon.style.display = 'block';
-                    setTimeout(() => {
-                        sunIcon.style.opacity = '1';
-                    }, 50);
-                }, 500);
-            } else {
-                // Fade out sun then fade in moon
-                sunIcon.style.opacity = '0';
-                setTimeout(() => {
-                    sunIcon.style.display = 'none';
-                    moonIcon.style.display = 'block';
-                    setTimeout(() => {
-                        moonIcon.style.opacity = '1';
-                    }, 50);
-                }, 500);
-            }
-            
-            // Remove transition class after animation completes
-            setTimeout(() => {
-                document.body.classList.remove('theme-transitioning');
-            }, 1100);
-        });
-    }
-
-    setupSidePanel() {
-        const menuButton = document.getElementById('menuButton');
-        const sidePanel = document.getElementById('sidePanel');
-        const closePanel = document.getElementById('closePanel');
-        const overlay = document.getElementById('overlay');
-    
-        // Open side panel
-        menuButton.addEventListener('click', () => {
-            sidePanel.classList.add('open');
-            overlay.classList.add('active');
-            document.body.style.overflow = 'hidden'; // Prevent scrolling when panel is open
-        });
-    
-        // Close side panel (via X button)
-        closePanel.addEventListener('click', () => {
-            sidePanel.classList.remove('open');
-            overlay.classList.remove('active');
-            document.body.style.overflow = '';
-        });
-    
-        // Close side panel (via overlay click)
-        overlay.addEventListener('click', () => {
-            sidePanel.classList.remove('open');
-            overlay.classList.remove('active');
-            document.body.style.overflow = '';
-        });
-    
-        // Close panel on ESC key
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && sidePanel.classList.contains('open')) {
-                sidePanel.classList.remove('open');
-                overlay.classList.remove('active');
-                document.body.style.overflow = '';
-            }
-        });
-    }
-
-    setupGameNavigation() {
-        const navContainer = document.createElement('div');
-        navContainer.className = 'game-navigation';
-        navContainer.innerHTML = `
-            <button id="prevGame" class="nav-button"></button>
-            <button id="nextGame" class="nav-button"></button>
-        `;
-    
-        // Create a MutationObserver to wait for team-stats-wrapper
-        const observer = new MutationObserver((mutations, obs) => {
-            const teamStatsWrapper = document.querySelector('.team-stats-wrapper');
-            if (teamStatsWrapper) {
-                teamStatsWrapper.appendChild(navContainer);
-                obs.disconnect(); // Stop observing once we've added the navigation
-                
-                // Add event listeners
-                document.getElementById('prevGame').addEventListener('click', () => this.changeGame(-1));
-                document.getElementById('nextGame').addEventListener('click', () => this.changeGame(1));
-                
-                // Initial update of navigation state
-                this.updateGameNavigation();
-            }
-        });
-    
-        // Start observing the document with the configured parameters
-        observer.observe(document.body, { childList: true, subtree: true });
-    }
-
-
-    // Click to go to match history 
-    setupGameInfoNavigation() {
-        const gameInfo = document.querySelector('.game-info');
-        gameInfo.style.cursor = 'pointer';
-        
-        gameInfo.addEventListener('click', () => {
-            const currentGame = this.gameGroups[this.currentGameIndex][0];
-            const season = this.getValue(currentGame, 'season');
-            const gameNumber = this.getValue(currentGame, 'game');
-            window.location.href = `match_history/index.html?season=${season}&game=${gameNumber}`;
-        });
-    }
-    
-
-    setupScoreHeaderScroll() {
-        const scoreHeader = document.querySelector('.score-header');
-        let lastScrollTop = 0;
-        let ticking = false;
-    
-        window.addEventListener('scroll', () => {
-            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-    
-            if (!ticking) {
-                window.requestAnimationFrame(() => {
-                    if (scrollTop > 50) {
-                        scoreHeader.classList.add('scrolled');
-                    } else {
-                        scoreHeader.classList.remove('scrolled');
-                    }
-                    lastScrollTop = scrollTop;
-                    ticking = false;
-                });
-    
-                ticking = true;
-            }
-        });
-    }
-
-    changeGame(direction) {
-        const newIndex = this.currentGameIndex + direction;
-        if (newIndex >= 0 && newIndex < this.gameGroups.length) {
-            this.currentGameIndex = newIndex;
-            this.renderCurrentGame();
-            this.updateGameScore();
-            this.updateGameNavigation();
-        }
-    }
-
-    updateGameNavigation() {
-        const prevButton = document.getElementById('prevGame');
-        const nextButton = document.getElementById('nextGame');
-        
-        if (!prevButton || !nextButton) return; // Guard clause if buttons don't exist yet
-        
-        prevButton.disabled = this.currentGameIndex === 0;
-        nextButton.disabled = this.currentGameIndex === this.gameGroups.length - 1;
-    }
-
-
-    findGameIndexBySeasonAndGame(season, gameNumber) {
-        if (!this.gameGroups) return 0;
-        
-        return this.gameGroups.findIndex(group => {
-            const gameSeason = this.getValue(group[0], 'season');
-            const gameNum = this.getValue(group[0], 'game');
-            return gameSeason === season && gameNum === gameNumber;
-        });
-    }
-
+    /**
+     * Initialize application data and rendering
+     */
     async init() {
         try {
             console.log('Starting data fetch...');
+            
+            // Fetch all required data in parallel
             const [gameData, matchData, imageData] = await Promise.all([
                 this.fetchSheetData(),
                 this.fetchMatchData(),
@@ -301,7 +127,33 @@ class GameStats {
         }
     }
 
-    // Add this new method to fetch image URLs
+    /**
+     * Fetch game statistics data from Google Sheets
+     */
+    async fetchSheetData() {
+        const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${SHEET_NAME}!${RANGE}?key=${API_KEY}`;
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error('Failed to fetch data from Google Sheets');
+        }
+        return await response.json();
+    }
+
+    /**
+     * Fetch match history data from Google Sheets
+     */
+    async fetchMatchData() {
+        const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${MATCH_HISTORY_TAB}!${MATCH_RANGE}?key=${API_KEY}`;
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error('Failed to fetch match data from Google Sheets');
+        }
+        return await response.json();
+    }
+
+    /**
+     * Fetch image URLs from Google Sheets
+     */
     async fetchImageUrls() {
         const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${IMAGE_URLS_TAB}!${IMAGE_RANGE}?key=${API_KEY}`;
         console.log('Fetching images from:', url);
@@ -319,6 +171,28 @@ class GameStats {
         }
     }
 
+    /**
+     * Map column headers to required statistics
+     */
+    mapHeadersToRequiredStats(headers) {
+        const headerMap = headers.reduce((map, header, index) => {
+            map[header.toLowerCase().trim()] = index;
+            return map;
+        }, {});
+
+        for (const [stat, possibleHeaders] of Object.entries(this.requiredStats)) {
+            for (const header of possibleHeaders) {
+                if (headerMap.hasOwnProperty(header)) {
+                    this.columnMap[stat] = headerMap[header];
+                    break;
+                }
+            }
+        }
+    }
+
+    /**
+     * Process image URLs from spreadsheet data
+     */
     mapImageUrls(rows) {
         console.log('Raw image data rows:', rows);
         
@@ -362,6 +236,71 @@ class GameStats {
         console.log('All mapped team logos:', Object.keys(this.teamLogos).join(', '));
     }
 
+    /**
+     * Group game data by game number and season
+     */
+    groupByGame(rows) {
+        const gameMap = new Map();
+        
+        rows.forEach(row => {
+            const gameNumber = this.getValue(row, 'game');
+            const season = this.getValue(row, 'season');
+            const gameKey = `${season}-${gameNumber}`;
+            
+            if (!gameMap.has(gameKey)) {
+                gameMap.set(gameKey, []);
+            }
+            gameMap.get(gameKey).push(row);
+        });
+
+        // Custom season comparison function
+        const compareSeasons = (seasonA, seasonB) => {
+            // Define season order
+            const seasonOrder = {
+                'W24': 1,
+                'S24': 2,
+                'W25': 3,
+                'S25': 4
+                // Add future seasons with higher numbers as needed
+            };
+            
+            return seasonOrder[seasonA] - seasonOrder[seasonB];
+        };
+
+        // Convert to array and sort by season and game number
+        return Array.from(gameMap.values())
+            .sort((a, b) => {
+                const seasonA = this.getValue(a[0], 'season');
+                const seasonB = this.getValue(b[0], 'season');
+                const gameA = parseInt(this.getValue(a[0], 'game'));
+                const gameB = parseInt(this.getValue(b[0], 'game'));
+                
+                // First compare seasons using custom ordering
+                const seasonComparison = compareSeasons(seasonA, seasonB);
+                if (seasonComparison !== 0) {
+                    return seasonComparison;
+                }
+                // If seasons are the same, compare game numbers
+                return gameA - gameB;
+            });
+    }
+
+    /**
+     * Find game index by season and game number
+     */
+    findGameIndexBySeasonAndGame(season, gameNumber) {
+        if (!this.gameGroups) return 0;
+        
+        return this.gameGroups.findIndex(group => {
+            const gameSeason = this.getValue(group[0], 'season');
+            const gameNum = this.getValue(group[0], 'game');
+            return gameSeason === season && gameNum === gameNumber;
+        });
+    }
+
+    /**
+     * Find the latest completed game based on dates
+     */
     findLatestCompletedGameIndex() {
         if (!this.matchData || !this.matchData.values || !this.gameGroups) {
             return 0;
@@ -408,8 +347,7 @@ class GameStats {
                     // Set the time part of the gameDate
                     gameDate.setHours(hours, minutes || 0, 0, 0);
                 } else {
-                    // If no time specified, set to end of day to ensure games without times
-                    // are considered complete only after the game day has passed
+                    // If no time specified, set to end of day
                     gameDate.setHours(23, 59, 59, 999);
                 }
                 
@@ -424,86 +362,23 @@ class GameStats {
         return 0;
     }
 
-    groupByGame(rows) {
-        const gameMap = new Map();
-        
-        rows.forEach(row => {
-            const gameNumber = this.getValue(row, 'game');
-            const season = this.getValue(row, 'season');
-            const gameKey = `${season}-${gameNumber}`;
-            
-            if (!gameMap.has(gameKey)) {
-                gameMap.set(gameKey, []);
-            }
-            gameMap.get(gameKey).push(row);
-        });
-
-        // Custom season comparison function
-        const compareSeasons = (seasonA, seasonB) => {
-            // Define season order (add more seasons as needed)
-            const seasonOrder = {
-                'W24': 1,
-                'S24': 2,
-                'W25': 3,
-                'S25': 4
-                // Add future seasons with higher numbers
-                // 'F24': 3,
-                // 'W25': 4,
-                // etc.
-            };
-            
-            return seasonOrder[seasonA] - seasonOrder[seasonB];
-        };
-
-        // Convert to array and sort by season and game number
-        return Array.from(gameMap.values())
-            .sort((a, b) => {
-                const seasonA = this.getValue(a[0], 'season');
-                const seasonB = this.getValue(b[0], 'season');
-                const gameA = parseInt(this.getValue(a[0], 'game'));
-                const gameB = parseInt(this.getValue(b[0], 'game'));
-                
-                // First compare seasons using custom ordering
-                const seasonComparison = compareSeasons(seasonA, seasonB);
-                if (seasonComparison !== 0) {
-                    return seasonComparison;
-                }
-                // If seasons are the same, compare game numbers
-                return gameA - gameB;
-            });
+    /**
+     * Get a value from a data row with a default value if not found
+     */
+    getValue(row, statKey, defaultValue = '0') {
+        const index = this.columnMap[statKey];
+        return index !== undefined ? (row[index] || defaultValue) : defaultValue;
     }
 
-    renderCurrentGame() {
-        if (this.gameGroups && this.gameGroups.length > 0) {
-            const currentGameData = this.gameGroups[this.currentGameIndex];
-            this.renderGameData(currentGameData);
-        }
-    }
-
-    async fetchSheetData() {
-        const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${SHEET_NAME}!${RANGE}?key=${API_KEY}`;
-        const response = await fetch(url);
-        if (!response.ok) {
-            throw new Error('Failed to fetch data from Google Sheets');
-        }
-        return await response.json();
-    }
-
-    async fetchMatchData() {
-        const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${MATCH_HISTORY_TAB}!${MATCH_RANGE}?key=${API_KEY}`;
-        const response = await fetch(url);
-        if (!response.ok) {
-            throw new Error('Failed to fetch match data from Google Sheets');
-        }
-        return await response.json();
-    }
-
+    /**
+     * Format a date string to readable format
+     */
     formatDate(dateStr) {
         try {
             const date = new Date(dateStr);
             return date.toLocaleDateString('en-US', {
-                day: 'numeric',
                 month: 'short',
+                day: 'numeric',
                 year: 'numeric'
             }).replace(',', ',');
         } catch (error) {
@@ -512,7 +387,9 @@ class GameStats {
         }
     }
 
-    // Update the formatGameStatus method to include game time
+    /**
+     * Format game status based on date and time
+     */
     formatGameStatus(dateStr, gameTime) {
         const gameDate = new Date(dateStr);
         const now = new Date();
@@ -541,20 +418,108 @@ class GameStats {
         return gameDate < now ? 'Final' : gameTime || 'TBD';
     }
 
-    formatDate(dateStr) {
-        try {
-            const date = new Date(dateStr);
-            return date.toLocaleDateString('en-US', {
-                month: 'short',
-                day: 'numeric',
-                year: 'numeric'
-            }).replace(',', ',');
-        } catch (error) {
-            console.error('Error formatting date:', error);
-            return dateStr;
+    /**
+     * Setup game navigation buttons
+     */
+    setupGameNavigation() {
+        const navContainer = document.createElement('div');
+        navContainer.className = 'game-navigation';
+        navContainer.innerHTML = `
+            <button id="prevGame" class="nav-button"></button>
+            <button id="nextGame" class="nav-button"></button>
+        `;
+    
+        // Create a MutationObserver to wait for team-stats-wrapper
+        const observer = new MutationObserver((mutations, obs) => {
+            const teamStatsWrapper = document.querySelector('.team-stats-wrapper');
+            if (teamStatsWrapper) {
+                teamStatsWrapper.appendChild(navContainer);
+                obs.disconnect(); // Stop observing once we've added the navigation
+                
+                // Add event listeners
+                document.getElementById('prevGame').addEventListener('click', () => this.changeGame(-1));
+                document.getElementById('nextGame').addEventListener('click', () => this.changeGame(1));
+                
+                // Initial update of navigation state
+                this.updateGameNavigation();
+            }
+        });
+    
+        // Start observing the document with the configured parameters
+        observer.observe(document.body, { childList: true, subtree: true });
+    }
+
+    /**
+     * Setup click to go to match history
+     */
+    setupGameInfoNavigation() {
+        const gameInfo = document.querySelector('.game-info');
+        gameInfo.style.cursor = 'pointer';
+        
+        gameInfo.addEventListener('click', () => {
+            const currentGame = this.gameGroups[this.currentGameIndex][0];
+            const season = this.getValue(currentGame, 'season');
+            const gameNumber = this.getValue(currentGame, 'game');
+            window.location.href = `match_history/index.html?season=${season}&game=${gameNumber}`;
+        });
+    }
+
+    /**
+     * Setup score header scrolling behavior
+     */
+    setupScoreHeaderScroll() {
+        const scoreHeader = document.querySelector('.score-header');
+        let lastScrollTop = 0;
+        let ticking = false;
+    
+        window.addEventListener('scroll', () => {
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    
+            if (!ticking) {
+                window.requestAnimationFrame(() => {
+                    if (scrollTop > 50) {
+                        scoreHeader.classList.add('scrolled');
+                    } else {
+                        scoreHeader.classList.remove('scrolled');
+                    }
+                    lastScrollTop = scrollTop;
+                    ticking = false;
+                });
+    
+                ticking = true;
+            }
+        });
+    }
+
+    /**
+     * Change to previous or next game
+     */
+    changeGame(direction) {
+        const newIndex = this.currentGameIndex + direction;
+        if (newIndex >= 0 && newIndex < this.gameGroups.length) {
+            this.currentGameIndex = newIndex;
+            this.renderCurrentGame();
+            this.updateGameScore();
+            this.updateGameNavigation();
         }
     }
 
+    /**
+     * Update navigation button states
+     */
+    updateGameNavigation() {
+        const prevButton = document.getElementById('prevGame');
+        const nextButton = document.getElementById('nextGame');
+        
+        if (!prevButton || !nextButton) return; // Guard clause if buttons don't exist yet
+        
+        prevButton.disabled = this.currentGameIndex === 0;
+        nextButton.disabled = this.currentGameIndex === this.gameGroups.length - 1;
+    }
+
+    /**
+     * Update the game score display
+     */
     updateGameScore() {
         if (!this.matchData || !this.matchData.values) return;
 
@@ -605,7 +570,7 @@ class GameStats {
         const homeScore = parseInt(matchRow[homeIndex]) || 0;
         const awayScore = parseInt(matchRow[awayIndex]) || 0;
 
-        // After setting scores:
+        // Update team names and scores
         document.getElementById('team-a-name').textContent = 'Brickhampton';
         document.getElementById('team-b-name').textContent = matchRow[opponentIndex];
         document.getElementById('team-a-score').textContent = homeScore;
@@ -621,7 +586,7 @@ class GameStats {
         const teamAInfo = document.getElementById('team-a-score').parentElement;
         const teamBInfo = document.getElementById('team-b-score').parentElement;
     
-        // Get opponent name and log for debugging
+        // Get opponent name
         const opponentName = matchRow[opponentIndex];
         console.log('Looking for opponent:', opponentName);
         console.log('Available teams:', Object.keys(this.teamLogos));
@@ -694,89 +659,35 @@ class GameStats {
         }
     }
 
-
-    mapHeadersToRequiredStats(headers) {
-        const headerMap = headers.reduce((map, header, index) => {
-            map[header.toLowerCase().trim()] = index;
-            return map;
-        }, {});
-
-        for (const [stat, possibleHeaders] of Object.entries(this.requiredStats)) {
-            for (const header of possibleHeaders) {
-                if (headerMap.hasOwnProperty(header)) {
-                    this.columnMap[stat] = headerMap[header];
-                    break;
-                }
-            }
+    /**
+     * Render the current game data
+     */
+    renderCurrentGame() {
+        if (this.gameGroups && this.gameGroups.length > 0) {
+            const currentGameData = this.gameGroups[this.currentGameIndex];
+            this.renderGameData(currentGameData);
         }
     }
 
-    getValue(row, statKey, defaultValue = '0') {
-        const index = this.columnMap[statKey];
-        return index !== undefined ? (row[index] || defaultValue) : defaultValue;
-    }
-
+    /**
+     * Calculate shot statistics
+     */
     calculateShotStats(made, attempted) {
         const madeNum = parseInt(made) || 0;
         const attemptsNum = parseInt(attempted) || 0;
-        const percentage = attemptsNum > 0 ? ((madeNum / attemptsNum) * 100).toFixed(1) : '0.0';
+        const percentageResult = this.formatPercentage(madeNum, attemptsNum);
         return {
             made: madeNum,
             attempts: attemptsNum,
-            percentage,
+            percentage: percentageResult.value, // This will be empty string when 0/0
+            isPerfect: percentageResult.isPerfect,
             display: `${madeNum}/${attemptsNum}`
         };
     }
 
-    async fetchAndDisplayTeamData() {
-        try {
-            const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/Teams!A:C?key=${API_KEY}`;
-            const response = await fetch(url);
-            const data = await response.json();
-            
-            if (data.values && data.values.length >= 2) {
-                document.getElementById('team-a-name').textContent = data.values[0][0] || 'Team A';
-                document.getElementById('team-a-score').textContent = data.values[0][1] || '0';
-                document.getElementById('team-b-name').textContent = data.values[1][0] || 'Team B';
-                document.getElementById('team-b-score').textContent = data.values[1][1] || '0';
-            }
-        } catch (error) {
-            console.error('Error fetching team data:', error);
-        }
-    }
-
-    calculateTeamStats(players) {
-        const stats = {
-            fg: { made: 0, attempts: 0 },
-            threeFg: { made: 0, attempts: 0 },
-            ft: { made: 0, attempts: 0 },
-            reb: 0,
-            ast: 0,
-            to: 0
-        };
-
-        players.forEach(player => {
-            // Add FG stats
-            stats.fg.made += player.fgStats.made;
-            stats.fg.attempts += player.fgStats.attempts;
-
-            // Add 3FG stats
-            stats.threeFg.made += player.threeFgStats.made;
-            stats.threeFg.attempts += player.threeFgStats.attempts;
-
-            // Add FT stats
-            stats.ft.made += player.ftStats.made;
-            stats.ft.attempts += player.ftStats.attempts;
-
-            // Add other stats
-            stats.reb += parseInt(player.reb) || 0;
-            stats.ast += parseInt(player.ast) || 0;
-            stats.to += parseInt(player.to) || 0;
-        });
-
-        return stats;
-    }
-
+    /**
+     * Format percentage values
+     */
     formatPercentage(made, attempts, isTS = false) {
         // Return empty values if there are no attempts (for player stats)
         if (attempts === 0) {
@@ -796,7 +707,9 @@ class GameStats {
         };
     }
     
-    // Add a new method specifically for team stats
+    /**
+     * Format team percentage values
+     */
     formatTeamPercentage(made, attempts, isTS = false) {
         // Always show 0% for team stats when there are no attempts
         if (attempts === 0) {
@@ -816,19 +729,9 @@ class GameStats {
         };
     }
 
-    calculateShotStats(made, attempted) {
-        const madeNum = parseInt(made) || 0;
-        const attemptsNum = parseInt(attempted) || 0;
-        const percentageResult = this.formatPercentage(madeNum, attemptsNum);
-        return {
-            made: madeNum,
-            attempts: attemptsNum,
-            percentage: percentageResult.value, // This will now be empty string when 0/0
-            isPerfect: percentageResult.isPerfect,
-            display: `${madeNum}/${attemptsNum}`
-        };
-    }
-
+    /**
+     * Format true shooting percentage
+     */
     formatTSPercentage(value) {
         const percentage = parseFloat(value) || 0;
         const isPerfect = percentage >= 100;
@@ -838,15 +741,20 @@ class GameStats {
         };
     }
 
+    /**
+     * Setup column sorting
+     */
     setupColumnSorting() {
         const statsColumns = document.querySelector('.stats-columns');
+        if (!statsColumns) return;
+        
         const columns = statsColumns.children;
         
         // Add sorting indicators and click handlers to all columns except the player name
         Array.from(columns).forEach((column, index) => {
             if (index === 0) return; // Skip the player name column
             
-            // Modify the wrapper structure to maintain alignment
+            // Keep the original content
             const originalContent = column.textContent;
             column.innerHTML = originalContent;
             
@@ -858,7 +766,7 @@ class GameStats {
             column.addEventListener('click', () => this.handleColumnSort(index));
         });
     
-        // Update CSS for sort indicators
+        // Add CSS for sort indicators
         const style = document.createElement('style');
         style.textContent = `
             .sortable-column {
@@ -894,6 +802,9 @@ class GameStats {
         document.head.appendChild(style);
     }
 
+    /**
+     * Handle column sort click
+     */
     handleColumnSort(columnIndex) {
         const columns = ['player', 'pts', 'reb', 'ast', 'stl', 'blk', 'fgPercent', 'fg', 'threeFg', 'ft', 'tsPercent', 'to', 'per'];
         const column = columns[columnIndex];
@@ -922,6 +833,9 @@ class GameStats {
         this.renderCurrentGame();
     }
 
+    /**
+     * Update sort indicators in the UI
+     */
     updateSortIndicators(columnIndex) {
         const columns = document.querySelector('.stats-columns').children;
         Array.from(columns).forEach((col, i) => {
@@ -932,6 +846,75 @@ class GameStats {
         });
     }
 
+    /**
+     * Calculate team statistics from player data
+     */
+    calculateTeamStats(players) {
+        const stats = {
+            fg: { made: 0, attempts: 0 },
+            threeFg: { made: 0, attempts: 0 },
+            ft: { made: 0, attempts: 0 },
+            reb: 0,
+            ast: 0,
+            to: 0
+        };
+
+        players.forEach(player => {
+            // Add FG stats
+            stats.fg.made += player.fgStats.made;
+            stats.fg.attempts += player.fgStats.attempts;
+
+            // Add 3FG stats
+            stats.threeFg.made += player.threeFgStats.made;
+            stats.threeFg.attempts += player.threeFgStats.attempts;
+
+            // Add FT stats
+            stats.ft.made += player.ftStats.made;
+            stats.ft.attempts += player.ftStats.attempts;
+
+            // Add other stats
+            stats.reb += parseInt(player.reb) || 0;
+            stats.ast += parseInt(player.ast) || 0;
+            stats.to += parseInt(player.to) || 0;
+        });
+
+        return stats;
+    }
+
+    /**
+     * Update team statistics display
+     */
+    updateTeamStats(stats) {
+        const statValues = document.querySelectorAll('.stat-value');
+        const percentages = document.querySelectorAll('.stat-value-percentage');
+    
+        // Update FG
+        const fgPercentage = this.formatTeamPercentage(stats.fg.made, stats.fg.attempts);
+        statValues[0].textContent = `${stats.fg.made}/${stats.fg.attempts}`;
+        percentages[0].textContent = `${fgPercentage.value}%`;
+        percentages[0].classList.toggle('perfect-percentage', fgPercentage.isPerfect);
+    
+        // Update 3FG
+        const threeFgPercentage = this.formatTeamPercentage(stats.threeFg.made, stats.threeFg.attempts);
+        statValues[1].textContent = `${stats.threeFg.made}/${stats.threeFg.attempts}`;
+        percentages[1].textContent = `${threeFgPercentage.value}%`;
+        percentages[1].classList.toggle('perfect-percentage', threeFgPercentage.isPerfect);
+    
+        // Update FT
+        const ftPercentage = this.formatTeamPercentage(stats.ft.made, stats.ft.attempts);
+        statValues[2].textContent = `${stats.ft.made}/${stats.ft.attempts}`;
+        percentages[2].textContent = `${ftPercentage.value}%`;
+        percentages[2].classList.toggle('perfect-percentage', ftPercentage.isPerfect);
+    
+        // Update other stats
+        statValues[3].textContent = stats.reb;
+        statValues[4].textContent = stats.ast;
+        statValues[5].textContent = stats.to;
+    }
+
+    /**
+     * Process and render game data
+     */
     renderGameData(rows) {
         let players = rows.map(row => {
             const playerName = this.getValue(row, 'player', '');
@@ -946,7 +929,7 @@ class GameStats {
             const isEmpty = !playerName;
             const didNotPlay = playerName && !hasAnyStats;
     
-            // Rest of the player data mapping stays the same...
+            // Calculate shot stats
             const fgStats = this.calculateShotStats(
                 this.getValue(row, 'fgm'),
                 this.getValue(row, 'fga')
@@ -1046,34 +1029,9 @@ class GameStats {
         this.updatePlayerRows(players);
     }
 
-    updateTeamStats(stats) {
-        const statValues = document.querySelectorAll('.stat-value');
-        const percentages = document.querySelectorAll('.stat-value-percentage');
-    
-        // Update FG
-        const fgPercentage = this.formatTeamPercentage(stats.fg.made, stats.fg.attempts);
-        statValues[0].textContent = `${stats.fg.made}/${stats.fg.attempts}`;
-        percentages[0].textContent = `${fgPercentage.value}%`;
-        percentages[0].classList.toggle('perfect-percentage', fgPercentage.isPerfect);
-    
-        // Update 3FG
-        const threeFgPercentage = this.formatTeamPercentage(stats.threeFg.made, stats.threeFg.attempts);
-        statValues[1].textContent = `${stats.threeFg.made}/${stats.threeFg.attempts}`;
-        percentages[1].textContent = `${threeFgPercentage.value}%`;
-        percentages[1].classList.toggle('perfect-percentage', threeFgPercentage.isPerfect);
-    
-        // Update FT
-        const ftPercentage = this.formatTeamPercentage(stats.ft.made, stats.ft.attempts);
-        statValues[2].textContent = `${stats.ft.made}/${stats.ft.attempts}`;
-        percentages[2].textContent = `${ftPercentage.value}%`;
-        percentages[2].classList.toggle('perfect-percentage', ftPercentage.isPerfect);
-    
-        // Update other stats
-        statValues[3].textContent = stats.reb;
-        statValues[4].textContent = stats.ast;
-        statValues[5].textContent = stats.to;
-    }
-
+    /**
+     * Update player rows in the UI
+     */
     updatePlayerRows(players) {
         const container = document.querySelector('.scrollable-wrapper');
         
@@ -1125,6 +1083,124 @@ class GameStats {
         statsColumns.insertAdjacentHTML('afterend', playerRowsHTML);
     }
 
+    /**
+     * Setup theme toggle functionality
+     */
+    setupThemeToggle() {
+        const themeToggle = document.getElementById('themeToggle');
+        const moonIcon = document.getElementById('moonIcon');
+        const sunIcon = document.getElementById('sunIcon');
+        
+        if (!themeToggle || !moonIcon || !sunIcon) return;
+        
+        // Check for saved theme preference or use device preference
+        const savedTheme = localStorage.getItem('theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        
+        // Set initial theme without transition on first load
+        if (savedTheme === 'light' || (!savedTheme && !prefersDark)) {
+            document.documentElement.setAttribute('data-theme', 'light');
+            moonIcon.style.display = 'none';
+            sunIcon.style.display = 'block';
+        }
+        
+        // Add initial styles to icons for smoother transitions
+        moonIcon.style.transition = 'opacity 0.15s ease';
+        sunIcon.style.transition = 'opacity 0.15s ease';
+        
+        // Add a small delay on first load to prevent transition flash
+        setTimeout(() => {
+            document.body.classList.add('theme-transition-ready');
+        }, 100);
+        
+        // Theme toggle click handler
+        themeToggle.addEventListener('click', () => {
+            // Get current theme
+            const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            
+            // Apply transition class to ensure smooth transition
+            document.body.classList.add('theme-transitioning');
+            
+            // Switch theme attribute immediately
+            document.documentElement.setAttribute('data-theme', newTheme);
+            
+            // Save preference
+            localStorage.setItem('theme', newTheme);
+            
+            // Simplified icon switching with reduced timeouts
+            if (newTheme === 'light') {
+                // Switch to light theme (show sun)
+                moonIcon.style.opacity = '0';
+                setTimeout(() => {
+                    moonIcon.style.display = 'none';
+                    sunIcon.style.display = 'block';
+                    // Force a reflow to ensure the display change takes effect
+                    sunIcon.getBoundingClientRect();
+                    sunIcon.style.opacity = '1';
+                }, 150);
+            } else {
+                // Switch to dark theme (show moon)
+                sunIcon.style.opacity = '0';
+                setTimeout(() => {
+                    sunIcon.style.display = 'none';
+                    moonIcon.style.display = 'block';
+                    // Force a reflow to ensure the display change takes effect
+                    moonIcon.getBoundingClientRect();
+                    moonIcon.style.opacity = '1';
+                }, 150);
+            }
+            
+            // Remove transition class after animation completes
+            setTimeout(() => {
+                document.body.classList.remove('theme-transitioning');
+            }, 1000);
+        });
+    }
+
+    /**
+     * Setup side panel functionality
+     */
+    setupSidePanel() {
+        const menuButton = document.getElementById('menuButton');
+        const sidePanel = document.getElementById('sidePanel');
+        const closePanel = document.getElementById('closePanel');
+        const overlay = document.getElementById('overlay');
+    
+        // Open side panel
+        menuButton.addEventListener('click', () => {
+            sidePanel.classList.add('open');
+            overlay.classList.add('active');
+            document.body.style.overflow = 'hidden'; // Prevent scrolling when panel is open
+        });
+    
+        // Close side panel (via X button)
+        closePanel.addEventListener('click', () => {
+            sidePanel.classList.remove('open');
+            overlay.classList.remove('active');
+            document.body.style.overflow = '';
+        });
+    
+        // Close side panel (via overlay click)
+        overlay.addEventListener('click', () => {
+            sidePanel.classList.remove('open');
+            overlay.classList.remove('active');
+            document.body.style.overflow = '';
+        });
+    
+        // Close panel on ESC key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && sidePanel.classList.contains('open')) {
+                sidePanel.classList.remove('open');
+                overlay.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        });
+    }
+
+    /**
+     * Setup colored stats toggle functionality
+     */
     setupColorToggle() {
         const colorToggle = document.getElementById('colorToggle');
         const tableContainer = document.querySelector('.table-container');
@@ -1158,8 +1234,3 @@ class GameStats {
         });
     }
 }
-
-// Initialize when the DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
-    new GameStats();
-});

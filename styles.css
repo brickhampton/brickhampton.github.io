@@ -1,3 +1,7 @@
+/* ============================
+   CSS VARIABLES & THEMING
+   ============================ */
+
 :root {
     /* Dark theme (default) */
     --bg-primary: #000000;
@@ -18,12 +22,37 @@
     --table-bg-hover: rgba(0, 0, 0, 0.05);
 }
 
-/* Theme toggle button styles */
+/* ============================
+   GENERAL STYLES
+   ============================ */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    transition: background-color 1s ease, color 1s ease, border-color 1s ease, box-shadow 1s ease;
+}
+
+body {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    padding: 16px;
+    max-width: 1400px;
+    margin: 0 auto;
+    transition: background-color 1s ease;
+}
+
+/* Prevent transitions on SVG elements to avoid flashing */
+svg, svg path {
+    transition: none !important;
+}
+
+/* ============================
+   THEME TOGGLE BUTTON
+   ============================ */
+
 .theme-toggle {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    z-index: 1000;
     width: 40px;
     height: 40px;
     border-radius: 50%;
@@ -35,6 +64,8 @@
     justify-content: center;
     transition: all 1s ease;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+    position: relative;
 }
 
 .theme-toggle:hover {
@@ -45,137 +76,51 @@
     width: 24px;
     height: 24px;
     fill: var(--text-primary);
-    transition: all 1s ease;
-}
-
-/* Add these custom tweaks for light theme */
-[data-theme="light"] .player-photo {
-    border: 1px solid var(--border-color);
-}
-
-[data-theme="light"] .score-header.scrolled {
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-}
-
-[data-theme="light"] .nav-tab.active {
-    border-bottom: 2px solid var(--accent-blue);
-}
-
-[data-theme="light"] .perfect-percentage {
-    color: #00a15a !important;
-    text-shadow: 0 0 8px rgba(0, 161, 90, 0.5),
-                 0 0 12px rgba(0, 161, 90, 0.3);
-}
-
-/* Player row hover effect */
-.player-row:hover {
-    background-color: var(--table-bg-hover);
-}
-
-/* Apply consistent transition to all elements */
-* {
-    transition: background-color 1s ease, color 1s ease, border-color 1s ease, box-shadow 1s ease;
-}
-
-/* Override specific transitions that were defined before */
-.score-header,
-.score-container, 
-.game-info, 
-.score, 
-.team-name,
-.team-info,
-.player-photo,
-.nav-button {
-    transition: all 1s ease;
-}
-
-/* Remove transitions from SVG elements to prevent flashing */
-svg, 
-svg path {
-    transition: none !important;
-}
-
-/* Ensure the body background transitions smoothly */
-body {
-    transition: background-color 1s ease;
-}
-
-/* Fix for perfect percentage color transition */
-.perfect-percentage {
-    transition: color 1s ease, text-shadow 1s ease !important;
-}
-
-/* Initial state for theme icons */
-#moonIcon, #sunIcon {
-    opacity: 1;
-    transition: opacity 0.15s ease;
-}
-
-/* Theme transition classes */
-.theme-transitioning {
-    pointer-events: none; /* Prevent interactions during transition */
-}
-
-/* Apply styles to both theme icons */
-.theme-toggle svg {
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
 }
 
-/* Update the theme toggle button styles */
-.theme-toggle {
+/* When used as fixed position button */
+.theme-toggle.fixed {
     position: fixed;
     top: 20px;
     right: 20px;
     z-index: 1000;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background-color: var(--border-color);
-    border: none;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 1s ease;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-    overflow: hidden; /* Ensure icons don't overflow */
-    position: relative; /* For absolute positioning of icons */
 }
 
-/* Specific fixes for team score transitions */
-.team-score, 
-.score-header, 
-.team-info,
-.team-name,
-.score {
-    transition: all 1s ease !important;
-    will-change: color, opacity; /* Performance optimization */
+/* Theme transition */
+.theme-transitioning {
+    pointer-events: none;
 }
 
-/* Fix for winner indicators */
-.winner-left::before,
-.winner-right::before {
-    transition: border-color 1s ease;
+#moonIcon, #sunIcon {
+    opacity: 1;
+    transition: opacity 0.15s ease;
 }
 
-[data-theme="light"] .winner-left::before {
-    border-color: transparent transparent transparent var(--text-primary);
+/* Reduce icon lag */
+#moonIcon, #sunIcon {
+    opacity: 1;
+    transition: opacity 0.15s ease;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 24px;
+    height: 24px;
 }
 
-[data-theme="light"] .winner-right::before {
-    border-color: transparent var(--text-primary) transparent transparent;
-}
+/* ============================
+   MENU BUTTON & SIDE PANEL
+   ============================ */
 
-
-/* Menu Button */
 .menu-button {
     position: fixed;
     top: 20px;
     left: 20px;
-    z-index: 99;
+    z-index: 998; /* Increased z-index to ensure it's above everything */
     width: 40px;
     height: 40px;
     border-radius: 50%;
@@ -199,11 +144,10 @@ body {
     transition: color 1s ease;
 }
 
-/* Side Panel */
 .side-panel {
     position: fixed;
     top: 0;
-    left: -300px; /* Start off-screen */
+    left: -300px;
     width: 300px;
     height: 100%;
     background-color: var(--bg-primary);
@@ -261,13 +205,9 @@ body {
     font-size: 16px;
 }
 
-/* Update theme toggle to work within the side panel */
-.theme-toggle {
-    position: relative; /* Change from fixed to relative */
-    top: unset;
-    right: unset;
-    width: 40px;
-    height: 40px;
+/* Light theme adjustment */
+[data-theme="light"] .side-panel {
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
 }
 
 /* Overlay for closing the panel */
@@ -286,20 +226,10 @@ body {
     display: block;
 }
 
-/* Make sure the side panel is above the overlay */
-.side-panel {
-    z-index: 1000;
-}
+/* ============================
+   COLOR TOGGLE BUTTON
+   ============================ */
 
-/* Additional styles for light theme */
-[data-theme="light"] .side-panel {
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
-}
-
-/* ADD COLOUR */
-
-/* Colour toggle button */
-/* Color toggle button */
 .color-toggle {
     position: relative;
     width: 40px;
@@ -332,12 +262,21 @@ body {
 }
 
 /* Active state - colored dots */
+.color-toggle.active {
+    background-color: #2b2b2b;
+    box-shadow: 0 0 12px rgba(77, 171, 247, 0.5);
+}
+
+.color-toggle.active svg {
+    transform: rotate(15deg) scale(1.1);
+}
+
 .color-toggle.active .blue-dot {
     fill: #4dabf7;
 }
 
 .color-toggle.active .green-dot {
-    fill: #51cf66;
+    fill: #66e77c;
 }
 
 .color-toggle.active .purple-dot {
@@ -346,16 +285,6 @@ body {
 
 .color-toggle.active .yellow-dot {
     fill: #fcc419;
-}
-
-/* Make the icon more noticeable when active */
-.color-toggle.active {
-    background-color: #2b2b2b;
-    box-shadow: 0 0 12px rgba(77, 171, 247, 0.5);
-}
-
-.color-toggle.active svg {
-    transform: rotate(15deg) scale(1.1);
 }
 
 /* Light theme adjustments */
@@ -379,172 +308,37 @@ body {
     animation: buttonClick 0.3s ease;
 }
 
+/* ============================
+   SCORE HEADER STYLES
+   ============================ */
 
-
-
-/* Colors for colored mode */
-.colored-stats .player-row > div:nth-child(2),  /* PTS */
-.colored-stats .player-row > div:nth-child(3),  /* REB */
-.colored-stats .player-row > div:nth-child(4) { /* AST */
-    color: #4dabf7 !important; /* Blue */
-    font-weight: 600;
-}
-
-.colored-stats .player-row > div:nth-child(5),  /* STL */
-.colored-stats .player-row > div:nth-child(6) { /* BLK */
-    color: #cc5de8 !important; /* Purple */
-    font-weight: 600;
-}
-
-.colored-stats .player-row > div:nth-child(7),  /* FG% */
-.colored-stats .player-row > div:nth-child(8),  /* FG */
-.colored-stats .player-row > div:nth-child(9),  /* 3FG */
-.colored-stats .player-row > div:nth-child(10), /* FT */
-.colored-stats .player-row > div:nth-child(11) { /* TS% */
-    color: #51cf66 !important; /* Green */
-    font-weight: 600;
-}
-
-.colored-stats .player-row > div:nth-child(12) { /* TO */
-    color: #ff6b6b !important; /* Red */
-    font-weight: 600;
-}
-
-.colored-stats .player-row > div:nth-child(13) { /* PER */
-    color: #fcc419 !important; /* Yellow */
-    font-weight: 600;
-}
-
-/* Ensure perfect percentage keeps its special styling even in colored mode */
-.colored-stats .perfect-percentage {
-    color: #00ff8d !important;
-    text-shadow: 0 0 8px rgba(0, 255, 141, 0.8),
-                 0 0 12px rgba(0, 255, 141, 0.5);
-}
-
-/* Light theme adjustments for better contrast */
-[data-theme="light"] .colored-stats .player-row > div:nth-child(2),
-[data-theme="light"] .colored-stats .player-row > div:nth-child(3),
-[data-theme="light"] .colored-stats .player-row > div:nth-child(4) {
-    color: #1971c2 !important; /* Darker blue */
-}
-
-[data-theme="light"] .colored-stats .player-row > div:nth-child(5),
-[data-theme="light"] .colored-stats .player-row > div:nth-child(6) {
-    color: #9c36b5 !important; /* Darker purple */
-}
-
-[data-theme="light"] .colored-stats .player-row > div:nth-child(7),
-[data-theme="light"] .colored-stats .player-row > div:nth-child(8),
-[data-theme="light"] .colored-stats .player-row > div:nth-child(9),
-[data-theme="light"] .colored-stats .player-row > div:nth-child(10),
-[data-theme="light"] .colored-stats .player-row > div:nth-child(11) {
-    color: #2b8a3e !important; /* Darker green */
-}
-
-[data-theme="light"] .colored-stats .player-row > div:nth-child(12) {
-    color: #e03131 !important; /* Darker red */
-}
-
-[data-theme="light"] .colored-stats .player-row > div:nth-child(13) {
-    color: #e67700 !important; /* Darker yellow */
-}
-
-
-/* START MAIN */
-
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-}
-
-body {
-    background-color: var(--bg-primary);
-    color: var(--text-primary);
-    padding: 16px;
-    max-width: 1400px;  /* Add max-width to contain the content */
-    margin: 0 auto;     /* Center the content */
-}
-
-/* Score Header Styles */
 .score-header {
     position: sticky;
     top: 0;
     z-index: 100;
     background-color: var(--bg-primary);
-    transition: all 1s ease;
     padding: 16px 0;
-    margin-top: 0;
-    margin-bottom: 0;
-}
-
-.score-header.scrolled {
-    padding: 12px 0;
-}
-
-.score-header.scrolled .score {
-    font-size: 18px;
-}
-
-.score-header.scrolled .team-name {
-    font-size: 10px;
-}
-
-/* Adjust spacing when team names are hidden */
-.score-header.scrolled .team-info {
-    gap: 1px; /* Remove any gap that was meant for spacing with team name */
-}
-
-/* Hide date and game number when scrolled */
-.score-header.scrolled .game-date {
-    display: none;
-}
-
-
-.score-header.scrolled .game-number {
-    display: block !important; /* Force display of game number */
-    font-size: 14px;
     margin: 0;
-}
-
-/* Adjust game status display when scrolled */
-.score-header.scrolled .game-info {
-    padding: 0 10px;
-    transform: scale(0.9);
-}
-
-.score-header.scrolled .game-status {
-    display: none; 
-}
-
-.score-container, .game-info, .score, .team-name {
     transition: all 1s ease;
 }
-
-/* Ensure game info stays centered vertically when scrolled */
-.game-info {
-    justify-content: center;
-    min-height: 24px; /* Add minimum height to prevent layout shift */
-}
-
 
 .score-container {
     display: flex;
     justify-content: center;
     align-items: center;
     gap: 40px;
-    max-width: 800px; /* Increased from 600px to accommodate logos */
+    max-width: 800px;
     margin: 0 auto;
-    padding: 0 40px; /* Increased to prevent logos from being cut off */
+    padding: 0 40px;
     position: relative;
 }
 
+/* Team and Score */
 .team-score {
     flex: 1;
     display: flex;
     min-width: 0;
+    position: relative;
 }
 
 .team-info {
@@ -555,22 +349,7 @@ body {
     flex-direction: column !important; /* Force column layout */
     align-items: center;
     position: relative;
-}
-
-.team-info {
     transition: opacity 0.2s ease;
-}
-
-.team-info.winner .score,
-.team-info.winner .team-name {
-    color: #ffffff;
-    opacity: 1;
-}
-
-.team-info.loser .score,
-.team-info.loser .team-name {
-    color: #bfbfbf; /* Lighter gray (was #808080) */
-    opacity: 0.85; /* Increased opacity for better visibility */
 }
 
 .score {
@@ -586,55 +365,83 @@ body {
     overflow: hidden;
     text-overflow: ellipsis;
     max-width: 140px;
-    margin-top: -3px; /* Space between score and name */
+    margin-top: -3px;
 }
 
-/* Default winner styles for dark mode */
+/* Winner and Loser styles */
 .team-info.winner .score,
 .team-info.winner .team-name {
-    color: #ffffff;
+    color: var(--text-primary);
     opacity: 1;
 }
 
-/* Override winner styles for light mode */
-[data-theme="light"] .team-info.winner .score,
-[data-theme="light"] .team-info.winner .team-name {
-    color: #000000;
-    opacity: 1;
-}
-
-/* Default loser styles for dark mode */
 .team-info.loser .score,
 .team-info.loser .team-name {
-    color: #bfbfbf;
-    opacity: 0.85;
+    color: #bfbfbf; 
+    opacity: 0.85; 
 }
 
-/* Override loser styles for light mode */
-[data-theme="light"] .team-info.loser .score,
-[data-theme="light"] .team-info.loser .team-name {
-    color: #505050;
-    opacity: 0.85;
+/* Winner indicator triangles */
+.winner {
+    position: relative;
 }
 
-/* Team logo styles - Add this to your styles.css */
-.team-info {
-    flex: 1;
-    min-width: 0;
+.winner-left::before,
+.winner-right::before {
+    content: '';
+    position: absolute;
+    top: 15px;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-radius: 2px;
+    transition: border-color 1s ease;
+}
+
+.winner-left::before {
+    left: -42px;
+    border-width: 6px 0 6px 8px;
+    border-color: transparent transparent transparent var(--text-primary);
+}
+
+.winner-right::before {
+    right: -42px;
+    border-width: 6px 8px 6px 0;
+    border-color: transparent var(--text-primary) transparent transparent;
+}
+
+/* Game info section */
+.game-info {
+    flex: 0 0 auto;
     text-align: center;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    position: relative;
+    gap: 2px;
+    min-width: 140px;
+    padding: 0 20px;
+    justify-content: center;
+    min-height: 24px;
 }
 
-.team-score {
-    flex: 1;
-    display: flex;
-    min-width: 0;
-    position: relative;
+.game-status {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
 }
 
+.game-date {
+    font-size: 14px;
+    color: var(--text-primary);
+    margin-bottom: 0;
+}
+
+.game-number {
+    font-size: 12px;
+    color: var(--text-primary);
+    letter-spacing: 0.5px;
+}
+
+/* Team Logos */
 .team-logo {
     width: 32px;
     height: 32px;
@@ -648,13 +455,13 @@ body {
 }
 
 .team-a-logo {
-    left: 15px; /* Moved closer to center (was -40px) */
+    left: 15px;
     top: 33%;
     transform: translateY(-50%);
 }
 
 .team-b-logo {
-    right: 15px; /* Moved closer to center (was -40px) */
+    right: 15px;
     top: 33%;
     transform: translateY(-50%);
 }
@@ -666,78 +473,55 @@ body {
     background-repeat: no-repeat;
 }
 
-.game-status {
-    font-size: 16px;
-    font-weight: 600;
-    color: var(--text-primary);
-    /* margin-bottom: 4px; */
+/* Scrolled state adjustments */
+.score-header.scrolled {
+    padding: 12px 0;
 }
 
-.game-info {
-    flex: 0 0 auto;
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    min-width: 140px;
-    padding: 0 20px;
+.score-header.scrolled .score {
+    font-size: 18px;
 }
 
-.game-date {
+.score-header.scrolled .team-name {
+    font-size: 10px;
+}
+
+.score-header.scrolled .team-info {
+    gap: 1px;
+}
+
+.score-header.scrolled .game-date {
+    display: none;
+}
+
+.score-header.scrolled .game-number {
+    display: block !important;
     font-size: 14px;
-    color: var(--text-primary);
-    margin-bottom: 0; /* Small space between date and game number */
+    margin: 0;
 }
 
-.game-number {
-    font-size: 12px;
-    color: var(--text-primary);
-    letter-spacing: 0.5px;
+.score-header.scrolled .game-info {
+    padding: 0 10px;
+    transform: scale(0.9);
 }
 
-/* Add winner indicator */
-.winner {
-    position: relative;  /* For positioning the triangle */
+.score-header.scrolled .game-status {
+    display: none; 
 }
 
-.winner-left::before,
-.winner-right::before {
-    content: '';
-    position: absolute;
-    /* Update vertical positioning to align with the score */
-    top: 15px;
-    width: 0;
-    height: 0;
-    border-style: solid;
-    /* Remove transform since we're explicitly positioning */
-    border-radius: 2px;
-}
+/* ============================
+   NAVIGATION TABS
+   ============================ */
 
-/* Left triangle (for home team) - pointing right */
-.winner-left::before {
-    left: -42px;
-    border-width: 6px 0 6px 8px;
-    border-color: transparent transparent transparent var(--text-primary);
-}
-
-/* Right triangle (for away team) - pointing left */
-.winner-right::before {
-    right: -42px;
-    border-width: 6px 8px 6px 0;
-    border-color: transparent var(--text-primary) transparent transparent;
-}
-
-/* Navigation Tabs */
 .nav-tabs {
     display: flex;
     justify-content: space-between;
-    margin: 6px 0; /* Reduced from 20px to 12px */
+    margin: 6px 0;
     border-bottom: 0.8px solid rgba(255, 255, 255, 0.10);
     border-top: 0.8px solid rgba(255, 255, 255, 0.10);
     padding: 0 16px;
 }
 
-/* Override for light mode */
 [data-theme="light"] .nav-tabs {
     border-bottom: 0.8px solid rgba(0, 0, 0, 0.10);
     border-top: 0.8px solid rgba(0, 0, 0, 0.10);
@@ -750,7 +534,7 @@ body {
     position: relative;
     transition: color 0.2s ease;
     font-size: 15px;
-    font-weight: 600; /* Added bold font weight */
+    font-weight: 600;
     white-space: nowrap;
 }
 
@@ -761,13 +545,16 @@ body {
 .nav-tab.active {
     color: var(--accent-blue);
     border-bottom: 2px solid var(--accent-blue);
-    font-weight: 700; /* Slightly bolder for active tab */
+    font-weight: 700;
 }
 
-/* Team Stats Styles */
+/* ============================
+   TEAM STATS SECTION
+   ============================ */
+
 .team-stats-wrapper {
-    margin: 8px 0; /* Reduced from 15px to 8px */
-    padding: 8px 0; /* Reduced from 15px to 8px */
+    margin: 8px 0;
+    padding: 8px 0;
     position: relative;
     overflow: visible;
 }
@@ -800,7 +587,10 @@ body {
     letter-spacing: 0.5px;
 }
 
-/* Player Stats Table */
+/* ============================
+   PLAYER STATS TABLE
+   ============================ */
+
 .table-container {
     margin-top: 8px;
     overflow: hidden;
@@ -809,36 +599,33 @@ body {
 .scrollable-wrapper {
     overflow-x: auto;
     width: 100%;
-    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.3) rgba(255, 255, 255, 0.1);
 }
 
-/* Modern scrollbar styling */
+/* Custom scrollbar styling */
 .scrollable-wrapper::-webkit-scrollbar {
-    height: 4px;  /* Thin scrollbar */
+    height: 4px;
     width: 4px;
 }
 
 .scrollable-wrapper::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.1);  /* Subtle track */
+    background: rgba(255, 255, 255, 0.1);
     border-radius: 2px;
 }
 
 .scrollable-wrapper::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.3);  /* Subtle thumb */
+    background: rgba(255, 255, 255, 0.3);
     border-radius: 2px;
     transition: background 0.2s ease;
 }
 
 .scrollable-wrapper::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.5);  /* Lighter on hover */
+    background: rgba(255, 255, 255, 0.5);
 }
 
-/* Firefox scrollbar styling */
-.scrollable-wrapper {
-    scrollbar-width: thin;
-    scrollbar-color: rgba(255, 255, 255, 0.3) rgba(255, 255, 255, 0.1);
-}
-
+/* Table layout */
 .stats-columns, .player-row {
     display: grid;
     grid-template-columns: 160px repeat(12, minmax(40px, auto));
@@ -847,10 +634,8 @@ body {
 }
 
 .stats-columns {
-    /* padding: 2px 0; */
     color: var(--text-secondary);
     font-size: 12px;
-    /* border-bottom: 1px solid var(--border-color); */
     position: sticky;
     top: 0;
     background-color: var(--bg-primary);
@@ -862,6 +647,7 @@ body {
     text-align: center;
 }
 
+/* Fixed (sticky) first column */
 .fixed-column {
     position: sticky;
     left: 0;
@@ -874,17 +660,18 @@ body {
     padding-right: 4px !important;
 }
 
+.player-row .fixed-column {
+    font-weight: normal;
+    text-align: left;
+}
+
 .player-row > div:not(.fixed-column) {
     font-weight: 600;
     text-align: center;
     padding: 4px;
 }
 
-.player-row .fixed-column {
-    font-weight: normal;
-    text-align: left;
-}
-
+/* Player photo and name */
 .player-photo {
     width: 35px;
     height: 35px;
@@ -899,28 +686,122 @@ body {
     transition: all 0.2s ease;
 }
 
-/* Add hover effect for player photos */
 .player-photo:hover {
     border-color: var(--accent-blue);
 }
 
 .player-name {
     font-size: 14px;
-    white-space: nowrap;  /* Added to prevent name wrapping */
-    overflow: hidden;     /* Added to handle long names */
-    text-overflow: ellipsis;  /* Added to handle long names */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
+/* Row hover effect */
+.player-row:hover {
+    background-color: var(--table-bg-hover);
+}
 
+/* Special styling for perfect percentages */
 .perfect-percentage {
-    color: #00ff8d !important; /* Adjusted to match the screenshot's green */
+    color: #00ff8d !important;
     font-weight: bold;
-    text-shadow: 0 0 8px rgba(0, 255, 141, 0.8), /* Inner glow */
-                 0 0 12px rgba(0, 255, 141, 0.5); /* Outer glow */
+    text-shadow: 0 0 8px rgba(0, 255, 141, 0.8),
+                 0 0 12px rgba(0, 255, 141, 0.5);
+    transition: color 1s ease, text-shadow 1s ease !important;
 }
 
+/* ============================
+   COLORED STATS MODE
+   ============================ */
 
-/* Game navigation */
+/* Different stat categories get different colors */
+.colored-stats .player-row > div:nth-child(2),  /* PTS */
+.colored-stats .player-row > div:nth-child(3),  /* REB */
+.colored-stats .player-row > div:nth-child(4) { /* AST */
+    color: #4dabf7 !important;
+    font-weight: 600;
+}
+
+.colored-stats .player-row > div:nth-child(5),  /* STL */
+.colored-stats .player-row > div:nth-child(6) { /* BLK */
+    color: #cc5de8 !important;
+    font-weight: 600;
+}
+
+.colored-stats .player-row > div:nth-child(7),  /* FG% */
+.colored-stats .player-row > div:nth-child(8),  /* FG */
+.colored-stats .player-row > div:nth-child(9),  /* 3FG */
+.colored-stats .player-row > div:nth-child(10), /* FT */
+.colored-stats .player-row > div:nth-child(11) { /* TS% */
+    color: #64eb7a !important;
+    font-weight: 600;
+}
+
+.colored-stats .player-row > div:nth-child(12) { /* TO */
+    color: #ff6b6b !important;
+    font-weight: 600;
+}
+
+.colored-stats .player-row > div:nth-child(13) { /* PER */
+    color: #fcc419 !important;
+    font-weight: 600;
+}
+
+/* Light theme color adjustments for better contrast */
+[data-theme="light"] .colored-stats .player-row > div:nth-child(2),
+[data-theme="light"] .colored-stats .player-row > div:nth-child(3),
+[data-theme="light"] .colored-stats .player-row > div:nth-child(4) {
+    color: #1971c2 !important;
+}
+
+[data-theme="light"] .colored-stats .player-row > div:nth-child(5),
+[data-theme="light"] .colored-stats .player-row > div:nth-child(6) {
+    color: #9c36b5 !important;
+}
+
+[data-theme="light"] .colored-stats .player-row > div:nth-child(7),
+[data-theme="light"] .colored-stats .player-row > div:nth-child(8),
+[data-theme="light"] .colored-stats .player-row > div:nth-child(9),
+[data-theme="light"] .colored-stats .player-row > div:nth-child(10),
+[data-theme="light"] .colored-stats .player-row > div:nth-child(11) {
+    color: #38ac4f !important;
+}
+
+[data-theme="light"] .colored-stats .player-row > div:nth-child(12) {
+    color: #f04242 !important;
+}
+
+[data-theme="light"] .colored-stats .player-row > div:nth-child(13) {
+    color: #e4a700 !important;
+}
+
+/* Special styling for perfect percentages - define with higher specificity */
+/* Dark theme (default) styling */
+.perfect-percentage,
+div.perfect-percentage,
+.player-row div.perfect-percentage,
+.colored-stats .player-row div.perfect-percentage {
+    color: #00ff8d !important;
+    text-shadow: 0 0 8px rgba(0, 255, 141, 0.8),
+                 0 0 12px rgba(0, 255, 141, 0.5);
+    font-weight: bold !important;
+}
+
+/* Light theme styling - slightly less bright */
+[data-theme="light"] .perfect-percentage,
+[data-theme="light"] div.perfect-percentage,
+[data-theme="light"] .player-row div.perfect-percentage,
+[data-theme="light"] .colored-stats .player-row div.perfect-percentage {
+    color: #00f788 !important; /* Slightly less bright green */
+    text-shadow: 0 0 8px rgba(0, 204, 112, 0.7),
+                 0 0 12px rgba(0, 204, 112, 0.4);
+    font-weight: bold !important;
+}
+
+/* ============================
+   GAME NAVIGATION
+   ============================ */
 
 .game-navigation {
     display: flex;
@@ -928,8 +809,8 @@ body {
     justify-content: space-between;
     position: absolute;
     top: 50%;
-    left: -20px; /* Move further out to page edge */
-    right: -20px; /* Move further out to page edge */
+    left: -20px;
+    right: -20px;
     transform: translateY(-50%);
     pointer-events: none;
     padding: 0;
@@ -949,7 +830,7 @@ body {
     height: 100px;
     display: flex;
     align-items: center;
-    border-radius: 12px; /* Add rounded corners */
+    border-radius: 12px;
 }
 
 #prevGame::before {
@@ -963,7 +844,7 @@ body {
 .nav-button:hover:not(:disabled) {
     color: var(--accent-blue);
     opacity: 1;
-    backdrop-filter: blur(4px); /* Optional: adds a slight blur effect */
+    backdrop-filter: blur(4px);
 }
 
 .nav-button:disabled {
@@ -971,74 +852,104 @@ body {
     cursor: not-allowed;
 }
 
-/* Update team stats wrapper for proper positioning context */
-.team-stats-wrapper {
-    position: relative;
-    margin: 15px 0;
-    padding: 15px 0;
-    overflow: visible; /* Ensure arrows aren't cut off */
+/* ============================
+   LIGHT THEME SPECIFIC OVERRIDES
+   ============================ */
+
+/* Add any light theme specific overrides here that don't fit elsewhere */
+[data-theme="light"] .player-photo {
+    border: 1px solid var(--border-color);
 }
 
+[data-theme="light"] .score-header.scrolled {
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
 
-@media (min-width: 1024px) {  /* Add this new media query */
+[data-theme="light"] .nav-tab.active {
+    border-bottom: 2px solid var(--accent-blue);
+}
+
+/* ============================
+   RESPONSIVE STYLES
+   ============================ */
+
+/* Desktop styles */
+@media (min-width: 1024px) {
     body {
-        padding: 16px 48px;  /* Increase padding on sides for desktop */
+        padding: 16px 48px;
     }
 }
 
+/* Tablet and mobile styles */
 @media (max-width: 768px) {
     body {
-        padding: 16px;  /* Keep original padding for mobile */
+        padding: 16px;
+        padding-top: 70px; /* Add padding to the top to push content down */
+    }
+
+    .menu-button {
+        top: 15px; 
+        left: 15px;
+    }
+
+    .score-header {
+        margin-top: 10px;
+    }
+
+    .side-panel {
+        width: 85%; /* Wider on mobile but still leave some margin */
+        max-width: 300px;
     }
 
     .score-container {
         gap: 10px;
         max-width: 100%;
-        padding: 0 40px; /* Keep padding for logos */
+        padding: 0 40px;
     }
 
+    /* Team logos */
     .team-logo {
         width: 28px;
         height: 28px;
     }
     
-        /* Keep team logos beside scores even in mobile */
-        .team-a-logo {
-            left: -36px;
-            top: 22px;
-        }
-        
-        .team-b-logo {
-            right: -36px;
-            top: 22px;
-        }
+    .team-a-logo {
+        left: -36px;
+        top: 22px;
+    }
+    
+    .team-b-logo {
+        right: -36px;
+        top: 22px;
+    }
 
-        .team-info {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
+    .team-info {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
 
-
+    /* Adjustments for scrolled header */
     .score-header.scrolled .team-logo {
         width: 22px;
         height: 22px;
-        top: 50%; /* Center vertically with the score */
+        top: 50%;
         transform: translateY(-50%);
     }
 
     .score-header.scrolled .winner-left::before,
     .score-header.scrolled .winner-right::before {
-        top: 50%; /* Center vertically with the score */
+        top: 50%;
         transform: translateY(-50%);
     }
 
     .score-header.scrolled .score {
-        font-size: 16px; /* Half of the mobile 32px size */
+        font-size: 16px;
         margin-bottom: 0;
         line-height: 1;
     }
 
+    /* Game info */
     .game-status {
         font-size: 16px;
     }
@@ -1048,35 +959,39 @@ body {
         padding: 0 10px;
     }
     
+    /* Team and score */
     .team-name {
-        max-width: 100px; /* Smaller max-width for mobile */
+        max-width: 100px;
     }
     
     .score {
         font-size: 36px;
     }
 
+    /* Winner indicators */
     .winner-left::before {
         left: -50px;
-        top: 15px; /* Half of the mobile score font-size */
+        top: 15px;
         border-width: 6px 0 6px 8px;
     }
     
     .winner-right::before {
         right: -50px;
-        top: 15px; /* Half of the mobile score font-size */
+        top: 15px;
         border-width: 6px 8px 6px 0;
     }
 
+    /* Navigation tabs */
     .nav-tabs {
-        gap: 24px; /* Slightly smaller gap on mobile */
+        gap: 24px;
     }
 
     .nav-tab {
-        padding: 10px 16px; /* Slightly smaller padding on mobile */
+        padding: 10px 16px;
         font-size: 15px;
     }
 
+    /* Stats layout */
     .team-stats {
         grid-template-columns: repeat(3, 1fr);
         grid-template-rows: auto auto;
@@ -1091,8 +1006,9 @@ body {
         grid-template-columns: 110px repeat(12, 50px);  
     }
 
+    /* Game navigation */
     .game-navigation {
-        left: -12px; /* Closer to edge on mobile */
+        left: -12px;
         right: -12px;
     }
     
@@ -1100,6 +1016,6 @@ body {
         font-size: 36px;
         padding: 15px;
         height: 100px;
-        border-radius: 12px; /* Slightly smaller radius on mobile */
+        border-radius: 12px;
     }
 }
