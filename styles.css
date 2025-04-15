@@ -1,10 +1,457 @@
 :root {
+    /* Dark theme (default) */
     --bg-primary: #000000;
     --text-primary: #ffffff;
     --text-secondary: #808080;
     --accent-blue: #1d9bf0;
     --border-color: #333333;
+    --table-bg-hover: rgba(255, 255, 255, 0.05);
 }
+
+/* Light theme variables */
+[data-theme="light"] {
+    --bg-primary: #ffffff;
+    --text-primary: #000000;
+    --text-secondary: #505050;
+    --accent-blue: #1a8cd8;
+    --border-color: #e1e1e1;
+    --table-bg-hover: rgba(0, 0, 0, 0.05);
+}
+
+/* Theme toggle button styles */
+.theme-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: var(--border-color);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 1s ease;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.theme-toggle:hover {
+    transform: scale(1.1);
+}
+
+.theme-toggle svg {
+    width: 24px;
+    height: 24px;
+    fill: var(--text-primary);
+    transition: all 1s ease;
+}
+
+/* Add these custom tweaks for light theme */
+[data-theme="light"] .player-photo {
+    border: 1px solid var(--border-color);
+}
+
+[data-theme="light"] .score-header.scrolled {
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="light"] .nav-tab.active {
+    border-bottom: 2px solid var(--accent-blue);
+}
+
+[data-theme="light"] .perfect-percentage {
+    color: #00a15a !important;
+    text-shadow: 0 0 8px rgba(0, 161, 90, 0.5),
+                 0 0 12px rgba(0, 161, 90, 0.3);
+}
+
+/* Player row hover effect */
+.player-row:hover {
+    background-color: var(--table-bg-hover);
+}
+
+/* Apply consistent transition to all elements */
+* {
+    transition: background-color 1s ease, color 1s ease, border-color 1s ease, box-shadow 1s ease;
+}
+
+/* Override specific transitions that were defined before */
+.score-header,
+.score-container, 
+.game-info, 
+.score, 
+.team-name,
+.team-info,
+.player-photo,
+.nav-button {
+    transition: all 1s ease;
+}
+
+/* Remove transitions from SVG elements to prevent flashing */
+svg, 
+svg path {
+    transition: none !important;
+}
+
+/* Ensure the body background transitions smoothly */
+body {
+    transition: background-color 1s ease;
+}
+
+/* Fix for perfect percentage color transition */
+.perfect-percentage {
+    transition: color 1s ease, text-shadow 1s ease !important;
+}
+
+/* Initial state for theme icons */
+#moonIcon, #sunIcon {
+    opacity: 1;
+    transition: opacity 0.15s ease;
+}
+
+/* Theme transition classes */
+.theme-transitioning {
+    pointer-events: none; /* Prevent interactions during transition */
+}
+
+/* Apply styles to both theme icons */
+.theme-toggle svg {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+/* Update the theme toggle button styles */
+.theme-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: var(--border-color);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 1s ease;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    overflow: hidden; /* Ensure icons don't overflow */
+    position: relative; /* For absolute positioning of icons */
+}
+
+/* Specific fixes for team score transitions */
+.team-score, 
+.score-header, 
+.team-info,
+.team-name,
+.score {
+    transition: all 1s ease !important;
+    will-change: color, opacity; /* Performance optimization */
+}
+
+/* Fix for winner indicators */
+.winner-left::before,
+.winner-right::before {
+    transition: border-color 1s ease;
+}
+
+[data-theme="light"] .winner-left::before {
+    border-color: transparent transparent transparent var(--text-primary);
+}
+
+[data-theme="light"] .winner-right::before {
+    border-color: transparent var(--text-primary) transparent transparent;
+}
+
+
+/* Menu Button */
+.menu-button {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 99;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: var(--border-color);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 1s ease;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.menu-button:hover {
+    transform: scale(1.1);
+    background-color: var(--accent-blue);
+}
+
+.menu-button svg {
+    color: var(--text-primary);
+    transition: color 1s ease;
+}
+
+/* Side Panel */
+.side-panel {
+    position: fixed;
+    top: 0;
+    left: -300px; /* Start off-screen */
+    width: 300px;
+    height: 100%;
+    background-color: var(--bg-primary);
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+    z-index: 1000;
+    transition: left 0.3s ease;
+    overflow-y: auto;
+}
+
+.side-panel.open {
+    left: 0;
+}
+
+.side-panel-content {
+    padding: 20px;
+}
+
+.side-panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.side-panel-header h3 {
+    margin: 0;
+    color: var(--text-primary);
+}
+
+.close-button {
+    background: none;
+    border: none;
+    color: var(--text-primary);
+    cursor: pointer;
+    padding: 5px;
+}
+
+.side-panel-options {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.menu-option {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+}
+
+.menu-option span {
+    color: var(--text-primary);
+    font-size: 16px;
+}
+
+/* Update theme toggle to work within the side panel */
+.theme-toggle {
+    position: relative; /* Change from fixed to relative */
+    top: unset;
+    right: unset;
+    width: 40px;
+    height: 40px;
+}
+
+/* Overlay for closing the panel */
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+    display: none;
+}
+
+.overlay.active {
+    display: block;
+}
+
+/* Make sure the side panel is above the overlay */
+.side-panel {
+    z-index: 1000;
+}
+
+/* Additional styles for light theme */
+[data-theme="light"] .side-panel {
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+}
+
+/* ADD COLOUR */
+
+/* Colour toggle button */
+/* Color toggle button */
+.color-toggle {
+    position: relative;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: var(--border-color);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.5s ease;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.color-toggle:hover {
+    transform: scale(1.1);
+}
+
+.color-toggle svg {
+    width: 24px;
+    height: 24px;
+    transition: transform 0.5s ease;
+}
+
+/* Default state - grayscale dots */
+.palette-color {
+    fill: #555555;
+    transition: fill 0.5s ease;
+}
+
+/* Active state - colored dots */
+.color-toggle.active .blue-dot {
+    fill: #4dabf7;
+}
+
+.color-toggle.active .green-dot {
+    fill: #51cf66;
+}
+
+.color-toggle.active .purple-dot {
+    fill: #cc5de8;
+}
+
+.color-toggle.active .yellow-dot {
+    fill: #fcc419;
+}
+
+/* Make the icon more noticeable when active */
+.color-toggle.active {
+    background-color: #2b2b2b;
+    box-shadow: 0 0 12px rgba(77, 171, 247, 0.5);
+}
+
+.color-toggle.active svg {
+    transform: rotate(15deg) scale(1.1);
+}
+
+/* Light theme adjustments */
+[data-theme="light"] .palette-color {
+    fill: #777777;
+}
+
+[data-theme="light"] .color-toggle.active {
+    background-color: #f0f0f0;
+    box-shadow: 0 0 12px rgba(25, 113, 194, 0.5);
+}
+
+/* Clicking animation for color toggle button */
+@keyframes buttonClick {
+    0% { transform: scale(1); }
+    50% { transform: scale(0.9); }
+    100% { transform: scale(1); }
+}
+
+.color-toggle.clicking {
+    animation: buttonClick 0.3s ease;
+}
+
+
+
+
+/* Colors for colored mode */
+.colored-stats .player-row > div:nth-child(2),  /* PTS */
+.colored-stats .player-row > div:nth-child(3),  /* REB */
+.colored-stats .player-row > div:nth-child(4) { /* AST */
+    color: #4dabf7 !important; /* Blue */
+    font-weight: 600;
+}
+
+.colored-stats .player-row > div:nth-child(5),  /* STL */
+.colored-stats .player-row > div:nth-child(6) { /* BLK */
+    color: #cc5de8 !important; /* Purple */
+    font-weight: 600;
+}
+
+.colored-stats .player-row > div:nth-child(7),  /* FG% */
+.colored-stats .player-row > div:nth-child(8),  /* FG */
+.colored-stats .player-row > div:nth-child(9),  /* 3FG */
+.colored-stats .player-row > div:nth-child(10), /* FT */
+.colored-stats .player-row > div:nth-child(11) { /* TS% */
+    color: #51cf66 !important; /* Green */
+    font-weight: 600;
+}
+
+.colored-stats .player-row > div:nth-child(12) { /* TO */
+    color: #ff6b6b !important; /* Red */
+    font-weight: 600;
+}
+
+.colored-stats .player-row > div:nth-child(13) { /* PER */
+    color: #fcc419 !important; /* Yellow */
+    font-weight: 600;
+}
+
+/* Ensure perfect percentage keeps its special styling even in colored mode */
+.colored-stats .perfect-percentage {
+    color: #00ff8d !important;
+    text-shadow: 0 0 8px rgba(0, 255, 141, 0.8),
+                 0 0 12px rgba(0, 255, 141, 0.5);
+}
+
+/* Light theme adjustments for better contrast */
+[data-theme="light"] .colored-stats .player-row > div:nth-child(2),
+[data-theme="light"] .colored-stats .player-row > div:nth-child(3),
+[data-theme="light"] .colored-stats .player-row > div:nth-child(4) {
+    color: #1971c2 !important; /* Darker blue */
+}
+
+[data-theme="light"] .colored-stats .player-row > div:nth-child(5),
+[data-theme="light"] .colored-stats .player-row > div:nth-child(6) {
+    color: #9c36b5 !important; /* Darker purple */
+}
+
+[data-theme="light"] .colored-stats .player-row > div:nth-child(7),
+[data-theme="light"] .colored-stats .player-row > div:nth-child(8),
+[data-theme="light"] .colored-stats .player-row > div:nth-child(9),
+[data-theme="light"] .colored-stats .player-row > div:nth-child(10),
+[data-theme="light"] .colored-stats .player-row > div:nth-child(11) {
+    color: #2b8a3e !important; /* Darker green */
+}
+
+[data-theme="light"] .colored-stats .player-row > div:nth-child(12) {
+    color: #e03131 !important; /* Darker red */
+}
+
+[data-theme="light"] .colored-stats .player-row > div:nth-child(13) {
+    color: #e67700 !important; /* Darker yellow */
+}
+
+
+/* START MAIN */
 
 * {
     margin: 0;
@@ -27,7 +474,7 @@ body {
     top: 0;
     z-index: 100;
     background-color: var(--bg-primary);
-    transition: all 0.3s ease;
+    transition: all 1s ease;
     padding: 16px 0;
     margin-top: 0;
     margin-bottom: 0;
@@ -73,7 +520,7 @@ body {
 }
 
 .score-container, .game-info, .score, .team-name {
-    transition: all 0.3s ease;
+    transition: all 1s ease;
 }
 
 /* Ensure game info stays centered vertically when scrolled */
@@ -140,6 +587,34 @@ body {
     text-overflow: ellipsis;
     max-width: 140px;
     margin-top: -3px; /* Space between score and name */
+}
+
+/* Default winner styles for dark mode */
+.team-info.winner .score,
+.team-info.winner .team-name {
+    color: #ffffff;
+    opacity: 1;
+}
+
+/* Override winner styles for light mode */
+[data-theme="light"] .team-info.winner .score,
+[data-theme="light"] .team-info.winner .team-name {
+    color: #000000;
+    opacity: 1;
+}
+
+/* Default loser styles for dark mode */
+.team-info.loser .score,
+.team-info.loser .team-name {
+    color: #bfbfbf;
+    opacity: 0.85;
+}
+
+/* Override loser styles for light mode */
+[data-theme="light"] .team-info.loser .score,
+[data-theme="light"] .team-info.loser .team-name {
+    color: #505050;
+    opacity: 0.85;
 }
 
 /* Team logo styles - Add this to your styles.css */
@@ -260,6 +735,12 @@ body {
     border-bottom: 0.8px solid rgba(255, 255, 255, 0.10);
     border-top: 0.8px solid rgba(255, 255, 255, 0.10);
     padding: 0 16px;
+}
+
+/* Override for light mode */
+[data-theme="light"] .nav-tabs {
+    border-bottom: 0.8px solid rgba(0, 0, 0, 0.10);
+    border-top: 0.8px solid rgba(0, 0, 0, 0.10);
 }
 
 .nav-tab {

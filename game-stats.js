@@ -43,6 +43,112 @@ class GameStats {
         this.setupScoreHeaderScroll();
         this.setupColumnSorting();
         this.setupGameInfoNavigation();
+        this.setupThemeToggle();
+        this.setupSidePanel();
+        this.setupColorToggle();
+    }
+
+    setupThemeToggle() {
+        const themeToggle = document.getElementById('themeToggle');
+        const moonIcon = document.getElementById('moonIcon');
+        const sunIcon = document.getElementById('sunIcon');
+        
+        // Check for saved theme preference or use device preference
+        const savedTheme = localStorage.getItem('theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        
+        // Set initial theme without transition on first load
+        if (savedTheme === 'light' || (!savedTheme && !prefersDark)) {
+            document.documentElement.setAttribute('data-theme', 'light');
+            moonIcon.style.display = 'none';
+            sunIcon.style.display = 'block';
+        }
+        
+        // Add a small delay on first load to prevent transition flash
+        setTimeout(() => {
+            document.body.classList.add('theme-transition-ready');
+        }, 100);
+        
+        // Theme toggle click handler
+        themeToggle.addEventListener('click', () => {
+            // Get current theme
+            const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            
+            // Apply transition class to ensure smooth transition
+            document.body.classList.add('theme-transitioning');
+            
+            // Switch theme attribute
+            document.documentElement.setAttribute('data-theme', newTheme);
+            
+            // Save preference
+            localStorage.setItem('theme', newTheme);
+            
+            // Update icon with a slight delay to make transition smoother
+            if (newTheme === 'light') {
+                // Fade out moon then fade in sun
+                moonIcon.style.opacity = '0';
+                setTimeout(() => {
+                    moonIcon.style.display = 'none';
+                    sunIcon.style.display = 'block';
+                    setTimeout(() => {
+                        sunIcon.style.opacity = '1';
+                    }, 50);
+                }, 500);
+            } else {
+                // Fade out sun then fade in moon
+                sunIcon.style.opacity = '0';
+                setTimeout(() => {
+                    sunIcon.style.display = 'none';
+                    moonIcon.style.display = 'block';
+                    setTimeout(() => {
+                        moonIcon.style.opacity = '1';
+                    }, 50);
+                }, 500);
+            }
+            
+            // Remove transition class after animation completes
+            setTimeout(() => {
+                document.body.classList.remove('theme-transitioning');
+            }, 1100);
+        });
+    }
+
+    setupSidePanel() {
+        const menuButton = document.getElementById('menuButton');
+        const sidePanel = document.getElementById('sidePanel');
+        const closePanel = document.getElementById('closePanel');
+        const overlay = document.getElementById('overlay');
+    
+        // Open side panel
+        menuButton.addEventListener('click', () => {
+            sidePanel.classList.add('open');
+            overlay.classList.add('active');
+            document.body.style.overflow = 'hidden'; // Prevent scrolling when panel is open
+        });
+    
+        // Close side panel (via X button)
+        closePanel.addEventListener('click', () => {
+            sidePanel.classList.remove('open');
+            overlay.classList.remove('active');
+            document.body.style.overflow = '';
+        });
+    
+        // Close side panel (via overlay click)
+        overlay.addEventListener('click', () => {
+            sidePanel.classList.remove('open');
+            overlay.classList.remove('active');
+            document.body.style.overflow = '';
+        });
+    
+        // Close panel on ESC key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && sidePanel.classList.contains('open')) {
+                sidePanel.classList.remove('open');
+                overlay.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        });
     }
 
     setupGameNavigation() {
@@ -407,33 +513,33 @@ class GameStats {
     }
 
     // Update the formatGameStatus method to include game time
-formatGameStatus(dateStr, gameTime) {
-    const gameDate = new Date(dateStr);
-    const now = new Date();
-    
-    // If we have a time value, incorporate it into the gameDate
-    if (gameTime) {
-        const timeStr = gameTime.trim();
-        // Parse time in format like "7:00 PM"
-        const [timePart, ampm] = timeStr.split(' ');
-        let [hours, minutes] = timePart.split(':').map(Number);
+    formatGameStatus(dateStr, gameTime) {
+        const gameDate = new Date(dateStr);
+        const now = new Date();
         
-        // Convert to 24-hour format
-        if (ampm && ampm.toUpperCase() === 'PM' && hours < 12) {
-            hours += 12;
-        } else if (ampm && ampm.toUpperCase() === 'AM' && hours === 12) {
-            hours = 0;
+        // If we have a time value, incorporate it into the gameDate
+        if (gameTime) {
+            const timeStr = gameTime.trim();
+            // Parse time in format like "7:00 PM"
+            const [timePart, ampm] = timeStr.split(' ');
+            let [hours, minutes] = timePart.split(':').map(Number);
+            
+            // Convert to 24-hour format
+            if (ampm && ampm.toUpperCase() === 'PM' && hours < 12) {
+                hours += 12;
+            } else if (ampm && ampm.toUpperCase() === 'AM' && hours === 12) {
+                hours = 0;
+            }
+            
+            // Set the time part of the gameDate
+            gameDate.setHours(hours, minutes || 0, 0, 0);
+        } else {
+            // If no time specified, set to end of day
+            gameDate.setHours(23, 59, 59, 999);
         }
         
-        // Set the time part of the gameDate
-        gameDate.setHours(hours, minutes || 0, 0, 0);
-    } else {
-        // If no time specified, set to end of day
-        gameDate.setHours(23, 59, 59, 999);
+        return gameDate < now ? 'Final' : gameTime || 'TBD';
     }
-    
-    return gameDate < now ? 'Final' : gameTime || 'TBD';
-}
 
     formatDate(dateStr) {
         try {
@@ -1017,6 +1123,39 @@ formatGameStatus(dateStr, gameTime) {
         // Insert new player rows after stats-columns
         const statsColumns = container.querySelector('.stats-columns');
         statsColumns.insertAdjacentHTML('afterend', playerRowsHTML);
+    }
+
+    setupColorToggle() {
+        const colorToggle = document.getElementById('colorToggle');
+        const tableContainer = document.querySelector('.table-container');
+        
+        // Check for saved color preference
+        const coloredMode = localStorage.getItem('coloredStats') === 'true';
+        
+        // Apply initial state
+        if (coloredMode) {
+            tableContainer.classList.add('colored-stats');
+            colorToggle.classList.add('active');
+        }
+        
+        // Add click event with enhanced feedback
+        colorToggle.addEventListener('click', () => {
+            // Add a small "bounce" animation effect
+            colorToggle.classList.add('clicking');
+            
+            // Toggle colored stats
+            tableContainer.classList.toggle('colored-stats');
+            colorToggle.classList.toggle('active');
+            
+            // Save preference
+            const isColored = tableContainer.classList.contains('colored-stats');
+            localStorage.setItem('coloredStats', isColored);
+            
+            // Remove the animation class after animation completes
+            setTimeout(() => {
+                colorToggle.classList.remove('clicking');
+            }, 300);
+        });
     }
 }
 
