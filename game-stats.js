@@ -1166,6 +1166,10 @@ class GameStats {
         const sidePanel = document.getElementById('sidePanel');
         const closePanel = document.getElementById('closePanel');
         const overlay = document.getElementById('overlay');
+        const themeOptionWrapper = document.getElementById('themeOptionWrapper');
+        const colorOptionWrapper = document.getElementById('colorOptionWrapper');
+        const themeToggle = document.getElementById('themeToggle');
+        const colorToggle = document.getElementById('colorToggle');
     
         // Open side panel
         menuButton.addEventListener('click', () => {
@@ -1174,7 +1178,7 @@ class GameStats {
             document.body.style.overflow = 'hidden'; // Prevent scrolling when panel is open
         });
     
-        // Close side panel (via X button)
+        // Close side panel (via back button)
         closePanel.addEventListener('click', () => {
             sidePanel.classList.remove('open');
             overlay.classList.remove('active');
@@ -1186,6 +1190,24 @@ class GameStats {
             sidePanel.classList.remove('open');
             overlay.classList.remove('active');
             document.body.style.overflow = '';
+        });
+    
+        // Make theme option clickable
+        themeOptionWrapper.addEventListener('click', (e) => {
+            // Only trigger if the click was on the wrapper itself or the span,
+            // not on the button (to avoid double-triggering)
+            if (e.target === themeOptionWrapper || e.target.tagName === 'SPAN') {
+                themeToggle.click();
+            }
+        });
+    
+        // Make color option clickable
+        colorOptionWrapper.addEventListener('click', (e) => {
+            // Only trigger if the click was on the wrapper itself or the span,
+            // not on the button (to avoid double-triggering)
+            if (e.target === colorOptionWrapper || e.target.tagName === 'SPAN') {
+                colorToggle.click();
+            }
         });
     
         // Close panel on ESC key

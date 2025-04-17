@@ -31,7 +31,7 @@
     padding: 0;
     box-sizing: border-box;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    transition: background-color 1s ease, color 1s ease, border-color 1s ease, box-shadow 1s ease;
+    transition: background-color 0.8s ease, color 0.8s ease, border-color 0.8s ease, box-shadow 0.8s ease;
 }
 
 body {
@@ -40,7 +40,7 @@ body {
     padding: 16px;
     max-width: 1400px;
     margin: 0 auto;
-    transition: background-color 1s ease;
+    transition: background-color 0.8s ease;
 }
 
 /* Prevent transitions on SVG elements to avoid flashing */
@@ -62,7 +62,7 @@ svg, svg path {
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 1s ease;
+    transition: all 0.8s ease;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
     overflow: hidden;
     position: relative;
@@ -97,13 +97,13 @@ svg, svg path {
 
 #moonIcon, #sunIcon {
     opacity: 1;
-    transition: opacity 0.15s ease;
+    transition: opacity 0.8s ease;
 }
 
 /* Reduce icon lag */
 #moonIcon, #sunIcon {
     opacity: 1;
-    transition: opacity 0.15s ease;
+    transition: opacity 0.8s ease;
     position: absolute;
     top: 50%;
     left: 50%;
@@ -117,31 +117,32 @@ svg, svg path {
    ============================ */
 
 .menu-button {
-    position: fixed;
-    top: 20px;
+    position: absolute;
+    top: -35px;
     left: 20px;
-    z-index: 998; /* Increased z-index to ensure it's above everything */
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background-color: var(--border-color);
+    z-index: 998;
+    width: 30px;
+    height: 30px;
+    border-radius: 0;
+    background-color: transparent;
     border: none;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 1s ease;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    box-shadow: none;
 }
 
 .menu-button:hover {
-    transform: scale(1.1);
-    background-color: var(--accent-blue);
+    transform: none;
+    background-color: transparent;
+    color: var(--accent-blue);
 }
 
 .menu-button svg {
     color: var(--text-primary);
-    transition: color 1s ease;
+    width: 20px;
+    height: 20px;
 }
 
 .side-panel {
@@ -153,7 +154,7 @@ svg, svg path {
     background-color: var(--bg-primary);
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
     z-index: 1000;
-    transition: left 0.3s ease;
+    transition: left 0.2s ease;
     overflow-y: auto;
 }
 
@@ -162,29 +163,30 @@ svg, svg path {
 }
 
 .side-panel-content {
-    padding: 20px;
+    padding: 0 20px;
 }
 
-.side-panel-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-    padding-bottom: 10px;
+.back-button-container {
+    padding: 20px 0 10px 0;
     border-bottom: 1px solid var(--border-color);
+    margin-bottom: 15px;
 }
 
-.side-panel-header h3 {
-    margin: 0;
-    color: var(--text-primary);
-}
-
-.close-button {
+.back-button {
     background: none;
     border: none;
     color: var(--text-primary);
     cursor: pointer;
-    padding: 5px;
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    width: 40px;
+    height: 40px;
+}
+
+.back-button:hover {
+    color: var(--accent-blue);
 }
 
 .side-panel-options {
@@ -195,14 +197,23 @@ svg, svg path {
 
 .menu-option {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-start;
     align-items: center;
-    padding: 10px 0;
+    padding: 15px 0;
+    cursor: pointer;
+    position: relative;
+    transition: background-color 0.8s ease;
 }
 
 .menu-option span {
     color: var(--text-primary);
     font-size: 16px;
+    margin-left: 15px; 
+}
+
+.theme-toggle, .color-toggle {
+    margin-left: 8px;
+    margin-right: 0;
 }
 
 /* Light theme adjustment */
@@ -241,7 +252,7 @@ svg, svg path {
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.5s ease;
+    transition: all 0.8s ease;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
 }
 
@@ -252,13 +263,13 @@ svg, svg path {
 .color-toggle svg {
     width: 24px;
     height: 24px;
-    transition: transform 0.5s ease;
+    transition: transform 0.8s ease;
 }
 
 /* Default state - grayscale dots */
 .palette-color {
     fill: #555555;
-    transition: fill 0.5s ease;
+    transition: fill 0.8s ease;
 }
 
 /* Active state - colored dots */
@@ -305,21 +316,33 @@ svg, svg path {
 }
 
 .color-toggle.clicking {
-    animation: buttonClick 0.3s ease;
+    animation: buttonClick 0.8s ease;
 }
 
 /* ============================
    SCORE HEADER STYLES
    ============================ */
 
+/* Add a thin divider line under the menu button */
+.score-header:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background-color: var(--border-color);
+    opacity: 0.3;
+}
+
 .score-header {
     position: sticky;
     top: 0;
     z-index: 100;
     background-color: var(--bg-primary);
-    padding: 16px 0;
-    margin: 0;
-    transition: all 1s ease;
+    padding: 10px 0;
+    margin-top: 35px; /* Space for menu button */
+    transition: all 0.8s ease;
 }
 
 .score-container {
@@ -349,7 +372,7 @@ svg, svg path {
     flex-direction: column !important; /* Force column layout */
     align-items: center;
     position: relative;
-    transition: opacity 0.2s ease;
+    transition: opacity 0.8s ease;
 }
 
 .score {
@@ -395,7 +418,7 @@ svg, svg path {
     height: 0;
     border-style: solid;
     border-radius: 2px;
-    transition: border-color 1s ease;
+    transition: border-color 0.8s ease;
 }
 
 .winner-left::before {
@@ -475,7 +498,8 @@ svg, svg path {
 
 /* Scrolled state adjustments */
 .score-header.scrolled {
-    padding: 12px 0;
+    padding: 2px 0;
+    margin-top: 0;
 }
 
 .score-header.scrolled .score {
@@ -532,7 +556,7 @@ svg, svg path {
     color: var(--text-primary);
     cursor: pointer;
     position: relative;
-    transition: color 0.2s ease;
+    transition: color 0.8s ease;
     font-size: 15px;
     font-weight: 600;
     white-space: nowrap;
@@ -618,7 +642,7 @@ svg, svg path {
 .scrollable-wrapper::-webkit-scrollbar-thumb {
     background: rgba(255, 255, 255, 0.3);
     border-radius: 2px;
-    transition: background 0.2s ease;
+    transition: background 0.8s ease;
 }
 
 .scrollable-wrapper::-webkit-scrollbar-thumb:hover {
@@ -683,7 +707,7 @@ svg, svg path {
     background-size: cover;
     border: 1px solid var(--border-color);
     overflow: hidden;
-    transition: all 0.2s ease;
+    transition: all 0.8s ease;
 }
 
 .player-photo:hover {
@@ -708,7 +732,7 @@ svg, svg path {
     font-weight: bold;
     text-shadow: 0 0 8px rgba(0, 255, 141, 0.8),
                  0 0 12px rgba(0, 255, 141, 0.5);
-    transition: color 1s ease, text-shadow 1s ease !important;
+    transition: color 0.8s ease, text-shadow 0.8s ease !important;
 }
 
 /* ============================
@@ -821,7 +845,7 @@ div.perfect-percentage,
     border: none;
     color: var(--text-primary);
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.8s ease;
     font-size: 36px;
     pointer-events: auto;
     padding: 20px;
@@ -883,28 +907,25 @@ div.perfect-percentage,
 /* Tablet and mobile styles */
 @media (max-width: 768px) {
     body {
-        padding: 16px;
-        padding-top: 70px; /* Add padding to the top to push content down */
+        padding-top: 35px; /* Reduced padding */
     }
 
     .menu-button {
-        top: 15px; 
+        top: -33px;
         left: 15px;
     }
 
     .score-header {
-        margin-top: 10px;
+        margin-top: 30px; /* Less space on mobile */
     }
 
     .side-panel {
-        width: 85%; /* Wider on mobile but still leave some margin */
+        width: 70%; /* Wider on mobile but still leave some margin */
         max-width: 300px;
     }
 
     .score-container {
-        gap: 10px;
-        max-width: 100%;
-        padding: 0 40px;
+        padding: 0 20px;
     }
 
     /* Team logos */
@@ -930,6 +951,11 @@ div.perfect-percentage,
     }
 
     /* Adjustments for scrolled header */
+    .score-header.scrolled {
+        margin-top: 0;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
     .score-header.scrolled .team-logo {
         width: 22px;
         height: 22px;
@@ -1017,5 +1043,14 @@ div.perfect-percentage,
         padding: 15px;
         height: 100px;
         border-radius: 12px;
+    }
+
+    /* Menu icons */
+    .palette-outline {
+        fill: var(--text-primary) !important;
+    }
+    
+    .color-toggle.active .palette-outline {
+        fill: var(--text-primary) !important;
     }
 }

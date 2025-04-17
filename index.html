@@ -6,40 +6,35 @@
     <title>Game Stats</title>
     <link rel="stylesheet" href="styles.css">
 </head>
-<body>
-    <button class="menu-button" id="menuButton" aria-label="Open menu">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
-            <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-        </svg>
-    </button>
-    
+<body>    
     <!-- Side Panel -->
     <div class="side-panel" id="sidePanel">
         <div class="side-panel-content">
-            <div class="side-panel-header">
-                <h3>Settings</h3>
-                <button class="close-button" id="closePanel" aria-label="Close menu">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
-                        <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 6L6 18M6 6l12 12"/>
-                    </svg>
-                </button>
-            </div>
             <div class="side-panel-options">
-                <div class="menu-option">
-                    <span>Theme</span>
+                <div class="back-button-container">
+                    <button class="back-button" id="closePanel" aria-label="Close menu">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+                            <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 18l-6-6 6-6"/>
+                        </svg>
+                    </button>
+                </div>
+                
+                <div class="menu-option" id="themeOptionWrapper">
                     <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
                         <!-- Moon SVG (for dark theme) -->
                         <svg id="moonIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
                             <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1-8.313-12.454z"/>
                         </svg>
                         <!-- Sun SVG (for light theme) -->
-                        <svg id="sunIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="display: none;">
-                            <path d="M12 2a1 1 0 0 1 1 1v1a1 1 0 0 1-2 0V3a1 1 0 0 1 1-1zm0 17a1 1 0 0 1 1 1v1a1 1 0 0 1-2 0v-1a1 1 0 0 1 1-1zm10-9a1 1 0 0 1-1 1h-1a1 1 0 0 1 0-2h1a1 1 0 0 1 1 1zM5 12a1 1 0 0 1-1 1H3a1 1 0 0 1 0-2h1a1 1 0 0 1 1 1zm14.95 6.36a1 1 0 0 1-1.41 0l-.71-.71a1 1 0 0 1 1.41-1.41l.71.71a1 1 0 0 1 0 1.41zm-11.9-11.9a1 1 0 0 1-1.41 0l-.71-.71a1 1 0 0 1 1.41-1.41l.71.71a1 1 0 0 1 0 1.41zm-1.9 12.61a1 1 0 0 1 0-1.41l.71-.71a1 1 0 0 1 1.41 1.41l-.71.71a1 1 0 0 1-1.41 0zm12.61-12.61a1 1 0 0 1 0 1.41l-.71.71a1 1 0 0 1-1.41-1.41l.71-.71a1 1 0 0 1 1.41 0zM12 6a6 6 0 1 0 0 12 6 6 0 0 0 0-12z"/>
+                        <svg id="sunIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" style="display: none;">
+                            <circle cx="12" cy="12" r="5" fill="currentColor"/>
+                            <path fill="currentColor" d="M12,3 L12,4 M12,20 L12,21 M4,12 L3,12 M21,12 L20,12 M6.5,6.5 L5.5,5.5 M17.5,6.5 L18.5,5.5 M6.5,17.5 L5.5,18.5 M17.5,17.5 L18.5,18.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
                         </svg>
                     </button>
+                    <span>Theme</span>
                 </div>
-                <div class="menu-option">
-                    <span>Colour</span>
+                
+                <div class="menu-option" id="colorOptionWrapper">
                     <button class="color-toggle" id="colorToggle" aria-label="Toggle stats colors">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
                             <path class="palette-outline" fill="currentColor" d="M12 22C6.49 22 2 17.51 2 12S6.49 2 12 2s10 4.04 10 9c0 3.31-2.69 6-6 6h-1.77c-.28 0-.5.22-.5.5 0 .12.05.23.13.33.41.47.64 1.06.64 1.67 0 1.38-1.12 2.5-2.5 2.5zm0-18c-4.41 0-8 3.59-8 8s3.59 8 8 8c.28 0 .5-.22.5-.5 0-.16-.08-.28-.14-.35-.41-.46-.63-1.05-.63-1.65 0-1.38 1.12-2.5 2.5-2.5H16c2.21 0 4-1.79 4-4 0-3.86-3.59-7-8-7z"/>
@@ -49,6 +44,7 @@
                             <circle class="palette-color yellow-dot" cx="17.5" cy="11.5" r="1.5"/>
                         </svg>
                     </button>
+                    <span>Colour</span>
                 </div>
             </div>
         </div>
@@ -57,6 +53,11 @@
     <!-- Overlay for closing panel when clicking outside -->
     <div class="overlay" id="overlay"></div>
     <div class="score-header">
+        <button class="menu-button" id="menuButton" aria-label="Open menu">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20">
+                <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+            </svg>
+        </button>
         <div class="score-container">
             <div class="team-score">
                 <div class="team-info">
