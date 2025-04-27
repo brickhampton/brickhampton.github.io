@@ -469,6 +469,7 @@ class GameStats {
      */
     setupScoreHeaderScroll() {
         const scoreHeader = document.querySelector('.score-header');
+        const navTabs = document.querySelector('.nav-tabs');
         let lastScrollTop = 0;
         let ticking = false;
     
@@ -479,8 +480,12 @@ class GameStats {
                 window.requestAnimationFrame(() => {
                     if (scrollTop > 50) {
                         scoreHeader.classList.add('scrolled');
+                        // Ensure nav tabs stay properly positioned
+                        navTabs.style.top = '85px'; // Adjust to match the scrolled header height
                     } else {
                         scoreHeader.classList.remove('scrolled');
+                        // Reset to default position
+                        navTabs.style.top = '105px'; // Adjust to match the normal header height
                     }
                     lastScrollTop = scrollTop;
                     ticking = false;

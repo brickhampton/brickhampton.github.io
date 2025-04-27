@@ -576,10 +576,19 @@ svg, svg path {
 .nav-tabs {
     display: flex;
     justify-content: space-between;
-    margin: 6px 0;
+    margin: 0; /* Changed from 6px 0 */
     border-bottom: 0.8px solid rgba(255, 255, 255, 0.10);
     border-top: 0.8px solid rgba(255, 255, 255, 0.10);
     padding: 0 16px;
+    position: sticky; /* Make it sticky */
+    top: 105px; /* Position it below the score header */
+    z-index: 98; /* Below score-header's z-index of 99 */
+    background-color: var(--bg-primary); /* Ensure background is solid */
+    transition: top 0.3s ease; /* Smooth transition when score header shrinks */
+}
+
+.score-header.scrolled + .nav-tabs {
+    top: 85px; /* Adjust this value to match the height of the scrolled score header */
 }
 
 [data-theme="light"] .nav-tabs {
@@ -606,6 +615,21 @@ svg, svg path {
     color: var(--accent-blue);
     border-bottom: 2px solid var(--accent-blue);
     font-weight: 700;
+}
+
+.nav-tabs::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    right: 0;
+    height: 0.8px;
+    background-color: rgba(255, 255, 255, 0.10);
+    z-index: -1;
+}
+
+[data-theme="light"] .nav-tabs::after {
+    background-color: rgba(0, 0, 0, 0.10);
 }
 
 /* ============================
@@ -1081,6 +1105,14 @@ div.perfect-percentage,
         padding: 15px;
         height: 100px;
         border-radius: 12px;
+    }
+
+    .nav-tabs {
+        top: 95px; /* Adjust for mobile header height */
+    }
+    
+    .score-header.scrolled + .nav-tabs {
+        top: 75px; /* Adjust for mobile scrolled header height */
     }
 
     /* Menu icons */
