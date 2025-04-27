@@ -584,11 +584,12 @@ svg, svg path {
     top: 105px; /* Position it below the score header */
     z-index: 98; /* Below score-header's z-index of 99 */
     background-color: var(--bg-primary); /* Ensure background is solid */
-    transition: top 0.3s ease; /* Smooth transition when score header shrinks */
+    transition: top 0s ease, background-color 0.8s ease, border-color 0.8s ease;
 }
 
 .score-header.scrolled + .nav-tabs {
     top: 85px; /* Adjust this value to match the height of the scrolled score header */
+    transition: top 0s ease, background-color 0.8s ease, border-color 0.8s ease;
 }
 
 [data-theme="light"] .nav-tabs {
@@ -615,21 +616,6 @@ svg, svg path {
     color: var(--accent-blue);
     border-bottom: 2px solid var(--accent-blue);
     font-weight: 700;
-}
-
-.nav-tabs::after {
-    content: '';
-    position: absolute;
-    bottom: -1px;
-    left: 0;
-    right: 0;
-    height: 0.8px;
-    background-color: rgba(255, 255, 255, 0.10);
-    z-index: -1;
-}
-
-[data-theme="light"] .nav-tabs::after {
-    background-color: rgba(0, 0, 0, 0.10);
 }
 
 /* ============================
