@@ -155,7 +155,8 @@ svg, svg path {
     z-index: 100;
     display: flex;
     align-items: center;
-    padding-left: 20px;
+    padding-left: 10px;
+    padding-top: 10px;
     /* border-bottom: 1px solid var(--border-color); */
 }
 
@@ -946,7 +947,7 @@ div.perfect-percentage,
     }
 
     .menu-container {
-        height: 30px; /* Slightly smaller on mobile */
+        height: 35px; /* Slightly smaller on mobile */
     }
 
     .score-header {
