@@ -522,7 +522,7 @@ class GameStats {
      */
     updateGameScore() {
         if (!this.matchData || !this.matchData.values) return;
-
+    
         // Get headers to find correct columns
         const headers = this.matchData.values[0].map(header => header.toLowerCase().trim());
         const homeIndex = headers.indexOf('home');
@@ -532,12 +532,12 @@ class GameStats {
         const seasonIndex = headers.indexOf('season');
         const gameIndex = headers.indexOf('game');
         const timeIndex = headers.indexOf('time');  
-
+    
         if (homeIndex === -1 || awayIndex === -1 || opponentIndex === -1 || seasonIndex === -1) {
             console.error('Required columns not found in match_history');
             return;
         }
-
+    
         // Find the matching game in match history using both season and game number
         const currentGame = this.gameGroups[this.currentGameIndex][0];
         const currentGameNumber = this.getValue(currentGame, 'game');
@@ -552,107 +552,105 @@ class GameStats {
             console.error('No matching game found in match history');
             return;
         }
-
+    
         // Get game status
         const gameTime = timeIndex !== -1 ? matchRow[timeIndex] : null;
         const gameStatus = this.formatGameStatus(matchRow[dateIndex], gameTime);
-
+    
         // Update game info container
         const gameInfoHTML = `
             <div class="game-status">${gameStatus}</div>
             <div class="game-date">${this.formatDate(matchRow[dateIndex])}</div>
             <div class="game-number">${currentSeason} Game ${matchRow[gameIndex]}</div>
         `;
-
+    
         document.querySelector('.game-info').innerHTML = gameInfoHTML;
         
         // Get scores as numbers for comparison
         const homeScore = parseInt(matchRow[homeIndex]) || 0;
         const awayScore = parseInt(matchRow[awayIndex]) || 0;
-
+    
         // Update team names and scores
         document.getElementById('team-a-name').textContent = 'Brickhampton';
         document.getElementById('team-b-name').textContent = matchRow[opponentIndex];
         document.getElementById('team-a-score').textContent = homeScore;
         document.getElementById('team-b-score').textContent = awayScore;
         
-        // Remove any existing logos
-        const existingLogoA = document.getElementById('team-a-logo');
-        const existingLogoB = document.getElementById('team-b-logo');
-        if (existingLogoA) existingLogoA.remove();
-        if (existingLogoB) existingLogoB.remove();
-        
         // Get team containers
-        const teamAInfo = document.getElementById('team-a-score').parentElement;
-        const teamBInfo = document.getElementById('team-b-score').parentElement;
-    
+        const teamAInfo = document.querySelector('.team-info:has(#team-a-score)');
+        const teamBInfo = document.querySelector('.team-info:has(#team-b-score)');
+        
+        if (!teamAInfo || !teamBInfo) {
+            console.error('Team info containers not found');
+            return;
+        }
+        
+        // Get logo containers (they now exist in the HTML)
+        const logoA = document.getElementById('team-a-logo');
+        const logoB = document.getElementById('team-b-logo');
+        
+        // Clear existing logo content
+        if (logoA) logoA.innerHTML = '';
+        if (logoB) logoB.innerHTML = '';
+        
         // Get opponent name
         const opponentName = matchRow[opponentIndex];
         console.log('Looking for opponent:', opponentName);
-        console.log('Available teams:', Object.keys(this.teamLogos));
-
+        
         const brickhamptonInfo = this.teamLogos['Brickhampton'] || { logo: '', background: '#333', zoom: '100%' };
         const opponentInfo = this.teamLogos[opponentName] || { logo: '', background: '#333', zoom: '100%' };
+        
+        // Update team A logo styles
+        if (logoA) {
+            // Set background style
+            if (brickhamptonInfo.background && brickhamptonInfo.background.includes('gradient')) {
+                logoA.style.background = brickhamptonInfo.background;
+            } else {
+                logoA.style.backgroundColor = brickhamptonInfo.background || '#333';
+            }
     
-        // Create team A logo
-        const logoA = document.createElement('div');
-        logoA.id = 'team-a-logo';
-        logoA.className = 'team-logo team-a-logo';
-
-        // Set background style
-        if (brickhamptonInfo.background && brickhamptonInfo.background.includes('gradient')) {
-            logoA.style.background = brickhamptonInfo.background;
-        } else {
-            logoA.style.backgroundColor = brickhamptonInfo.background || '#333';
+            // Create and add the inner logo image if available
+            if (brickhamptonInfo.logo) {
+                const logoImgA = document.createElement('div');
+                logoImgA.className = 'logo-image';
+                logoImgA.style.backgroundImage = `url('${brickhamptonInfo.logo}')`;
+                logoImgA.style.backgroundSize = brickhamptonInfo.zoom || '100%';
+                logoA.appendChild(logoImgA);
+            }
         }
-
-        // Create and add the inner logo image if available
-        if (brickhamptonInfo.logo) {
-            const logoImgA = document.createElement('div');
-            logoImgA.className = 'logo-image';
-            logoImgA.style.backgroundImage = `url('${brickhamptonInfo.logo}')`;
-            logoImgA.style.backgroundSize = brickhamptonInfo.zoom || '100%';
-            logoA.appendChild(logoImgA);
+    
+        // Update team B logo styles
+        if (logoB) {
+            // Set background style
+            if (opponentInfo.background && opponentInfo.background.includes('gradient')) {
+                logoB.style.background = opponentInfo.background;
+            } else {
+                logoB.style.backgroundColor = opponentInfo.background || '#333';
+            }
+    
+            // Create and add the inner logo image if available
+            if (opponentInfo.logo) {
+                const logoImgB = document.createElement('div');
+                logoImgB.className = 'logo-image';
+                logoImgB.style.backgroundImage = `url('${opponentInfo.logo}')`;
+                logoImgB.style.backgroundSize = opponentInfo.zoom || '100%';
+                logoB.appendChild(logoImgB);
+            }
         }
-
-        // Insert into team info container
-        teamAInfo.appendChild(logoA);
-
-        // Create team B logo - similarly structured
-        const logoB = document.createElement('div');
-        logoB.id = 'team-b-logo';
-        logoB.className = 'team-logo team-b-logo';
-
-        // Set background style
-        if (opponentInfo.background && opponentInfo.background.includes('gradient')) {
-            logoB.style.background = opponentInfo.background;
-        } else {
-            logoB.style.backgroundColor = opponentInfo.background || '#333';
-        }
-
-        // Create and add the inner logo image if available
-        if (opponentInfo.logo) {
-            const logoImgB = document.createElement('div');
-            logoImgB.className = 'logo-image';
-            logoImgB.style.backgroundImage = `url('${opponentInfo.logo}')`;
-            logoImgB.style.backgroundSize = opponentInfo.zoom || '100%';
-            logoB.appendChild(logoImgB);
-        }
-
-        // Insert into team info container
-        teamBInfo.appendChild(logoB);
-
+    
         // Remove any existing winner/loser classes
         teamAInfo.classList.remove('winner', 'loser', 'winner-left');
         teamBInfo.classList.remove('winner', 'loser', 'winner-right');
-
+    
         // Apply winner/loser styling based on score comparison
         if (homeScore > awayScore) {
             teamAInfo.classList.add('winner', 'winner-left');
             teamBInfo.classList.add('loser');
+            console.log('Team B is loser');
         } else if (awayScore > homeScore) {
             teamAInfo.classList.add('loser');
             teamBInfo.classList.add('winner', 'winner-right');
+            console.log('Team A is loser');
         } else if (gameStatus === 'Final') {  // Only add winner classes if game is final
             teamAInfo.classList.add('winner');
             teamBInfo.classList.add('winner');

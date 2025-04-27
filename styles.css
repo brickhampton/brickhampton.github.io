@@ -117,9 +117,9 @@ svg, svg path {
    ============================ */
 
 .menu-button {
-    position: absolute;
-    top: -35px;
-    left: 20px;
+    position: relative;
+    top: 0;
+    left: 0;
     z-index: 998;
     width: 30px;
     height: 30px;
@@ -143,6 +143,20 @@ svg, svg path {
     color: var(--text-primary);
     width: 20px;
     height: 20px;
+}
+
+.menu-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 35px;
+    background-color: var(--bg-primary);
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    padding-left: 20px;
+    /* border-bottom: 1px solid var(--border-color); */
 }
 
 .side-panel {
@@ -337,8 +351,8 @@ svg, svg path {
 
 .score-header {
     position: sticky;
-    top: 0;
-    z-index: 100;
+    top: 35px;
+    z-index: 99;
     background-color: var(--bg-primary);
     padding: 10px 0;
     margin-top: 35px; /* Space for menu button */
@@ -349,11 +363,17 @@ svg, svg path {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 40px;
+    gap: 20px; 
     max-width: 800px;
     margin: 0 auto;
-    padding: 0 40px;
+    padding: 0 10px; 
     position: relative;
+}
+
+.score-name-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 /* Team and Score */
@@ -369,10 +389,13 @@ svg, svg path {
     min-width: 0;
     text-align: center;
     display: flex;
-    flex-direction: column !important; /* Force column layout */
+    flex-direction: row !important; 
     align-items: center;
+    justify-content: center;
     position: relative;
     transition: opacity 0.8s ease;
+    padding: 0 5px;
+    gap: 8px;
 }
 
 .score {
@@ -398,10 +421,21 @@ svg, svg path {
     opacity: 1;
 }
 
-.team-info.loser .score,
-.team-info.loser .team-name {
-    color: #bfbfbf; 
-    opacity: 0.85; 
+.team-score .team-info.loser .score-name-container .score {
+    color: #bfbfbf !important; 
+    opacity: 0.85 !important;
+}
+
+.team-score .team-info.loser .score-name-container .team-name {
+    color: #bfbfbf !important;
+    opacity: 0.85 !important;
+}
+
+/* Light theme specific styling */
+[data-theme="light"] .team-score .team-info.loser .score-name-container .score,
+[data-theme="light"] .team-score .team-info.loser .score-name-container .team-name {
+    color: #999999 !important;
+    opacity: 0.85 !important;
 }
 
 /* Winner indicator triangles */
@@ -413,23 +447,25 @@ svg, svg path {
 .winner-right::before {
     content: '';
     position: absolute;
-    top: 15px;
+    top: 50%;
+    transform: translateY(-50%);
     width: 0;
     height: 0;
     border-style: solid;
     border-radius: 2px;
     transition: border-color 0.8s ease;
+    z-index: 10; 
 }
 
 .winner-left::before {
-    left: -42px;
-    border-width: 6px 0 6px 8px;
+    left: -50px; 
+    border-width: 5px 0 5px 6px;
     border-color: transparent transparent transparent var(--text-primary);
 }
 
 .winner-right::before {
-    right: -42px;
-    border-width: 6px 8px 6px 0;
+    right: -50px; 
+    border-width: 5px 6px 5px 0;
     border-color: transparent var(--text-primary) transparent transparent;
 }
 
@@ -466,27 +502,25 @@ svg, svg path {
 
 /* Team Logos */
 .team-logo {
-    width: 32px;
-    height: 32px;
+    width: 28px;
+    height: 28px;
     border-radius: 50%;
     overflow: hidden;
-    position: absolute;
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 5;
+    position: relative;
+    margin-bottom: 0; /* Remove bottom margin */
+    flex-shrink: 0; /* Prevent logo from shrinking */
 }
 
-.team-a-logo {
-    left: 15px;
-    top: 33%;
-    transform: translateY(-50%);
-}
-
-.team-b-logo {
-    right: 15px;
-    top: 33%;
-    transform: translateY(-50%);
+.team-a-logo, .team-b-logo {
+    position: relative; /* Changed from absolute positioning */
+    top: auto; /* Remove top positioning */
+    left: auto; /* Remove left positioning */
+    right: auto; /* Remove right positioning */
+    transform: none; /* Remove transform */
 }
 
 .logo-image {
@@ -498,8 +532,9 @@ svg, svg path {
 
 /* Scrolled state adjustments */
 .score-header.scrolled {
-    padding: 2px 0;
+    padding: 12px 0;
     margin-top: 0;
+    top: 35px;
 }
 
 .score-header.scrolled .score {
@@ -511,7 +546,7 @@ svg, svg path {
 }
 
 .score-header.scrolled .team-info {
-    gap: 1px;
+    gap: 10px;
 }
 
 .score-header.scrolled .game-date {
@@ -525,7 +560,7 @@ svg, svg path {
 }
 
 .score-header.scrolled .game-info {
-    padding: 0 10px;
+    padding: 0 -10px;
     transform: scale(0.9);
 }
 
@@ -907,51 +942,53 @@ div.perfect-percentage,
 /* Tablet and mobile styles */
 @media (max-width: 768px) {
     body {
-        padding-top: 35px; /* Reduced padding */
+        padding-top: 0px; /* Reduced padding */
     }
 
-    .menu-button {
-        top: -33px;
-        left: 15px;
+    .menu-container {
+        height: 30px; /* Slightly smaller on mobile */
     }
 
     .score-header {
         margin-top: 30px; /* Less space on mobile */
+        top: 30px; /* Match the menu-container height */
     }
 
     .side-panel {
-        width: 70%; /* Wider on mobile but still leave some margin */
+        width: 50%; /* Wider on mobile but still leave some margin */
         max-width: 300px;
     }
 
     .score-container {
-        padding: 0 20px;
+        gap: 0px; /* Reduce gap even more on mobile */
+        padding: 0;
     }
 
     /* Team logos */
     .team-logo {
-        width: 28px;
+        width: 28px; /* Slightly smaller on mobile */
         height: 28px;
     }
-    
-    .team-a-logo {
-        left: -36px;
-        top: 22px;
+
+    .team-info:has(.team-a-logo) {
+        flex-direction: row;
     }
-    
-    .team-b-logo {
-        right: -36px;
-        top: 22px;
+
+    .team-info:has(.team-b-logo) {
+        flex-direction: row-reverse;
     }
 
     .team-info {
         display: flex;
-        flex-direction: column;
+        flex-direction: row;
         align-items: center;
+        gap: 8px;
+        justify-content: center;
     }
 
     /* Adjustments for scrolled header */
     .score-header.scrolled {
+        top: 30px; /* Keep this consistent on mobile */
         margin-top: 0;
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     }
@@ -959,8 +996,6 @@ div.perfect-percentage,
     .score-header.scrolled .team-logo {
         width: 22px;
         height: 22px;
-        top: 50%;
-        transform: translateY(-50%);
     }
 
     .score-header.scrolled .winner-left::before,
@@ -970,9 +1005,19 @@ div.perfect-percentage,
     }
 
     .score-header.scrolled .score {
-        font-size: 16px;
-        margin-bottom: 0;
-        line-height: 1;
+        font-size: 18px;
+    }
+
+    .score-header.scrolled .team-name {
+        font-size: 9.5px;
+    }
+
+    .score-header.scrolled .score-container {
+        gap: 0px; /* Adjust for mobile scrolled state */
+    }
+
+    .score-header.scrolled .team-info {
+        gap: 10px; /* Even tighter spacing for mobile scrolled state */
     }
 
     /* Game info */
@@ -981,30 +1026,27 @@ div.perfect-percentage,
     }
 
     .game-info {
-        min-width: 120px;
-        padding: 0 10px;
+        min-width: 90px;
+        padding: 0 3px;
     }
     
     /* Team and score */
     .team-name {
-        max-width: 100px;
+        max-width: 70px; 
+        font-size: 10.5px; 
     }
     
     .score {
-        font-size: 36px;
+        font-size: 30px; 
     }
 
     /* Winner indicators */
     .winner-left::before {
-        left: -50px;
-        top: 15px;
-        border-width: 6px 0 6px 8px;
+        left: -5px;
     }
     
     .winner-right::before {
-        right: -50px;
-        top: 15px;
-        border-width: 6px 8px 6px 0;
+        right: -5px; 
     }
 
     /* Navigation tabs */
