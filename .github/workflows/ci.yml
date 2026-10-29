@@ -15,3 +15,22 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
+
+  # Checks the live database the site reads: the history is all there, and the public key can only read.
+  database:
+    runs-on: ubuntu-latest
+    env:
+      API: https://iwwmtturlbxebaiagscc.supabase.co/rest/v1
+      KEY: sb_publishable_RVq88Qby-XtccIL-JUwWUw_w5OiMjzC
+    steps:
+      - name: Count the rows
+        run: |
+          count() { curl -fsS -o /dev/null -D - "$API/$1?select=*" -H "apikey: $KEY" -H "Prefer: count=exact" -H "Range: 0-0" | tr -d '\r' | sed -n 's/^content-range: .*\///Ip'; }
+          for t in seasons players games lines; do echo "$t: $(count $t)"; done
+          test "$(count games)" -ge 81 && test "$(count lines)" -ge 449 && test "$(count players)" -ge 21
+      - name: The public key can't write
+        run: |
+          code=$(curl -s -o /dev/null -w '%{http_code}' -X POST "$API/seasons" -H "apikey: $KEY" -H "Content-Type: application/json" -d '{"code":"X99","sort":999}')
+          echo "insert answered $code"; test "$code" -ge 400
+          code=$(curl -s -o /dev/null -w '%{http_code}' "$API/admin" -H "apikey: $KEY")
+          echo "PIN table answered $code"; test "$code" -ge 400
