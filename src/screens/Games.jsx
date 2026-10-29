@@ -14,12 +14,13 @@ function SeasonRecord({ games }) {
   </>;
 }
 
-const short = d => fmtDate(d, { day: 'numeric', month: 'short' });
+// Day and full month. On a phone the month drops under the day, so every row lines up the same way.
+const DayMonth = ({ d }) => { const [day, month] = fmtDate(d, { day: 'numeric', month: 'long' }).split(' '); return <b><span className="dm">{day}</span> <span className="dm">{month}</span></b>; };
 
 function GameRow({ g }) {
   if (!Object.keys(g.rows).length) return (
     <button className="grow-row nostats" disabled>
-      <span className="d"><b>{short(g.date)}</b><span>Game {g.no}</span></span>
+      <span className="d"><DayMonth d={g.date} /><span>Game {g.no}</span></span>
       <span className="o"><span className="opp">vs {g.opp}</span></span><span className="res"><span className={`badge ${g.result}`}>{g.result === 'U' ? 'Unknown' : RES[g.result]}</span></span>
       <span className="tp"><span className="ns">No stats recorded</span></span>
       <span className="pts num">–</span>
@@ -28,7 +29,7 @@ function GameRow({ g }) {
   const t = topPer(g);
   return (
     <button className="grow-row" data-g={g.id} onClick={() => go('game', { gameId: g.id })}>
-      <span className="d"><b>{short(g.date)}</b><span>Game {g.no}</span></span>
+      <span className="d"><DayMonth d={g.date} /><span>Game {g.no}</span></span>
       <span className="o"><span className="opp">vs {g.opp}</span>{g.live ? <span className="newtag">New</span> : null}</span>
       <span className="res"><span className={`badge ${g.result}`}>{g.result === 'U' ? 'Unknown' : RES[g.result]}</span></span>
       <span className="tp"><Avatar id={t.id} num={numIn(g, t.id)} /><span>{P(t.id).name}</span><PerPill v={t.s.per} /></span>
