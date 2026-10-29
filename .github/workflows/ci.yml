@@ -34,3 +34,10 @@ jobs:
           echo "insert answered $code"; test "$code" -ge 400
           code=$(curl -s -o /dev/null -w '%{http_code}' "$API/admin" -H "apikey: $KEY")
           echo "PIN table answered $code"; test "$code" -ge 400
+      - name: Saving a game needs Admin
+        run: |
+          code=$(curl -s -o /tmp/out -w '%{http_code}' -X POST "$API/rpc/save_game" -H "apikey: $KEY" -H "Content-Type: application/json" \
+            -d '{"p_token":"00000000-0000-0000-0000-000000000000","p_game":{}}')
+          echo "save_game without a PIN answered $code: $(cat /tmp/out)"
+          test "$code" != 404 || { echo "save_game is missing: run supabase/04-record.sql in the Supabase SQL editor"; exit 1; }
+          test "$code" -ge 400

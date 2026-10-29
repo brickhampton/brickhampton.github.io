@@ -3,7 +3,7 @@ import { S, useStore, boot, set } from './lib/store.js';
 import { allGames, statPlayers } from './lib/core.js';
 import { go, fromHash, peekHash, openTab, openPlayer, POS, posKey } from './lib/nav.js';
 import { reduced } from './lib/charts.js';
-import { Gear, Shield } from './components/icons.jsx';
+import { Gear, Shield, Plus } from './components/icons.jsx';
 import { Skeleton, EmptyState } from './components/ui.jsx';
 import { Home, heroH } from './screens/Home.jsx';
 import { Games } from './screens/Games.jsx';
@@ -11,6 +11,11 @@ import { Game } from './screens/Game.jsx';
 import { Stats } from './screens/Stats.jsx';
 import { Player } from './screens/Player.jsx';
 import { Settings } from './screens/Settings.jsx';
+import { Setup } from './screens/Setup.jsx';
+import { Entry } from './screens/Entry.jsx';
+import { SheetRoot } from './components/Sheet.jsx';
+import { recordGame } from './components/PinSheet.jsx';
+import { isAdmin, lock, touch } from './lib/admin.js';
 
 const $ = s => document.querySelector(s);
 peekHash();
@@ -90,6 +95,10 @@ export default function App() {
       e.preventDefault(); e.stopPropagation(); openPlayer(av.dataset.av);
     };
     addEventListener('click', avClick, true);
+    // Any tap keeps Admin mode unlocked; 15 minutes without one locks it.
+    const tap = () => touch();
+    addEventListener('pointerdown', tap, true);
+    const idle = setInterval(() => { if (S.adminToken && !isAdmin()) lock(); }, 30e3);
     const rz = () => moveTabInd();
     addEventListener('resize', rz);
     document.fonts?.ready.then(moveTabInd);
@@ -111,7 +120,7 @@ export default function App() {
     let raf = 0;
     const gs = $('#s-games'), onScroll = () => { if (!raf) raf = requestAnimationFrame(() => { raf = 0; homeFade(); }); };
     gs.addEventListener('scroll', onScroll, { passive: true });
-    return () => { removeEventListener('popstate', pop); removeEventListener('click', avClick, true); removeEventListener('resize', rz); offs.forEach(f => f()); gs.removeEventListener('scroll', onScroll); };
+    return () => { removeEventListener('popstate', pop); removeEventListener('click', avClick, true); removeEventListener('pointerdown', tap, true); clearInterval(idle); removeEventListener('resize', rz); offs.forEach(f => f()); gs.removeEventListener('scroll', onScroll); };
   }, []);
 
   // Which tab is lit: Home (top of Games) lights none.
@@ -148,7 +157,7 @@ export default function App() {
 
   return (
     <div id="app">
-      <header className="appbar pad-x" id="appbar">
+      <header className="appbar pad-x" id="appbar" hidden={scr === 'setup' || scr === 'entry'}>
         <div className="wordmark home-link" id="go-home" role="link" tabIndex={0} aria-label="Brickhampton home" onClick={goHome}
           onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); goHome(); } }}>Brickhampton</div>
         <nav className="tabs" aria-label="Main">
@@ -156,8 +165,9 @@ export default function App() {
             <button key={k} data-tab={k} aria-current={bodyScr !== 'home' && tab === k} onClick={() => onTab(k)}>{l}</button>))}
         </nav>
         <span className="grow" />
-        <button className="admintag" id="admintag" hidden><Shield /><span className="nl">Admin</span></button>
+        <button className="admintag" id="admintag" hidden={!isAdmin()} onClick={() => go('settings')}><Shield /><span className="nl">Admin</span></button>
         <button className="gear" id="open-settings" aria-label="Settings" aria-current={scr === 'settings'} onClick={() => go('settings')}><Gear /></button>
+        <button className="btn primary" id="new-game" aria-label="Record a game" disabled={!s.ready} onClick={recordGame}><Plus /><span className="nl">Record a game</span></button>
         <span className="tab-ind" aria-hidden="true" />
       </header>
 
@@ -170,7 +180,10 @@ export default function App() {
         <Section id="stats" show={scr === 'stats'}><div className="wrap stats" id="stats">{body('stats', Stats, 'stats')}</div></Section>
         <Section id="player" show={scr === 'player'}><div className="wrap player" id="player">{body('player', Player, 'player')}</div></Section>
         <Section id="settings" show={scr === 'settings'}><div className="wrap settings" id="settings">{body('settings', Settings, 'games')}</div></Section>
+        <Section id="setup" show={scr === 'setup'}>{s.ready && scr === 'setup' ? <Setup /> : <div />}</Section>
+        <section className="screen" id="s-entry" hidden={scr !== 'entry'} style={{ overflow: 'hidden' }}>{s.ready && scr === 'entry' && <Entry />}</section>
       </main>
+      <SheetRoot />
     </div>
   );
 }

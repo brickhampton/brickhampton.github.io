@@ -5,6 +5,7 @@ Run these once, in order, in the Supabase dashboard: **SQL Editor → New query*
 1. `01-schema.sql`: the tables, read-only access for everyone, and the Admin PIN check.
 2. `02-history.sql`: every game from the master sheet, W24 to S26.
 3. `03-set-pin.sql`: put your four-digit PIN between the quotes first. This is the only place the PIN is typed outside the app.
+4. `04-record.sql`: saving a recorded game, and editing a season's opponents.
 
 How it's protected:
 

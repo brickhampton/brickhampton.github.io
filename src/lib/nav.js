@@ -1,4 +1,5 @@
 import { S, set } from './store.js';
+import { rec } from './record.js';
 import { P, allGames, statPlayers } from './core.js';
 
 // Screens keep their scroll position, so switching tabs or going back never jumps to the top.
@@ -31,6 +32,8 @@ export function fromHash(opts = {}) {
   if (scr === 'game' && id && allGames().some(g => g.id === id)) return go('game', { gameId: id, ...opts });
   if (scr === 'player' && id && P(id)) return go('player', { playerId: id, pFrom: S.pFrom || 'stats', ...opts });
   if (scr === 'stats' || scr === 'settings') return go(scr, opts);
+  // A game being recorded is kept on this device, so a reload goes straight back to it.
+  if ((scr === 'setup' || scr === 'entry') && rec()) return go(scr === 'entry' && !rec().nums ? 'setup' : scr, opts);
   if (scr === 'games') return go('games', opts);
   return go('games', { top: true, ...opts });
 }
