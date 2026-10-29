@@ -4,7 +4,10 @@ import { go } from '../lib/nav.js';
 import { drawGameTrend, GT_STATS, moreFor } from '../lib/charts.js';
 import { Avatar } from '../components/Avatar.jsx';
 import { BoxScore } from '../components/BoxScore.jsx';
-import { Back, Fwd, BIC } from '../components/icons.jsx';
+import { Back, Fwd, BIC, Pencil } from '../components/icons.jsx';
+import { isAdmin } from '../lib/admin.js';
+import { openSheet } from '../components/Sheet.jsx';
+import { EditGame } from './EditGame.jsx';
 import { Chart, StatChips } from '../components/ui.jsx';
 
 export function ShootBar({ k, label, m, a, v }) {
@@ -63,6 +66,7 @@ export function Game() {
   return <>
     <div className="gnav">
       <button className="btn ghost" id="g-back" onClick={() => go('games', { gSeason: g.season })}><Back />All games</button>
+      {isAdmin() && <button className="btn admin-edit" id="g-edit" onClick={() => openSheet(<EditGame id={g.id} />, { wide: true })}><Pencil width="16" height="16" />Edit game</button>}
       <span className="grow" />
       <button className="btn ghost" id="g-prev" aria-label="Previous game" disabled={!prev} onClick={() => prev && go('game', { gameId: prev.id })}><Back /><span className="nl">Previous game</span></button>
       <button className="btn ghost" id="g-next" aria-label="Next game" disabled={!next} onClick={() => next && go('game', { gameId: next.id })}><span className="nl">Next game</span><Fwd /></button>

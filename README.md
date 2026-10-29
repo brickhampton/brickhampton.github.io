@@ -33,5 +33,5 @@ node scripts/make-seed-sql.mjs   # rebuild supabase/02-history.sql from src/data
 
 1. Read-only site from the imported history (done).
 2. Supabase database, plus a scheduled ping so the free project never pauses (done).
-3. Record a game behind the Admin PIN: Who played today, the tap entry screen, undo, end game (this).
-4. Admin mode: PIN checked on the server with lockout, auto-lock after 15 minutes, and every Admin edit.
+3. Record a game behind the Admin PIN: Who played today, the tap entry screen, undo, end game (done).
+4. Admin mode: seasons, results, roster, opponents, Edit game, Delete game, Change history with Undo, CSV backup (this).
