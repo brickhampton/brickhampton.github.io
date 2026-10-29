@@ -19,6 +19,8 @@ export const S = {
   roster: [], subs: [], games: [], seasons: [], current: null, opps: {},
   // navigation
   screen: 'games', gamesSub: 'games', gameId: null, playerId: null, pFrom: null, pScope: null, homeTop: true, navTop: true, slide: 0, nav: 0,
+  // admin mode and the open sheet
+  adminToken: null, adminAt: 0, sheet: null,
   ...freshUi(),
 };
 
@@ -36,8 +38,12 @@ export function set(patch) { Object.assign(S, typeof patch === 'function' ? patc
 const subscribe = l => { listeners.add(l); return () => listeners.delete(l); };
 export function useStore() { useSyncExternalStore(subscribe, () => version); return S; }
 
+// Runs whenever fresh data arrives (the game being recorded puts its new subs back in).
+export const afterLoad = [];
+
 // Fill in view choices that depend on the data.
 function fit() {
+  afterLoad.forEach(f => f());
   const codes = S.seasons;
   if (!S.gSeason || (S.gSeason !== 'ALL' && !codes.includes(S.gSeason))) S.gSeason = S.current;
   if (!S.sSeason || (S.sSeason !== 'ALL' && !codes.includes(S.sSeason))) S.sSeason = S.current;
