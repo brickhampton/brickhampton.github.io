@@ -7,7 +7,9 @@ Live at **https://brickhampton.github.io**. Anyone with the link can view; editi
 
 - React + Vite single-page app, hosted free on GitHub Pages (`.github/workflows/deploy.yml` publishes every push to `main`).
 - Pages have their own addresses (`#/game/S26-5`, `#/player/lim`, `#/stats`), so a game or player can be shared as a link.
-- Data: the imported master sheet (`src/data/seed.js`) for now. The Supabase database arrives in Phase 2.
+- Data: Supabase (free tier). Setup is in `supabase/README.md`. Anyone can read; every change goes through database functions that need an Admin session opened with the PIN.
+- `.github/workflows/keep-awake.yml` reads one row every three days so the free project never pauses.
+- Each browser keeps a copy of the last data it loaded, so the site opens instantly and still shows the stats on a bad connection.
 
 ## Stats
 
@@ -24,11 +26,12 @@ npm install
 npm run dev        # local site at http://localhost:5173
 npm run build      # production build in dist/
 npm run check -- path/to/brickhampton-master-data.csv   # compare the import with the master sheet, row by row
+node scripts/make-seed-sql.mjs   # rebuild supabase/02-history.sql from src/data/seed.js
 ```
 
 ## Phases
 
-1. Read-only site from the imported history (this).
-2. Supabase database, plus a scheduled ping so the free project never pauses.
+1. Read-only site from the imported history (done).
+2. Supabase database, plus a scheduled ping so the free project never pauses (this).
 3. Record a game: Who played today, the tap entry screen, undo, end game.
 4. Admin mode: PIN checked on the server with lockout, auto-lock after 15 minutes, and every Admin edit.

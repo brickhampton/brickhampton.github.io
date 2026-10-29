@@ -35,6 +35,12 @@ export function fromHash(opts = {}) {
   return go('games', { top: true, ...opts });
 }
 
+// Before the games have loaded, show the right screen's loading shimmer.
+export function peekHash() {
+  const scr = location.hash.replace(/^#\/?/, '').split('/')[0];
+  if (['game', 'player', 'stats', 'settings', 'games'].includes(scr)) S.screen = scr;
+}
+
 export const openTab = tab => {
   if (tab === 'games') return go(S.gamesSub === 'game' && S.gameId && allGames().some(g => g.id === S.gameId) ? 'game' : 'games');
   if (tab === 'player') return S.playerId && P(S.playerId) ? go('player', { pFrom: S.screen }) : openPlayer(statPlayers()[0]);
