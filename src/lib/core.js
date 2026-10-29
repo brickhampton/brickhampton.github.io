@@ -41,7 +41,7 @@ function subNums(g) {
   subNumCache.set(g, out);
   return out;
 }
-export const numIn = (g, id) => subNums(g)[id];
+export const numIn = (g, id) => g.nums?.[id] ?? subNums(g)[id];
 
 /* ================= stats ================= */
 // PER uses Geoff's current formula for every game, old or new (2026-10-29).

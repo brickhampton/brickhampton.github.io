@@ -1,5 +1,5 @@
 import { useSyncExternalStore } from 'react';
-import { loadData } from './data.js';
+import { loadData, cachedData } from './data.js';
 
 // One shared state object for the whole app, in the same shape the mockup used.
 // Team data (games, players, seasons, opponents) comes from the data layer.
@@ -36,18 +36,24 @@ export function set(patch) { Object.assign(S, typeof patch === 'function' ? patc
 const subscribe = l => { listeners.add(l); return () => listeners.delete(l); };
 export function useStore() { useSyncExternalStore(subscribe, () => version); return S; }
 
-export async function boot() {
-  try {
-    const d = await loadData();
-    Object.assign(S, d, { ready: true });
-    // Fill in view choices that depend on the data.
-    const codes = S.seasons;
-    if (!S.gSeason || (S.gSeason !== 'ALL' && !codes.includes(S.gSeason))) S.gSeason = S.current;
-    if (!S.sSeason || (S.sSeason !== 'ALL' && !codes.includes(S.sSeason))) S.sSeason = S.current;
-    if (!Array.isArray(S.trend)) S.trend = S.roster.map(p => p.id);
-    if (!Array.isArray(S.h2h)) S.h2h = S.roster.slice(0, 2).map(p => p.id);
-  } catch (e) {
-    S.error = e?.message || String(e);
-  }
-  notify();
+// Fill in view choices that depend on the data.
+function fit() {
+  const codes = S.seasons;
+  if (!S.gSeason || (S.gSeason !== 'ALL' && !codes.includes(S.gSeason))) S.gSeason = S.current;
+  if (!S.sSeason || (S.sSeason !== 'ALL' && !codes.includes(S.sSeason))) S.sSeason = S.current;
+  if (!Array.isArray(S.trend)) S.trend = S.roster.map(p => p.id);
+  if (!Array.isArray(S.h2h)) S.h2h = S.roster.slice(0, 2).map(p => p.id);
 }
+
+// Opens straight away on the last data this browser saw, then swaps in the latest from the database.
+// Resolves once there is something to show.
+export function boot() {
+  const cached = cachedData();
+  if (cached) { Object.assign(S, cached, { ready: true }); fit(); notify(); }
+  const fresh = loadData().then(d => { Object.assign(S, d, { ready: true, error: null, offline: false }); fit(); notify(); })
+    .catch(e => { if (S.ready) S.offline = true; else S.error = e?.message || String(e); notify(); });
+  return cached ? Promise.resolve() : fresh;
+}
+
+// Loads the latest games again, for example after a change is saved.
+export const reload = () => loadData().then(d => { Object.assign(S, d, { offline: false }); fit(); notify(); });

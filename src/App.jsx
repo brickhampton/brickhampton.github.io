@@ -1,10 +1,10 @@
 import { useEffect, useLayoutEffect, useRef } from 'react';
 import { S, useStore, boot, set } from './lib/store.js';
 import { allGames, statPlayers } from './lib/core.js';
-import { go, fromHash, openTab, openPlayer, POS, posKey } from './lib/nav.js';
+import { go, fromHash, peekHash, openTab, openPlayer, POS, posKey } from './lib/nav.js';
 import { reduced } from './lib/charts.js';
 import { Gear, Shield } from './components/icons.jsx';
-import { Skeleton } from './components/ui.jsx';
+import { Skeleton, EmptyState } from './components/ui.jsx';
 import { Home, heroH } from './screens/Home.jsx';
 import { Games } from './screens/Games.jsx';
 import { Game } from './screens/Game.jsx';
@@ -13,6 +13,7 @@ import { Player } from './screens/Player.jsx';
 import { Settings } from './screens/Settings.jsx';
 
 const $ = s => document.querySelector(s);
+peekHash();
 
 // The thin underline that slides under the current tab, sized to the words themselves.
 function moveTabInd() {
@@ -143,7 +144,7 @@ export default function App() {
     if (t === 'games' && S.screen === 'games') return $('#s-games').scrollTo({ top: heroH(), behavior: reduced ? 'auto' : 'smooth' });
     openTab(t);
   };
-  const body = (name, El, kind) => scr !== name ? null : s.error ? <p className="foot">Couldn't load the stats: {s.error}</p> : s.ready ? <El /> : <Skeleton kind={kind} />;
+  const body = (name, El, kind) => scr !== name ? null : s.error ? <EmptyState title="Couldn't load the stats" text="Check your connection, then pull down or reload to try again."><p className="foot">{s.error}</p></EmptyState> : s.ready ? <El /> : <Skeleton kind={kind} />;
 
   return (
     <div id="app">
