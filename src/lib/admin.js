@@ -1,4 +1,4 @@
-import { S, set } from './store.js';
+import { S, set, reload } from './store.js';
 import { db } from './data.js';
 
 // Admin mode. The PIN is checked by the database, which hands back a session token.
@@ -48,3 +48,17 @@ export async function adminCall(fn, args) {
 }
 
 export const changePin = pin => adminCall('admin_change_pin', { p_new: pin });
+
+// An Admin change: the database records it in Change history, then the site reloads the stats.
+export async function adminEdit(fn, args) {
+  const r = await adminCall(fn, args);
+  await reload().catch(() => {});
+  return r;
+}
+
+// The last few Admin changes, for Settings.
+export async function loadHistory() {
+  if (!isAdmin()) return;
+  const { data, error } = await db.rpc('admin_history', { p_token: S.adminToken });
+  if (!error) set({ aHist: data });
+}

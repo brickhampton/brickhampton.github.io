@@ -56,8 +56,8 @@ function homeScene(cw, ch) {
     <rect x="${vx.toFixed(1)}" y="250" width="${vw.toFixed(1)}" height="${Math.max(0, vb - 250).toFixed(1)}" fill="url(#hfloor)"/>
     ${court}${beams}
     <g>${pieces.slice(0, half).join('')}</g>
-    ${back.map((id, i) => fig(id, [270, 400, 530][i], 138, 118)).join('')}
-    ${front.map((id, i) => fig(id, [160, 290, 510, 640][i], 236, 138)).join('')}
+    ${back.map((id, i) => fig(id, 400 + (i - (back.length - 1) / 2) * Math.min(130, 520 / Math.max(1, back.length - 1)), 138, 118)).join('')}
+    ${front.map((id, i) => fig(id, (front.length === 4 ? [160, 290, 510, 640] : front.length === 3 ? [180, 300, 620] : [290, 510])[i], 236, 138)).join('')}
     <ellipse cx="400" cy="390" rx="62" ry="9" fill="#000" opacity=".4"/>${TROPHY}${ball}
     <g>${pieces.slice(half).join('')}</g>
   </svg>`;

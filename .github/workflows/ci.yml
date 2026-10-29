@@ -41,3 +41,10 @@ jobs:
           echo "save_game without a PIN answered $code: $(cat /tmp/out)"
           test "$code" != 404 || { echo "save_game is missing: run supabase/04-record.sql in the Supabase SQL editor"; exit 1; }
           test "$code" -ge 400
+      - name: Admin edits need Admin
+        run: |
+          code=$(curl -s -o /tmp/out -w '%{http_code}' -X POST "$API/rpc/undo_last" -H "apikey: $KEY" -H "Content-Type: application/json" \
+            -d '{"p_token":"00000000-0000-0000-0000-000000000000"}')
+          echo "undo_last without a PIN answered $code: $(cat /tmp/out)"
+          test "$code" != 404 || { echo "undo_last is missing: run supabase/05-admin.sql in the Supabase SQL editor"; exit 1; }
+          test "$code" -ge 400
