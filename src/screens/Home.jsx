@@ -1,7 +1,7 @@
 import { useLayoutEffect, useRef, useState } from 'react';
 import { P, statPlayers, esc } from '../lib/core.js';
 import { reduced } from '../lib/charts.js';
-import { figure } from '../components/Avatar.jsx';
+import { figure, cleanLook, HEIGHT } from '../lib/avatar.js';
 import { ChevDown } from '../components/icons.jsx';
 
 const TROPHY = `<svg x="345" y="262" width="110" height="122" preserveAspectRatio="xMidYMax meet" viewBox="0 0 24 24" aria-hidden="true"><defs><linearGradient id="ht-g" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#ffe08a"/><stop offset=".55" stop-color="#e9b949"/><stop offset="1" stop-color="#b9821f"/></linearGradient></defs>
@@ -9,22 +9,33 @@ const TROPHY = `<svg x="345" y="262" width="110" height="122" preserveAspectRati
   <path d="M7 3h10v6a5 5 0 0 1-10 0z" fill="url(#ht-g)"/><rect x="10.8" y="13.6" width="2.4" height="3.6" fill="#c9922c"/><rect x="7.5" y="17.2" width="9" height="3.3" rx="1" fill="url(#ht-g)"/>
   <path d="M9.2 5.2v3.6" stroke="#fff6d6" stroke-width="1.2" stroke-linecap="round" opacity=".8"/></svg>`;
 
-// Placeholder championship photo drawn from the same avatars as the rest of the app.
+// The team photo is posed like the real championship photo: four standing at the back with their arms round each other,
+// three crouching in front. Anyone else on the roster fills in on the shorter row.
+const POSE = { back: ['hoang', 'liu', 'yoon', 'shan'], front: ['lim', 'yao', 'lin'], hold: { shan: 'fist', yao: 'trophy', lim: 'ball' } };
+function rows(ids) {
+  const back = POSE.back.filter(id => ids.includes(id)), front = POSE.front.filter(id => ids.includes(id));
+  for (const id of ids) if (!back.includes(id) && !front.includes(id)) (back.length <= front.length ? back : front).push(id);
+  return { back, front };
+}
+// Where a point of a player's 100 × 104 drawing lands in the scene, allowing for their height.
+const at = (id, cx, top, w, x, y) => { const h = HEIGHT[cleanLook(P(id)).height], k = w / 100; return [cx + (x - 50) * h * k, top + (104 - (104 - y) * h) * k]; };
+
+// Championship photo drawn from the same avatars as the rest of the app.
 // The stage is drawn around the players at whatever shape the screen is, so the photo always fills it.
 function homeScene(cw, ch) {
   const ids = statPlayers(), A = cw / Math.max(ch, 1);
-  // Keep x 20–780 and y 60–450 (players, trophy and ball) in view; grow the other way to fill the screen.
+  // Keep the team (x 170–630, y 60–440) in view; grow the other way to fill the screen.
   // On a tall phone screen, crop the sides a little so the players are bigger, and sit them just above the middle.
-  let vw = A < 1 ? 700 : 760, vh = 390; if (A > vw / vh) vw = vh * A; else vh = vw / A;
+  let vw = A < 1 ? 520 : 760, vh = 390; if (A > vw / vh) vw = vh * A; else vh = vw / A;
   let vy = Math.min(60, 265 - vh * (A < 1 ? .44 : .5));
   // Keep the "Games" scroll hint at the bottom clear of the trophy: drop the empty sky first, then zoom out a touch.
-  const need = 410 + 64 * vw / cw;
+  const need = 428 + 64 * vw / cw;
   if (vy + vh < need) vy = Math.min(105, need - vh);
   if (vy + vh < need) { vh = need - vy; vw = vh * A; }
   const vx = 400 - vw / 2, vb = vy + vh;
   let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
-  const fig = (id, cx, top, w) => `<g class="hp" style="--hd:${(rnd() * 1.6).toFixed(2)}s"><svg x="${cx - w / 2}" y="${top}" width="${w}" height="${w * 1.04}" viewBox="0 0 100 104" overflow="visible">
-    <ellipse cx="50" cy="104" rx="30" ry="5" fill="#000" opacity=".35"/>${figure(P(id))}</svg></g>`;
+  const fig = (id, cx, top, w, crouch) => `<g class="hp" style="--hd:${(rnd() * 1.6).toFixed(2)}s"><svg x="${cx - w / 2}" y="${top}" width="${w}" height="${w * 1.04}" viewBox="0 0 100 104" overflow="visible">
+    <ellipse cx="50" cy="${crouch ? 138 : 104}" rx="${crouch ? 40 : 30}" ry="5" fill="#000" opacity=".35"/>${figure(P(id), { stage: true, crouch, pose: POSE.hold[id] })}</svg></g>`;
   // Court lines on the floor, drawn in perspective and very faint, running off the bottom of the screen.
   const yb = vb + 40, sl = y => (y - 250) * 83 / 220;
   const court = `<g fill="none" stroke="#fff" stroke-opacity=".09" stroke-width="2">
@@ -42,8 +53,19 @@ function homeScene(cw, ch) {
     return i % 5 === 4 ? `<circle class="${ani ? 'cf' : 'cf0'}" cx="${x.toFixed(0)}" cy="${y.toFixed(0)}" r="2.6" fill="${c}" style="--d:${(4 + rnd() * 4).toFixed(1)}s;--dl:${(-rnd() * 4).toFixed(1)}s"/>`
       : `<rect class="${ani ? 'cf' : 'cf0'}" x="${x.toFixed(0)}" y="${y.toFixed(0)}" width="${w.toFixed(1)}" height="${(w * .45).toFixed(1)}" rx="1" fill="${c}" style="--r:${r}deg;--d:${(4 + rnd() * 4).toFixed(1)}s;--dl:${(-rnd() * 4).toFixed(1)}s"/>`;
   });
-  const half = Math.round(n * .55), back = ids.slice(4), front = ids.slice(0, 4);
-  const ball = `<g transform="translate(108 386)"><ellipse cx="0" cy="24" rx="20" ry="4" fill="#000" opacity=".35"/><circle r="21" fill="#ee6018"/><path d="M-21 0h42M0-21v42M-14.5-14.5q8.5 14.5 0 29M14.5-14.5q-8.5 14.5 0 29" stroke="#2a1206" stroke-width="2.2" fill="none"/></g>`;
+  const half = Math.round(n * .55), { back, front } = rows(ids);
+  const BW = 116, BT = 112, FW = 140, FT = 222;
+  const bx = i => 400 + (i - (back.length - 1) / 2) * Math.min(84, 560 / Math.max(1, back.length - 1));
+  const fx = i => 400 + (i - (front.length - 1) / 2) * Math.min(125, 520 / Math.max(1, front.length - 1));
+  // Back row: each player's hand rests on the next player's shoulder.
+  const hands = back.slice(0, -1).map((id, i) => {
+    const [x, y] = at(back[i + 1], bx(i + 1), BT, BW, 35, 69);
+    return `<g class="hp" style="--hd:0s"><circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="6.4" fill="${cleanLook(P(id)).skin}"/></g>`;
+  }).join('');
+  // Without the trophy holder or the ball holder, the trophy and ball go on the floor.
+  const has = k => front.some(id => POSE.hold[id] === k);
+  const ball = has('ball') ? '' : `<g transform="translate(108 386)"><ellipse cx="0" cy="24" rx="20" ry="4" fill="#000" opacity=".35"/><circle r="21" fill="#ee6018"/><path d="M-21 0h42M0-21v42M-14.5-14.5q8.5 14.5 0 29M14.5-14.5q-8.5 14.5 0 29" stroke="#2a1206" stroke-width="2.2" fill="none"/></g>`;
+  const trophy = has('trophy') ? '' : `<ellipse cx="400" cy="390" rx="62" ry="9" fill="#000" opacity=".4"/>${TROPHY}`;
   const box = `x="${vx.toFixed(1)}" y="${vy.toFixed(1)}" width="${vw.toFixed(1)}" height="${vh.toFixed(1)}"`;
   return `<svg class="hscene" viewBox="${vx.toFixed(1)} ${vy.toFixed(1)} ${vw.toFixed(1)} ${vh.toFixed(1)}" role="img" aria-label="Team photo: ${ids.map(id => esc(P(id).name)).join(', ')} with the trophy">
     <defs>
@@ -56,9 +78,9 @@ function homeScene(cw, ch) {
     <rect x="${vx.toFixed(1)}" y="250" width="${vw.toFixed(1)}" height="${Math.max(0, vb - 250).toFixed(1)}" fill="url(#hfloor)"/>
     ${court}${beams}
     <g>${pieces.slice(0, half).join('')}</g>
-    ${back.map((id, i) => fig(id, 400 + (i - (back.length - 1) / 2) * Math.min(130, 520 / Math.max(1, back.length - 1)), 138, 118)).join('')}
-    ${front.map((id, i) => fig(id, (front.length === 4 ? [160, 290, 510, 640] : front.length === 3 ? [180, 300, 620] : [290, 510])[i], 236, 138)).join('')}
-    <ellipse cx="400" cy="390" rx="62" ry="9" fill="#000" opacity=".4"/>${TROPHY}${ball}
+    ${back.map((id, i) => fig(id, bx(i), BT, BW)).join('')}${hands}
+    ${front.map((id, i) => fig(id, fx(i), FT, FW, true)).join('')}
+    ${trophy}${ball}
     <g>${pieces.slice(half).join('')}</g>
   </svg>`;
 }

@@ -8,8 +8,9 @@ import { PinSheet } from '../components/PinSheet.jsx';
 import { Avatar } from '../components/Avatar.jsx';
 import { SeasonPick, MoreBtn } from '../components/ui.jsx';
 import { EditGame } from './EditGame.jsx';
+import { AvatarSheet } from './AvatarSheet.jsx';
+import { randomLook } from '../lib/avatar.js';
 
-const EXTRA_SKIN = ['#f0c39b', '#c98f63', '#e2b089', '#a8704a'];
 const Grip = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="9" cy="6" r="1.6" /><circle cx="15" cy="6" r="1.6" /><circle cx="9" cy="12" r="1.6" /><circle cx="15" cy="12" r="1.6" /><circle cx="9" cy="18" r="1.6" /><circle cx="15" cy="18" r="1.6" /></svg>;
 const UndoIc = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 14 4 9l5-5" /><path d="M4 9h10a6 6 0 0 1 0 12h-3" /></svg>;
 const nextSeasonCode = () => { const top = S.seasons[0], yy = +top.slice(1); return top[0] === 'S' ? 'W' + String(yy + 1).padStart(2, '0') : 'S' + top.slice(1); };
@@ -61,13 +62,13 @@ function PlayerSheet({ id }) {
     if (role === 'starter' && !(no >= 0 && no <= 99)) return setErr('Starters need a jersey number.');
     const clash = role === 'starter' && S.roster.find(x => x.id !== id && x.num === no);
     if (clash) return setErr(`#${no} is already taken by ${clash.name}.`);
-    const k = S.roster.length + S.subs.length;
     run(() => adminEdit('save_player', { p_player: {
       id: p?.id || 'p' + Date.now().toString(36), name: nm, num: role === 'starter' ? String(no) : '0', role,
-      look: p ? undefined : { skin: EXTRA_SKIN[k % 4], hair: '#1a1410', style: k } } }));
+      look: p ? undefined : randomLook() } }));
   };
   return <>
-    <h2>{p ? 'Edit player' : 'Add player'}</h2><p className="sheet-sub">{p ? 'Changes apply to every game this player played.' : 'New players start with no games.'}</p>
+    <h2>{p ? 'Edit player' : 'Add player'}</h2><p className="sheet-sub">{p ? 'Changes apply to every game this player played.' : 'New players start with no games, and a random avatar you can change later.'}</p>
+    {p && <div className="pp-av"><Avatar id={id} num={sub ? '' : undefined} /><button className="btn ghost sm" id="pp-avatar" onClick={() => openSheet(<AvatarSheet id={id} />, { wide: true })}>Edit avatar</button></div>}
     <div className="eg-grid two"><div className="field"><label htmlFor="pp-name">Name</label><input id="pp-name" value={name} placeholder="Name" autoComplete="off" onChange={e => { setName(e.target.value); setErr(''); }} /></div>
       <div className="field"><label htmlFor="pp-num">Jersey number</label><input id="pp-num" inputMode="numeric" value={role === 'sub' ? '' : num} disabled={role === 'sub'} placeholder={role === 'sub' ? 'Subs wear 0 or 00' : 'Number'} onChange={e => { setNum(e.target.value); setErr(''); }} /></div></div>
     <div className="field"><label>Role</label><div className="rseg big" id="pp-role">{[['starter', 'Starter'], ['sub', 'Sub']].map(([k, l]) => <button key={k} data-v={k} aria-pressed={role === k} onClick={() => setRole(k)}>{l}</button>)}</div></div>
@@ -186,7 +187,7 @@ function Admin() {
   const lastIn = id => Math.max(0, ...all.filter(g => g.rows[id]).map(g => +new Date(g.date)));
   // Subs: newest first (just-added ones with no games on top), then by their latest game.
   const subs = s.subs.map((p, i) => ({ p, i, t: gp(p.id) ? lastIn(p.id) : Infinity })).sort((a, b) => b.t - a.t || a.i - b.i).map(x => x.p);
-  const prow = (p, role) => <div className="arow" key={p.id}><Avatar id={p.id} num={role === 'sub' ? '' : undefined} /><span className="nm">{p.name}</span><span className="meta">{role === 'starter' ? '#' + p.num : gp(p.id) + ' GP'}</span>
+  const prow = (p, role) => <div className="arow" key={p.id}><button className="av-btn" data-avatar={p.id} aria-label={`Edit ${p.name}'s avatar`} onClick={() => openSheet(<AvatarSheet id={p.id} />, { wide: true })}><Avatar id={p.id} num={role === 'sub' ? '' : undefined} /></button><span className="nm">{p.name}</span><span className="meta">{role === 'starter' ? '#' + p.num : gp(p.id) + ' GP'}</span>
     <button className="iconbtn sm" data-player={p.id} aria-label={`Edit ${p.name}`} onClick={() => openSheet(<PlayerSheet id={p.id} />)}><Pencil width="16" height="16" /></button></div>;
 
   // Opponents: the current season's list (its order when recording), then every other team by most recent game.
@@ -226,7 +227,7 @@ function Admin() {
                 onClick={() => g.result !== r && edit('set_result', { p_game: g.id, p_result: r })}>{r === 'U' ? '–' : r}</button>)}</span>
               <button className="iconbtn sm" data-edit={g.id} aria-label={`Edit Game ${g.no}`} onClick={() => openSheet(<EditGame id={g.id} />, { wide: true })}><Pencil width="16" height="16" /></button></div>))
             : <div className="hempty">No {aRes} games yet.</div>}</div></div></div>
-      <div className="sec"><h3>Roster</h3><p className="hint">Starters show on Who played and in Stats. Subs only appear in the games they played. Renaming a player to an existing player's name merges them</p>
+      <div className="sec"><h3>Roster</h3><p className="hint">Starters show on Who played and in Stats. Subs only appear in the games they played. Tap an avatar to change it. Renaming a player to an existing player's name merges them</p>
         <div className="card alist" id="a-roster"><div className="sub-h">Starters</div>{s.roster.map(p => prow(p, 'starter'))}
           <div className="sub-h">Subs</div>{(open.subs ? subs : subs.slice(0, 5)).map(p => prow(p, 'sub'))}
           {subs.length > 5 && <div className="arow amore"><MoreBtn data-amore="subs" open={open.subs} n={subs.length} noun="subs" onClick={() => setOpen(o => ({ ...o, subs: !o.subs }))} /></div>}
