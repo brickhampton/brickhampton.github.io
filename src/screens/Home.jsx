@@ -32,7 +32,8 @@ function homeScene(cw, ch) {
   if (vy + vh < need) { vh = need - vy; vw = vh * A; }
   const vx = 400 - vw / 2, vb = vy + vh;
   let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
-  const fig = (id, cx, top, w) => `<g class="hp" style="--hd:${(rnd() * 1.6).toFixed(2)}s"><svg x="${cx - w / 2}" y="${top}" width="${w}" height="${w * 1.04}" viewBox="0 0 100 104" overflow="visible">
+  // Each player bobs, blinks and smiles on their own timing.
+  const fig = (id, cx, top, w) => `<g class="hp alive" style="--hd:${(rnd() * 1.6).toFixed(2)}s;--bd:${(rnd() * -5).toFixed(2)}s;--sd:${(rnd() * -12).toFixed(2)}s;--sl:${(10 + rnd() * 6).toFixed(1)}s"><svg x="${cx - w / 2}" y="${top}" width="${w}" height="${w * 1.04}" viewBox="0 0 100 104" overflow="visible">
     <ellipse cx="50" cy="104" rx="32" ry="4" fill="#000" opacity=".35"/>${figure(P(id), { stage: true, pose: POSE.hold[id] })}</svg></g>`;
   // Court lines on the floor, drawn in perspective and very faint, running off the bottom of the screen.
   const yb = vb + 40, sl = y => (y - 250) * 83 / 220;
@@ -52,9 +53,12 @@ function homeScene(cw, ch) {
       : `<rect class="${ani ? 'cf' : 'cf0'}" x="${x.toFixed(0)}" y="${y.toFixed(0)}" width="${w.toFixed(1)}" height="${(w * .45).toFixed(1)}" rx="1" fill="${c}" style="--r:${r}deg;--d:${(4 + rnd() * 4).toFixed(1)}s;--dl:${(-rnd() * 4).toFixed(1)}s"/>`;
   });
   const half = Math.round(n * .55), { back, front } = rows(ids);
-  const BW = 132, BT = 104, FW = 166, FT = 226;
-  const bx = i => 400 + (i - (back.length - 1) / 2) * Math.min(96, 560 / Math.max(1, back.length - 1));
-  const fx = i => 400 + (i - (front.length - 1) / 2) * Math.min(125, 520 / Math.max(1, front.length - 1));
+  // Huddled: the back row stands shoulder to shoulder at slightly different depths, and the front row stands close in
+  // front of them, in the gaps. Players nearer the middle are drawn last, so they overlap the ones beside them.
+  const BW = 132, BT = 116, FW = 156, FT = 178, STAGGER = [4, -3, 2, -4, 3, -2];
+  const bx = i => 400 + (i - (back.length - 1) / 2) * Math.min(70, 560 / Math.max(1, back.length - 1));
+  const fx = i => 400 + (i - (front.length - 1) / 2) * Math.min(98, 520 / Math.max(1, front.length - 1));
+  const inward = (list, x) => list.map((id, i) => [id, i]).sort((a, b) => Math.abs(x(b[1]) - 400) - Math.abs(x(a[1]) - 400));
   // Without the trophy holder or the ball holder, the trophy and ball go on the floor.
   const has = k => front.some(id => POSE.hold[id] === k);
   const ball = has('ball') ? '' : `<g transform="translate(108 386)"><ellipse cx="0" cy="24" rx="20" ry="4" fill="#000" opacity=".35"/><circle r="21" fill="#ee6018"/><path d="M-21 0h42M0-21v42M-14.5-14.5q8.5 14.5 0 29M14.5-14.5q-8.5 14.5 0 29" stroke="#2a1206" stroke-width="2.2" fill="none"/></g>`;
@@ -71,8 +75,10 @@ function homeScene(cw, ch) {
     <rect x="${vx.toFixed(1)}" y="250" width="${vw.toFixed(1)}" height="${Math.max(0, vb - 250).toFixed(1)}" fill="url(#hfloor)"/>
     ${court}${beams}
     <g>${pieces.slice(0, half).join('')}</g>
-    ${back.map((id, i) => fig(id, bx(i), BT, BW)).join('')}
-    ${front.map((id, i) => fig(id, fx(i), FT, FW)).join('')}
+    <g${A < 1 ? ' transform="translate(400 300) scale(1.3) translate(-400 -300)"' : ''}>
+    ${inward(back, bx).map(([id, i]) => fig(id, bx(i), BT + STAGGER[i % 6], BW)).join('')}
+    ${inward(front, fx).map(([id, i]) => fig(id, fx(i), FT + (i === Math.floor(front.length / 2) ? 10 : 0) + STAGGER[(i + 3) % 6], FW)).join('')}
+    </g>
     ${trophy}${ball}
     <g>${pieces.slice(half).join('')}</g>
   </svg>`;
