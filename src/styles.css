@@ -989,8 +989,6 @@ button:hover .lid,button:focus-visible .lid,button:active .lid{transform:transla
 .cf0{transform-box:fill-box;transform-origin:center;transform:rotate(var(--r,0deg))}
 .cf{transform-box:fill-box;transform-origin:center;animation:cfDrift var(--d) ease-in-out var(--dl) infinite alternate}
 @keyframes cfDrift{from{transform:translateY(-5px) rotate(var(--r,0deg))}to{transform:translateY(7px) rotate(calc(var(--r,0deg) + 50deg))}}
-.beam{animation:beam 7s ease-in-out infinite alternate}
-@keyframes beam{from{opacity:.55}to{opacity:1}}
 .hcue{position:absolute;left:50%;bottom:max(18px,env(safe-area-inset-bottom,0px));transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 14px;border-radius:999px;font-size:13px;color:rgba(255,255,255,.62);letter-spacing:.02em}
 .hcue:hover{color:#fff}
 .hcue svg{animation:cue 2.4s ease-in-out infinite}
@@ -1040,3 +1038,6 @@ button:hover .lid,button:focus-visible .lid,button:active .lid{transform:transla
 /* Phone flashes going off now and then in the crowd behind the team. */
 .hflash{opacity:0;animation:hflash var(--fd) steps(1,end) var(--fl) infinite}
 @keyframes hflash{0%,96%{opacity:0}97%,99%{opacity:.85}}
+/* Home skylights: hidden most of the time; about once a minute they drift in, sweep across and fade. */
+.hsweep{opacity:0;animation:hsweep 60s ease-in-out -38s infinite}
+@keyframes hsweep{0%,86%{opacity:0;transform:translateX(-240px)}90%{opacity:1}96%{opacity:1}100%{opacity:0;transform:translateX(240px)}}

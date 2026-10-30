@@ -53,14 +53,6 @@ export function hoop(c, { z0 = 0, s = 1, glass = '#d8e2f5', dim = 1 } = {}) {
     <path d="${rim}" stroke="#ee6018" stroke-width="2.4" fill="none"/></g>`;
 }
 
-// Hardwood: planks running down the court, slightly different shades, converging into the distance.
-export function planks(c, { zTop = -3, xs = 16, w = .38, cols = ['#3a2819', '#35241a', '#3e2b1b', '#33221a'] } = {}) {
-  let s = '';
-  const zb = c.dc - .45;
-  for (let i = 0, X = -xs; X < xs; X += w, i++) s += `<polygon points="${c.poly([[X, zTop], [X + w, zTop], [X + w, zb], [X, zb]])}" fill="${cols[(i * 7 + (i >> 2)) % cols.length]}"/>`;
-  return s;
-}
-
 // A small crowd in the stands: rows of heads and shoulders, dim, getting darker towards the back.
 export function crowd({ x0, x1, yb, rows = 5, gap = 15, size = 7, seed = 3, light = 1 }) {
   let s = seed; const rnd = () => (s = (s * 16807) % 2147483647) / 2147483647;

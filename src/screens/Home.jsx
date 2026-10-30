@@ -3,7 +3,7 @@ import { P, statPlayers, esc } from '../lib/core.js';
 import { reduced } from '../lib/charts.js';
 import { figure, pxShadow } from '../lib/avatar.js';
 import { ChevDown } from '../components/icons.jsx';
-import { stage, BGV } from '../lib/homeStage.js';
+import { stage } from '../lib/homeStage.js';
 
 const TROPHY = `<svg x="345" y="262" width="110" height="122" preserveAspectRatio="xMidYMax meet" viewBox="0 0 24 24" aria-hidden="true"><defs><linearGradient id="ht-g" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#ffe08a"/><stop offset=".55" stop-color="#e9b949"/><stop offset="1" stop-color="#b9821f"/></linearGradient></defs>
   <path d="M17 4h3v2.5a3.5 3.5 0 0 1-3.6 3.5M7 4H4v2.5A3.5 3.5 0 0 0 7.6 10" fill="none" stroke="#d9a63a" stroke-width="2" stroke-linecap="round"/>
@@ -33,7 +33,7 @@ function homeScene(cw, ch) {
   if (vy + vh < need) vy = Math.min(105, need - vh);
   if (vy + vh < need) { vh = need - vy; vw = vh * A; }
   const vx = 400 - vw / 2, vb = vy + vh;
-  const S = stage(BGV, { vx, vy, vw, vh, vb, A });
+  const S = stage({ vx, vy, vw, vh, vb, A });
   let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
   // Each player bobs, blinks and smiles on their own timing.
   const vars = () => `--hd:${(rnd() * 1.6).toFixed(2)}s;--bd:${(rnd() * -5).toFixed(2)}s;--sd:${(rnd() * -12).toFixed(2)}s;--sl:${(10 + rnd() * 6).toFixed(1)}s`;
@@ -68,7 +68,6 @@ function homeScene(cw, ch) {
     <defs>${S.defs}<linearGradient id="hrgrad" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#fff"/><stop offset=".4" stop-color="#fff" stop-opacity="0"/></linearGradient><mask id="hrmask" maskContentUnits="objectBoundingBox"><rect width="1" height="1" fill="url(#hrgrad)"/></mask></defs>
     ${S.under}
     <g${A < 1 ? ' transform="translate(400 300) scale(1.3) translate(-400 -300)"' : ''}>${refl.join('')}</g>
-    ${S.over || ''}
     <g>${pieces.slice(0, half).join('')}</g>
     <g${A < 1 ? ' transform="translate(400 300) scale(1.3) translate(-400 -300)"' : ''}>
     ${team}
