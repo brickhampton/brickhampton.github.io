@@ -65,18 +65,43 @@ function SeasonCmp({ id, seasonsPlayed }) {
   );
 }
 
-// The big player on the player page. Tapping them gets a random reaction: a hop, a big smile, or bouncing the ball.
+// The big player on the player page, bobbing like the player on the recording court. Every few seconds they do a
+// little trick with the ball, and tapping them gets a random reaction. Each trick is a few steps: a pose, a class
+// that animates it, and how long it lasts.
+const TRICKS = {
+  hop: [['hop', '', 650]],
+  smile: [['smile', '', 1600]],
+  dribble: [['dribble', '', 1500]],
+  cross: [['bounce', '', 520], ['bounce', 'dribbleL', 1040], ['bounce', '', 520]],
+  spin: [['spin', 'spin', 2200]],
+};
+const IDLE = ['dribble', 'cross', 'spin', 'dribble'];
 function PStage({ p, num }) {
-  const [react, setReact] = useState(null), timer = useRef(0), last = useRef('');
-  useEffect(() => () => clearTimeout(timer.current), []);
-  const tap = () => {
-    const ks = ['hop', 'smile', 'dribble'].filter(x => x !== last.current), k = ks[Math.floor(Math.random() * ks.length)];
-    last.current = k; clearTimeout(timer.current); setReact({ k, n: Date.now() });
-    timer.current = setTimeout(() => setReact(null), k === 'hop' ? 650 : k === 'smile' ? 1600 : 2200);
+  const [step, setStep] = useState(null), timer = useRef(0), last = useRef('');
+  const run = (k, done) => {
+    clearTimeout(timer.current); last.current = k;
+    const steps = TRICKS[k];
+    const next = i => {
+      if (i === steps.length) { setStep(null); done?.(); return; }
+      const [cls, pose, ms] = steps[i]; setStep({ cls, pose, n: Date.now() + i });
+      timer.current = setTimeout(() => next(i + 1), ms);
+    };
+    next(0);
   };
-  return <button className={`pstage alive${react ? ' ' + react.k : ''}`} id="p-stage" aria-label="Wave hello" onClick={tap}>
-    <span className="pglow" /><span className="pring" />
-    <span className="phop"><svg className="pfig" viewBox="0 0 100 104" aria-hidden="true" dangerouslySetInnerHTML={{ __html: figure({ ...p, num }, { stage: true, }) }} /></span>
+  // Idle tricks, now and then, unless the viewer prefers less motion.
+  useEffect(() => {
+    if (reduced) return;
+    let idle = 0;
+    const wait = () => { idle = setTimeout(() => run(IDLE[Math.floor(Math.random() * IDLE.length)], wait), 3500 + Math.random() * 3500); };
+    wait();
+    return () => { clearTimeout(idle); clearTimeout(timer.current); };
+  }, []);
+  const tap = () => {
+    const ks = Object.keys(TRICKS).filter(x => x !== last.current);
+    run(ks[Math.floor(Math.random() * ks.length)]);
+  };
+  return <button className={`pstage alive${step ? ' ' + step.cls : ''}`} id="p-stage" aria-label="Wave hello" onClick={tap}>
+    <span className="phop"><svg key={step?.n || 0} className="pfig" viewBox="0 0 100 104" aria-hidden="true" dangerouslySetInnerHTML={{ __html: figure({ ...p, num }, { stage: true, pose: step?.pose || undefined }) }} /></span>
     <span className="pshadow" />
   </button>;
 }
