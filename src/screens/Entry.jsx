@@ -25,15 +25,15 @@ const D = 140; // let the player get to their spot before the ball moves
 const PX = 3, BALL_D = BALL.map(([o, w], j) => `M${o} ${j}h${w}v1h${-w}z`).join('');
 const NET = Array.from({ length: 8 }, (_, j) => Array.from({ length: 12 - j }, (_, i) => (i + j) % 2 ? '' : `M${542 - (12 - j) * 2 + i * 4} ${73 + j * 4}h3v3h-3z`).join('')).join('');
 const MATE = { v: 2, skin: '#d9b48e', hair: '#2e2e33', style: 14 };
-// The crowd behind the courtside boards: two rows of little pixel fans, in muted colours so the player stays the focus.
+// The crowd behind the courtside boards: one sparse row of soft, dim figures in muted colours (never the team's blue),
+// so they sit back in the dark and the player stays the focus. Every third fan is one of the few who react to small plays.
 const CROWD = (() => {
-  const SK = ['#b48a68', '#c99c76', '#8f6a4f', '#d4ab86'], HR = ['#1a1412', '#2b211b', '#3a3330'], TOP = ['#3a4466', '#5a3434', '#44523f', '#4b4458', '#2f55d4', '#6b5a3a'];
+  const SK = ['#5a4a3e', '#66533f', '#4e4036'], HR = ['#1c1714', '#241d18', '#2b2420'], TOP = ['#2c2724', '#33291f', '#2a2a26', '#3a2c2a', '#302b30'];
   const out = [];
-  // The stage is often wider than the court drawing, so the stands run on past both edges of it.
-  for (let row = 0; row < 2; row++) for (let i = 0; i < 44; i++) {
-    const n = row * 44 + i, x = i * 22 - 400 + (row ? 11 : 0) + ((n * 7) % 5), y = row ? 118 : 106;
-    if (x > 556 && x < 640) continue; // leave room for the hoop
-    out.push({ i: n, x, y: y + ((n * 3) % 4), skin: SK[n % 4], hair: HR[(n * 5) % 3], top: TOP[(n * 7) % 6], d: ((n * 37) % 100) / 100 * .3, h: 2 + ((n * 13) % 10) / 5 });
+  for (let i = 0; i < 34; i++) {
+    const x = i * 36 - 402 + ((i * 11) % 3) * 3;
+    if (x > 548 && x < 650) continue; // leave room for the hoop
+    out.push({ i, x, y: 111 + ((i * 5) % 2) * 3, skin: SK[i % 3], hair: HR[(i * 2) % 3], top: TOP[(i * 3) % 5], few: i % 3 === 0, d: ((i * 37) % 100) / 100 * .25, h: 2.6 + ((i * 13) % 10) / 5 });
   }
   return out;
 })();
@@ -324,23 +324,30 @@ export function Entry() {
           <div className="stage" aria-hidden="true">
             <svg viewBox="0 0 640 180" preserveAspectRatio="xMidYMax meet">
               <g id="crowd" shapeRendering="crispEdges">{CROWD.map(f => (
-                <g key={f.i} className="fan" style={{ '--d': `${f.d}s`, '--h': `${f.h}s` }}>
-                  <rect x={f.x - 4} y={f.y + 2} width="3" height="8" fill={f.skin} className="arms" /><rect x={f.x + 9} y={f.y + 2} width="3" height="8" fill={f.skin} className="arms" />
-                  <rect x={f.x} y={f.y} width="8" height="8" fill={f.skin} /><rect x={f.x} y={f.y} width="8" height="2" fill={f.hair} />
-                  <rect x={f.x - 2} y={f.y + 8} width="12" height="16" fill={f.top} />
+                <g key={f.i} className={`fan${f.few ? ' few' : ''}`} style={{ '--d': `${f.d}s`, '--h': `${f.h}s` }}>
+                  {/* Drawn in the players' 3-unit pixels: a square head with a hair line, blocky shoulders, arms for a 3. */}
+                  <rect x={f.x - 3} y={f.y + 3} width="3" height="9" fill={f.skin} className="arms" /><rect x={f.x + 12} y={f.y + 3} width="3" height="9" fill={f.skin} className="arms" />
+                  <rect x={f.x + 3} y={f.y} width="6" height="3" fill={f.hair} /><rect x={f.x} y={f.y + 3} width="12" height="9" fill={f.skin} /><rect x={f.x} y={f.y + 3} width="12" height="3" fill={f.hair} />
+                  <rect x={f.x - 3} y={f.y + 15} width="18" height="12" fill={f.top} /><rect x={f.x} y={f.y + 12} width="12" height="3" fill={f.top} />
                 </g>))}</g>
               <g shapeRendering="crispEdges">
                 <rect x="-400" y="136" width="1440" height="32" fill="#191513" /><rect x="-400" y="136" width="1440" height="2" fill="#2c2520" />
                 <rect x="-400" y="168" width="1440" height="12" fill="#e2c9a0" /><rect x="-400" y="168" width="1440" height="2" fill="#efdcbb" />
                 {Array.from({ length: 44 }, (_, i) => <rect key={i} x={i * 33 - 400 + (i % 2) * 9} y="174" width="3" height="6" fill="#cfb185" />)}
                 <rect x="400" y="170" width="180" height="10" fill="#2f55d4" opacity=".55" /><rect x="400" y="170" width="2" height="10" fill="#f4ead8" />
-                {/* A stadium hoop: a padded base on the floor, a post, and an arm reaching out to the backboard. */}
-                <rect x="596" y="128" width="40" height="40" fill="#2f55d4" /><rect x="596" y="128" width="40" height="4" fill="#4a6fe6" /><rect x="596" y="160" width="40" height="8" fill="#1d3a9e" />
-                <rect x="610" y="42" width="10" height="86" fill="#5d5a58" /><rect x="618" y="42" width="2" height="86" fill="#43403e" />
-                <rect x="576" y="42" width="44" height="8" fill="#5d5a58" /><rect x="576" y="48" width="44" height="2" fill="#43403e" />
-                {[0, 1, 2, 3, 4, 5].map(i => <rect key={i} x={604 - i * 5} y={84 - i * 6} width="6" height="6" fill="#5d5a58" />)}
-                <rect x="566" y="24" width="10" height="56" fill="#e8e6e3" /><rect x="566" y="48" width="10" height="15" fill="#2f55d4" /><rect x="574" y="24" width="2" height="56" fill="#b9b6b2" />
-                <rect x="560" y="68" width="6" height="6" fill="#43403e" />
+                {/* A portable stadium hoop, all white with an orange rim: a padded base on the floor, a post, and an arm that
+                    angles up to the padded bottom of the backboard. */}
+                <rect x="592" y="132" width="48" height="36" fill="#e8e6e3" /><rect x="592" y="162" width="48" height="6" fill="#c4c1bd" /><rect x="592" y="132" width="48" height="3" fill="#f7f6f4" />
+                <rect x="616" y="98" width="14" height="34" fill="#e8e6e3" /><rect x="626" y="98" width="4" height="34" fill="#c4c1bd" />
+              </g>
+              <g fill="none" strokeLinecap="square" strokeLinejoin="round">
+                <path d="M623 100 L623 92 L580 72" stroke="#e8e6e3" strokeWidth="7" /><path d="M626 96 L582 76" stroke="#c4c1bd" strokeWidth="2" />
+                <path d="M600 132 L612 84" stroke="#d9d6d2" strokeWidth="2.5" />
+              </g>
+              <g shapeRendering="crispEdges">
+                <rect x="566" y="22" width="8" height="52" fill="#d8dde3" opacity=".9" /><rect x="574" y="22" width="2" height="52" fill="#f2f2f2" />
+                <rect x="562" y="70" width="16" height="8" fill="#f2f2f2" /><rect x="562" y="76" width="16" height="2" fill="#c4c1bd" />
+                <rect x="560" y="66" width="7" height="6" fill="#ee6018" />
               </g>
               <g id="rim" shapeRendering="crispEdges"><rect x="517" y="69" width="50" height="4" fill="#ee6018" /></g>
               <g id="net" shapeRendering="crispEdges" style={{ transformBox: 'view-box', transformOrigin: '542px 72px' }}>
