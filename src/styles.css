@@ -545,8 +545,9 @@ tr.tot td{font-weight:600;border-top:1px solid var(--stroke)}
 .pstage{position:relative;width:clamp(180px,24vw,260px);aspect-ratio:1;display:block;padding:0;border-radius:50%}
 .pfig{position:absolute;left:12%;top:8%;width:76%;height:auto;overflow:visible}
 .pstage .av-fig{animation:idleBob .9s steps(2,jump-none) infinite}
-/* The same soft blue glow as behind the player in the avatar builder. */
-.pglow{position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 50% 45%,rgba(57,105,230,.35),transparent 70%)}
+/* A soft white spotlight from above, with a pool of light at the player's feet. */
+.pglow{position:absolute;inset:-75% -10% 0;filter:blur(4px);background:radial-gradient(ellipse 34% 6% at 50% 93%,rgba(255,255,255,.35),transparent)}
+.pglow::before{content:"";position:absolute;inset:0;background:linear-gradient(rgba(255,255,255,.05),rgba(255,255,255,.24));clip-path:polygon(44% 0,56% 0,84% 93%,16% 93%);-webkit-mask:linear-gradient(transparent 30%,#000 80%);mask:linear-gradient(transparent 30%,#000 80%)}
 /* Tricks on the player page: a hop, a big smile, bouncing the ball, crossing it over, spinning it on a finger. */
 .pstage.smile .av-smile{animation:none;opacity:1}
 .pstage.smile .av-eyes{animation:none;opacity:0}

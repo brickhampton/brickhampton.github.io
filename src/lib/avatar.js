@@ -182,8 +182,8 @@ function sprite(c, num, pose) {
     [3, 5, 7].forEach(dx => r(bx - dx - 1, ty + 6, 1, 1, SB));
     if (c.sleeve) r(bx - 1 - aw, ty + 1, 1 + aw, 2, c.sleeve);
   } else if (pose === 'trophy') {
-    // The free hand holds the trophy: the upper arm comes forward from the shoulder to the trophy's near side.
-    r(bx - 2, ty + 1, 2, 3, SB); if (c.sleeve) r(bx - 2, ty + 1, 2, 2, c.sleeve);
+    // Both hands hold the trophy by its handles: this upper arm comes forward from the shoulder to the near handle.
+    r(bx - 2, ty + 1, 2, 4, SB); if (c.sleeve) r(bx - 2, ty + 1, 2, 2, c.sleeve);
   } else freeArm(false);
   // ---- jersey and number
   r(bx, ty, bw, torsoH, J); r(bx + bw - 1, ty, 1, torsoH, T); r(bx + bw - 2, ty + 1, 1, torsoH - 1, J2);
@@ -271,12 +271,12 @@ function sprite(c, num, pose) {
     ball(bx + Math.floor(bw / 2), ty + 5, r);
     r(fx - 1, ty + 1, 2, 3, S); r(fx - 3, ty + 3, 3, 3, S); r(fx - 3, ty + 5, 3, 1, S2);
   } else if (pose === 'trophy') {
-    const cx = bx + Math.floor(bw / 2) - 1, G = '#f2c14e', G2 = '#c98f22';
-    r(cx - 2, ty + 1, 6, 3, G); r(cx - 1, ty + 4, 4, 1, G); r(cx, ty + 5, 2, 1, G2); r(cx - 1, ty + 6, 4, 1, G); r(cx - 2, ty + 7, 6, 1, '#4a3418');
-    r(cx + 2, ty + 1, 2, 4, G2); r(cx - 1, ty + 1, 1, 2, '#fff2c4'); r(cx - 4, ty + 1, 2, 1, G); r(cx + 4, ty + 1, 2, 1, G);
-    r(cx - 4, ty + 2, 2, 2, SB);
-    // The other arm hangs relaxed.
-    [...ARM, ...HAND].forEach(([j, dx, w]) => r(fx - dx - w, ty + j, w + aw, 1, S));
+    // Held one pixel below the collar, a hand on each handle.
+    const cx = bx + Math.floor(bw / 2) - 1, G = '#f2c14e', G2 = '#c98f22', t = ty + 1;
+    r(cx - 2, t + 1, 6, 3, G); r(cx - 1, t + 4, 4, 1, G); r(cx, t + 5, 2, 1, G2); r(cx - 1, t + 6, 4, 1, G); r(cx - 2, t + 7, 6, 1, '#4a3418');
+    r(cx + 2, t + 1, 2, 4, G2); r(cx - 1, t + 1, 1, 2, '#fff2c4'); r(cx - 4, t + 1, 2, 1, G); r(cx + 4, t + 1, 2, 1, G);
+    r(cx - 4, t + 2, 2, 2, SB);
+    r(fx - 1, ty + 1, 2, 3, S); r(cx + 4, t + 2, 2, 2, S);
   } else {
     [...ARM, ...HAND].forEach(([j, dx, w]) => r(fx - dx - w, ty + j, w + aw, 1, S));
   }
