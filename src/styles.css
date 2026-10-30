@@ -98,6 +98,15 @@ h1.page{font-size:40px;font-weight:500;letter-spacing:-.04em;margin:0;line-heigh
 @keyframes eyesOff{0%,74%{opacity:1}75%,89%{opacity:0}90%,100%{opacity:1}}
 /* The selected player on the court bobs on the spot while waiting for the next action. */
 .actor .av-fig{animation:idleBob .9s steps(2,jump-none) infinite}
+/* The crowd on the recording court: a slow idle shuffle, and on a good play they jump with their arms up. */
+#crowd{opacity:.75}
+.fan{animation:fanIdle var(--h,2.4s) steps(2,jump-none) var(--d,0s) infinite}
+.fan .arms{opacity:0}
+#crowd.cheer .fan{animation:fanHop .32s steps(2,jump-none) var(--d,0s) 3}
+#crowd.cheer.big .fan{animation:fanHop .28s steps(2,jump-none) var(--d,0s) 5}
+#crowd.cheer .fan .arms{opacity:1;transform:translateY(-8px)}
+@keyframes fanIdle{50%{transform:translateY(1px)}}
+@keyframes fanHop{50%{transform:translateY(-5px)}}
 @keyframes idleBob{50%{transform:translateY(-3px)}}
 .celebrate .av-fig{animation:jump .5s var(--ease-out)}
 .slump .av-head{animation:slump .55s ease-out}
@@ -1006,3 +1015,7 @@ button:hover .lid,button:focus-visible .lid,button:active .lid{transform:transla
   .avb-tools{flex-direction:column}
   .avb-opts{grid-template-columns:repeat(auto-fill,minmax(64px,1fr))}
 }
+.avb-sw.pick{position:relative;display:grid;place-items:center;background:var(--lift);color:var(--bone);box-shadow:inset 0 0 0 1px var(--stroke);cursor:pointer}
+.avb-sw.pick svg{width:20px;height:20px}
+.avb-sw.pick input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;border:0;padding:0}
+.avb-sw.pick:focus-within{box-shadow:inset 0 0 0 1px var(--stroke),0 0 0 2px var(--lift),0 0 0 4px var(--bone)}

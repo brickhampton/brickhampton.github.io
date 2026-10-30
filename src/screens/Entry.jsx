@@ -25,6 +25,18 @@ const D = 140; // let the player get to their spot before the ball moves
 const PX = 3, BALL_D = BALL.map(([o, w], j) => `M${o} ${j}h${w}v1h${-w}z`).join('');
 const NET = Array.from({ length: 8 }, (_, j) => Array.from({ length: 12 - j }, (_, i) => (i + j) % 2 ? '' : `M${542 - (12 - j) * 2 + i * 4} ${73 + j * 4}h3v3h-3z`).join('')).join('');
 const MATE = { v: 2, skin: '#d9b48e', hair: '#2e2e33', style: 14 };
+// The crowd behind the courtside boards: two rows of little pixel fans, in muted colours so the player stays the focus.
+const CROWD = (() => {
+  const SK = ['#b48a68', '#c99c76', '#8f6a4f', '#d4ab86'], HR = ['#1a1412', '#2b211b', '#3a3330'], TOP = ['#3a4466', '#5a3434', '#44523f', '#4b4458', '#2f55d4', '#6b5a3a'];
+  const out = [];
+  // The stage is often wider than the court drawing, so the stands run on past both edges of it.
+  for (let row = 0; row < 2; row++) for (let i = 0; i < 44; i++) {
+    const n = row * 44 + i, x = i * 22 - 400 + (row ? 11 : 0) + ((n * 7) % 5), y = row ? 118 : 106;
+    if (x > 556 && x < 640) continue; // leave room for the hoop
+    out.push({ i: n, x, y: y + ((n * 3) % 4), skin: SK[n % 4], hair: HR[(n * 5) % 3], top: TOP[(n * 7) % 6], d: ((n * 37) % 100) / 100 * .3, h: 2 + ((n * 13) % 10) / 5 });
+  }
+  return out;
+})();
 
 function makeStage() {
   const fx = $('#fx'), net = $('#net'), rim = $('#rim'), actorWrap = $('#actor-wrap');
@@ -46,6 +58,24 @@ function makeStage() {
   }
   function actorMood(mood, delay = 0) {
     setTimeout(() => { if (!actor) return; const b = actor.querySelector('.body'); b.classList.remove('celebrate', 'slump'); void b.getBBox(); b.classList.add(mood); }, delay);
+  }
+  // The player strikes a pose for the action (arm up on a shot, both hands up for a rebound), then relaxes.
+  function actorPose(pose, delay, ms) {
+    const id = actor?.dataset.id; if (!id) return;
+    setTimeout(() => {
+      if (!actor || actor.dataset.id !== id) return;
+      const body = actor.querySelector('.body'); body.innerHTML = figure(P(id), { stage: true, pose });
+      clearTimeout(actor._pose);
+      actor._pose = setTimeout(() => { if (actor?.dataset.id === id) actor.querySelector('.body').innerHTML = figure(P(id), { stage: true, pose: 'down' }); }, ms);
+    }, delay);
+  }
+  // The crowd jumps up with their arms in the air on a good play.
+  function cheer(delay, big) {
+    setTimeout(() => {
+      const c = $('#crowd'); if (!c) return;
+      c.classList.remove('cheer', 'big'); void c.getBBox(); c.classList.add('cheer'); if (big) c.classList.add('big');
+      clearTimeout(c._t); c._t = setTimeout(() => c.classList.remove('cheer', 'big'), big ? 1700 : 1200);
+    }, delay);
   }
   function mk(tag, attrs, parent = fx) { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); parent.appendChild(e); return e; }
   function ball(fill = BALL_C) {
@@ -97,6 +127,11 @@ function makeStage() {
   function play(sel, k) {
     placeActor(sel, false, SPOT[k]);
     if (reduced) return;
+    const pose = { '2M': ['shoot', 0, D + 380], '2X': ['shoot', 0, D + 380], '3M': ['shoot', 0, D + 480], '3X': ['shoot', 0, D + 480], 'FM': ['shoot', 0, D + 340], 'FX': ['shoot', 0, D + 340],
+      'OR': ['catch', 200, 700], 'DR': ['catch', 200, 700], 'AS': ['pass', D - 40, 520], 'ST': ['pass', 300, 520], 'BK': ['block', 0, 760] }[k];
+    if (pose) actorPose(...pose);
+    const cheers = { '2M': D + 360, '3M': D + 460, 'FM': D + 320, 'AS': D + 580, 'ST': 330, 'BK': 280, 'OR': 300, 'DR': 300 };
+    if (k in cheers) cheer(cheers[k], k === '3M');
     switch (k) {
       case '2M': actorMood('celebrate', D); shot(SPOT[k], 80, 360, true); setTimeout(() => pop('+2', RX, 40), D + 360); break;
       case '2X': actorMood('celebrate', D); shot(SPOT[k], 80, 360, false); actorMood('slump', D + 420); break;
@@ -114,7 +149,7 @@ function makeStage() {
       }
       case 'AS': { // the player threads a pass to a teammate who finishes
         const x = SPOT[k];
-        const mate = mk('g', {}); mate.innerHTML = `<g transform="translate(${440 - 50 * SC} ${FLOOR - 104 * SC}) scale(${SC})">${figure({ ...MATE, num: '' }, { stage: true })}</g>`;
+        const mate = mk('g', {}); mate.innerHTML = `<g transform="translate(${440 - 50 * SC} ${FLOOR - 104 * SC}) scale(${SC})">${figure({ ...MATE, num: '' }, { stage: true, pose: 'catch' })}</g>`;
         mate.animate([{ opacity: 0 }, { opacity: .9, offset: .2 }, { opacity: .9, offset: .8 }, { opacity: 0 }], { duration: 900, fill: 'forwards' }); setTimeout(() => mate.remove(), 950);
         const trail = mk('path', { d: `M${x + 20} ${HAND_Y + 10} Q300 ${HAND_Y - 20} 430 ${HAND_Y + 30}`, stroke: '#ee6018', 'stroke-width': 2, fill: 'none', 'stroke-dasharray': '3 7', 'stroke-linecap': 'round' });
         trail.animate([{ opacity: 0 }, { opacity: .9, offset: .3 }, { opacity: 0 }], { duration: 700, fill: 'forwards' }); setTimeout(() => trail.remove(), 750);
@@ -288,13 +323,24 @@ export function Entry() {
         <div className="right">
           <div className="stage" aria-hidden="true">
             <svg viewBox="0 0 640 180" preserveAspectRatio="xMidYMax meet">
+              <g id="crowd" shapeRendering="crispEdges">{CROWD.map(f => (
+                <g key={f.i} className="fan" style={{ '--d': `${f.d}s`, '--h': `${f.h}s` }}>
+                  <rect x={f.x - 4} y={f.y + 2} width="3" height="8" fill={f.skin} className="arms" /><rect x={f.x + 9} y={f.y + 2} width="3" height="8" fill={f.skin} className="arms" />
+                  <rect x={f.x} y={f.y} width="8" height="8" fill={f.skin} /><rect x={f.x} y={f.y} width="8" height="2" fill={f.hair} />
+                  <rect x={f.x - 2} y={f.y + 8} width="12" height="16" fill={f.top} />
+                </g>))}</g>
               <g shapeRendering="crispEdges">
-                <rect x="0" y="168" width="640" height="12" fill="#5c3f27" /><rect x="0" y="168" width="640" height="3" fill="#8a5d36" />
-                {Array.from({ length: 20 }, (_, i) => <rect key={i} x={i * 33 + (i % 2) * 9} y="174" width="3" height="6" fill="#4a321f" />)}
-                {Array.from({ length: 22 }, (_, i) => { const t = i / 21, x = 110 + 220 * t, y = 168 - 102 * Math.sin(t * Math.PI / 2); return <rect key={i} x={Math.round(x / 3) * 3} y={Math.round(y / 3) * 3} width="3" height="3" fill="#4a382a" />; })}
-                <rect x="384" y="120" width="186" height="48" fill="#2f55d4" opacity=".14" />
-                <rect x="574" y="36" width="6" height="132" fill="#3d3a39" />
-                <rect x="566" y="24" width="8" height="54" fill="#e8e6e3" /><rect x="566" y="48" width="8" height="15" fill="#2f55d4" />
+                <rect x="-400" y="136" width="1440" height="32" fill="#191513" /><rect x="-400" y="136" width="1440" height="2" fill="#2c2520" />
+                <rect x="-400" y="168" width="1440" height="12" fill="#e2c9a0" /><rect x="-400" y="168" width="1440" height="2" fill="#efdcbb" />
+                {Array.from({ length: 44 }, (_, i) => <rect key={i} x={i * 33 - 400 + (i % 2) * 9} y="174" width="3" height="6" fill="#cfb185" />)}
+                <rect x="400" y="170" width="180" height="10" fill="#2f55d4" opacity=".55" /><rect x="400" y="170" width="2" height="10" fill="#f4ead8" />
+                {/* A stadium hoop: a padded base on the floor, a post, and an arm reaching out to the backboard. */}
+                <rect x="596" y="128" width="40" height="40" fill="#2f55d4" /><rect x="596" y="128" width="40" height="4" fill="#4a6fe6" /><rect x="596" y="160" width="40" height="8" fill="#1d3a9e" />
+                <rect x="610" y="42" width="10" height="86" fill="#5d5a58" /><rect x="618" y="42" width="2" height="86" fill="#43403e" />
+                <rect x="576" y="42" width="44" height="8" fill="#5d5a58" /><rect x="576" y="48" width="44" height="2" fill="#43403e" />
+                {[0, 1, 2, 3, 4, 5].map(i => <rect key={i} x={604 - i * 5} y={84 - i * 6} width="6" height="6" fill="#5d5a58" />)}
+                <rect x="566" y="24" width="10" height="56" fill="#e8e6e3" /><rect x="566" y="48" width="10" height="15" fill="#2f55d4" /><rect x="574" y="24" width="2" height="56" fill="#b9b6b2" />
+                <rect x="560" y="68" width="6" height="6" fill="#43403e" />
               </g>
               <g id="rim" shapeRendering="crispEdges"><rect x="517" y="69" width="50" height="4" fill="#ee6018" /></g>
               <g id="net" shapeRendering="crispEdges" style={{ transformBox: 'view-box', transformOrigin: '542px 72px' }}>
