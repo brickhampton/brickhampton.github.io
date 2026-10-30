@@ -1,19 +1,20 @@
 import { useState } from 'react';
 import { P } from '../lib/core.js';
 import { adminEdit } from '../lib/admin.js';
-import { figure, cleanLook, lookOf, randomLook, OPTS, SKINS, HAIRS, BANDS } from '../lib/avatar.js';
+import { figure, cleanLook, lookOf, randomLook, OPTS, SKINS, HAIRS, BANDS, SHOES } from '../lib/avatar.js';
 import { closeSheet } from '../components/Sheet.jsx';
 import { useSave } from './Settings.jsx';
 
-// Which part of the drawing each kind of thumbnail shows.
-const VIEW = { body: '6 -14 88 120', head: '22 6 56 56', face: '30 26 40 34' };
+// Which part of the drawing each kind of thumbnail shows: the whole player, or the head from a round avatar.
+const VIEW = { body: '6 -2 92 108', head: '0 0 100 100', face: '14 20 72 72' };
 const TABS = [
-  ['body', 'Body', [['height', 'Height', 'body'], ['weight', 'Weight', 'body'], ['muscle', 'Muscle', 'body'], ['skin', 'Skin tone']]],
+  ['body', 'Body', [['height', 'Height', 'body'], ['weight', 'Build', 'body'], ['muscle', 'Muscle', 'body'], ['skin', 'Skin tone']]],
   ['hair', 'Hair', [['style', 'Style', 'head'], ['hair', 'Colour']]],
-  ['face', 'Face', [['eyes', 'Eyes', 'face'], ['brows', 'Eyebrows', 'face'], ['mouth', 'Mouth', 'face'], ['beard', 'Facial hair', 'head']]],
-  ['gear', 'Extras', [['glasses', 'Glasses', 'face'], ['band', 'Headband'], ['wrist', 'Wristbands']]],
+  ['face', 'Face', [['eyes', 'Eyes', 'face'], ['eyeY', 'Eye height', 'face'], ['brows', 'Eyebrows', 'face'], ['beard', 'Facial hair', 'face']]],
+  ['gear', 'Extras', [['glasses', 'Glasses', 'face'], ['band', 'Headband'], ['wrist', 'Wristbands'], ['sleeve', 'Arm sleeve'], ['socks', 'Socks', 'body'], ['stripe', 'Sock stripe'], ['shoe', 'Shoes']]],
 ];
-const SWATCH = { skin: SKINS, hair: HAIRS, band: BANDS, wrist: BANDS };
+const SWATCH = { skin: SKINS, hair: HAIRS, band: BANDS, wrist: BANDS, sleeve: BANDS, stripe: BANDS, shoe: SHOES };
+const OPTIONAL = ['band', 'wrist', 'sleeve', 'stripe'];
 
 const Thumb = ({ look, num, view }) => <svg viewBox={VIEW[view]} aria-hidden="true"
   dangerouslySetInnerHTML={{ __html: figure({ ...look, num }, { stage: view === 'body' }) }} />;
@@ -29,7 +30,7 @@ export function AvatarSheet({ id }) {
 
   const row = ([k, label, view]) => {
     const sw = SWATCH[k];
-    const optional = k === 'band' || k === 'wrist';
+    const optional = OPTIONAL.includes(k);
     const list = sw ? [...(optional ? [null] : []), ...sw, ...(!optional && !sw.includes(look[k]) ? [look[k]] : [])] : OPTS[k].map((_, i) => i);
     return <div className="avb-row" key={k}><div className="avb-label">{label}</div>
       <div className={sw ? 'avb-swatches' : 'avb-opts'} role="radiogroup" aria-label={label}>{list.map(v => {
@@ -37,7 +38,7 @@ export function AvatarSheet({ id }) {
         return sw
           ? <button key={String(v)} role="radio" aria-checked={on} aria-label={name} data-k={k} data-v={String(v)} className={`avb-sw${v ? '' : ' none'}`} style={v ? { background: v } : undefined} onClick={() => put(k, v)} />
           : <button key={v} role="radio" aria-checked={on} data-k={k} data-v={v} className={`avb-opt ${view}`} onClick={() => put(k, v)}>
-            <Thumb look={{ ...look, [k]: v, ...(k === 'style' ? { band: null } : {}) }} num={num} view={view} /><span>{name}</span></button>;
+            <Thumb look={{ ...look, [k]: v, ...(k === 'style' ? { band: null } : {}), ...(k === 'eyeY' || k === 'eyes' ? { glasses: 0 } : {}) }} num={num} view={view} /><span>{name}</span></button>;
       })}</div></div>;
   };
 
@@ -45,8 +46,8 @@ export function AvatarSheet({ id }) {
   return <>
     <h2>Edit avatar</h2><p className="sheet-sub">{p.name}. Shows everywhere straight away, and Undo in Change history puts it back</p>
     <div className="avb">
-      <div className="avb-stage"><svg className="avb-fig" viewBox="-10 -24 120 168" aria-label={`${p.name}'s avatar`}
-        dangerouslySetInnerHTML={{ __html: `<ellipse cx="50" cy="104" rx="30" ry="5" fill="#000" opacity=".35"/>${figure({ ...look, num }, { stage: true })}` }} />
+      <div className="avb-stage"><svg className="avb-fig" viewBox="0 -4 108 114" aria-label={`${p.name}'s avatar`}
+        dangerouslySetInnerHTML={{ __html: `<ellipse cx="50" cy="104" rx="30" ry="4" fill="#000" opacity=".35"/>${figure({ ...look, num }, { stage: true, pose: 'dribble' })}` }} />
         <div className="avb-tools"><button className="btn ghost sm" id="avb-shuffle" onClick={() => setLook(cleanLook(randomLook()))}>Shuffle</button>
           <button className="btn ghost sm" id="avb-reset" disabled={!changed} onClick={() => setLook(saved)}>Reset</button></div></div>
       <div className="avb-parts">
