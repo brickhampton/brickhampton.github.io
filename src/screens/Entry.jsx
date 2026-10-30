@@ -5,7 +5,7 @@ import { rec, change, countsFor, livePts, ACTIONS, A, saveGame, clearRecording }
 import { reduced } from '../lib/charts.js';
 import { go } from '../lib/nav.js';
 import { Avatar, figure } from '../components/Avatar.jsx';
-import { BALL, BALL_C } from '../lib/avatar.js';
+import { BALL, BALL_C, pxShadow } from '../lib/avatar.js';
 import { BoxScore } from '../components/BoxScore.jsx';
 import { openSheet, closeSheet } from '../components/Sheet.jsx';
 import { PinSheet } from '../components/PinSheet.jsx';
@@ -24,16 +24,17 @@ const D = 140; // let the player get to their spot before the ball moves
 // The ball and hoop are drawn in the same flat pixel style as the players (3 screen units to a pixel).
 const PX = 3, BALL_D = BALL.map(([o, w], j) => `M${o} ${j}h${w}v1h${-w}z`).join('');
 const NET = Array.from({ length: 8 }, (_, j) => Array.from({ length: 12 - j }, (_, i) => (i + j) % 2 ? '' : `M${542 - (12 - j) * 2 + i * 4} ${73 + j * 4}h3v3h-3z`).join('')).join('');
-const MATE = { v: 2, skin: '#d9b48e', hair: '#2e2e33', style: 14 };
+const MATE = { v: 2, skin: '#d9b48e', hair: '#2e2e33', style: 3 }; // a short fringe
 // The crowd behind the courtside boards: one sparse row of soft, dim figures in muted colours (never the team's blue),
-// so they sit back in the dark and the player stays the focus. Every third fan is one of the few who react to small plays.
+// so they sit back in the dark and the player stays the focus. Most fans get up for a made 2; every third fan is one
+// of the few who clap the smaller plays.
 const CROWD = (() => {
   const SK = ['#5a4a3e', '#66533f', '#4e4036'], HR = ['#1c1714', '#241d18', '#2b2420'], TOP = ['#2c2724', '#33291f', '#2a2a26', '#3a2c2a', '#302b30'];
   const out = [];
   for (let i = 0; i < 34; i++) {
     const x = i * 36 - 402 + ((i * 11) % 3) * 3;
     if (x > 548 && x < 650) continue; // leave room for the hoop
-    out.push({ i, x, y: 111 + ((i * 5) % 2) * 3, skin: SK[i % 3], hair: HR[(i * 2) % 3], top: TOP[(i * 3) % 5], few: i % 3 === 0, d: ((i * 37) % 100) / 100 * .25, h: 2.6 + ((i * 13) % 10) / 5 });
+    out.push({ i, x, y: 111 + ((i * 5) % 2) * 3, skin: SK[i % 3], hair: HR[(i * 2) % 3], top: TOP[(i * 3) % 5], few: i % 3 === 0, most: i % 4 !== 3, d: ((i * 37) % 100) / 100 * .25, h: 2.6 + ((i * 13) % 10) / 5 });
   }
   return out;
 })();
@@ -44,10 +45,10 @@ function makeStage() {
   function placeActor(sel, instant, x = actorX) {
     if (!sel) { actorWrap.innerHTML = ''; actor = null; return; }
     if (!actor || actor.dataset.id !== sel) {
-      actorWrap.innerHTML = `<g class="actor alive" data-id="${esc(sel)}"><ellipse cx="0" cy="${FLOOR}" rx="26" ry="5" fill="#000" opacity=".35"/><g class="body">${figure(P(sel), { stage: true, pose: 'down' })}</g></g>`;
+      actorWrap.innerHTML = `<g class="actor alive" data-id="${esc(sel)}">${pxShadow(0, FLOOR, 22)}<g class="body">${figure(P(sel), { stage: true, pose: 'down' })}</g></g>`;
       actor = actorWrap.firstElementChild; instant = true;
     }
-    const body = actor.querySelector('.body'), shadow = actor.querySelector('ellipse');
+    const body = actor.querySelector('.body'), shadow = actor.querySelector('.pxsh');
     const tf = xx => `translate(${xx - 50 * SC}px, ${FLOOR - 104 * SC}px) scale(${SC})`;
     if (instant || reduced) { body.style.transform = tf(x); shadow.style.transform = `translateX(${x}px)`; }
     else {
@@ -69,13 +70,17 @@ function makeStage() {
       actor._pose = setTimeout(() => { if (actor?.dataset.id === id) actor.querySelector('.body').innerHTML = figure(P(id), { stage: true, pose: 'down' }); }, ms);
     }, delay);
   }
-  // The crowd jumps up with their arms in the air on a good play.
-  function cheer(delay, big) {
+  // The crowd reacts to a good play: 'big' (a 3, everyone up), 'most' (a 2, most of them up) or 'clap' (a few clap).
+  function cheer(delay, level) {
     setTimeout(() => {
       const c = $('#crowd'); if (!c) return;
-      c.classList.remove('cheer', 'big'); void c.getBBox(); c.classList.add('cheer'); if (big) c.classList.add('big');
-      clearTimeout(c._t); c._t = setTimeout(() => c.classList.remove('cheer', 'big'), big ? 1700 : 1200);
+      c.classList.remove('big', 'most', 'clap'); void c.getBBox(); c.classList.add(level);
+      clearTimeout(c._t); c._t = setTimeout(() => c.classList.remove(level), level === 'big' ? 1700 : 1300);
     }, delay);
+  }
+  // A leap for a block: the player springs up and drops back down.
+  function leap(delay) {
+    setTimeout(() => { if (!actor) return; const b = actor.querySelector('.body'); b.classList.remove('leap'); void b.getBBox(); b.classList.add('leap'); setTimeout(() => b.classList.remove('leap'), 800); }, delay);
   }
   function mk(tag, attrs, parent = fx) { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); parent.appendChild(e); return e; }
   function ball(fill = BALL_C) {
@@ -128,10 +133,10 @@ function makeStage() {
     placeActor(sel, false, SPOT[k]);
     if (reduced) return;
     const pose = { '2M': ['shoot', 0, D + 380], '2X': ['shoot', 0, D + 380], '3M': ['shoot', 0, D + 480], '3X': ['shoot', 0, D + 480], 'FM': ['shoot', 0, D + 340], 'FX': ['shoot', 0, D + 340],
-      'OR': ['catch', 200, 700], 'DR': ['catch', 200, 700], 'AS': ['pass', D - 40, 520], 'ST': ['pass', 300, 520], 'BK': ['block', 0, 760] }[k];
+      'OR': ['catch', 200, 700], 'DR': ['catch', 200, 700], 'AS': ['pass2', D - 40, 520], 'ST': ['pass', 120, 260], 'BK': ['block1', 0, 760] }[k];
     if (pose) actorPose(...pose);
-    const cheers = { '2M': D + 360, '3M': D + 460, 'FM': D + 320, 'AS': D + 580, 'ST': 330, 'BK': 280, 'OR': 300, 'DR': 300 };
-    if (k in cheers) cheer(cheers[k], k === '3M');
+    const cheers = { '2M': [D + 360, 'most'], '3M': [D + 460, 'big'], 'FM': [D + 320, 'clap'], 'AS': [D + 580, 'clap'], 'ST': [420, 'clap'], 'BK': [280, 'clap'], 'OR': [300, 'clap'], 'DR': [300, 'clap'] }[k];
+    if (cheers) cheer(...cheers);
     switch (k) {
       case '2M': actorMood('celebrate', D); shot(SPOT[k], 80, 360, true); setTimeout(() => pop('+2', RX, 40), D + 360); break;
       case '2X': actorMood('celebrate', D); shot(SPOT[k], 80, 360, false); actorMood('slump', D + 420); break;
@@ -145,7 +150,7 @@ function makeStage() {
           if (k === 'OR') then(fly(b, [[x, HAND_Y - 8, -160], [x, HAND_Y + 14, -160], [x + 10, HAND_Y - 30, -60], [x + 16, HAND_Y - 40, 0, 0]], 420, 'ease-out', 80), () => b.remove());
           else { streaks(x - 30, HAND_Y, -1); then(fly(b, [[x, HAND_Y - 8, -160], [x - 200, HAND_Y - 20, -420], [40, HAND_Y, -700, 0]], 420, 'cubic-bezier(.5,0,.7,1)', 100), () => b.remove()); }
         });
-        setTimeout(() => pop(k === 'OR' ? 'OREB' : 'DREB', x, 34, '#eeeeee', 18), 250); break;
+        setTimeout(() => pop(k === 'OR' ? 'Gimme dat' : 'Yoink', x, 34, '#eeeeee', 18), 250); break;
       }
       case 'AS': { // the player threads a pass to a teammate who finishes
         const x = SPOT[k];
@@ -157,19 +162,24 @@ function makeStage() {
         then(fly(b, arc(x + 20, HAND_Y + 10, 430, HAND_Y + 30, 28, 10, 420), 320, 'ease-out', D), () => then(fly(b, arc(430, HAND_Y + 30, RX, RY - 2, 45, 8, 200, 420), 260), () => { ripple(); then(fly(b, [[RX, RY - 2], [RX, 110, 0, 0]], 220, 'ease-in'), () => b.remove()); }));
         setTimeout(() => pop('Dime', 300, 40, '#eeeeee', 18), 160); break;
       }
-      case 'ST': { // an opponent's dribble gets picked off and the player races the other way
-        const x = SPOT[k], b = ball('#ee6018');
-        const a = fly(b, [[600, FLOOR - 30, 0], [540, FLOOR - 14, -90], [480, FLOOR - 30, -180], [420, FLOOR - 14, -270], [x + 20, FLOOR - 40, -330], [x - 60, FLOOR - 30, -400], [20, FLOOR - 24, -700, 0]], 620, 'linear');
-        actorMood('celebrate', 330); setTimeout(() => streaks(x - 20, FLOOR - 40, -1), 380);
-        then(a, () => b.remove()); setTimeout(() => pop('Steal', x, 40, '#eeeeee', 18), 320); break;
+      case 'ST': { // an opponent dribbles in, the player pokes the ball loose, scoops it up and takes off the other way
+        const x = SPOT[k], b = ball(), sel0 = sel;
+        then(fly(b, [[620, FLOOR - 24, 0], [580, FLOOR - 10, -60], [540, FLOOR - 26, -120], [500, FLOOR - 10, -180], [460, FLOOR - 26, -240], [x + 46, FLOOR - 12, -300], [x + 30, FLOOR - 34, -330]], 380, 'linear'), () => {
+          burst(x + 30, FLOOR - 34, '#eeeeee');
+          then(fly(b, [[x + 30, FLOOR - 34, -330], [x + 18, FLOOR - 52, -380], [x + 12, FLOOR - 40, -420, 0]], 160, 'ease-out'), () => b.remove());
+        });
+        actorPose('dribble', 520, 760); actorMood('celebrate', 520);
+        setTimeout(() => { if (actor?.dataset.id === sel0) { placeActor(sel0, false, x - 150); streaks(x - 90, FLOOR - 50, -1); } }, 620);
+        setTimeout(() => { if (actor?.dataset.id === sel0) placeActor(sel0, false, x); }, 1200);
+        setTimeout(() => pop('Cookiesss', x, 40, '#eeeeee', 18), 400); break;
       }
       case 'BK': { // an opponent's shot goes up and the player swats it
-        const b = ball(); actorMood('celebrate', 140);
-        then(fly(b, arc(300, FLOOR - 30, SPOT.BK, HAND_Y - 26, 40, 8, 180), 280, 'ease-out'), () => {
-          burst(SPOT.BK, HAND_Y - 26, '#eeeeee');
-          then(fly(b, [[SPOT.BK, HAND_Y - 26, 180], [340, FLOOR - 4, -200], [220, FLOOR - 30, -420], [150, FLOOR - 6, -560, 0]], 480, 'cubic-bezier(.2,.7,.4,1)'), () => b.remove());
+        const b = ball(), top = HAND_Y - 46; leap(0);
+        then(fly(b, arc(300, FLOOR - 30, SPOT.BK + 6, top, 50, 8, 180), 280, 'ease-out'), () => {
+          burst(SPOT.BK + 6, top, '#eeeeee');
+          then(fly(b, [[SPOT.BK + 6, top, 180], [340, FLOOR - 4, -200], [220, FLOOR - 30, -420], [150, FLOOR - 6, -560, 0]], 480, 'cubic-bezier(.2,.7,.4,1)'), () => b.remove());
         });
-        setTimeout(() => pop('Rejected', SPOT.BK, 34, '#eeeeee', 18), 280); break;
+        setTimeout(() => pop('Rejected!', SPOT.BK, 34, '#eeeeee', 18), 280); break;
       }
       case 'TO': { // the ball squirts away out of bounds
         const x = SPOT[k], b = ball('#8a8380'); actorMood('slump', 220);
@@ -324,11 +334,12 @@ export function Entry() {
           <div className="stage" aria-hidden="true">
             <svg viewBox="0 0 640 180" preserveAspectRatio="xMidYMax meet">
               <g id="crowd" shapeRendering="crispEdges">{CROWD.map(f => (
-                <g key={f.i} className={`fan${f.few ? ' few' : ''}`} style={{ '--d': `${f.d}s`, '--h': `${f.h}s` }}>
+                <g key={f.i} className={`fan${f.few ? ' few' : ''}${f.most ? ' most' : ''}`} style={{ '--d': `${f.d}s`, '--h': `${f.h}s` }}>
                   {/* Drawn in the players' 3-unit pixels: a square head with a hair line, blocky shoulders, arms for a 3. */}
                   <rect x={f.x - 3} y={f.y + 3} width="3" height="9" fill={f.skin} className="arms" /><rect x={f.x + 12} y={f.y + 3} width="3" height="9" fill={f.skin} className="arms" />
                   <rect x={f.x + 3} y={f.y} width="6" height="3" fill={f.hair} /><rect x={f.x} y={f.y + 3} width="12" height="9" fill={f.skin} /><rect x={f.x} y={f.y + 3} width="12" height="3" fill={f.hair} />
                   <rect x={f.x - 3} y={f.y + 15} width="18" height="12" fill={f.top} /><rect x={f.x} y={f.y + 12} width="12" height="3" fill={f.top} />
+                  <rect x={f.x + 3} y={f.y + 15} width="6" height="3" fill={f.skin} className="clap" />
                 </g>))}</g>
               <g shapeRendering="crispEdges">
                 <rect x="-400" y="136" width="1440" height="32" fill="#191513" /><rect x="-400" y="136" width="1440" height="2" fill="#2c2520" />
@@ -374,7 +385,7 @@ export function Entry() {
         <div className="log" id="log">{log.length ? log.map((e, i) => (
           <button key={e.id} className={`chip${i === 0 ? ' new' : ''}${confirm === e.id ? ' confirm' : ''}`} data-id={e.id}
             onClick={() => { if (confirm === e.id) { setConfirm(null); remove(e.id, 'Deleted'); } else setConfirm(e.id); }}>
-            {confirm === e.id ? <>Delete <b>{P(e.pid).name}{A[e.a].label}</b>?</> : <><b>{P(e.pid).name}</b>{A[e.a].label}</>}</button>))
+            {confirm === e.id ? <>Delete <b>{P(e.pid).name} {A[e.a].label}</b>?</> : <><b>{P(e.pid).name}</b>{A[e.a].label}</>}</button>))
           : <span className="empty">Actions you record show up here. Tap one to delete it.</span>}</div>
       </div>
     </div>
