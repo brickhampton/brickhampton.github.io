@@ -32,7 +32,7 @@ function makeStage() {
   function placeActor(sel, instant, x = actorX) {
     if (!sel) { actorWrap.innerHTML = ''; actor = null; return; }
     if (!actor || actor.dataset.id !== sel) {
-      actorWrap.innerHTML = `<g class="actor alive" data-id="${esc(sel)}"><ellipse cx="0" cy="${FLOOR}" rx="26" ry="5" fill="#000" opacity=".35"/><g class="body">${figure(P(sel), { stage: true })}</g></g>`;
+      actorWrap.innerHTML = `<g class="actor alive" data-id="${esc(sel)}"><ellipse cx="0" cy="${FLOOR}" rx="26" ry="5" fill="#000" opacity=".35"/><g class="body">${figure(P(sel), { stage: true, pose: 'down' })}</g></g>`;
       actor = actorWrap.firstElementChild; instant = true;
     }
     const body = actor.querySelector('.body'), shadow = actor.querySelector('ellipse');
@@ -48,7 +48,7 @@ function makeStage() {
     setTimeout(() => { if (!actor) return; const b = actor.querySelector('.body'); b.classList.remove('celebrate', 'slump'); void b.getBBox(); b.classList.add(mood); }, delay);
   }
   function mk(tag, attrs, parent = fx) { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); parent.appendChild(e); return e; }
-  function ball(fill = '#ee6018') {
+  function ball(fill = BALL_C) {
     const g = mk('g', {});
     mk('path', { d: BALL_D, fill: fill === '#ee6018' ? BALL_C : fill, transform: `translate(${-3.5 * PX} ${-3 * PX}) scale(${PX})`, 'shape-rendering': 'crispEdges' }, g);
     setTimeout(() => g.remove(), 2400);

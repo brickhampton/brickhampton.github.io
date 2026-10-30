@@ -34,7 +34,7 @@ function homeScene(cw, ch) {
   let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
   // Each player bobs, blinks and smiles on their own timing.
   const fig = (id, cx, top, w) => `<g class="hp alive" style="--hd:${(rnd() * 1.6).toFixed(2)}s;--bd:${(rnd() * -5).toFixed(2)}s;--sd:${(rnd() * -12).toFixed(2)}s;--sl:${(10 + rnd() * 6).toFixed(1)}s"><svg x="${cx - w / 2}" y="${top}" width="${w}" height="${w * 1.04}" viewBox="0 0 100 104" overflow="visible">
-    <ellipse cx="50" cy="104" rx="32" ry="4" fill="#000" opacity=".35"/>${figure(P(id), { stage: true, pose: POSE.hold[id] })}</svg></g>`;
+    <ellipse cx="50" cy="104" rx="32" ry="4" fill="#000" opacity=".35"/>${figure(P(id), { stage: true, pose: POSE.hold[id] || 'down' })}</svg></g>`;
   // Court lines on the floor, drawn in perspective and very faint, running off the bottom of the screen.
   const yb = vb + 40, sl = y => (y - 250) * 83 / 220;
   const court = `<g fill="none" stroke="#fff" stroke-opacity=".09" stroke-width="2">
