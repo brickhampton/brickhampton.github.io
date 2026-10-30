@@ -76,7 +76,7 @@ function PStage({ p, num }) {
   };
   return <button className={`pstage alive${react ? ' ' + react.k : ''}`} id="p-stage" aria-label="Wave hello" onClick={tap}>
     <span className="pglow" /><span className="pring" />
-    <span className="phop"><svg className="pfig" viewBox="0 0 100 104" aria-hidden="true" dangerouslySetInnerHTML={{ __html: figure({ ...p, num }, { stage: true, pose: react?.k === 'dribble' ? 'dribble' : undefined }) }} /></span>
+    <span className="phop"><svg className="pfig" viewBox="0 0 100 104" aria-hidden="true" dangerouslySetInnerHTML={{ __html: figure({ ...p, num }, { stage: true, }) }} /></span>
     <span className="pshadow" />
   </button>;
 }

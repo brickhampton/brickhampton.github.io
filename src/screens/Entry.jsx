@@ -48,7 +48,7 @@ function makeStage() {
     setTimeout(() => { if (!actor) return; const b = actor.querySelector('.body'); b.classList.remove('celebrate', 'slump'); void b.getBBox(); b.classList.add(mood); }, delay);
   }
   function mk(tag, attrs, parent = fx) { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); parent.appendChild(e); return e; }
-  function ball(fill = '#ee6018') {
+  function ball(fill = BALL_C) {
     const g = mk('g', {});
     mk('path', { d: BALL_D, fill: fill === '#ee6018' ? BALL_C : fill, transform: `translate(${-3.5 * PX} ${-3 * PX}) scale(${PX})`, 'shape-rendering': 'crispEdges' }, g);
     setTimeout(() => g.remove(), 2400);
@@ -97,6 +97,8 @@ function makeStage() {
   function play(sel, k) {
     placeActor(sel, false, SPOT[k]);
     if (reduced) return;
+    // The ball leaves the player's hand for the play and is back in it once the play is over.
+    if (actor) { const a = actor; a.classList.add('nob'); clearTimeout(a._nob); a._nob = setTimeout(() => a.classList.remove('nob'), 1300); }
     switch (k) {
       case '2M': actorMood('celebrate', D); shot(SPOT[k], 80, 360, true); setTimeout(() => pop('+2', RX, 40), D + 360); break;
       case '2X': actorMood('celebrate', D); shot(SPOT[k], 80, 360, false); actorMood('slump', D + 420); break;

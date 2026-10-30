@@ -98,6 +98,7 @@ h1.page{font-size:40px;font-weight:500;letter-spacing:-.04em;margin:0;line-heigh
 @keyframes eyesOff{0%,74%{opacity:1}75%,89%{opacity:0}90%,100%{opacity:1}}
 /* The selected player on the court bobs on the spot while waiting for the next action. */
 .actor .av-fig{animation:idleBob .9s steps(2,jump-none) infinite}
+.actor.nob .av-ball{visibility:hidden}
 @keyframes idleBob{50%{transform:translateY(-3px)}}
 .celebrate .av-fig{animation:jump .5s var(--ease-out)}
 .slump .av-head{animation:slump .55s ease-out}

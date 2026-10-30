@@ -217,7 +217,7 @@ function sprite(c, num, pose) {
   if (c.band) { r(hx - 1, hy + 2, 11, 2, c.band); r(hx - 1, hy + 2, 11, 1, mix(c.band, -.25)); }
   // ---- front arm and whatever it holds
   layer = 'b';
-  if (pose === 'dribble') {
+  if (pose === 'dribble' || !pose) {
     // Palming the ball: the forearm comes out level and a big hand sits on top, fingers spread over the ball.
     ball(fx + 5, ty + 8, r);
     [[1, -1, 3 + aw], [2, 0, 5 + aw], [3, 1, 5 + aw], [4, 3, 5], [5, 3, 5]].forEach(([j, dx, w]) => r(fx + dx, ty + j, w, 1, S));
@@ -260,7 +260,7 @@ function paths(g, layer) {
 const cache = new Map();
 // SVG markup for a player. Round avatars (the default) show the head and the top of the jersey in a 100 × 100 box.
 // opts.stage draws the whole player at their height, feet on the bottom of a 100 × 104 box: the court, the Home
-// photo, the player page and the builder. opts.pose: 'dribble', 'fist', 'ball', 'trophy', or arms down (the default).
+// photo, the player page and the builder. opts.pose: 'fist', 'ball', 'trophy', 'down' (arms down), or palming the ball (the default, as in the reference).
 export function figure(raw, opts = {}) {
   const c = cleanLook(raw), key = JSON.stringify([c, raw.num, !!opts.stage, opts.pose || '']);
   if (cache.has(key)) return cache.get(key);
