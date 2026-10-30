@@ -11,8 +11,8 @@ const TROPHY = `<svg x="345" y="262" width="110" height="122" preserveAspectRati
 
 // The team photo is posed like the real championship photo: four standing at the back, three in front holding the ball
 // and the trophy. Anyone else on the roster fills in on the shorter row.
-// A. Shan's raised fist comes and goes now and then instead of being held all the time.
-const POSE = { back: ['hoang', 'liu', 'yoon', 'shan'], front: ['lim', 'yao', 'lin'], hold: { yao: 'trophy', lim: 'ball' }, now: { shan: 'fist' } };
+// A. Shan's raised fist comes and goes now and then instead of being held all the time. nudge shifts a player by whole sprite pixels.
+const POSE = { back: ['hoang', 'liu', 'yoon', 'shan'], front: ['lim', 'yao', 'lin'], hold: { yao: 'trophy', lim: 'ball' }, now: { shan: 'fist' }, nudge: { lin: 1 } };
 function rows(ids) {
   const back = POSE.back.filter(id => ids.includes(id)), front = POSE.front.filter(id => ids.includes(id));
   for (const id of ids) if (!back.includes(id) && !front.includes(id)) (back.length <= front.length ? back : front).push(id);
@@ -78,7 +78,7 @@ function homeScene(cw, ch) {
     <g>${pieces.slice(0, half).join('')}</g>
     <g${A < 1 ? ' transform="translate(400 300) scale(1.3) translate(-400 -300)"' : ''}>
     ${inward(back, bx).map(([id, i]) => fig(id, bx(i), BT + STAGGER[i % 6], BW)).join('')}
-    ${inward(front, fx).map(([id, i]) => fig(id, fx(i), FT + (i === Math.floor(front.length / 2) ? 10 : 0) + STAGGER[(i + 3) % 6], FW)).join('')}
+    ${inward(front, fx).map(([id, i]) => fig(id, fx(i) + (POSE.nudge[id] || 0) * FW * 1.04 / 34, FT + (i === Math.floor(front.length / 2) ? 10 : 0) + STAGGER[(i + 3) % 6], FW)).join('')}
     </g>
     ${trophy}${ball}
     <g>${pieces.slice(half).join('')}</g>
