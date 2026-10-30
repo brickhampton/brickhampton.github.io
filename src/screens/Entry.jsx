@@ -27,7 +27,7 @@ function makeStage() {
   function placeActor(sel, instant, x = actorX) {
     if (!sel) { actorWrap.innerHTML = ''; actor = null; return; }
     if (!actor || actor.dataset.id !== sel) {
-      actorWrap.innerHTML = `<g class="actor" data-id="${esc(sel)}"><ellipse cx="0" cy="${FLOOR}" rx="26" ry="5" fill="#000" opacity=".35"/><g class="body">${figure(P(sel))}</g></g>`;
+      actorWrap.innerHTML = `<g class="actor" data-id="${esc(sel)}"><ellipse cx="0" cy="${FLOOR}" rx="26" ry="5" fill="#000" opacity=".35"/><g class="body">${figure(P(sel), { stage: true })}</g></g>`;
       actor = actorWrap.firstElementChild; instant = true;
     }
     const body = actor.querySelector('.body'), shadow = actor.querySelector('ellipse');

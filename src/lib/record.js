@@ -2,6 +2,7 @@ import { S, notify, reload, afterLoad } from './store.js';
 import { lastNo, isStarter, P } from './core.js';
 import { adminCall, isAdmin } from './admin.js';
 import { go } from './nav.js';
+import { randomLook, lookOf } from './avatar.js';
 
 // The game being recorded. Every tap is kept in this browser straight away,
 // so it survives the connection dropping or the tab closing. It goes to the database on Save.
@@ -21,7 +22,6 @@ export const ACTIONS = [
   { k: 'TO', key: 'TO', sub: 'Turnover', cls: 'other to', label: 'Turnover' },
 ];
 export const A = Object.fromEntries(ACTIONS.map(a => [a.k, a]));
-const EXTRA_SKIN = ['#f0c39b', '#c98f63', '#e2b089', '#a8704a'];
 
 export const todayIso = () => { const d = new Date(); return new Date(d - d.getTimezoneOffset() * 6e4).toISOString().slice(0, 10); };
 
@@ -53,8 +53,7 @@ export const setupPlayers = () => [...R.order.map(P).filter(Boolean), ...R.today
 export const syncPlaying = () => { R.playing = setupPlayers().map(p => p.id).filter(id => R.playing.includes(id)); };
 
 export function addSub(name, rawNum) {
-  const n = S.roster.length + S.subs.length;
-  const p = { id: 'p' + Date.now().toString(36), name, num: /^\d{1,2}$/.test(rawNum) ? String(parseInt(rawNum, 10)) : '0', guest: true, skin: EXTRA_SKIN[n % 4], hair: '#1a1410', style: n };
+  const p = { id: 'p' + Date.now().toString(36), name, num: /^\d{1,2}$/.test(rawNum) ? String(parseInt(rawNum, 10)) : '0', guest: true, ...randomLook() };
   S.subs = [...S.subs, p];
   change(r => { r.newSubs.push(p); r.todaySubs.push(p.id); r.playing.push(p.id); syncPlaying(); });
 }
@@ -99,7 +98,7 @@ export async function saveGame() {
   const id = await adminCall('save_game', {
     p_game: {
       ...R.game, result: R.result,
-      new_players: R.newSubs.filter(p => used.has(p.id)).map(p => ({ id: p.id, name: p.name, num: p.num, look: { skin: p.skin, hair: p.hair, style: p.style } })),
+      new_players: R.newSubs.filter(p => used.has(p.id)).map(p => ({ id: p.id, name: p.name, num: p.num, look: lookOf(p) })),
       lines: R.playing.map(pid => ({ player_id: pid, num: nums[pid] ?? null, ...countsFor(pid, R.events) })),
     },
   });

@@ -159,7 +159,7 @@ export function Player() {
       <div className="pnum" aria-hidden="true">{num}</div>
       <button className="pstage" id="p-stage" aria-label="Wave hello" onClick={hop}>
         <span className="pglow" /><span className="pring" />
-        <svg className="pfig" viewBox="0 0 100 104" aria-hidden="true" dangerouslySetInnerHTML={{ __html: figure({ ...p, num }) }} />
+        <svg className="pfig" viewBox="0 0 100 104" aria-hidden="true" dangerouslySetInnerHTML={{ __html: figure({ ...p, num }, { stage: true }) }} />
         <span className="pball"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="#ee6018" /><path d="M1 12h22M12 1v22M4.2 4.2q5 7.8 0 15.6M19.8 4.2q-5 7.8 0 15.6" stroke="#2a1206" strokeWidth="1.3" fill="none" /></svg></span>
         <span className="pshadow" />
       </button>
