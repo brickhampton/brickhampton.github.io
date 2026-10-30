@@ -135,8 +135,11 @@ function sprite(c, num, pose) {
   const g = Array.from({ length: H }, () => Array(W).fill(null));
   // The ball has its own grid, so the hand drawn over it doesn't cut holes in it when it bounces away.
   const go = Array.from({ length: H }, () => Array(W).fill(null));
+  // The eyes have their own grid too, so the face stays solid skin underneath: when the eyes blink or swap for the
+  // smiling ones, no hole opens onto the background.
+  const ge = Array.from({ length: H }, () => Array(W).fill(null));
   let layer = 'b';
-  const r = (x, y, w = 1, h = 1, col, lay = layer) => { const t = lay === 'o' ? go : g; for (let j = y; j < y + h; j++) for (let i = x; i < x + w; i++) if (j >= 0 && j < H && i >= 0 && i < W) t[j][i] = col ? [col, lay] : null; };
+  const r = (x, y, w = 1, h = 1, col, lay = layer) => { const t = lay === 'o' ? go : lay === 'e' ? ge : g; for (let j = y; j < y + h; j++) for (let i = x; i < x + w; i++) if (j >= 0 && j < H && i >= 0 && i < W) t[j][i] = col ? [col, lay] : null; };
   const S = c.skin, S2 = mix(S, .12), SB = mix(S, .06), HR = c.hair;
   const tall = TALL[c.height], wide = c.weight, aw = c.muscle > 1 ? 1 : 0;
   const hx = 8, hy = 3 + (3 - tall), ty = hy + 11, bx = hx - wide, bw = 10 + wide * 2;
@@ -228,6 +231,8 @@ function sprite(c, num, pose) {
       r(x + o, ey - 1, 4 - 2 * o, 1, G); r(x + o, ey + 2, 4 - 2 * o, 1, G); r(x, ey, 1, 2, G); r(x + 3, ey, 1, 2, G);
     });
     r(hx + 5, ey, 1, 1, G); r(hx, ey, 1, 1, G);
+    // The frames sit over the eyes, as they did before the eyes had their own grid.
+    g.forEach((row, y) => row.forEach((px, x) => { if (px && px[0] === G && px[1] === 'h') ge[y][x] = null; }));
   }
   if (c.band) { r(hx - 1, hy + 2, 11, 2, c.band); r(hx - 1, hy + 2, 11, 1, mix(c.band, -.25)); }
   // ---- front arm and whatever it holds
@@ -270,7 +275,7 @@ function sprite(c, num, pose) {
   } else {
     [...ARM, ...HAND].forEach(([j, dx, w]) => r(fx - dx - w, ty + j, w + aw, 1, S));
   }
-  return { g, go, hy };
+  return { g, go, ge, hy };
 }
 // A shadow in the same chunky pixels as the players: three stepped rows, centred on (cx, cy), u units to a pixel.
 export function pxShadow(cx, cy, rx, u = 3, op = .35) {
@@ -303,14 +308,14 @@ const cache = new Map();
 export function figure(raw, opts = {}) {
   const c = cleanLook(raw), key = JSON.stringify([c, raw.num, !!opts.stage, opts.pose || '']);
   if (cache.has(key)) return cache.get(key);
-  const { g, go, hy } = sprite(c, raw.num, opts.pose), smile = sprite({ ...c, eyes: 4 }, raw.num, opts.pose).g;
+  const { g, go, ge, hy } = sprite(c, raw.num, opts.pose), smile = sprite({ ...c, eyes: 4 }, raw.num, opts.pose).ge;
   // The ball, head, eyes and smiling eyes are their own groups (outside the pixel scale), so the bounce, blink and smile
   // animations work in the box's units. The smiling eyes stay hidden until an animation shows them.
   const tf = opts.stage ? `translate(50 0) scale(${(104 / FEET).toFixed(4)}) translate(-13 0)` : `scale(6.25) translate(-5 ${3 - hy})`, at = s => `<g transform="${tf}">${s}</g>`;
   // A palmed ball sits behind the hand; a ball held in front of the chest sits over the body.
   const bl = `<g class="av-ball" style="--drop:${((5 + TALL[c.height]) * 104 / FEET).toFixed(1)}px">${at(paths(go, 'o'))}</g>`, body = at(paths(g, 'b'));
   const svg = `<g class="av-fig" shape-rendering="crispEdges">${opts.pose === 'ball' ? body + bl : bl + body}`
-    + `<g class="av-head">${at(paths(g, 'h'))}<g class="av-eyes">${at(paths(g, 'e'))}</g><g class="av-smile">${at(paths(smile, 'e'))}</g></g></g>`;
+    + `<g class="av-head">${at(paths(g, 'h'))}<g class="av-eyes">${at(paths(ge, 'e'))}</g><g class="av-smile">${at(paths(smile, 'e'))}</g></g></g>`;
   if (cache.size > 400) cache.clear();
   cache.set(key, svg);
   return svg;
