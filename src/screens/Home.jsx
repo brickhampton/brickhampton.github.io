@@ -3,6 +3,7 @@ import { P, statPlayers, esc } from '../lib/core.js';
 import { reduced } from '../lib/charts.js';
 import { figure, pxShadow } from '../lib/avatar.js';
 import { ChevDown } from '../components/icons.jsx';
+import { stage } from '../lib/homeStage.js';
 
 const TROPHY = `<svg x="345" y="262" width="110" height="122" preserveAspectRatio="xMidYMax meet" viewBox="0 0 24 24" aria-hidden="true"><defs><linearGradient id="ht-g" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#ffe08a"/><stop offset=".55" stop-color="#e9b949"/><stop offset="1" stop-color="#b9821f"/></linearGradient></defs>
   <path d="M17 4h3v2.5a3.5 3.5 0 0 1-3.6 3.5M7 4H4v2.5A3.5 3.5 0 0 0 7.6 10" fill="none" stroke="#d9a63a" stroke-width="2" stroke-linecap="round"/>
@@ -32,20 +33,16 @@ function homeScene(cw, ch) {
   if (vy + vh < need) vy = Math.min(105, need - vh);
   if (vy + vh < need) { vh = need - vy; vw = vh * A; }
   const vx = 400 - vw / 2, vb = vy + vh;
+  const S = stage({ vx, vy, vw, vh, vb, A });
   let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
   // Each player bobs, blinks and smiles on their own timing.
-  const fig = (id, cx, top, w) => `<g class="hp alive" style="--hd:${(rnd() * 1.6).toFixed(2)}s;--bd:${(rnd() * -5).toFixed(2)}s;--sd:${(rnd() * -12).toFixed(2)}s;--sl:${(10 + rnd() * 6).toFixed(1)}s"><svg x="${cx - w / 2}" y="${top}" width="${w}" height="${w * 1.04}" viewBox="0 0 100 104" overflow="visible">
-    ${pxShadow(50, 103.5, 22, 104 / 34)}${POSE.now[id] ? `<g class="hp-rest">${figure(P(id), { stage: true, pose: 'down' })}</g><g class="hp-now">${figure(P(id), { stage: true, pose: POSE.now[id] })}</g>` : figure(P(id), { stage: true, pose: POSE.hold[id] || 'down' })}</svg></g>`;
-  // Court lines on the floor, drawn in perspective and very faint, running off the bottom of the screen.
-  const yb = vb + 40, sl = y => (y - 250) * 83 / 220;
-  const court = `<g fill="none" stroke="#fff" stroke-opacity=".09" stroke-width="2">
-    <path d="M${(95 - sl(yb) - 2000).toFixed(0)} 250H${(705 + sl(yb) + 2000).toFixed(0)}M95 250 ${(95 - sl(yb)).toFixed(0)} ${yb.toFixed(0)}M705 250 ${(705 + sl(yb)).toFixed(0)} ${yb.toFixed(0)}"/>
-    <ellipse cx="400" cy="250" rx="80" ry="14"/>
-    <path d="M335 330 ${(335 - (yb - 330) * .12).toFixed(0)} ${yb.toFixed(0)}M465 330 ${(465 + (yb - 330) * .12).toFixed(0)} ${yb.toFixed(0)}M335 330H465"/><ellipse cx="400" cy="330" rx="65" ry="15"/>
-    <path d="M110 470A300 175 0 0 1 690 470L${(690 + (yb - 470) * .1).toFixed(0)} ${yb.toFixed(0)}M110 470 ${(110 - (yb - 470) * .1).toFixed(0)} ${yb.toFixed(0)}"/></g>`;
-  // Spotlights hang at the top edge of the screen.
-  const beams = [[110, 'l'], [400, 'c'], [690, 'r']].map(([x, k], i) => `<polygon class="beam" style="animation-delay:${i * 1.3}s" points="${x - 14},${vy} ${x + 14},${vy} ${x + (k === 'l' ? 210 : k === 'r' ? -10 : 150)},470 ${x + (k === 'l' ? 10 : k === 'r' ? -210 : -150)},470" fill="url(#hbeam)"/>
-    <circle cx="${x}" cy="${vy + 4}" r="16" fill="url(#hlamp)"/>`).join('');
+  const vars = () => `--hd:${(rnd() * 1.6).toFixed(2)}s;--bd:${(rnd() * -5).toFixed(2)}s;--sd:${(rnd() * -12).toFixed(2)}s;--sl:${(10 + rnd() * 6).toFixed(1)}s`;
+  const refl = [];
+  const fig = (id, cx, top, w) => { const st = vars(), body = POSE.now[id] ? `<g class="hp-rest">${figure(P(id), { stage: true, pose: 'down' })}</g><g class="hp-now">${figure(P(id), { stage: true, pose: POSE.now[id] })}</g>` : figure(P(id), { stage: true, pose: POSE.hold[id] || 'down' });
+    const svg = inner => `<svg x="${cx - w / 2}" y="${top}" width="${w}" height="${w * 1.04}" viewBox="0 0 100 104" overflow="visible">${inner}</svg>`;
+    // A faint reflection in the polished floor, flipped about the player's feet.
+    if (S.refl) { const fy = top + w * 1.035; refl.push(`<g class="alive" style="${st}" mask="url(#hrmask)" opacity="${S.refl}"><g transform="translate(0 ${(2 * fy).toFixed(1)}) scale(1 -1)">${svg(figure(P(id), { stage: true, pose: POSE.hold[id] || 'down' }))}</g></g>`); }
+    return `<g class="hp alive" style="${st}">${svg(pxShadow(50, 103.5, 22, 104 / 34) + body)}</g>`; };
   const COLS = ['#4f7cff', '#eeeeee', '#e9b949', '#9db4ff', '#f4d37c', '#2f55d4'];
   const n = Math.min(110, Math.round(54 * vw * (Math.min(vb, 470) - vy) / (800 * 470)));
   const pieces = Array.from({ length: n }, (_, i) => {
@@ -64,21 +61,16 @@ function homeScene(cw, ch) {
   const has = k => front.some(id => POSE.hold[id] === k);
   const ball = has('ball') ? '' : `<g transform="translate(108 386)">${pxShadow(0, 24, 18, 4)}<circle r="21" fill="#ee6018"/><path d="M-21 0h42M0-21v42M-14.5-14.5q8.5 14.5 0 29M14.5-14.5q-8.5 14.5 0 29" stroke="#2a1206" stroke-width="2.2" fill="none"/></g>`;
   const trophy = has('trophy') ? '' : `${pxShadow(400, 390, 56, 5, .4)}${TROPHY}`;
+  const team = `${inward(back, bx).map(([id, i]) => fig(id, bx(i), BT + STAGGER[i % 6], BW)).join('')}
+    ${inward(front, fx).map(([id, i]) => fig(id, fx(i), FT + (i === Math.floor(front.length / 2) ? 10 : 0) + STAGGER[(i + 3) % 6], FW)).join('')}`;
   const box = `x="${vx.toFixed(1)}" y="${vy.toFixed(1)}" width="${vw.toFixed(1)}" height="${vh.toFixed(1)}"`;
   return `<svg class="hscene" viewBox="${vx.toFixed(1)} ${vy.toFixed(1)} ${vw.toFixed(1)} ${vh.toFixed(1)}" role="img" aria-label="Team photo: ${ids.map(id => esc(P(id).name)).join(', ')} with the trophy">
-    <defs>
-      <radialGradient id="hglow" gradientUnits="userSpaceOnUse" cx="400" cy="272" r="${Math.max(440, vh * .55).toFixed(0)}"><stop offset="0" stop-color="#2f55d4" stop-opacity=".45"/><stop offset=".6" stop-color="#1c3896" stop-opacity=".12"/><stop offset="1" stop-color="#0c0c10" stop-opacity="0"/></radialGradient>
-      <linearGradient id="hbeam" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".16"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
-      <radialGradient id="hlamp"><stop offset="0" stop-color="#fff"/><stop offset=".35" stop-color="#fff6d6" stop-opacity=".7"/><stop offset="1" stop-color="#fff6d6" stop-opacity="0"/></radialGradient>
-      <radialGradient id="hfloor" gradientUnits="userSpaceOnUse" cx="400" cy="250" r="${Math.max(560, vw * .6).toFixed(0)}"><stop offset="0" stop-color="#e9b949" stop-opacity=".12"/><stop offset="1" stop-color="#e9b949" stop-opacity="0"/></radialGradient>
-    </defs>
-    <rect ${box} fill="#0c0c10"/><rect ${box} fill="url(#hglow)"/>
-    <rect x="${vx.toFixed(1)}" y="250" width="${vw.toFixed(1)}" height="${Math.max(0, vb - 250).toFixed(1)}" fill="url(#hfloor)"/>
-    ${court}${beams}
+    <defs>${S.defs}<linearGradient id="hrgrad" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#fff"/><stop offset=".4" stop-color="#fff" stop-opacity="0"/></linearGradient><mask id="hrmask" maskContentUnits="objectBoundingBox"><rect width="1" height="1" fill="url(#hrgrad)"/></mask></defs>
+    ${S.under}
+    <g${A < 1 ? ' transform="translate(400 300) scale(1.3) translate(-400 -300)"' : ''}>${refl.join('')}</g>
     <g>${pieces.slice(0, half).join('')}</g>
     <g${A < 1 ? ' transform="translate(400 300) scale(1.3) translate(-400 -300)"' : ''}>
-    ${inward(back, bx).map(([id, i]) => fig(id, bx(i), BT + STAGGER[i % 6], BW)).join('')}
-    ${inward(front, fx).map(([id, i]) => fig(id, fx(i), FT + (i === Math.floor(front.length / 2) ? 10 : 0) + STAGGER[(i + 3) % 6], FW)).join('')}
+    ${team}
     </g>
     ${trophy}${ball}
     <g>${pieces.slice(half).join('')}</g>
