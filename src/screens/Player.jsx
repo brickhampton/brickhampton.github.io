@@ -195,7 +195,7 @@ export function Player() {
     </div>
 
     <div className="two">
-      <div className="sec"><h3>Skill shape</h3><p className="hint">Per game in {scope === 'ALL' ? 'all games' : scope}, scaled to team best</p>
+      <div className="sec"><h3>Skill shape</h3>
         <div className="card"><div className="ctrl"><div className="legend rleg"><span><i style={{ background: '#4f7cff' }} />{p.name}</span><span><i className="dash" />{pcmp === 'team' ? 'Team average' : P(pcmp).name}</span></div>
           <span className="grow" /><select id="p-cmp" aria-label="Compare with" value={pcmp} onChange={e => set({ pCmp: e.target.value })}><option value="team">vs team average</option>{peers.filter(x => x.id !== id).map(x => <option key={x.id} value={x.id}>vs {P(x.id).name}</option>)}</select></div>
           <Chart id="p-radar" draw={w => drawRadar(w, a, peers, pcmp)} deps={[id, scope, pcmp, games]} /></div></div>
