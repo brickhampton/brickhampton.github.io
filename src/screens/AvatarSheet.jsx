@@ -9,9 +9,9 @@ import { useSave } from './Settings.jsx';
 const VIEW = { body: '6 -2 92 108', head: '0 0 100 100', face: '14 20 72 72', feet: '14 80 76 26' };
 const TABS = [
   ['body', 'Body', [['height', 'Height', 'body'], ['weight', 'Build', 'body'], ['skin', 'Skin tone']]],
-  ['hair', 'Hair', [['style', 'Style', 'head'], ['hair', 'Colour']]],
+  ['hair', 'Hair', [['style', 'Style', 'head'], ['hairFlip', 'Direction', 'head'], ['hair', 'Colour']]],
   ['face', 'Face', [['eyes', 'Eyes', 'face'], ['eyeY', 'Eye height', 'face'], ['brows', 'Eyebrows', 'face'], ['beard', 'Facial hair', 'face']]],
-  ['gear', 'Extras', [['glasses', 'Glasses', 'face'], ['glassesC', 'Frame colour'], ['band', 'Headband'], ['wrist', 'Wristband'], ['sleeve', 'Arm sleeve'], ['socks', 'Socks', 'body'], ['stripe', 'Sock stripe']]],
+  ['gear', 'Extras', [['glasses', 'Glasses', 'face'], ['glassesC', 'Frame colour'], ['band', 'Headband'], ['wrist', 'Wristband'], ['sleeve', 'Arm sleeve'], ['accFlip', 'Wristband and sleeve on', 'body'], ['socks', 'Socks', 'body'], ['stripe', 'Sock stripe']]],
   ['shoes', 'Shoes', [['shoeType', 'Shape', 'feet'], ['shoe', 'Main colour'], ['shoeAcc', 'Second colour']]],
 ];
 const SWATCH = { skin: SKINS, hair: HAIRS, band: BANDS, wrist: BANDS, sleeve: BANDS, stripe: BANDS, shoe: SHOES, shoeAcc: SHOES, glassesC: BANDS };
@@ -38,6 +38,7 @@ export function AvatarSheet({ id }) {
     const sw = SWATCH[k];
     const optional = OPTIONAL.includes(k);
     if (k === 'glassesC' && !look.glasses) return null;
+    if (k === 'accFlip' && !look.wrist && !look.sleeve) return null;
     const custom = sw && look[k] && !sw.includes(look[k]) ? [look[k]] : [];
     const list = sw ? [...(optional ? [null] : []), ...sw, ...custom] : (CHOICES[k] || OPTS[k].map((_, i) => i));
     return <div className="avb-row" key={k}><div className="avb-label">{label}</div>
