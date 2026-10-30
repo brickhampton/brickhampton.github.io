@@ -32,7 +32,7 @@ function makeStage() {
   function placeActor(sel, instant, x = actorX) {
     if (!sel) { actorWrap.innerHTML = ''; actor = null; return; }
     if (!actor || actor.dataset.id !== sel) {
-      actorWrap.innerHTML = `<g class="actor alive" data-id="${esc(sel)}"><ellipse cx="0" cy="${FLOOR}" rx="26" ry="5" fill="#000" opacity=".35"/><g class="body">${figure(P(sel), { stage: true })}</g></g>`;
+      actorWrap.innerHTML = `<g class="actor alive" data-id="${esc(sel)}"><ellipse cx="0" cy="${FLOOR}" rx="26" ry="5" fill="#000" opacity=".35"/><g class="body">${figure(P(sel), { stage: true, pose: 'down' })}</g></g>`;
       actor = actorWrap.firstElementChild; instant = true;
     }
     const body = actor.querySelector('.body'), shadow = actor.querySelector('ellipse');
@@ -97,8 +97,6 @@ function makeStage() {
   function play(sel, k) {
     placeActor(sel, false, SPOT[k]);
     if (reduced) return;
-    // The ball leaves the player's hand for the play and is back in it once the play is over.
-    if (actor) { const a = actor; a.classList.add('nob'); clearTimeout(a._nob); a._nob = setTimeout(() => a.classList.remove('nob'), 1300); }
     switch (k) {
       case '2M': actorMood('celebrate', D); shot(SPOT[k], 80, 360, true); setTimeout(() => pop('+2', RX, 40), D + 360); break;
       case '2X': actorMood('celebrate', D); shot(SPOT[k], 80, 360, false); actorMood('slump', D + 420); break;
