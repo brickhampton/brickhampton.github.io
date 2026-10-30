@@ -13,7 +13,7 @@ const FULL = { hz: 120, dc: 20.5, f: 614, hc: 1.92 };
 // On a tall phone the players are drawn 1.3x bigger round (400, 300), so the court is too.
 const cam = (C, A) => { const k = A < 1 ? 1.3 : 1; return camera({ ...C, hz: 300 + (C.hz - 300) * k, f: C.f * k }); };
 export function stage(v, o) {
-  const B = { 1: arena, 2: centre, 3: pixel, 4: spot, 5: spot, 6: spot }[v] || current;
+  const B = { 1: arena, 2: centre, 3: pixel, 4: spot, 5: spot, 6: spot, 7: spot }[v] || current;
   return B(o, +v);
 }
 
@@ -135,7 +135,7 @@ function spot({ vx, vy, vw, vh, vb, A }, v) {
   const full = v >= 5, c = cam(full ? FULL : HALF, A), top = c.pt(0, -3)[1], box = `x="${f1(vx)}" y="${f1(vy)}" width="${f1(vw)}" height="${f1(vh)}"`;
   const lines = courtLines(c, { full }), pool = full ? c.pt(0, 14) : c.pt(0, 6.6);
   const circle = full ? `<polygon points="${c.poly(c.arc(0, 14, 1.8, 0, Math.PI * 2, 1, 0, 60))}" fill="#2f55d4" opacity=".2"/>` : '';
-  const L = [vx + vw * .1, vy + 30], R = [vx + vw * .9, vy + 30], T = [400, pool[1] + 10];
+  const hid = v === 7, L = hid ? [vx + vw * .06, vy - 70] : [vx + vw * .1, vy + 30], R = hid ? [vx + vw * .94, vy - 70] : [vx + vw * .9, vy + 30], T = [400, pool[1] + 10];
   const beam = ([x, y], w) => { const dx = T[0] - x, dy = T[1] - y, len = Math.hypot(dx, dy), nx = -dy / len, ny = dx / len;
     return `${f1(x + nx * 8)},${f1(y + ny * 8)} ${f1(x - nx * 8)},${f1(y - ny * 8)} ${f1(T[0] - nx * w)},${f1(T[1] - ny * w)} ${f1(T[0] + nx * w)},${f1(T[1] + ny * w)}`; };
   const can = ([x, y], k) => { const a = Math.atan2(T[1] - y, T[0] - x) * 180 / Math.PI;
@@ -150,7 +150,7 @@ function spot({ vx, vy, vw, vh, vb, A }, v) {
       <linearGradient id="hbL" gradientUnits="userSpaceOnUse" x1="${f1(L[0])}" y1="${f1(L[1])}" x2="${T[0]}" y2="${f1(T[1])}"><stop offset="0" stop-color="#fff6d6" stop-opacity=".34"/><stop offset="1" stop-color="#fff6d6" stop-opacity=".04"/></linearGradient>
       <linearGradient id="hcone" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#fff6d6" stop-opacity=".22"/><stop offset="1" stop-color="#fff6d6" stop-opacity=".03"/></linearGradient>
       <linearGradient id="hbR" gradientUnits="userSpaceOnUse" x1="${f1(R[0])}" y1="${f1(R[1])}" x2="${T[0]}" y2="${f1(T[1])}"><stop offset="0" stop-color="#fff6d6" stop-opacity=".34"/><stop offset="1" stop-color="#fff6d6" stop-opacity=".04"/></linearGradient>`,
-    under: `<rect ${box} fill="#0b0c12"/><rect ${box} fill="url(#hglow)"/>
+    under: `<rect ${box} fill="#0b0c12"/><rect ${box} fill="url(#hglow)"/>${hid ? stands(vx, vw, vy, top) : ''}
       <rect x="${f1(vx)}" y="${f1(top)}" width="${f1(vw)}" height="${f1(vb - top)}" fill="url(#hfl)"/>
       <polygon points="${keyPaint(c)}" fill="#2f55d4" opacity=".22"/>${circle}
       <g fill="none" stroke="#fff" stroke-opacity=".2" stroke-width="2" stroke-linejoin="round"><path d="${lines.solid}"/><path d="${lines.dash}" stroke-dasharray="7 7"/></g>
@@ -160,7 +160,7 @@ function spot({ vx, vy, vw, vh, vb, A }, v) {
       ${v === 6 ? `<polygon class="beam" points="370,${f1(vy + 24)} 430,${f1(vy + 24)} 640,${f1(pool[1] + 30)} 160,${f1(pool[1] + 30)}" fill="url(#hcone)" filter="url(#hsoft)"/>
       <rect x="${f1(vx)}" y="${f1(vy + 14)}" width="${f1(vw)}" height="3" fill="#161b29"/>${lamps(vx, vw, vy + 22, Math.max(6, Math.round(vw / 105)))}`
     : `<g filter="url(#hsoft)"><polygon class="beam" points="${beam(L, 120)}" fill="url(#hbL)"/><polygon class="beam" style="animation-delay:2s" points="${beam(R, 120)}" fill="url(#hbR)"/></g>
-      ${can(L)}${can(R)}`}`,
+      ${hid ? '' : can(L) + can(R)}`}`,
   };
 }
 
@@ -247,3 +247,39 @@ function pixel({ vx, vy, vw, vh, vb, A }) {
   };
 }
 const Z3 = 1.575 + Math.sqrt(6.75 ** 2 - 6.6 ** 2);
+
+// Option 7's backdrop: a dim crowd in two tiers, with the team's banners hanging from the rafters in front of
+// the upper tier. Further banners are smaller and fainter, so the arena has some depth.
+const EMBLEM = {
+  trophy: ['#######', '#.###.#', '.#####.', '..###..', '...#...', '..###..', '.#####.'],
+  ball: ['..###..', '.#.#.#.', '#..#..#', '#######', '#..#..#', '.#.#.#.', '..###..'],
+  star: ['...#...', '...#...', '#######', '.#####.', '..###..', '.##.##.', '##...##'],
+};
+function banner(x, y, w, h, kind, op) {
+  const u = w / 11, e = EMBLEM[kind];
+  let px = '';
+  e.forEach((row, j) => [...row].forEach((ch, i) => { if (ch === '#') px += `<rect x="${f1(x + (i + 2) * u)}" y="${f1(y + h * .3 + j * u)}" width="${f1(u + .2)}" height="${f1(u + .2)}"/>`; }));
+  const cut = h + w * .28;
+  return `<g opacity="${op}"><path d="M${f1(x - 2)} ${f1(y - 400)}V${f1(y)}M${f1(x + w + 2)} ${f1(y - 400)}V${f1(y)}" stroke="#1d2436" stroke-width="1.2"/>
+    <path d="M${f1(x)} ${f1(y)}h${f1(w)}V${f1(y + h)}L${f1(x + w / 2)} ${f1(y + cut)}L${f1(x)} ${f1(y + h)}Z" fill="#16295e"/>
+    <path d="M${f1(x + u)} ${f1(y)}V${f1(y + h - u * .4)}L${f1(x + w / 2)} ${f1(y + cut - u * 1.3)}L${f1(x + w - u)} ${f1(y + h - u * .4)}V${f1(y)}" fill="none" stroke="#e9b949" stroke-width="${f1(u * .7)}" opacity=".75"/>
+    <rect x="${f1(x)}" y="${f1(y)}" width="${f1(w)}" height="${f1(u * 1.6)}" fill="#e9b949" opacity=".8"/>
+    <g fill="${kind === 'ball' ? '#ee6018' : '#e9b949'}" shape-rendering="crispEdges">${px}</g></g>`;
+}
+function stands(vx, vw, vy, top) {
+  // Lower tier right behind the floor, upper tier above a dark gap, fainter and smaller.
+  let s = crowd({ x0: vx, x1: vx + vw, yb: top - 12, rows: 5, gap: 12, size: 6.5, seed: 9 })
+    + `<rect x="${f1(vx)}" y="${f1(top - 82)}" width="${f1(vw)}" height="9" fill="#0d1226"/><rect x="${f1(vx)}" y="${f1(top - 74)}" width="${f1(vw)}" height="1.2" fill="#2f55d4" opacity=".55"/>`
+    + crowd({ x0: vx, x1: vx + vw, yb: top - 86, rows: 4, gap: 10, size: 5, seed: 21, light: .7 })
+    + flashes({ x0: vx, x1: vx + vw, y0: top - 120, y1: top - 16, n: 12, seed: 5 })
+    + `<rect x="${f1(vx)}" y="${f1(top - 10)}" width="${f1(vw)}" height="10" fill="#14224f"/><rect x="${f1(vx)}" y="${f1(top - 10)}" width="${f1(vw)}" height="1.5" fill="#e9b949" opacity=".5"/>`;
+  // Banners: a far row, small and faint, and a near pair on each side, bigger and closer to the edges.
+  const kinds = ['trophy', 'star', 'ball'], far = [], near = [];
+  const gapX = x => Math.abs(x - 400) < 70;
+  for (let i = 0, x = 400 - 115; x > vx - 20; x -= 64, i++) far.push([x, i], [800 - x, i + 1]);
+  far.forEach(([x, i]) => { if (!gapX(x)) s += banner(x - 13, top - 150, 26, 44, kinds[i % 3], .45); });
+  for (let i = 0, x = 400 - 225; x > vx - 40; x -= 125, i++) near.push([x, i + 1], [800 - x, i + 2]);
+  near.forEach(([x, i]) => { s += banner(x - 21, Math.max(top - 175, vy + 12) + (i % 2) * 6, 42, 70, kinds[i % 3], .8); });
+  // A haze over the stands and banners, so they sit back behind the team.
+  return s + `<defs><linearGradient id="hhaze" gradientUnits="userSpaceOnUse" x1="0" x2="0" y1="${f1(vy)}" y2="${f1(top)}"><stop offset="0" stop-color="#0b0c12" stop-opacity=".55"/><stop offset=".7" stop-color="#0d1430" stop-opacity=".3"/><stop offset="1" stop-color="#0d1430" stop-opacity=".1"/></linearGradient></defs><rect x="${f1(vx)}" y="${f1(vy)}" width="${f1(vw)}" height="${f1(top - vy)}" fill="url(#hhaze)"/>`;
+}
