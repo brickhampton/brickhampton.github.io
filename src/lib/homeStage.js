@@ -13,8 +13,8 @@ const FULL = { hz: 120, dc: 20.5, f: 614, hc: 1.92 };
 // On a tall phone the players are drawn 1.3x bigger round (400, 300), so the court is too.
 const cam = (C, A) => { const k = A < 1 ? 1.3 : 1; return camera({ ...C, hz: 300 + (C.hz - 300) * k, f: C.f * k }); };
 export function stage(v, o) {
-  const B = { 1: arena, 2: centre, 3: pixel, 4: spot }[v] || current;
-  return B(o);
+  const B = { 1: arena, 2: centre, 3: pixel, 4: spot, 5: spot, 6: spot }[v] || current;
+  return B(o, +v);
 }
 
 function current({ vx, vy, vw, vh, vb }) {
@@ -129,9 +129,12 @@ function centre({ vx, vy, vw, vh, vb, A }) {
 
 // Option 4: the current spotlit stage, cleaned up: a real court on a dark polished floor, two spotlights from the
 // corners crossing on the team, and the players reflected in the floor.
-function spot({ vx, vy, vw, vh, vb, A }) {
-  const c = cam(HALF, A), top = c.pt(0, -3)[1], box = `x="${f1(vx)}" y="${f1(vy)}" width="${f1(vw)}" height="${f1(vh)}"`;
-  const lines = courtLines(c), pool = c.pt(0, 6.6);
+// Options 5 and 6 are this clean floor seen from option 2's centre-court angle: 5 keeps the corner spotlights,
+// 6 lights the team from a row of ceiling lights instead.
+function spot({ vx, vy, vw, vh, vb, A }, v) {
+  const full = v >= 5, c = cam(full ? FULL : HALF, A), top = c.pt(0, -3)[1], box = `x="${f1(vx)}" y="${f1(vy)}" width="${f1(vw)}" height="${f1(vh)}"`;
+  const lines = courtLines(c, { full }), pool = full ? c.pt(0, 14) : c.pt(0, 6.6);
+  const circle = full ? `<polygon points="${c.poly(c.arc(0, 14, 1.8, 0, Math.PI * 2, 1, 0, 60))}" fill="#2f55d4" opacity=".2"/>` : '';
   const L = [vx + vw * .1, vy + 30], R = [vx + vw * .9, vy + 30], T = [400, pool[1] + 10];
   const beam = ([x, y], w) => { const dx = T[0] - x, dy = T[1] - y, len = Math.hypot(dx, dy), nx = -dy / len, ny = dx / len;
     return `${f1(x + nx * 8)},${f1(y + ny * 8)} ${f1(x - nx * 8)},${f1(y - ny * 8)} ${f1(T[0] - nx * w)},${f1(T[1] - ny * w)} ${f1(T[0] + nx * w)},${f1(T[1] + ny * w)}`; };
@@ -145,16 +148,19 @@ function spot({ vx, vy, vw, vh, vb, A }) {
       <radialGradient id="hside" gradientUnits="userSpaceOnUse" cx="400" cy="${f1(pool[1])}" r="${f1(Math.max(500, vw * .6))}"><stop offset=".4" stop-color="#07080c" stop-opacity="0"/><stop offset="1" stop-color="#07080c" stop-opacity=".9"/></radialGradient>
       <radialGradient id="hpool" gradientUnits="userSpaceOnUse" cx="400" cy="${f1(pool[1])}" r="240" gradientTransform="translate(400 ${f1(pool[1])}) scale(1 .4) translate(-400 ${f1(-pool[1])})"><stop offset="0" stop-color="#fff" stop-opacity=".3"/><stop offset=".7" stop-color="#cfdcff" stop-opacity=".08"/><stop offset="1" stop-color="#cfdcff" stop-opacity="0"/></radialGradient>
       <linearGradient id="hbL" gradientUnits="userSpaceOnUse" x1="${f1(L[0])}" y1="${f1(L[1])}" x2="${T[0]}" y2="${f1(T[1])}"><stop offset="0" stop-color="#fff6d6" stop-opacity=".34"/><stop offset="1" stop-color="#fff6d6" stop-opacity=".04"/></linearGradient>
+      <linearGradient id="hcone" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#fff6d6" stop-opacity=".22"/><stop offset="1" stop-color="#fff6d6" stop-opacity=".03"/></linearGradient>
       <linearGradient id="hbR" gradientUnits="userSpaceOnUse" x1="${f1(R[0])}" y1="${f1(R[1])}" x2="${T[0]}" y2="${f1(T[1])}"><stop offset="0" stop-color="#fff6d6" stop-opacity=".34"/><stop offset="1" stop-color="#fff6d6" stop-opacity=".04"/></linearGradient>`,
     under: `<rect ${box} fill="#0b0c12"/><rect ${box} fill="url(#hglow)"/>
       <rect x="${f1(vx)}" y="${f1(top)}" width="${f1(vw)}" height="${f1(vb - top)}" fill="url(#hfl)"/>
-      <polygon points="${keyPaint(c)}" fill="#2f55d4" opacity=".22"/>
+      <polygon points="${keyPaint(c)}" fill="#2f55d4" opacity=".22"/>${circle}
       <g fill="none" stroke="#fff" stroke-opacity=".2" stroke-width="2" stroke-linejoin="round"><path d="${lines.solid}"/><path d="${lines.dash}" stroke-dasharray="7 7"/></g>
       <rect x="${f1(vx)}" y="${f1(top)}" width="${f1(vw)}" height="${f1(vb - top)}" fill="url(#hside)"/>
       <ellipse cx="400" cy="${f1(pool[1])}" rx="380" ry="170" fill="url(#hpool)"/>
-      ${hoop(c, { dim: .5 })}
-      <g filter="url(#hsoft)"><polygon class="beam" points="${beam(L, 120)}" fill="url(#hbL)"/><polygon class="beam" style="animation-delay:2s" points="${beam(R, 120)}" fill="url(#hbR)"/></g>
-      ${can(L)}${can(R)}`,
+      ${hoop(c, { dim: full ? .65 : .5 })}
+      ${v === 6 ? `<polygon class="beam" points="370,${f1(vy + 24)} 430,${f1(vy + 24)} 640,${f1(pool[1] + 30)} 160,${f1(pool[1] + 30)}" fill="url(#hcone)" filter="url(#hsoft)"/>
+      <rect x="${f1(vx)}" y="${f1(vy + 14)}" width="${f1(vw)}" height="3" fill="#161b29"/>${lamps(vx, vw, vy + 22, Math.max(6, Math.round(vw / 105)))}`
+    : `<g filter="url(#hsoft)"><polygon class="beam" points="${beam(L, 120)}" fill="url(#hbL)"/><polygon class="beam" style="animation-delay:2s" points="${beam(R, 120)}" fill="url(#hbR)"/></g>
+      ${can(L)}${can(R)}`}`,
   };
 }
 
