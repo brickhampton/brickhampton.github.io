@@ -48,6 +48,8 @@ select:focus,select:focus-visible{outline:none;border-color:var(--stone)!importa
 .btn.ghost{background:none;box-shadow:inset 0 0 0 1px var(--stroke)}
 .btn.danger{background:var(--neg);color:#2a0d06;font-weight:600}
 .iconbtn.danger{color:var(--neg);background:none}
+/* The discard button matches the 44px buttons beside it. */
+.panel .end-actions .iconbtn{width:44px;height:44px}
 .panel .actions .grow{flex:1}
 .panel{position:relative}
 .xbtn{position:absolute;top:14px;right:14px;width:36px;height:36px;border-radius:999px;display:grid;place-items:center;color:var(--granite)}
@@ -72,8 +74,9 @@ select:focus,select:focus-visible{outline:none;border-color:var(--stone)!importa
 .meta .t{font-size:17px;font-weight:500;letter-spacing:-.02em}
 .meta .s{font-size:13px;color:var(--granite)}
 h1.page{font-size:40px;font-weight:500;letter-spacing:-.04em;margin:0;line-height:1.05;text-wrap:balance}
-.sec h3{font-size:20px;font-weight:500;letter-spacing:-.02em;margin:0 0 4px}
-.sec h3 + .leaders{margin-top:12px}
+/* A heading sits 14px above what follows it, or 4px above its subheading, which then takes the 14px. */
+.sec h3{font-size:20px;font-weight:500;letter-spacing:-.02em;margin:0 0 14px}
+.sec h3:has(+ .hint){margin-bottom:4px}
 .sec .hint{font-size:13px;color:var(--granite);margin:0 0 14px}
 .chips{display:flex;gap:6px;flex-wrap:wrap}
 .chips button{height:36px;padding:0 14px;border-radius:999px;font-size:14px;color:var(--stone);box-shadow:inset 0 0 0 1px var(--stroke);display:inline-flex;align-items:center;gap:8px}
@@ -226,6 +229,14 @@ tr.tot td{font-weight:600;border-top:1px solid var(--stroke)}
 .two{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:16px}
 .two > .sec{display:flex;flex-direction:column}
 .two > .sec > .card{flex:1;display:flex;flex-direction:column}
+/* Side by side, the two cards start at the same height whether or not each heading has a subheading. */
+@media (min-width:901px){
+  .two{grid-template-rows:auto auto 1fr}
+  .two > .sec{display:grid;grid-row:span 3;grid-template-rows:subgrid;row-gap:0}
+  .two > .sec > h3{margin-bottom:4px}
+  .two > .sec > .hint{grid-row:2;margin-bottom:4px}
+  .two > .sec > :last-child{grid-row:3;margin-top:10px}
+}
 #sbars{flex:1;min-height:0}
 .h2h-head{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px;margin-bottom:14px}
 .h2h-head .side{display:flex;align-items:center;gap:10px;min-width:0}
@@ -418,6 +429,7 @@ tr.tot td{font-weight:600;border-top:1px solid var(--stroke)}
   .nl{display:none}
   #new-game{width:36px;padding:0;justify-content:center}
   .gnav .btn{padding:0 14px}
+  #g-prev,#g-next{width:44px;padding:0;justify-content:center}
   .jersey .badge{justify-self:start}
   .entry .bar{gap:8px;min-height:0;padding-block:8px;flex-wrap:nowrap}
   .entry .wordmark{display:none}
@@ -541,8 +553,8 @@ b.pos{color:var(--green)} b.neg{color:var(--neg)}
 .fchip:first-child{box-shadow:inset 0 0 0 1.5px var(--royal)}
 .fnote{margin:12px 0 0;color:var(--stone);font-size:14px}
 .fnote .up{color:var(--green)} .fnote .down{color:var(--neg)}
-.phead{display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap}
-.phead .hint{margin-bottom:0}
+.phead{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.phead h3{margin:0}
 .tog{position:relative;display:inline-grid;grid-auto-flow:column;grid-auto-columns:1fr;background:var(--lift);border-radius:999px;padding:3px;isolation:isolate;box-shadow:inset 0 0 0 1px var(--lift2)}
 .tog::before{content:"";position:absolute;top:3px;bottom:3px;left:3px;width:calc(50% - 3px);border-radius:999px;background:var(--bone);box-shadow:0 2px 10px rgba(0,0,0,.4);z-index:-1;transition:transform .36s cubic-bezier(.34,1.32,.5,1)}
 .tog.r::before{transform:translateX(100%)}
@@ -713,6 +725,8 @@ button:hover .lid,button:focus-visible .lid,button:active .lid{transform:transla
 .btn.sm{height:36px;padding:0 12px;font-size:14px}
 .iconbtn.sm{width:36px;height:36px;border-radius:8px}
 .btnrow{display:flex;gap:10px;flex-wrap:wrap;padding-top:6px}
+.card.btnrow{padding:18px}
+@media (max-width:520px){.card.btnrow .btn{flex:1 1 auto;justify-content:center}}
 .hint.pad{padding:10px 2px;margin:0}
 .rseg{display:flex;gap:4px}
 .rseg button{min-width:34px;height:32px;padding:0 8px;border-radius:8px;background:var(--lift2);font-size:13px;font-weight:600;color:var(--granite)}

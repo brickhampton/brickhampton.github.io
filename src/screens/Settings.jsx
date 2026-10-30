@@ -208,16 +208,16 @@ function Admin() {
   return <>
     <div className="ghead"><div><h1 className="page">Settings</h1></div><span className="grow" />
       <span className="admin-on"><Shield />Admin mode on</span><button className="btn ghost sm" id="lock" onClick={lock}><Lock size={16} />Lock</button></div>
-    <p className="hint top">Admin mode locks itself after 15 minutes without a tap. To change a game's details or box score, open the game and tap <b>Edit game</b>, or use the pencil in Results.</p>
+    <p className="hint top">Admin mode locks itself after 15 minutes without a tap. To change a game's details or box score, open the game and tap <b>Edit game</b>, or use the pencil in Results</p>
     {err && <p className="ferr" id="a-err">{err}</p>}
     <div className="adm-grid">
-      <div className="sec"><h3>Seasons</h3><p className="hint">New games go into the current season, and Games and Stats open on it.</p>
+      <div className="sec"><h3>Seasons</h3><p className="hint">New games go into the current season, and Games and Stats open on it</p>
         <div className="card alist" id="a-seasons">{seasons}
           <div className="arow"><button className="btn sm" id="a-add-season" onClick={() => edit('add_season', {})}>+ Add {nextSeasonCode()} ({seasonName(nextSeasonCode())})</button></div></div></div>
-      <div className="sec"><h3>Change history</h3><p className="hint">Every Admin edit, newest first.</p>
+      <div className="sec"><h3>Change history</h3><p className="hint">Every Admin edit, newest first</p>
         <div className="card" id="a-hist">{h.length ? <ul className="hist">{h.map((x, i) => <li key={i}><span>{x.text}</span><em>{ago(x.at)}</em></li>)}</ul> : <div className="hempty">No changes yet.</div>}
           <div className="btnrow"><button className="btn ghost sm" id="a-undo" disabled={!h.length} onClick={() => edit('undo_last', {})}><UndoIc />Undo last change</button></div></div></div>
-      <div className="sec wide"><h3>Results</h3><p className="hint">Tap W, L or D for each game. The dash means unknown.</p>
+      <div className="sec wide"><h3>Results</h3><p className="hint">Tap W, L or D for each game. The dash means unknown</p>
         <div className="card"><SeasonPick id="a-res-chips" value={aRes} seasons={s.seasons} all={null} onPick={v => set({ aRes: v })} />
           <div className="alist" id="a-results">{rs.length ? rs.map(g => (
             <div className="arow rrow" key={g.id}><span className="g">Game {g.no}</span><span className="nm">vs {g.opp}<em>{fmtDate(g.date, { day: 'numeric', month: 'long' })}</em></span>
@@ -226,12 +226,12 @@ function Admin() {
                 onClick={() => g.result !== r && edit('set_result', { p_game: g.id, p_result: r })}>{r === 'U' ? '–' : r}</button>)}</span>
               <button className="iconbtn sm" data-edit={g.id} aria-label={`Edit Game ${g.no}`} onClick={() => openSheet(<EditGame id={g.id} />, { wide: true })}><Pencil width="16" height="16" /></button></div>))
             : <div className="hempty">No {aRes} games yet.</div>}</div></div></div>
-      <div className="sec"><h3>Roster</h3><p className="hint">Starters show on Who played and in Stats. Subs only appear in the games they played. Renaming a player to an existing player's name merges them.</p>
+      <div className="sec"><h3>Roster</h3><p className="hint">Starters show on Who played and in Stats. Subs only appear in the games they played. Renaming a player to an existing player's name merges them</p>
         <div className="card alist" id="a-roster"><div className="sub-h">Starters</div>{s.roster.map(p => prow(p, 'starter'))}
           <div className="sub-h">Subs</div>{(open.subs ? subs : subs.slice(0, 5)).map(p => prow(p, 'sub'))}
           {subs.length > 5 && <div className="arow amore"><MoreBtn data-amore="subs" open={open.subs} n={subs.length} noun="subs" onClick={() => setOpen(o => ({ ...o, subs: !o.subs }))} /></div>}
           <div className="arow"><button className="btn sm" id="a-add-player" onClick={() => openSheet(<PlayerSheet id={null} />)}>+ Add player</button></div></div></div>
-      <div className="sec"><h3>Opponents</h3><p className="hint">This season's teams come first, in the order they appear when you record a game. Drag to reorder, or drag between sections to add or remove a team from this season. Renaming to an existing team merges them.</p>
+      <div className="sec"><h3>Opponents</h3><p className="hint">This season's teams come first, in the order they appear when you record a game. Drag to reorder, or drag between sections to add or remove a team from this season. Renaming to an existing team merges them</p>
         <div className="card alist" id="a-opps"><div className="sub-h">This season ({s.current})</div>
           <div className="dlist" id="a-opps-cur" ref={cur}>{curTeams.map(orow)}{!curTeams.length && <div className="hempty">No teams in {s.current} yet. Drag one up here or add a team.</div>}</div>
           <div className="sub-h">Other teams</div>
@@ -264,9 +264,8 @@ export function Settings() {
   if (!isAdmin()) return <>
     <div className="ghead"><div><h1 className="page">Settings</h1></div></div>
     <div className="card admin-lock"><div className="lock-ic"><Lock /></div>
-      <div><h3>Admin mode</h3><p className="hint">Record games, edit past games and box scores, set results, add seasons, and manage the roster and opponents.</p></div>
+      <div><h3>Admin mode</h3><p className="hint">Record games, edit past games and box scores, set results, add seasons, and manage the roster and opponents</p></div>
       <button className="btn primary" id="unlock" onClick={() => openSheet(<PinSheet />)}>Unlock with PIN</button></div>
-    <p className="foot">The PIN is checked by the stats database, and it locks for 15 minutes after 5 wrong tries.</p>
   </>;
   return <Admin />;
 }

@@ -177,7 +177,7 @@ export function playerBadges(id, asOf) {
   const dd = sg.filter(g => g.rows[id]).map(g => calc(g.rows[id])).filter(s => [s.pts, s.reb, s.ast, s.stl, s.blk].filter(v => v >= 10).length >= 2).length;
   if (dd >= 2) add('dd', 'Double-double machine', 'layers', 'blue', `${dd} double-doubles in ${nm}.`);
   const sak = sg.filter(g => g.rows[id]).map(g => calc(g.rows[id])).filter(s => s.pts >= 1 && s.reb >= 1 && s.ast >= 1 && s.stl >= 1).length;
-  if (sak >= BT.sak) add('sak', 'Swiss Army Knife', 'knife', 'blue', `${sak} games in ${nm} with at least a point, a rebound, an assist and a steal.`);
+  if (sak >= BT.sak) add('sak', 'Swiss army knife', 'knife', 'blue', `${sak} games in ${nm} with at least a point, a rebound, an assist and a steal.`);
   if (best(x => x.pg('to'), true) && a.gp >= 5) add('safe', 'Safe hands', 'lock', 'green', `Fewest turnovers a game in ${nm} (${f1(a.pg('to'))}).`);
   if (l5.length === 5 && l5.every(s => s.per >= BT.steady)) add('steady', 'Mr Consistent', 'check', 'grey', `${BT.steady}+ PER in each of their last 5 games.`);
   if (sg.length >= 5 && a.gp === sg.length) add('ever', 'Ol\' reliable', 'iron', 'grey', `Played all ${sg.length} games in ${nm}.`);
