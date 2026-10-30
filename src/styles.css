@@ -98,15 +98,22 @@ h1.page{font-size:40px;font-weight:500;letter-spacing:-.04em;margin:0;line-heigh
 @keyframes eyesOff{0%,74%{opacity:1}75%,89%{opacity:0}90%,100%{opacity:1}}
 /* The selected player on the court bobs on the spot while waiting for the next action. */
 .actor .av-fig{animation:idleBob .9s steps(2,jump-none) infinite}
-/* The crowd on the recording court: dim and soft, barely shifting. A few fans bob on a good play; a made 3 gets everyone up. */
+/* The crowd on the recording court: dim and barely shifting. A few clap the smaller plays, most get up with their
+   arms raised for a made 2, and everyone does for a 3. */
 #crowd{opacity:.55}
 .fan{animation:fanIdle var(--h,3s) steps(2,jump-none) var(--d,0s) infinite}
-.fan .arms{opacity:0}
-#crowd.cheer .fan.few{animation:fanHop .4s steps(2,jump-none) var(--d,0s) 2}
-#crowd.cheer.big .fan{animation:fanHop .3s steps(2,jump-none) var(--d,0s) 4}
-#crowd.cheer.big .fan .arms{opacity:1;transform:translateY(-7px)}
+.fan .arms,.fan .clap{opacity:0}
+#crowd.clap .fan.few{animation:fanBob .3s steps(2,jump-none) var(--d,0s) 3}
+#crowd.clap .fan.few .clap{animation:clap .22s steps(2,jump-none) var(--d,0s) 5}
+#crowd.most .fan.most{animation:fanHop .32s steps(2,jump-none) var(--d,0s) 3}
+#crowd.big .fan{animation:fanHop .28s steps(2,jump-none) var(--d,0s) 5}
+#crowd.most .fan.most .arms,#crowd.big .fan .arms{opacity:1;transform:translateY(-7px)}
 @keyframes fanIdle{50%{transform:translateY(1px)}}
+@keyframes fanBob{50%{transform:translateY(-1px)}}
 @keyframes fanHop{50%{transform:translateY(-3px)}}
+@keyframes clap{0%{opacity:1}50%{opacity:0}}
+.actor .body.leap .av-fig{animation:leap .7s cubic-bezier(.3,.8,.4,1)}
+@keyframes leap{40%{transform:translateY(-34px)}100%{transform:none}}
 @keyframes idleBob{50%{transform:translateY(-3px)}}
 .celebrate .av-fig{animation:jump .5s var(--ease-out)}
 .slump .av-head{animation:slump .55s ease-out}
@@ -538,7 +545,8 @@ tr.tot td{font-weight:600;border-top:1px solid var(--stroke)}
 .pstage{position:relative;width:clamp(180px,24vw,260px);aspect-ratio:1;display:block;padding:0;border-radius:50%}
 .pfig{position:absolute;left:12%;top:8%;width:76%;height:auto;overflow:visible}
 .pstage .av-fig{animation:idleBob .9s steps(2,jump-none) infinite}
-.pshadow{position:absolute;left:30%;right:30%;bottom:4%;height:6%;border-radius:50%;background:rgba(0,0,0,.45);filter:blur(4px)}
+/* The same soft blue glow as behind the player in the avatar builder. */
+.pglow{position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 50% 45%,rgba(57,105,230,.35),transparent 70%)}
 /* Tricks on the player page: a hop, a big smile, bouncing the ball, crossing it over, spinning it on a finger. */
 .pstage.smile .av-smile{animation:none;opacity:1}
 .pstage.smile .av-eyes{animation:none;opacity:0}

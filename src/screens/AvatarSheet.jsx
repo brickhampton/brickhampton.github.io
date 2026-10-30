@@ -1,14 +1,14 @@
 import { useState } from 'react';
 import { P } from '../lib/core.js';
 import { adminEdit } from '../lib/admin.js';
-import { figure, cleanLook, lookOf, randomLook, OPTS, CHOICES, SKINS, HAIRS, BANDS, SHOES } from '../lib/avatar.js';
+import { figure, pxShadow, cleanLook, lookOf, randomLook, OPTS, CHOICES, SKINS, HAIRS, BANDS, SHOES } from '../lib/avatar.js';
 import { closeSheet } from '../components/Sheet.jsx';
 import { useSave } from './Settings.jsx';
 
 // Which part of the drawing each kind of thumbnail shows: the whole player, or the head from a round avatar.
 const VIEW = { body: '6 -2 92 108', head: '0 0 100 100', face: '14 20 72 72', feet: '14 80 76 26' };
 const TABS = [
-  ['body', 'Body', [['height', 'Height', 'body'], ['weight', 'Build', 'body'], ['muscle', 'Muscle', 'body'], ['skin', 'Skin tone']]],
+  ['body', 'Body', [['height', 'Height', 'body'], ['weight', 'Build', 'body'], ['skin', 'Skin tone']]],
   ['hair', 'Hair', [['style', 'Style', 'head'], ['hair', 'Colour']]],
   ['face', 'Face', [['eyes', 'Eyes', 'face'], ['eyeY', 'Eye height', 'face'], ['brows', 'Eyebrows', 'face'], ['beard', 'Facial hair', 'face']]],
   ['gear', 'Extras', [['glasses', 'Glasses', 'face'], ['glassesC', 'Frame colour'], ['band', 'Headband'], ['wrist', 'Wristband'], ['sleeve', 'Arm sleeve'], ['socks', 'Socks', 'body'], ['stripe', 'Sock stripe']]],
@@ -56,7 +56,7 @@ export function AvatarSheet({ id }) {
     <h2>Edit avatar</h2><p className="sheet-sub">{p.name}. Shows everywhere straight away, and Undo in Change history puts it back</p>
     <div className="avb">
       <div className="avb-stage"><svg className="avb-fig" viewBox="0 -4 108 114" aria-label={`${p.name}'s avatar`}
-        dangerouslySetInnerHTML={{ __html: `<ellipse cx="50" cy="104" rx="30" ry="4" fill="#000" opacity=".35"/>${figure({ ...look, num }, { stage: true, pose: 'dribble' })}` }} />
+        dangerouslySetInnerHTML={{ __html: `${pxShadow(50, 103.5, 22, 104 / 34)}${figure({ ...look, num }, { stage: true, pose: 'dribble' })}` }} />
         <div className="avb-tools"><button className="btn ghost sm" id="avb-shuffle" onClick={() => setLook(cleanLook(randomLook()))}>Shuffle</button>
           <button className="btn ghost sm" id="avb-reset" disabled={!changed} onClick={() => setLook(saved)}>Reset</button></div></div>
       <div className="avb-parts">

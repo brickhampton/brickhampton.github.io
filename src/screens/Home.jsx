@@ -1,7 +1,7 @@
 import { useLayoutEffect, useRef, useState } from 'react';
 import { P, statPlayers, esc } from '../lib/core.js';
 import { reduced } from '../lib/charts.js';
-import { figure } from '../lib/avatar.js';
+import { figure, pxShadow } from '../lib/avatar.js';
 import { ChevDown } from '../components/icons.jsx';
 
 const TROPHY = `<svg x="345" y="262" width="110" height="122" preserveAspectRatio="xMidYMax meet" viewBox="0 0 24 24" aria-hidden="true"><defs><linearGradient id="ht-g" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#ffe08a"/><stop offset=".55" stop-color="#e9b949"/><stop offset="1" stop-color="#b9821f"/></linearGradient></defs>
@@ -34,7 +34,7 @@ function homeScene(cw, ch) {
   let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
   // Each player bobs, blinks and smiles on their own timing.
   const fig = (id, cx, top, w) => `<g class="hp alive" style="--hd:${(rnd() * 1.6).toFixed(2)}s;--bd:${(rnd() * -5).toFixed(2)}s;--sd:${(rnd() * -12).toFixed(2)}s;--sl:${(10 + rnd() * 6).toFixed(1)}s"><svg x="${cx - w / 2}" y="${top}" width="${w}" height="${w * 1.04}" viewBox="0 0 100 104" overflow="visible">
-    <ellipse cx="50" cy="104" rx="32" ry="4" fill="#000" opacity=".35"/>${figure(P(id), { stage: true, pose: POSE.hold[id] || 'down' })}</svg></g>`;
+    ${pxShadow(50, 103.5, 22, 104 / 34)}${figure(P(id), { stage: true, pose: POSE.hold[id] || 'down' })}</svg></g>`;
   // Court lines on the floor, drawn in perspective and very faint, running off the bottom of the screen.
   const yb = vb + 40, sl = y => (y - 250) * 83 / 220;
   const court = `<g fill="none" stroke="#fff" stroke-opacity=".09" stroke-width="2">
@@ -57,12 +57,12 @@ function homeScene(cw, ch) {
   // front of them, in the gaps. Players nearer the middle are drawn last, so they overlap the ones beside them.
   const BW = 132, BT = 116, FW = 156, FT = 178, STAGGER = [4, -3, 2, -4, 3, -2];
   const bx = i => 400 + (i - (back.length - 1) / 2) * Math.min(70, 560 / Math.max(1, back.length - 1));
-  const fx = i => 400 + (i - (front.length - 1) / 2) * Math.min(98, 520 / Math.max(1, front.length - 1));
+  const fx = i => 400 + (i - (front.length - 1) / 2) * Math.min(86, 520 / Math.max(1, front.length - 1));
   const inward = (list, x) => list.map((id, i) => [id, i]).sort((a, b) => Math.abs(x(b[1]) - 400) - Math.abs(x(a[1]) - 400));
   // Without the trophy holder or the ball holder, the trophy and ball go on the floor.
   const has = k => front.some(id => POSE.hold[id] === k);
-  const ball = has('ball') ? '' : `<g transform="translate(108 386)"><ellipse cx="0" cy="24" rx="20" ry="4" fill="#000" opacity=".35"/><circle r="21" fill="#ee6018"/><path d="M-21 0h42M0-21v42M-14.5-14.5q8.5 14.5 0 29M14.5-14.5q-8.5 14.5 0 29" stroke="#2a1206" stroke-width="2.2" fill="none"/></g>`;
-  const trophy = has('trophy') ? '' : `<ellipse cx="400" cy="390" rx="62" ry="9" fill="#000" opacity=".4"/>${TROPHY}`;
+  const ball = has('ball') ? '' : `<g transform="translate(108 386)">${pxShadow(0, 24, 18, 4)}<circle r="21" fill="#ee6018"/><path d="M-21 0h42M0-21v42M-14.5-14.5q8.5 14.5 0 29M14.5-14.5q-8.5 14.5 0 29" stroke="#2a1206" stroke-width="2.2" fill="none"/></g>`;
+  const trophy = has('trophy') ? '' : `${pxShadow(400, 390, 56, 5, .4)}${TROPHY}`;
   const box = `x="${vx.toFixed(1)}" y="${vy.toFixed(1)}" width="${vw.toFixed(1)}" height="${vh.toFixed(1)}"`;
   return `<svg class="hscene" viewBox="${vx.toFixed(1)} ${vy.toFixed(1)} ${vw.toFixed(1)} ${vh.toFixed(1)}" role="img" aria-label="Team photo: ${ids.map(id => esc(P(id).name)).join(', ')} with the trophy">
     <defs>

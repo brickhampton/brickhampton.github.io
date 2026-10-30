@@ -4,6 +4,7 @@ import { allGames, seasonList, seasonName, statPlayers, isStarter, playerAgg, ca
 import { go } from '../lib/nav.js';
 import { drawRadar, drawTrend, P_STATS, P_MORE, SLOT_COL, SC_B, reduced } from '../lib/charts.js';
 import { Avatar, figure } from '../components/Avatar.jsx';
+import { pxShadow } from '../lib/avatar.js';
 import { Back, BIC, MedalGold } from '../components/icons.jsx';
 import { Chart, SeasonPick, StatChips, MoreBtn, EmptyState, PerPill } from '../components/ui.jsx';
 import { ShootBar } from './Game.jsx';
@@ -101,8 +102,9 @@ function PStage({ p, num }) {
     run(ks[Math.floor(Math.random() * ks.length)]);
   };
   return <button className={`pstage alive${step ? ' ' + step.cls : ''}`} id="p-stage" aria-label="Wave hello" onClick={tap}>
+    <span className="pglow" />
+    <svg className="pfig" viewBox="0 0 100 104" aria-hidden="true" dangerouslySetInnerHTML={{ __html: pxShadow(50, 103.5, 22, 104 / 34) }} />
     <span className="phop"><svg key={step?.n || 0} className="pfig" viewBox="0 0 100 104" aria-hidden="true" dangerouslySetInnerHTML={{ __html: figure({ ...p, num }, { stage: true, pose: step?.pose || undefined }) }} /></span>
-    <span className="pshadow" />
   </button>;
 }
 
