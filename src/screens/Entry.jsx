@@ -28,12 +28,12 @@ const MATE = { v: 2, skin: '#d9b48e', hair: '#2e2e33', style: 14 };
 // The crowd behind the courtside boards: one sparse row of soft, dim figures in muted colours (never the team's blue),
 // so they sit back in the dark and the player stays the focus. Every third fan is one of the few who react to small plays.
 const CROWD = (() => {
-  const SK = ['#5a4a3e', '#66533f', '#4e4036'], TOP = ['#2c2724', '#33291f', '#2a2a26', '#3a2c2a', '#302b30'];
+  const SK = ['#5a4a3e', '#66533f', '#4e4036'], HR = ['#1c1714', '#241d18', '#2b2420'], TOP = ['#2c2724', '#33291f', '#2a2a26', '#3a2c2a', '#302b30'];
   const out = [];
   for (let i = 0; i < 34; i++) {
-    const x = i * 34 - 400 + ((i * 11) % 9);
+    const x = i * 36 - 402 + ((i * 11) % 3) * 3;
     if (x > 548 && x < 650) continue; // leave room for the hoop
-    out.push({ i, x, y: 112 + ((i * 5) % 4), skin: SK[i % 3], top: TOP[(i * 3) % 5], few: i % 3 === 0, d: ((i * 37) % 100) / 100 * .25, h: 2.6 + ((i * 13) % 10) / 5 });
+    out.push({ i, x, y: 111 + ((i * 5) % 2) * 3, skin: SK[i % 3], hair: HR[(i * 2) % 3], top: TOP[(i * 3) % 5], few: i % 3 === 0, d: ((i * 37) % 100) / 100 * .25, h: 2.6 + ((i * 13) % 10) / 5 });
   }
   return out;
 })();
@@ -323,11 +323,12 @@ export function Entry() {
         <div className="right">
           <div className="stage" aria-hidden="true">
             <svg viewBox="0 0 640 180" preserveAspectRatio="xMidYMax meet">
-              <g id="crowd">{CROWD.map(f => (
+              <g id="crowd" shapeRendering="crispEdges">{CROWD.map(f => (
                 <g key={f.i} className={`fan${f.few ? ' few' : ''}`} style={{ '--d': `${f.d}s`, '--h': `${f.h}s` }}>
-                  <rect x={f.x - 3} y={f.y + 4} width="3" height="9" rx="1.5" fill={f.skin} className="arms" /><rect x={f.x + 8} y={f.y + 4} width="3" height="9" rx="1.5" fill={f.skin} className="arms" />
-                  <circle cx={f.x + 4} cy={f.y + 4} r="4" fill={f.skin} />
-                  <rect x={f.x - 2} y={f.y + 9} width="12" height="16" rx="5" fill={f.top} />
+                  {/* Drawn in the players' 3-unit pixels: a square head with a hair line, blocky shoulders, arms for a 3. */}
+                  <rect x={f.x - 3} y={f.y + 3} width="3" height="9" fill={f.skin} className="arms" /><rect x={f.x + 12} y={f.y + 3} width="3" height="9" fill={f.skin} className="arms" />
+                  <rect x={f.x + 3} y={f.y} width="6" height="3" fill={f.hair} /><rect x={f.x} y={f.y + 3} width="12" height="9" fill={f.skin} /><rect x={f.x} y={f.y + 3} width="12" height="3" fill={f.hair} />
+                  <rect x={f.x - 3} y={f.y + 15} width="18" height="12" fill={f.top} /><rect x={f.x} y={f.y + 12} width="12" height="3" fill={f.top} />
                 </g>))}</g>
               <g shapeRendering="crispEdges">
                 <rect x="-400" y="136" width="1440" height="32" fill="#191513" /><rect x="-400" y="136" width="1440" height="2" fill="#2c2520" />
