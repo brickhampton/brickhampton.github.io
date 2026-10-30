@@ -979,6 +979,11 @@ button:hover .lid,button:focus-visible .lid,button:active .lid{transform:transla
 /* Enough room below the photo to scroll it fully away, even with a short list. */
 .ghero + .wrap{min-height:100%;box-sizing:border-box}
 .hp{animation:hpBob 3.2s steps(4,jump-none) var(--hd) infinite}
+/* A pose that comes and goes (A. Shan's fist pump): shown for a moment every few seconds. */
+.hp-now{visibility:hidden;animation:hpNow 7s steps(1,end) 2s infinite}
+.hp-rest{animation:hpRest 7s steps(1,end) 2s infinite}
+@keyframes hpNow{0%,69%{visibility:hidden}70%,89%{visibility:visible}90%,100%{visibility:hidden}}
+@keyframes hpRest{0%,69%{visibility:visible}70%,89%{visibility:hidden}90%,100%{visibility:visible}}
 @keyframes hpBob{0%,100%{transform:none}50%{transform:translateY(-2.5px)}}
 .cf0{transform-box:fill-box;transform-origin:center;transform:rotate(var(--r,0deg))}
 .cf{transform-box:fill-box;transform-origin:center;animation:cfDrift var(--d) ease-in-out var(--dl) infinite alternate}

@@ -11,7 +11,8 @@ const TROPHY = `<svg x="345" y="262" width="110" height="122" preserveAspectRati
 
 // The team photo is posed like the real championship photo: four standing at the back, three in front holding the ball
 // and the trophy. Anyone else on the roster fills in on the shorter row.
-const POSE = { back: ['hoang', 'liu', 'yoon', 'shan'], front: ['lim', 'yao', 'lin'], hold: { shan: 'fist', yao: 'trophy', lim: 'ball' } };
+// A. Shan's raised fist comes and goes now and then instead of being held all the time.
+const POSE = { back: ['hoang', 'liu', 'yoon', 'shan'], front: ['lim', 'yao', 'lin'], hold: { yao: 'trophy', lim: 'ball' }, now: { shan: 'fist' } };
 function rows(ids) {
   const back = POSE.back.filter(id => ids.includes(id)), front = POSE.front.filter(id => ids.includes(id));
   for (const id of ids) if (!back.includes(id) && !front.includes(id)) (back.length <= front.length ? back : front).push(id);
@@ -34,7 +35,7 @@ function homeScene(cw, ch) {
   let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
   // Each player bobs, blinks and smiles on their own timing.
   const fig = (id, cx, top, w) => `<g class="hp alive" style="--hd:${(rnd() * 1.6).toFixed(2)}s;--bd:${(rnd() * -5).toFixed(2)}s;--sd:${(rnd() * -12).toFixed(2)}s;--sl:${(10 + rnd() * 6).toFixed(1)}s"><svg x="${cx - w / 2}" y="${top}" width="${w}" height="${w * 1.04}" viewBox="0 0 100 104" overflow="visible">
-    ${pxShadow(50, 103.5, 22, 104 / 34)}${figure(P(id), { stage: true, pose: POSE.hold[id] || 'down' })}</svg></g>`;
+    ${pxShadow(50, 103.5, 22, 104 / 34)}${POSE.now[id] ? `<g class="hp-rest">${figure(P(id), { stage: true, pose: 'down' })}</g><g class="hp-now">${figure(P(id), { stage: true, pose: POSE.now[id] })}</g>` : figure(P(id), { stage: true, pose: POSE.hold[id] || 'down' })}</svg></g>`;
   // Court lines on the floor, drawn in perspective and very faint, running off the bottom of the screen.
   const yb = vb + 40, sl = y => (y - 250) * 83 / 220;
   const court = `<g fill="none" stroke="#fff" stroke-opacity=".09" stroke-width="2">
@@ -57,7 +58,7 @@ function homeScene(cw, ch) {
   // front of them, in the gaps. Players nearer the middle are drawn last, so they overlap the ones beside them.
   const BW = 132, BT = 116, FW = 156, FT = 178, STAGGER = [4, -3, 2, -4, 3, -2];
   const bx = i => 400 + (i - (back.length - 1) / 2) * Math.min(70, 560 / Math.max(1, back.length - 1));
-  const fx = i => 400 + (i - (front.length - 1) / 2) * Math.min(86, 520 / Math.max(1, front.length - 1));
+  const fx = i => 400 + (i - (front.length - 1) / 2) * Math.min(76, 520 / Math.max(1, front.length - 1));
   const inward = (list, x) => list.map((id, i) => [id, i]).sort((a, b) => Math.abs(x(b[1]) - 400) - Math.abs(x(a[1]) - 400));
   // Without the trophy holder or the ball holder, the trophy and ball go on the floor.
   const has = k => front.some(id => POSE.hold[id] === k);
