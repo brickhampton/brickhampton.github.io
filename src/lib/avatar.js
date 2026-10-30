@@ -1,6 +1,6 @@
 // Pixel-art players in the team jersey, drawn from each player's look (saved in players.look).
 // A look is { v: 2, skin, hair, style, eyes, eyeY, brows, beard, glasses, height, weight, muscle, socks,
-// band, wrist, sleeve, stripe, shoe, shoeAcc, glassesC, hairFlip, accFlip }: colours as hex, everything else an index into OPTS (0 is the default).
+// band, wrist, sleeve, stripe, shoe, shoeAcc, glassesC, hairFlip, wristFlip, sleeveFlip }: colours as hex, everything else an index into OPTS (0 is the default).
 // Looks saved before the pixel style (no v) are converted, so every saved avatar still draws.
 
 const HEX = /^#[0-9a-f]{6}$/i;
@@ -23,8 +23,8 @@ export const SHOES = ['#f2f2f2', '#1b1b1b', '#2f55d4', '#8a8f98', '#c0392b'];
 // Each option list: the label shown in the builder. Index 0 is the default.
 export const OPTS = {
   height: ['Average', 'Short', 'Tall', 'Very tall', 'Very short'],
-  // Hair mirrored left to right; wristband and arm sleeve on the right arm (as you look at the player) instead of the left.
-  hairFlip: ['Normal', 'Flipped'], accFlip: ['Left arm', 'Right arm'],
+  // Hair mirrored left to right; the wristband or arm sleeve on the right arm (as you look at the player) instead of the left.
+  hairFlip: ['Normal', 'Flipped'], wristFlip: ['Left arm', 'Right arm'], sleeveFlip: ['Left arm', 'Right arm'],
   weight: ['Average', 'Broad', 'Heavy'],
   muscle: ['Toned', 'Athletic', 'Muscular'],
   style: ['Short', 'Buzz', 'Bald', 'Fringe', 'Swept', 'Curtains', 'Messy', 'Two-block', 'Spiky', 'Mohawk', 'Afro', 'Bun', 'Long', 'Cornrows',
@@ -42,7 +42,7 @@ export const CHOICES = {
   style: [0, 14, 5, 15, 7, 16, 17, 18, 19, 3, 4, 6, 8, 1, 2, 9, 10, 11, 12, 13],
   beard: [0, 1, 4, 5], glasses: [0, 1, 2], height: [4, 1, 0, 2, 3],
 };
-const NUMS = ['hairFlip', 'accFlip', 'height', 'weight', 'muscle', 'style', 'eyes', 'eyeY', 'brows', 'beard', 'glasses', 'socks', 'shoeType'];
+const NUMS = ['hairFlip', 'wristFlip', 'sleeveFlip', 'height', 'weight', 'muscle', 'style', 'eyes', 'eyeY', 'brows', 'beard', 'glasses', 'socks', 'shoeType'];
 const COLOURS = ['band', 'wrist', 'sleeve', 'stripe', 'shoeAcc', 'glassesC'];
 
 // Looks saved by the first (cartoon) builder used other lists; map each old choice to its nearest pixel one.
@@ -166,8 +166,8 @@ function sprite(c, num, pose) {
   // The arm sleeve and wristband go on this arm.
   const ARM = [[1, -1, 1], [2, -1, 1], [3, -2, 2], [4, -2, 2], [5, -2, 2], [6, -3, 3], [7, -3, 3]], HAND = [[8, -4, 4], [9, -4, 2], [9, -1, 1], [10, -3, 1]];
   const side = (spans, col, mirror) => spans.forEach(([j, dx, w]) => mirror ? r(fx - 1 - dx - w + 1, ty + j, w + aw, 1, col) : r(bx + dx - aw, ty + j, w + aw, 1, col));
-  // Swapped accessories go on the front arm instead.
-  const BS = c.accFlip ? null : c.sleeve, BW = c.accFlip ? null : c.wrist;
+  // A swapped wristband or sleeve goes on the front arm instead.
+  const BS = c.sleeveFlip ? null : c.sleeve, BW = c.wristFlip ? null : c.wrist;
   const fx = bx + bw, freeArm = mirror => {
     side(ARM, SB, mirror); side(HAND, SB, mirror);
     if (BS) side(ARM.slice(0, 5), BS, mirror);
@@ -249,7 +249,8 @@ function sprite(c, num, pose) {
   if (c.band) { r(hx - 1, hy + 2, 11, 2, c.band); r(hx - 1, hy + 2, 11, 1, mix(c.band, -.25)); }
   // ---- front arm and whatever it holds
   layer = 'b';
-  if (c.accFlip && (c.sleeve || c.wrist)) rec = [];
+  const FS = c.sleeveFlip ? c.sleeve : null, FW = c.wristFlip ? c.wrist : null;
+  if (FS || FW) rec = [];
   if (pose === 'dribble' || !pose) {
     // Palming the ball: the forearm comes out level and a big hand sits on top, fingers spread over the ball.
     ball(fx + 5, ty + 8, r);
@@ -306,7 +307,7 @@ function sprite(c, num, pose) {
     }
     rec = null;
     dist.forEach((d, k) => {
-      const col = d <= 4 ? c.sleeve : d <= 6 ? c.wrist : null;
+      const col = d <= 4 ? FS : d <= 6 ? FW : null;
       if (col) g[Math.floor(k / W)][k % W] = [col, 'b'];
     });
   }
