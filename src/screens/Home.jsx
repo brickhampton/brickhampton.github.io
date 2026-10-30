@@ -26,7 +26,9 @@ function homeScene(cw, ch) {
   const ids = statPlayers(), A = cw / Math.max(ch, 1);
   // Keep the team (x 170–630, y 60–440) in view; grow the other way to fill the screen.
   // On a tall phone screen, crop the sides a little so the players are bigger, and sit them just above the middle.
-  let vw = A < 1 ? 520 : 760, vh = 390; if (A > vw / vh) vw = vh * A; else vh = vw / A;
+  // Zoomed out a little (Z) so more of the arena shows round the team.
+  const Z = 1.12;
+  let vw = (A < 1 ? 520 : 760) * Z, vh = 390 * Z; if (A > vw / vh) vw = vh * A; else vh = vw / A;
   let vy = Math.min(60, 265 - vh * (A < 1 ? .44 : .5));
   // Keep the "Games" scroll hint at the bottom clear of the trophy: drop the empty sky first, then zoom out a touch.
   const need = 428 + 64 * vw / cw;
