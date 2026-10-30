@@ -87,9 +87,18 @@ h1.page{font-size:40px;font-weight:500;letter-spacing:-.04em;margin:0;line-heigh
 .av-wrap{border-radius:50%;overflow:hidden;background:var(--lift2);flex:none;position:relative}
 .av-wrap svg{display:block;width:100%;height:100%}
 .av-head{transform-box:fill-box;transform-origin:50% 100%}
-.av-eyes{animation:blink 5s infinite;transform-box:fill-box;transform-origin:center}
+.av-eyes{animation:blink 5s var(--bd,0s) infinite;transform-box:fill-box;transform-origin:center}
+.av-smile{opacity:0}
 .av-fig{transform-box:fill-box;transform-origin:50% 100%}
 @keyframes blink{0%,94%,100%{transform:scaleY(1)}96%{transform:scaleY(.1)}}
+/* "alive" players (Home, the player page, the court) smile now and then: the smiling eyes swap in for a moment. */
+.alive .av-eyes{animation:blink 5s var(--bd,0s) infinite, eyesOff var(--sl,13s) var(--sd,0s) infinite}
+.alive .av-smile{animation:smileOn var(--sl,13s) var(--sd,0s) infinite}
+@keyframes smileOn{0%,74%{opacity:0}75%,89%{opacity:1}90%,100%{opacity:0}}
+@keyframes eyesOff{0%,74%{opacity:1}75%,89%{opacity:0}90%,100%{opacity:1}}
+/* The selected player on the court bobs on the spot while waiting for the next action. */
+.actor .av-fig{animation:idleBob .9s steps(2,jump-none) infinite}
+@keyframes idleBob{50%{transform:translateY(-3px)}}
 .celebrate .av-fig{animation:jump .5s var(--ease-out)}
 .slump .av-head{animation:slump .55s ease-out}
 @keyframes jump{0%{transform:translateY(0)}35%{transform:translateY(-9px) rotate(-3deg)}70%{transform:translateY(1px)}100%{transform:none}}
@@ -520,15 +529,18 @@ tr.tot td{font-weight:600;border-top:1px solid var(--stroke)}
 .pring{position:absolute;inset:0;border-radius:50%;border:1.5px dashed rgba(79,124,255,.35);animation:spin 36s linear infinite}
 .pfig{position:absolute;left:12%;top:8%;width:76%;height:auto;overflow:visible;animation:float 3.6s ease-in-out infinite, enter .7s var(--ease-out) both}
 .pshadow{position:absolute;left:30%;right:30%;bottom:4%;height:6%;border-radius:50%;background:rgba(0,0,0,.45);filter:blur(4px);animation:shadow 3.6s ease-in-out infinite}
-.pball{position:absolute;right:4%;bottom:14%;width:17%;aspect-ratio:1;animation:dribble 1.1s cubic-bezier(.5,0,.5,1) infinite}
-.pball svg{width:100%;height:100%;display:block;animation:spin 2.2s linear infinite}
-.pstage.hop .pfig{animation:hop .6s var(--ease-out), float 3.6s ease-in-out .6s infinite}
+/* Tapping the player: a hop, a big smile, or a few bounces of the ball. */
+.pstage.smile .av-smile{animation:none;opacity:1}
+.pstage.smile .av-eyes{animation:none;opacity:0}
+.pstage.dribble .av-ball{animation:pxDribble .5s cubic-bezier(.5,0,.5,1) infinite}
+@keyframes pxDribble{50%{transform:translateY(var(--drop,20px))}}
+.phop{position:absolute;inset:0}
+.pstage.hop .phop{animation:hop .6s var(--ease-out)}
 @keyframes float{50%{transform:translateY(-6px)}}
 @keyframes shadow{50%{transform:scaleX(.86);opacity:.7}}
 @keyframes glow{50%{opacity:.75;transform:scale(1.04)}}
 @keyframes spin{to{transform:rotate(360deg)}}
 @keyframes enter{from{opacity:0;transform:translateY(16px) scale(.92)}}
-@keyframes dribble{0%,100%{transform:translateY(-55%)}50%{transform:translateY(0) scaleY(.92)}}
 @keyframes hop{0%{transform:none}30%{transform:translateY(-18px) rotate(-4deg)}60%{transform:translateY(2px) rotate(2deg)}100%{transform:none}}
 .pid{position:relative;display:flex;flex-direction:column;gap:10px;min-width:0}
 .pid .team{font-size:15px;font-weight:500;color:var(--granite)}
@@ -945,8 +957,8 @@ button:hover .lid,button:focus-visible .lid,button:active .lid{transform:transla
 .hscene{display:block;width:100%;height:100%}
 /* Enough room below the photo to scroll it fully away, even with a short list. */
 .ghero + .wrap{min-height:100%;box-sizing:border-box}
-.hp{animation:hpBob 3.2s ease-in-out var(--hd) infinite}
-@keyframes hpBob{0%,100%{transform:none}50%{transform:translateY(-2px)}}
+.hp{animation:hpBob 3.2s steps(4,jump-none) var(--hd) infinite}
+@keyframes hpBob{0%,100%{transform:none}50%{transform:translateY(-2.5px)}}
 .cf0{transform-box:fill-box;transform-origin:center;transform:rotate(var(--r,0deg))}
 .cf{transform-box:fill-box;transform-origin:center;animation:cfDrift var(--d) ease-in-out var(--dl) infinite alternate}
 @keyframes cfDrift{from{transform:translateY(-5px) rotate(var(--r,0deg))}to{transform:translateY(7px) rotate(calc(var(--r,0deg) + 50deg))}}
@@ -978,10 +990,11 @@ button:hover .lid,button:focus-visible .lid,button:active .lid{transform:transla
 .avb-opt{display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 4px 8px;border-radius:12px;background:var(--lift2);box-shadow:inset 0 0 0 1px transparent;font-size:12px;color:var(--stone);min-width:0}
 .avb-opt svg{width:100%;aspect-ratio:1;height:auto;display:block}
 .avb-opt.body svg{aspect-ratio:92/108}
+.avb-opt.feet svg{aspect-ratio:76/26}
 .avb-opt span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
 .avb-opt[aria-checked="true"]{box-shadow:inset 0 0 0 2px var(--bone);color:var(--bone);background:var(--mid)}
 .avb-swatches{display:flex;flex-wrap:wrap;gap:10px}
-.avb-sw{width:40px;height:40px;border-radius:50%;box-shadow:inset 0 0 0 1px rgba(0,0,0,.35)}
+.avb-sw{width:40px;height:40px;border-radius:10px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.35)}
 .avb-sw[aria-checked="true"]{box-shadow:0 0 0 2px var(--lift),0 0 0 4px var(--bone)}
 .avb-sw.none{background:linear-gradient(135deg,transparent 46%,var(--granite) 46% 54%,transparent 54%);box-shadow:inset 0 0 0 1px var(--stroke)}
 .avb-sw.none[aria-checked="true"]{box-shadow:inset 0 0 0 1px var(--stroke),0 0 0 2px var(--lift),0 0 0 4px var(--bone)}

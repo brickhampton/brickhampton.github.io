@@ -14,25 +14,33 @@ const mix = (hex, t) => '#' + [1, 3, 5].map(i => {
 const blend = (a, b, t) => '#' + [1, 3, 5].map(i => Math.round(parseInt(a.slice(i, i + 2), 16) * (1 - t) + parseInt(b.slice(i, i + 2), 16) * t).toString(16).padStart(2, '0')).join('');
 
 export const SKINS = ['#f8dcc4', '#f4d1ad', '#f2c9a3', '#e9bd95', '#e0ac80', '#d6a077', '#c18557', '#a8704a', '#8a5638', '#6b4029'];
-export const HAIRS = ['#0f0c0c', '#2b1d15', '#5a3a22', '#8a5a2b', '#c9a063', '#a3472a', '#8f8f8f', '#e6e6e6', '#2f55d4', '#c0392b'];
-export const BANDS = ['#2f55d4', '#eeeeee', '#1b1b1b', '#c0392b', '#ee6018', '#e9b949'];
-export const SHOES = ['#f2f2f2', '#1b1b1b', '#ee6018', '#c0392b', '#e9b949', '#2f55d4', '#2fb36b'];
+// Hair: black, charcoal, darkest brown, gold and white. Accessories: black, white, blue, grey and red.
+export const HAIRS = ['#0f0c0c', '#2e2e33', '#24170f', '#f2c230', '#ececec'];
+export const BANDS = ['#1b1b1b', '#eeeeee', '#2f55d4', '#8a8f98', '#c0392b'];
+export const SHOES = ['#f2f2f2', '#1b1b1b', '#8a8f98', '#2f55d4', '#c0392b', '#ee6018', '#e9b949', '#2fb36b'];
 
 // Each option list: the label shown in the builder. Index 0 is the default.
 export const OPTS = {
   height: ['Average', 'Short', 'Tall', 'Very tall'],
   weight: ['Average', 'Broad', 'Heavy'],
   muscle: ['Toned', 'Athletic', 'Muscular'],
-  style: ['Short', 'Buzz', 'Bald', 'Fringe', 'Swept', 'Curtains', 'Messy', 'Quiff', 'Spiky', 'Mohawk', 'Afro', 'Bun', 'Long', 'Cornrows'],
+  style: ['Short', 'Buzz', 'Bald', 'Fringe', 'Swept', 'Curtains', 'Messy', 'Two-block', 'Spiky', 'Mohawk', 'Afro', 'Bun', 'Long', 'Cornrows',
+    'Middle part', 'Bed hair', 'Comma', 'Side part', 'Bowl', 'Wolf cut'],
   eyes: ['Dots', 'Big', 'Shine', 'Small', 'Happy', 'Sleepy'],
   eyeY: ['Default', 'Higher', 'Lower'],
   brows: ['None', 'Thin', 'Thick', 'Angled', 'Raised'],
   beard: ['None', 'Stubble', 'Moustache', 'Goatee', 'Chinstrap', 'Beard'],
   glasses: ['None', 'Square', 'Round', 'Shades', 'Sport'],
   socks: ['Crew', 'High', 'Low'],
+  shoeType: ['Classic', 'High-top', 'Runner'],
 };
-const NUMS = ['height', 'weight', 'muscle', 'style', 'eyes', 'eyeY', 'brows', 'beard', 'glasses', 'socks'];
-const COLOURS = ['band', 'wrist', 'sleeve', 'stripe'];
+// What the builder offers, in order. Parts left out (moustache, goatee, shades, sport glasses) still draw for old looks.
+export const CHOICES = {
+  style: [0, 14, 5, 15, 7, 16, 17, 18, 19, 3, 4, 6, 8, 1, 2, 9, 10, 11, 12, 13],
+  beard: [0, 1, 4, 5], glasses: [0, 1, 2],
+};
+const NUMS = ['height', 'weight', 'muscle', 'style', 'eyes', 'eyeY', 'brows', 'beard', 'glasses', 'socks', 'shoeType'];
+const COLOURS = ['band', 'wrist', 'sleeve', 'stripe', 'shoeAcc'];
 
 // Looks saved by the first (cartoon) builder used other lists; map each old choice to its nearest pixel one.
 const OLD = {
@@ -52,7 +60,10 @@ export function cleanLook(raw = {}) {
   const out = { v: 2, skin: color(p.skin, SKINS[2]), hair: color(p.hair, HAIRS[0]), shoe: color(p.shoe, SHOES[0]) };
   for (const k of NUMS) out[k] = pick(p[k], OPTS[k]);
   for (const k of COLOURS) out[k] = HEX.test(p[k] || '') ? p[k] : null;
-  if (p.band === true) out.band = BANDS[0];
+  if (p.band === true) out.band = BANDS[2];
+  // Moustache and goatee became stubble; shades and sport glasses became the rectangle frames.
+  if (out.beard === 2 || out.beard === 3) out.beard = 1;
+  if (out.glasses > 2) out.glasses = 1;
   return out;
 }
 
@@ -70,17 +81,17 @@ export function randomLook() {
   const some = (chance, list) => Math.random() < chance ? any(list) : null;
   const maybe = (chance, k) => Math.random() < chance ? 1 + r(OPTS[k].length - 1) : 0;
   return lookOf({
-    v: 2, skin: any(SKINS), hair: any(HAIRS.slice(0, 7)), style: r(OPTS.style.length),
-    eyes: maybe(.3, 'eyes'), brows: maybe(.4, 'brows'), beard: maybe(.4, 'beard'), glasses: maybe(.2, 'glasses'),
-    height: r(4), weight: maybe(.4, 'weight'), muscle: r(3), socks: maybe(.3, 'socks'),
-    band: some(.2, BANDS), wrist: some(.25, BANDS), stripe: some(.2, BANDS), shoe: any(SHOES),
+    v: 2, skin: any(SKINS), hair: any(HAIRS.slice(0, 3)), style: any(CHOICES.style),
+    eyes: maybe(.3, 'eyes'), brows: maybe(.4, 'brows'), beard: Math.random() < .3 ? any(CHOICES.beard) : 0, glasses: Math.random() < .2 ? 1 + r(2) : 0,
+    height: r(4), weight: maybe(.4, 'weight'), muscle: r(3), socks: maybe(.3, 'socks'), shoeType: r(3),
+    band: some(.2, BANDS), wrist: some(.25, BANDS), stripe: some(.2, BANDS), shoe: any(SHOES), shoeAcc: some(.5, SHOES),
   });
 }
 
 // ---------- The sprite ----------
 // Measured from Geoff's reference sprites: an 11-row head (hair rows 0-2, forehead 3-5, eyes on rows 6-7 nearer the
 // nose), no neck, no mouth, a 10-wide body (8 rows of jersey, 4 of shorts), arms 2-3 pixels thick, chunky shoes.
-const W = 28, H = 36, FEET = 34;
+const W = 30, H = 36, FEET = 34;
 const DIG = { 0: ['111', '101', '101', '101', '111'], 1: ['01', '11', '01', '01', '01'], 2: ['111', '001', '111', '100', '111'], 3: ['111', '001', '011', '001', '111'], 4: ['101', '101', '111', '001', '001'], 5: ['111', '100', '111', '001', '111'], 6: ['111', '100', '111', '101', '111'], 7: ['111', '001', '010', '010', '010'], 8: ['111', '101', '111', '101', '111'], 9: ['111', '101', '111', '001', '111'] };
 // Hair as spans on the head grid (x 0-9, nose at 10, back of the head at x 0): [y, x, pattern].
 // H hair, D shade, B buzzed (hair over skin), '.' leave alone. In the same order as OPTS.style.
@@ -93,13 +104,25 @@ const HAIR = [
   [[-1, 3, 'HHHH'], [0, 1, 'HHHHHHH'], [1, 0, 'HHHHHHHHHH'], [2, 0, 'HHHHHHHHHHH'], [3, 0, 'HHH..HHHHHH'], [4, 0, 'HD....HHD'], [5, 0, 'H']],
   [[-1, 2, 'HHHHHH'], [0, 1, 'HHHHHHHH'], [1, 0, 'HHHHHHDHHH'], [2, -1, 'HHHHHHD.DHHH'], [3, -1, 'HHHHHD...DHH'], [4, -1, 'HHHD.....DH'], [5, -1, 'HH'], [6, -1, 'HH'], [7, -1, 'D']],
   [[-2, 2, 'H..H'], [-1, 1, 'HH.HHH.H'], [0, 0, 'HHHHHHHHHH'], [1, -1, 'HHHHHHHHHHH'], [2, -1, 'HHHHHHHHHHH'], [3, 0, 'HHH.HH.HHH'], [4, 0, 'HH...H...H'], [5, 0, 'H']],
-  [[-2, 5, 'HHHH'], [-1, 3, 'HHHHHH'], [0, 2, 'HHHHHHHH'], [1, 1, 'HHHHHHHHH'], [2, 0, 'DHHHHHHHHH'], [3, 0, 'DD.......H'], [4, 0, 'B']],
+  [[-1, 2, 'HHHHHH'], [0, 1, 'HHHHHHHH'], [1, 0, 'BHHHHHHHHHH'], [2, 0, 'BBHHHHHHHHH'], [3, 0, 'BB..HHHHHHH'], [4, 0, 'B....HH.HD'], [5, 0, 'B']],
   [[-3, 2, 'H..H..H'], [-2, 1, 'HH.HH.HH'], [-1, 0, 'HHHHHHHHHH'], ...TOP, [3, 0, 'HHD.H..H.H'], [4, 0, 'HD'], [5, 0, 'H']],
   [[-3, 4, 'HHH'], [-2, 3, 'HHHHH'], [-1, 3, 'HHHHHH'], [0, 2, 'BHHHHB'], [1, 1, 'BBHHHHBB'], [2, 0, 'BBBBBBBBBB'], [3, 0, 'BB'], [4, 0, 'B']],
   [[-3, 2, 'HHHHHH'], [-2, 0, 'HHHHHHHHHH'], [-1, -1, 'HHHHHHHHHHHH'], [0, -2, 'HHHHHHHHHHHHH'], [1, -2, 'HHHHHHHHHHHHHD'], [2, -2, 'HHHHHHHHHHHHHD'], [3, -2, 'HHHH......HHD'], [4, -2, 'HHHD'], [5, -2, 'HHD'], [6, -1, 'D']],
   [[-3, 0, 'HHH'], [-2, -1, 'HHHH'], [-1, 0, 'DD'], ...TOP, [3, 0, 'HHD......H'], [4, 0, 'HD'], [5, 0, 'H']],
   [[-1, 2, 'HHHHHH'], [0, 1, 'HHHHHHHH'], [1, 0, 'HHHHHHHHHH'], [2, -1, 'HHHHHHHHHHH'], [3, -1, 'HHHH....HHH'], [4, -1, 'HHH.....HD'], [5, -1, 'HHH'], [6, -1, 'HHH'], [7, -1, 'HHH'], [8, -1, 'HHD'], [9, -1, 'HD'], [10, -1, 'HD'], [11, -1, 'D']],
   [[0, 2, 'HHHHHH'], [1, 1, 'BBBBBBBB'], [2, 0, 'HHHHHHHHHH'], [3, 0, 'BB.......B']],
+  // Middle part: full, parted in the middle, falling to the cheeks at the sides
+  [[-2, 2, 'HHHHHH'], [-1, 0, 'HHHHHHHHHH'], [0, -1, 'HHHHHHHHHHHH'], [1, -1, 'HHHHHHDHHHHH'], [2, -1, 'HHHHHHD.DHHH'], [3, -1, 'HHHHHD...DHH'], [4, -1, 'HHHHD.....DH'], [5, -1, 'HHHD.......H'], [6, -1, 'HHH'], [7, -1, 'HHH'], [8, -1, 'HD'], [9, -1, 'D']],
+  // Bed hair: medium length, tufts every which way
+  [[-3, 2, 'H...H'], [-2, 1, 'HH.HHH.H'], [-1, 0, 'HHHHHHHHHH'], [0, -1, 'HHHHHHHHHHHH'], [1, -2, 'HHHHHHHHHHHHH'], [2, -2, 'HHHHHHHHHHHHH'], [3, -1, 'HHHHH.HH.HHH'], [4, -1, 'HHH.H...H.H'], [5, -2, 'HHH.......H'], [6, -1, 'HH'], [7, -2, 'H.H']],
+  // Comma: short sides, the fringe swept down and curled under at the front
+  [[-1, 2, 'HHHHHH'], [0, 1, 'HHHHHHHH'], [1, 0, 'BHHHHHHHHHH'], [2, 0, 'BBHHHHHHHHH'], [3, 0, 'BB....HHHHH'], [4, 0, 'B......HHH'], [5, 0, 'B.....HH.H']],
+  // Side part: parted on the back side, combed over with a little lift at the front
+  [[-2, 4, 'HHHHH'], [-1, 2, 'HHHHHHHH'], [0, 1, 'HDHHHHHHHH'], [1, 0, 'HHDHHHHHHHH'], [2, 0, 'HHHHHHHHHHH'], [3, 0, 'HHH.....HHH'], [4, 0, 'HD.......H'], [5, 0, 'H']],
+  // Bowl: a round mushroom cut with a straight fringe
+  [[-2, 2, 'HHHHHH'], [-1, 1, 'HHHHHHHH'], [0, 0, 'HHHHHHHHHH'], [1, -1, 'HHHHHHHHHHHH'], [2, -1, 'HHHHHHHHHHHH'], [3, -1, 'HHHHHHHHHHHH'], [4, -1, 'HHHHHHHHHHHD'], [5, -1, 'HHD'], [6, -1, 'HD']],
+  // Wolf cut: shaggy layers, longer and choppy at the back
+  [[-2, 1, 'H.HHHH.H'], [-1, 0, 'HHHHHHHHHH'], [0, -1, 'HHHHHHHHHHHH'], [1, -2, 'HHHHHHHHHHHHH'], [2, -2, 'HHHHHHHHHHHHH'], [3, -2, 'HHHHHH.HH.HHH'], [4, -2, 'HHHH.H.....H'], [5, -2, 'HHH'], [6, -2, 'HHH'], [7, -2, 'HH'], [8, -2, 'H.H'], [9, -1, 'H']],
 ];
 const TALL = [1, 0, 2, 3], EYE_ROW = [6, 5, 7];
 const K = '#16121a', T = '#f2f2f2', J = '#2f55d4', J2 = mix(J, .2);
@@ -107,8 +130,10 @@ const K = '#16121a', T = '#f2f2f2', J = '#2f55d4', J2 = mix(J, .2);
 // The sprite as a grid of [colour, layer] (layer: b body, h head, e eyes), plus where the head sits.
 function sprite(c, num, pose) {
   const g = Array.from({ length: H }, () => Array(W).fill(null));
+  // The ball has its own grid, so the hand drawn over it doesn't cut holes in it when it bounces away.
+  const go = Array.from({ length: H }, () => Array(W).fill(null));
   let layer = 'b';
-  const r = (x, y, w = 1, h = 1, col) => { for (let j = y; j < y + h; j++) for (let i = x; i < x + w; i++) if (j >= 0 && j < H && i >= 0 && i < W) g[j][i] = col ? [col, layer] : null; };
+  const r = (x, y, w = 1, h = 1, col, lay = layer) => { const t = lay === 'o' ? go : g; for (let j = y; j < y + h; j++) for (let i = x; i < x + w; i++) if (j >= 0 && j < H && i >= 0 && i < W) t[j][i] = col ? [col, lay] : null; };
   const S = c.skin, S2 = mix(S, .12), SB = mix(S, .06), HR = c.hair;
   const tall = TALL[c.height], wide = c.weight, aw = c.muscle > 1 ? 1 : 0;
   const hx = 8, hy = 3 + (3 - tall), ty = hy + 11, bx = hx - wide, bw = 10 + wide * 2;
@@ -116,15 +141,29 @@ function sprite(c, num, pose) {
   // ---- legs, socks, shoes
   const L1 = bx + 1, L2 = bx + bw - 3, sockH = [2, 1 + legSkin, 1][c.socks];
   [L1, L2].forEach(L => { r(L, legY, 2, legSkin + 2, S); r(L, legY + legSkin + 2 - sockH, 2, sockH, T); if (c.stripe) r(L, legY + legSkin + 2 - sockH, 2, 1, c.stripe); });
-  const sy = legY + legSkin + 2, shoe = c.shoe, acc = mix(shoe, shoe === SHOES[0] ? .25 : -.3);
-  r(L1 - 1, sy, 4, 1, shoe); r(L1 - 2, sy + 1, 5, 1, shoe); r(L2, sy, 4, 1, shoe); r(L2, sy + 1, 5, 1, shoe);
-  r(L1 - 1, sy + 1, 1, 1, acc); r(L2 + 3, sy + 1, 1, 1, acc);
+  // Shoes in two colours. Classic: a flash on the side. High-top: up over the ankle with a coloured collar. Runner: a long coloured sole.
+  const sy = legY + legSkin + 2, shoe = c.shoe, light = parseInt(shoe.slice(1, 3), 16) > 200, st = c.shoeType;
+  const acc = c.shoeAcc || (light ? '#c9ccd2' : st === 2 ? '#f2f2f2' : mix(shoe, -.3));
+  if (st === 2) {
+    r(L1 - 1, sy, 4, 1, shoe); r(L1 - 3, sy + 1, 6, 1, acc); r(L2, sy, 4, 1, shoe); r(L2, sy + 1, 6, 1, acc);
+  } else {
+    r(L1 - 1, sy, 4, 1, shoe); r(L1 - 2, sy + 1, 5, 1, shoe); r(L2, sy, 4, 1, shoe); r(L2, sy + 1, 5, 1, shoe);
+    if (st === 1) { r(L1, sy - 1, 2, 1, acc); r(L2, sy - 1, 2, 1, acc); r(L1, sy, 2, 1, shoe); r(L2, sy, 2, 1, shoe); }
+    else { r(L1 - 1, sy + 1, 2, 1, acc); r(L2 + 2, sy + 1, 2, 1, acc); }
+  }
   // ---- shorts
   r(bx, shortsY, bw, 4, J); r(bx + Math.floor(bw / 2) - 1, shortsY + 3, 1, 1, null); r(bx + bw - 1, shortsY, 1, 4, T);
   // ---- back arm: hangs just off the body, thickening from the shoulder to the hand
-  const BACK = [[1, -2, 2], [2, -2, 2], [3, -3, 2], [4, -3, 2], [5, -3, 3], [6, -4, 3], [7, -4, 3], [8, -5, 3], [9, -5, 3], [10, -4, 1]];
-  BACK.forEach(([j, dx, w]) => r(bx + dx - aw, ty + j, w + aw, 1, SB)); r(bx - 5 - aw, ty + 9, 2, 1, S2);
-  if (c.wrist) { r(bx - 4 - aw, ty + 7, 3 + aw, 1, c.wrist); r(bx - 5 - aw, ty + 8, 3 + aw, 1, c.wrist); }
+  // ---- free arm: relaxed at the side, widening to a loose hand with the fingers apart (as in the reference).
+  // The arm sleeve and wristband go on this arm.
+  const ARM = [[1, -1, 1], [2, -1, 1], [3, -2, 2], [4, -2, 2], [5, -2, 2], [6, -3, 3], [7, -3, 3]], HAND = [[8, -4, 4], [9, -4, 2], [9, -1, 1], [10, -3, 1]];
+  const side = (spans, col, mirror) => spans.forEach(([j, dx, w]) => mirror ? r(fx - 1 - dx - w + 1, ty + j, w + aw, 1, col) : r(bx + dx - aw, ty + j, w + aw, 1, col));
+  const fx = bx + bw, freeArm = mirror => {
+    side(ARM, SB, mirror); side(HAND, SB, mirror);
+    if (c.sleeve) side(ARM.slice(0, 5), c.sleeve, mirror);
+    if (c.wrist) side([[6, -3, 3], [7, -3, 3]], c.wrist, mirror);
+  };
+  freeArm(false);
   // ---- jersey and number
   r(bx, ty, bw, torsoH, J); r(bx + bw - 1, ty, 1, torsoH, T); r(bx + bw - 2, ty + 1, 1, torsoH - 1, J2);
   r(bx + 3, ty, bw - 6, 1, T); r(bx + 4, ty, bw - 8, 1, S2); r(bx, ty, 1, 1, S);
@@ -133,7 +172,7 @@ function sprite(c, num, pose) {
   d.forEach((ch, k) => { DIG[ch].forEach((row, y) => [...row].forEach((v, x) => v === '1' && r(nx + x, ty + 2 + y, 1, 1, T))); nx += dw[k] + 1; });
   // ---- head: 10 wide plus a one-pixel nose, chin row narrower
   layer = 'h';
-  r(hx + 2, hy, 6, 1, S); r(hx + 1, hy + 1, 8, 1, S); r(hx, hy + 2, 10, 8, S); r(hx + 1, hy + 10, 8, 1, S); r(hx + 1, hy + 10, 3, 1, SB);
+  r(hx + 2, hy, 6, 1, S); r(hx + 1, hy + 1, 8, 1, S); r(hx, hy + 2, 10, 8, S); r(hx + 1, hy + 10, 8, 1, S);
   r(hx + 10, hy + 6, 1, 2, S);
   // facial hair (there is no mouth, so it sits below the nose and round the jaw)
   const beard = c.beard;
@@ -154,7 +193,7 @@ function sprite(c, num, pose) {
   });
   layer = 'h';
   // brows
-  const BR = HR === HAIRS[7] ? '#b9b9b9' : HR;
+  const BR = parseInt(HR.slice(1, 3), 16) > 220 ? '#b9b9b9' : HR;
   E.forEach((x, k) => {
     if (c.brows === 1) r(x - 1, ey - 2, 2, 1, BR);
     if (c.brows === 2) r(x - 1, ey - 2, 3, 1, BR);
@@ -162,34 +201,29 @@ function sprite(c, num, pose) {
     if (c.brows === 4) r(x - 1, ey - 3, 2, 1, BR);
   });
   // hair
-  const pal = { H: HR, D: mix(HR, .25), B: blend(S, HR, .6) };
+  const pal = { H: HR, D: mix(HR, .25), B: blend(S, HR, .8) };
   HAIR[c.style].forEach(([y, x, pat]) => [...pat].forEach((ch, i) => { if (pal[ch]) r(hx + x + i, hy + y, 1, 1, pal[ch]); }));
   if (c.style === 2) r(hx + 3, hy + 1, 2, 1, mix(S, -.35));
-  // glasses: two 5 x 4 frames sharing the bridge, wider than they are tall
-  if (c.glasses >= 1 && c.glasses <= 3) {
-    const G = '#26232c', LN = c.glasses === 3 ? '#1f2a38' : '#d6e6f5';
-    [hx, hx + 4].forEach((x, k) => {
-      r(x, ey - 1, 5, 4, G); r(x + 1, ey, 3, 2, LN);
-      if (c.glasses === 3) r(x + 1, ey, 1, 1, '#6f8bb0'); else { layer = 'e'; r(E[k], ey, 1, 2, K); layer = 'h'; }
-      if (c.glasses === 2) { r(x, ey - 1, 1, 1, S); r(x, ey + 2, 1, 1, S); if (k) { r(x + 4, ey - 1, 1, 1, S); r(x + 4, ey + 2, 1, 1, S); } }
+  // glasses: two thin 4 x 4 frames round the eyes with clear lenses, a bridge and an arm back to the ear.
+  // Rectangle frames, or round ones with the corners cut.
+  if (c.glasses) {
+    const G = '#3b3946';
+    [hx + 1, hx + 6].forEach(x => {
+      const o = c.glasses === 2 ? 1 : 0;
+      r(x + o, ey - 1, 4 - 2 * o, 1, G); r(x + o, ey + 2, 4 - 2 * o, 1, G); r(x, ey, 1, 2, G); r(x + 3, ey, 1, 2, G);
     });
-    r(hx - 1, ey, 1, 1, G);
+    r(hx + 5, ey, 1, 1, G); r(hx, ey, 1, 1, G);
   }
-  if (c.glasses === 4) { const G = '#2b2b2b', LN = '#9fd3f0'; r(hx - 1, ey - 1, 11, 3, G); r(hx + 2, ey - 1, 3, 2, LN); r(hx + 6, ey - 1, 3, 2, LN); r(hx + 2, ey - 1, 1, 1, '#ffffff'); r(hx + 6, ey - 1, 1, 1, '#ffffff'); }
   if (c.band) { r(hx - 1, hy + 2, 11, 2, c.band); r(hx - 1, hy + 2, 11, 1, mix(c.band, -.25)); }
   // ---- front arm and whatever it holds
   layer = 'b';
-  const fx = bx + bw, sleeve = spans => c.sleeve && spans.forEach(([j, dx, w]) => r(fx + dx, ty + j, w, 1, c.sleeve));
   if (pose === 'dribble') {
-    ball(fx + 4, ty + 8, r);
-    [[1, -1, 3 + aw], [2, 0, 3 + aw], [3, 0, 6], [4, 1, 6]].forEach(([j, dx, w]) => r(fx + dx, ty + j, w, 1, S)); r(fx + 1, ty + 4, 3, 1, S2);
-    sleeve([[1, -1, 3 + aw], [2, 0, 3 + aw], [3, 0, 2], [4, 1, 1]]);
-    if (c.wrist) r(fx + 3, ty + 3, 2, 2, c.wrist);
-    r(fx + 4, ty + 5, 3, 1, S); r(fx + 6, ty + 4, 1, 2, S2);
+    // Palming the ball: the forearm comes out level and a big hand sits on top, fingers spread over the ball.
+    ball(fx + 5, ty + 8, r);
+    [[1, -1, 3 + aw], [2, 0, 5 + aw], [3, 1, 5 + aw], [4, 3, 5], [5, 3, 5]].forEach(([j, dx, w]) => r(fx + dx, ty + j, w, 1, S));
+    [3, 5, 7].forEach(dx => r(fx + dx, ty + 6, 1, 1, S));
   } else if (pose === 'fist') {
     r(fx - 1, ty, 2, 3, S); r(fx, hy + 2, 2 + aw, ty - hy - 1, S); r(fx + 1 + aw, hy + 2, 1, ty - hy - 1, S2);
-    if (c.sleeve) r(fx, hy + 6, 2 + aw, ty - hy - 5, c.sleeve);
-    if (c.wrist) r(fx, hy + 2, 2 + aw, 2, c.wrist);
     r(fx - 1, hy - 2, 4 + aw, 4, S); r(fx, hy - 1, 2, 1, S2); r(fx + 2 + aw, hy - 2, 1, 4, S2);
   } else if (pose === 'ball') {
     ball(bx + Math.floor(bw / 2), ty + 5, r);
@@ -200,17 +234,13 @@ function sprite(c, num, pose) {
     r(cx + 2, ty + 1, 2, 4, G2); r(cx - 1, ty + 1, 1, 2, '#fff2c4'); r(cx - 4, ty + 1, 2, 1, G); r(cx + 4, ty + 1, 2, 1, G);
     r(cx - 4, ty + 2, 2, 2, S); r(cx + 4, ty + 2, 2, 2, S); r(fx - 1, ty + 1, 2, 2, S);
   } else {
-    BACK.forEach(([j, dx, w]) => r(fx - dx - w, ty + j, w + aw, 1, S)); r(fx + 3, ty + 9, 2, 1, S2);
-    sleeve(BACK.slice(0, 5).map(([j, dx, w]) => [j, -dx - w, w + aw]));
-    if (c.wrist) { r(fx + 1, ty + 7, 3 + aw, 1, c.wrist); r(fx + 2, ty + 8, 3 + aw, 1, c.wrist); }
+    [...ARM, ...HAND].forEach(([j, dx, w]) => r(fx - dx - w, ty + j, w + aw, 1, S));
   }
-  return { g, hy };
+  return { g, go, hy };
 }
-function ball(cx, cy, r) {
-  const O = '#f5a623', O2 = '#df8c1c';
-  [[1, 5], [0, 7], [0, 7], [0, 7], [0, 7], [1, 5]].forEach(([o, w], j) => r(cx - 3 + o, cy - 2 + j, w, 1, O));
-  r(cx - 2, cy - 1, 1, 1, '#ffc766'); r(cx - 1, cy + 3, 4, 1, O2); r(cx + 2, cy + 2, 2, 1, O2); r(cx + 3, cy + 1, 1, 1, O2);
-}
+// A flat orange ball, 7 wide and 6 tall, like the reference.
+export const BALL = [[1, 5], [0, 7], [0, 7], [0, 7], [0, 7], [1, 5]], BALL_C = '#f39a2b';
+function ball(cx, cy, r) { BALL.forEach(([o, w], j) => r(cx - 3 + o, cy - 2 + j, w, 1, BALL_C, 'o')); }
 
 // One path per colour for each layer, built from runs of pixels, so a whole player is a handful of elements.
 function paths(g, layer) {
@@ -234,10 +264,14 @@ const cache = new Map();
 export function figure(raw, opts = {}) {
   const c = cleanLook(raw), key = JSON.stringify([c, raw.num, !!opts.stage, opts.pose || '']);
   if (cache.has(key)) return cache.get(key);
-  const { g, hy } = sprite(c, raw.num, opts.pose);
-  // The head and eyes are their own groups (outside the pixel scale) so the bob and blink animations work in the box's units.
+  const { g, go, hy } = sprite(c, raw.num, opts.pose), smile = sprite({ ...c, eyes: 4 }, raw.num, opts.pose).g;
+  // The ball, head, eyes and smiling eyes are their own groups (outside the pixel scale), so the bounce, blink and smile
+  // animations work in the box's units. The smiling eyes stay hidden until an animation shows them.
   const tf = opts.stage ? `translate(50 0) scale(${(104 / FEET).toFixed(4)}) translate(-13 0)` : `scale(6.25) translate(-5 ${3 - hy})`, at = s => `<g transform="${tf}">${s}</g>`;
-  const svg = `<g class="av-fig" shape-rendering="crispEdges">${at(paths(g, 'b'))}<g class="av-head">${at(paths(g, 'h'))}<g class="av-eyes">${at(paths(g, 'e'))}</g></g></g>`;
+  // A palmed ball sits behind the hand; a ball held in front of the chest sits over the body.
+  const bl = `<g class="av-ball" style="--drop:${((5 + TALL[c.height]) * 104 / FEET).toFixed(1)}px">${at(paths(go, 'o'))}</g>`, body = at(paths(g, 'b'));
+  const svg = `<g class="av-fig" shape-rendering="crispEdges">${opts.pose === 'ball' ? body + bl : bl + body}`
+    + `<g class="av-head">${at(paths(g, 'h'))}<g class="av-eyes">${at(paths(g, 'e'))}</g><g class="av-smile">${at(paths(smile, 'e'))}</g></g></g>`;
   if (cache.size > 400) cache.clear();
   cache.set(key, svg);
   return svg;

@@ -5,6 +5,7 @@ import { rec, change, countsFor, livePts, ACTIONS, A, saveGame, clearRecording }
 import { reduced } from '../lib/charts.js';
 import { go } from '../lib/nav.js';
 import { Avatar, figure } from '../components/Avatar.jsx';
+import { BALL, BALL_C } from '../lib/avatar.js';
 import { BoxScore } from '../components/BoxScore.jsx';
 import { openSheet, closeSheet } from '../components/Sheet.jsx';
 import { PinSheet } from '../components/PinSheet.jsx';
@@ -20,6 +21,10 @@ const RX = 542, RY = 64, FLOOR = 168, SC = .78;
 const SPOT = { '2M': 330, '2X': 330, '3M': 120, '3X': 120, 'FM': 400, 'FX': 400, 'OR': 470, 'DR': 450, 'AS': 150, 'ST': 300, 'BK': 470, 'TO': 300 };
 const HAND_Y = FLOOR - 104 * SC + 22; // just above the head
 const D = 140; // let the player get to their spot before the ball moves
+// The ball and hoop are drawn in the same flat pixel style as the players (3 screen units to a pixel).
+const PX = 3, BALL_D = BALL.map(([o, w], j) => `M${o} ${j}h${w}v1h${-w}z`).join('');
+const NET = Array.from({ length: 8 }, (_, j) => Array.from({ length: 12 - j }, (_, i) => (i + j) % 2 ? '' : `M${542 - (12 - j) * 2 + i * 4} ${73 + j * 4}h3v3h-3z`).join('')).join('');
+const MATE = { v: 2, skin: '#d9b48e', hair: '#2e2e33', style: 14 };
 
 function makeStage() {
   const fx = $('#fx'), net = $('#net'), rim = $('#rim'), actorWrap = $('#actor-wrap');
@@ -27,7 +32,7 @@ function makeStage() {
   function placeActor(sel, instant, x = actorX) {
     if (!sel) { actorWrap.innerHTML = ''; actor = null; return; }
     if (!actor || actor.dataset.id !== sel) {
-      actorWrap.innerHTML = `<g class="actor" data-id="${esc(sel)}"><ellipse cx="0" cy="${FLOOR}" rx="26" ry="5" fill="#000" opacity=".35"/><g class="body">${figure(P(sel), { stage: true })}</g></g>`;
+      actorWrap.innerHTML = `<g class="actor alive" data-id="${esc(sel)}"><ellipse cx="0" cy="${FLOOR}" rx="26" ry="5" fill="#000" opacity=".35"/><g class="body">${figure(P(sel), { stage: true })}</g></g>`;
       actor = actorWrap.firstElementChild; instant = true;
     }
     const body = actor.querySelector('.body'), shadow = actor.querySelector('ellipse');
@@ -45,8 +50,7 @@ function makeStage() {
   function mk(tag, attrs, parent = fx) { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); parent.appendChild(e); return e; }
   function ball(fill = '#ee6018') {
     const g = mk('g', {});
-    mk('circle', { r: 11, fill }, g);
-    mk('path', { d: 'M-11 0H11M0-11V11M-7-8.5Q-1.5 0-7 8.5M7-8.5Q1.5 0 7 8.5', stroke: '#5a2204', 'stroke-width': 1.3, fill: 'none', opacity: .8 }, g);
+    mk('path', { d: BALL_D, fill: fill === '#ee6018' ? BALL_C : fill, transform: `translate(${-3.5 * PX} ${-3 * PX}) scale(${PX})`, 'shape-rendering': 'crispEdges' }, g);
     setTimeout(() => g.remove(), 2400);
     return g;
   }
@@ -55,7 +59,7 @@ function makeStage() {
     for (let i = 0; i <= n; i++) { const t = i / n; pts.push([x0 + (x1 - x0) * t, y0 + (y1 - y0) * t - 4 * h * t * (1 - t), r0 + spin * t]); }
     return pts;
   }
-  const tf = p => ({ transform: `translate(${p[0]}px,${p[1]}px) rotate(${p[2] || 0}deg)`, opacity: p[3] ?? 1 });
+  const tf = p => ({ transform: `translate(${p[0]}px,${p[1]}px)`, opacity: p[3] ?? 1 });
   const fly = (el, pts, duration, easing = 'linear', delay = 0) => el.animate(pts.map(tf), { duration, easing, delay, fill: 'both' });
   const then = (anim, fn) => { anim.finished.then(fn).catch(() => {}); };
   const ripple = () => net.animate([{ transform: 'scale(1,1)' }, { transform: 'scale(.82,1.32)' }, { transform: 'scale(1.04,.94)' }, { transform: 'scale(1,1)' }], { duration: 340, easing: 'ease-out' });
@@ -110,7 +114,7 @@ function makeStage() {
       }
       case 'AS': { // the player threads a pass to a teammate who finishes
         const x = SPOT[k];
-        const mate = mk('g', {}); mk('circle', { cx: 440, cy: FLOOR - 30, r: 12, fill: '#2f55d4' }, mate); mk('circle', { cx: 440, cy: FLOOR - 52, r: 9, fill: '#d9b48e' }, mate);
+        const mate = mk('g', {}); mate.innerHTML = `<g transform="translate(${440 - 50 * SC} ${FLOOR - 104 * SC}) scale(${SC})">${figure({ ...MATE, num: '' }, { stage: true })}</g>`;
         mate.animate([{ opacity: 0 }, { opacity: .9, offset: .2 }, { opacity: .9, offset: .8 }, { opacity: 0 }], { duration: 900, fill: 'forwards' }); setTimeout(() => mate.remove(), 950);
         const trail = mk('path', { d: `M${x + 20} ${HAND_Y + 10} Q300 ${HAND_Y - 20} 430 ${HAND_Y + 30}`, stroke: '#ee6018', 'stroke-width': 2, fill: 'none', 'stroke-dasharray': '3 7', 'stroke-linecap': 'round' });
         trail.animate([{ opacity: 0 }, { opacity: .9, offset: .3 }, { opacity: 0 }], { duration: 700, fill: 'forwards' }); setTimeout(() => trail.remove(), 750);
@@ -284,13 +288,17 @@ export function Entry() {
         <div className="right">
           <div className="stage" aria-hidden="true">
             <svg viewBox="0 0 640 180" preserveAspectRatio="xMidYMax meet">
-              <line x1="0" y1="168" x2="640" y2="168" stroke="#3a2c22" strokeWidth="2" />
-              <path d="M110 168 Q110 70 330 66" stroke="#3a2c22" strokeWidth="2" fill="none" strokeDasharray="4 6" />
-              <rect x="384" y="120" width="186" height="48" fill="#2f55d4" opacity=".12" />
-              <rect x="566" y="18" width="8" height="70" rx="2" fill="#3d3a39" />
-              <g id="rim"><line x1="518" y1="70" x2="566" y2="70" stroke="#ee6018" strokeWidth="4" strokeLinecap="round" /></g>
-              <g id="net" style={{ transformBox: 'view-box', transformOrigin: '542px 72px' }}>
-                <path d="M520 72 L528 104 M531 72 L534 104 M542 72 L542 104 M553 72 L550 104 M564 72 L556 104 M523 84 L561 84 M526 95 L558 95 M528 104 L556 104" stroke="#b8b3b0" strokeWidth="1.5" fill="none" strokeLinecap="round" />
+              <g shapeRendering="crispEdges">
+                <rect x="0" y="168" width="640" height="12" fill="#5c3f27" /><rect x="0" y="168" width="640" height="3" fill="#8a5d36" />
+                {Array.from({ length: 20 }, (_, i) => <rect key={i} x={i * 33 + (i % 2) * 9} y="174" width="3" height="6" fill="#4a321f" />)}
+                {Array.from({ length: 22 }, (_, i) => { const t = i / 21, x = 110 + 220 * t, y = 168 - 102 * Math.sin(t * Math.PI / 2); return <rect key={i} x={Math.round(x / 3) * 3} y={Math.round(y / 3) * 3} width="3" height="3" fill="#4a382a" />; })}
+                <rect x="384" y="120" width="186" height="48" fill="#2f55d4" opacity=".14" />
+                <rect x="574" y="36" width="6" height="132" fill="#3d3a39" />
+                <rect x="566" y="24" width="8" height="54" fill="#e8e6e3" /><rect x="566" y="48" width="8" height="15" fill="#2f55d4" />
+              </g>
+              <g id="rim" shapeRendering="crispEdges"><rect x="517" y="69" width="50" height="4" fill="#ee6018" /></g>
+              <g id="net" shapeRendering="crispEdges" style={{ transformBox: 'view-box', transformOrigin: '542px 72px' }}>
+                <path d={NET} fill="#e8e6e3" />
               </g>
               <g id="actor-wrap" />
               <g id="fx" />

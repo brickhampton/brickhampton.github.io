@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { S, set } from '../lib/store.js';
 import { allGames, seasonList, seasonName, statPlayers, isStarter, playerAgg, calc, ratio, pctTxt, perTxt, tier, f1, ORD, P, numIn, buildTags, playerBadges } from '../lib/core.js';
 import { go } from '../lib/nav.js';
@@ -63,6 +63,22 @@ function SeasonCmp({ id, seasonsPlayed }) {
       <div className="side r"><select id="sc-b" aria-label="Second season" value={b} onChange={e => keep(() => set({ pSc: [a === e.target.value ? b : a, e.target.value] }))}>{seasonsPlayed.map(c => <option key={c} value={c}>{c}</option>)}</select><span className="sdot" style={{ background: SC_B }} /></div>
     </div><H2HRows A1={A1} B1={B1} rowsDef={rowsDef} /></div>
   );
+}
+
+// The big player on the player page. Tapping them gets a random reaction: a hop, a big smile, or bouncing the ball.
+function PStage({ p, num }) {
+  const [react, setReact] = useState(null), timer = useRef(0), last = useRef('');
+  useEffect(() => () => clearTimeout(timer.current), []);
+  const tap = () => {
+    const ks = ['hop', 'smile', 'dribble'].filter(x => x !== last.current), k = ks[Math.floor(Math.random() * ks.length)];
+    last.current = k; clearTimeout(timer.current); setReact({ k, n: Date.now() });
+    timer.current = setTimeout(() => setReact(null), k === 'hop' ? 650 : k === 'smile' ? 1600 : 2200);
+  };
+  return <button className={`pstage alive${react ? ' ' + react.k : ''}`} id="p-stage" aria-label="Wave hello" onClick={tap}>
+    <span className="pglow" /><span className="pring" />
+    <span className="phop"><svg className="pfig" viewBox="0 0 100 104" aria-hidden="true" dangerouslySetInnerHTML={{ __html: figure({ ...p, num }, { stage: true, pose: react?.k === 'dribble' ? 'dribble' : undefined }) }} /></span>
+    <span className="pshadow" />
+  </button>;
 }
 
 export function Player() {
@@ -144,7 +160,6 @@ export function Player() {
   const pcmp = S.pCmp && S.pCmp !== id && peers.some(x => x.id === S.pCmp) ? S.pCmp : 'team';
   const keepScroll = patch => { const el = document.getElementById('s-player'), st = el.scrollTop; set(patch); requestAnimationFrame(() => el.scrollTop = st); };
   const openGame = gid => go('game', { gameId: gid });
-  const hop = e => { const st = e.currentTarget; st.classList.remove('hop'); void st.offsetWidth; st.classList.add('hop'); };
   const pStat = S.pStat in P_STATS || S.pStat in P_MORE ? S.pStat : 'per';
 
   return <>
@@ -157,12 +172,7 @@ export function Player() {
 
     <div className="phero">
       <div className="pnum" aria-hidden="true">{num}</div>
-      <button className="pstage" id="p-stage" aria-label="Wave hello" onClick={hop}>
-        <span className="pglow" /><span className="pring" />
-        <svg className="pfig" viewBox="0 0 100 104" aria-hidden="true" dangerouslySetInnerHTML={{ __html: figure({ ...p, num }, { stage: true }) }} />
-        <span className="pball"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="#ee6018" /><path d="M1 12h22M12 1v22M4.2 4.2q5 7.8 0 15.6M19.8 4.2q-5 7.8 0 15.6" stroke="#2a1206" strokeWidth="1.3" fill="none" /></svg></span>
-        <span className="pshadow" />
-      </button>
+      <PStage p={p} num={num} />
       <div className="pid"><h1 className="page pname">{p.name}<span className="pno num">#{num}</span></h1><Badges id={id} key={id} /></div>
     </div>
 
