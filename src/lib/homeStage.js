@@ -13,7 +13,7 @@ const FULL = { hz: 120, dc: 20.5, f: 614, hc: 1.92 };
 // On a tall phone the players are drawn 1.3x bigger round (400, 300), so the court is too.
 const cam = (C, A) => { const k = A < 1 ? 1.3 : 1; return camera({ ...C, hz: 300 + (C.hz - 300) * k, f: C.f * k }); };
 export function stage(v, o) {
-  const B = { 1: arena, 2: centre, 3: pixel, 4: spot, 5: spot, 6: spot, 7: spot }[v] || current;
+  const B = { 1: arena, 2: centre, 3: pixel, 4: spot, 5: spot, 6: spot, 7: spot, 8: spot, 9: spot, 10: spot }[v] || current;
   return B(o, +v);
 }
 
@@ -135,7 +135,7 @@ function spot({ vx, vy, vw, vh, vb, A }, v) {
   const full = v >= 5, c = cam(full ? FULL : HALF, A), top = c.pt(0, -3)[1], box = `x="${f1(vx)}" y="${f1(vy)}" width="${f1(vw)}" height="${f1(vh)}"`;
   const lines = courtLines(c, { full }), pool = full ? c.pt(0, 14) : c.pt(0, 6.6);
   const circle = full ? `<polygon points="${c.poly(c.arc(0, 14, 1.8, 0, Math.PI * 2, 1, 0, 60))}" fill="#2f55d4" opacity=".2"/>` : '';
-  const hid = v === 7, L = hid ? [vx + vw * .06, vy - 70] : [vx + vw * .1, vy + 30], R = hid ? [vx + vw * .94, vy - 70] : [vx + vw * .9, vy + 30], T = [400, pool[1] + 10];
+  const hid = v >= 7, L = hid ? [vx + vw * .06, vy - 70] : [vx + vw * .1, vy + 30], R = hid ? [vx + vw * .94, vy - 70] : [vx + vw * .9, vy + 30], T = [400, pool[1] + 10];
   const beam = ([x, y], w) => { const dx = T[0] - x, dy = T[1] - y, len = Math.hypot(dx, dy), nx = -dy / len, ny = dx / len;
     return `${f1(x + nx * 8)},${f1(y + ny * 8)} ${f1(x - nx * 8)},${f1(y - ny * 8)} ${f1(T[0] - nx * w)},${f1(T[1] - ny * w)} ${f1(T[0] + nx * w)},${f1(T[1] + ny * w)}`; };
   const can = ([x, y], k) => { const a = Math.atan2(T[1] - y, T[0] - x) * 180 / Math.PI;
@@ -157,7 +157,7 @@ function spot({ vx, vy, vw, vh, vb, A }, v) {
       <rect x="${f1(vx)}" y="${f1(top)}" width="${f1(vw)}" height="${f1(vb - top)}" fill="url(#hside)"/>
       <ellipse cx="400" cy="${f1(pool[1])}" rx="380" ry="170" fill="url(#hpool)"/>
       ${hoop(c, { dim: full ? .65 : .5 })}
-      ${v === 6 ? `<polygon class="beam" points="370,${f1(vy + 24)} 430,${f1(vy + 24)} 640,${f1(pool[1] + 30)} 160,${f1(pool[1] + 30)}" fill="url(#hcone)" filter="url(#hsoft)"/>
+      ${v >= 8 ? natural(v, { vx, vy, vw, vh, vb, top, pool }) : v === 6 ? `<polygon class="beam" points="370,${f1(vy + 24)} 430,${f1(vy + 24)} 640,${f1(pool[1] + 30)} 160,${f1(pool[1] + 30)}" fill="url(#hcone)" filter="url(#hsoft)"/>
       <rect x="${f1(vx)}" y="${f1(vy + 14)}" width="${f1(vw)}" height="3" fill="#161b29"/>${lamps(vx, vw, vy + 22, Math.max(6, Math.round(vw / 105)))}`
     : `<g filter="url(#hsoft)"><polygon class="beam" points="${beam(L, 120)}" fill="url(#hbL)"/><polygon class="beam" style="animation-delay:2s" points="${beam(R, 120)}" fill="url(#hbR)"/></g>
       ${hid ? '' : can(L) + can(R)}`}`,
@@ -282,4 +282,26 @@ function stands(vx, vw, vy, top) {
   near.forEach(([x, i]) => { s += banner(x - 21, Math.max(top - 175, vy + 12) + (i % 2) * 6, 42, 70, kinds[i % 3], .8); });
   // A haze over the stands and banners, so they sit back behind the team.
   return s + `<defs><linearGradient id="hhaze" gradientUnits="userSpaceOnUse" x1="0" x2="0" y1="${f1(vy)}" y2="${f1(top)}"><stop offset="0" stop-color="#0b0c12" stop-opacity=".55"/><stop offset=".7" stop-color="#0d1430" stop-opacity=".3"/><stop offset="1" stop-color="#0d1430" stop-opacity=".1"/></linearGradient></defs><rect x="${f1(vx)}" y="${f1(vy)}" width="${f1(vw)}" height="${f1(top - vy)}" fill="url(#hhaze)"/>`;
+}
+
+// Options 8-10: option 7 lit more naturally, with no beams from the sides.
+//  8 even arena light: the whole floor and the stands lit softly, brightest round the team.
+//  9 soft light from above: a broad diffuse glow over the team and a bigger pool at their feet.
+// 10 skylights: warm, soft shafts of light falling at an angle from high windows.
+function natural(v, { vx, vy, vw, vh, vb, top, pool }) {
+  const box = `x="${f1(vx)}" y="${f1(vy)}" width="${f1(vw)}" height="${f1(vh)}"`, cy = f1(pool[1]);
+  if (v === 8) return `<defs><radialGradient id="hev" gradientUnits="userSpaceOnUse" cx="400" cy="${cy}" r="${f1(Math.max(600, vw * .75))}" gradientTransform="translate(400 ${cy}) scale(1 .55) translate(-400 -${cy})"><stop offset="0" stop-color="#e8eeff" stop-opacity=".2"/><stop offset=".55" stop-color="#c9d6ff" stop-opacity=".08"/><stop offset="1" stop-color="#c9d6ff" stop-opacity="0"/></radialGradient>
+      <linearGradient id="hevs" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#c9d6ff" stop-opacity=".02"/><stop offset="1" stop-color="#c9d6ff" stop-opacity=".09"/></linearGradient></defs>
+    <rect x="${f1(vx)}" y="${f1(vy)}" width="${f1(vw)}" height="${f1(top - vy)}" fill="url(#hevs)"/><rect ${box} fill="url(#hev)"/>`;
+  if (v === 9) return `<defs>${blur('hbig', 45)}<radialGradient id="hov" gradientUnits="userSpaceOnUse" cx="400" cy="${cy}" r="300" gradientTransform="translate(400 ${cy}) scale(1 .42) translate(-400 -${cy})"><stop offset="0" stop-color="#fff8e8" stop-opacity=".45"/><stop offset=".6" stop-color="#fff1d0" stop-opacity=".1"/><stop offset="1" stop-color="#fff1d0" stop-opacity="0"/></radialGradient></defs>
+    <ellipse cx="400" cy="${f1(vy + (pool[1] - vy) * .35)}" rx="230" ry="${f1((pool[1] - vy) * .55)}" fill="#fff6e0" opacity=".2" filter="url(#hbig)"/>
+    <ellipse cx="400" cy="${cy}" rx="520" ry="220" fill="url(#hov)"/>`;
+  // Skylights: parallel shafts from the upper left.
+  const dx = 260, h = pool[1] + 40 - (vy - 40);
+  const shafts = [[-180, 70, .07], [-40, 46, .09], [90, 90, .06], [250, 50, .05], [380, 70, .04]].map(([x, w, o], i) => {
+    const x0 = 400 + x - dx / 2, y0 = vy - 40;
+    return `<polygon class="beam" style="animation-delay:${i * 1.4}s" points="${f1(x0)},${f1(y0)} ${f1(x0 + w)},${f1(y0)} ${f1(x0 + w + dx)},${f1(y0 + h)} ${f1(x0 + dx)},${f1(y0 + h)}" fill="url(#hsky)" opacity="${o * 10}"/>`; }).join('');
+  return `<defs>${blur('hsky-b', 16)}<linearGradient id="hsky" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#ffe9c4" stop-opacity=".42"/><stop offset=".75" stop-color="#ffe9c4" stop-opacity=".12"/><stop offset="1" stop-color="#ffe9c4" stop-opacity=".03"/></linearGradient>
+    <radialGradient id="hskp" gradientUnits="userSpaceOnUse" cx="430" cy="${cy}" r="300" gradientTransform="translate(430 ${cy}) scale(1 .4) translate(-430 -${cy})"><stop offset="0" stop-color="#ffe2b0" stop-opacity=".26"/><stop offset="1" stop-color="#ffe2b0" stop-opacity="0"/></radialGradient></defs>
+    <g filter="url(#hsky-b)">${shafts}</g><ellipse cx="430" cy="${cy}" rx="520" ry="210" fill="url(#hskp)"/>`;
 }
