@@ -1,6 +1,6 @@
 // Pixel-art players in the team jersey, drawn from each player's look (saved in players.look).
 // A look is { v: 2, skin, hair, style, eyes, eyeY, brows, beard, glasses, height, weight, muscle, socks,
-// band, wrist, sleeve, stripe, shoe }: colours as hex, everything else an index into OPTS (0 is the default).
+// band, wrist, sleeve, stripe, shoe, shoeAcc, glassesC }: colours as hex, everything else an index into OPTS (0 is the default).
 // Looks saved before the pixel style (no v) are converted, so every saved avatar still draws.
 
 const HEX = /^#[0-9a-f]{6}$/i;
@@ -14,10 +14,11 @@ const mix = (hex, t) => '#' + [1, 3, 5].map(i => {
 const blend = (a, b, t) => '#' + [1, 3, 5].map(i => Math.round(parseInt(a.slice(i, i + 2), 16) * (1 - t) + parseInt(b.slice(i, i + 2), 16) * t).toString(16).padStart(2, '0')).join('');
 
 export const SKINS = ['#f8dcc4', '#f4d1ad', '#f2c9a3', '#e9bd95', '#e0ac80', '#d6a077', '#c18557', '#a8704a', '#8a5638', '#6b4029'];
-// Hair: black, charcoal, darkest brown, gold and white. Accessories: black, white, blue, grey and red.
-export const HAIRS = ['#0f0c0c', '#2e2e33', '#24170f', '#f2c230', '#ececec'];
+// Hair: black, or any colour from the picker. Accessories, shoes and glasses: black, white, blue, grey and red, or any
+// colour from the picker. Shoes keep their own white, the default saved looks already rely on.
+export const HAIRS = ['#0f0c0c'];
 export const BANDS = ['#1b1b1b', '#eeeeee', '#2f55d4', '#8a8f98', '#c0392b'];
-export const SHOES = ['#f2f2f2', '#1b1b1b', '#8a8f98', '#2f55d4', '#c0392b', '#ee6018', '#e9b949', '#2fb36b'];
+export const SHOES = ['#f2f2f2', '#1b1b1b', '#2f55d4', '#8a8f98', '#c0392b'];
 
 // Each option list: the label shown in the builder. Index 0 is the default.
 export const OPTS = {
@@ -40,7 +41,7 @@ export const CHOICES = {
   beard: [0, 1, 4, 5], glasses: [0, 1, 2],
 };
 const NUMS = ['height', 'weight', 'muscle', 'style', 'eyes', 'eyeY', 'brows', 'beard', 'glasses', 'socks', 'shoeType'];
-const COLOURS = ['band', 'wrist', 'sleeve', 'stripe', 'shoeAcc'];
+const COLOURS = ['band', 'wrist', 'sleeve', 'stripe', 'shoeAcc', 'glassesC'];
 
 // Looks saved by the first (cartoon) builder used other lists; map each old choice to its nearest pixel one.
 const OLD = {
@@ -81,7 +82,7 @@ export function randomLook() {
   const some = (chance, list) => Math.random() < chance ? any(list) : null;
   const maybe = (chance, k) => Math.random() < chance ? 1 + r(OPTS[k].length - 1) : 0;
   return lookOf({
-    v: 2, skin: any(SKINS), hair: any(HAIRS.slice(0, 3)), style: any(CHOICES.style),
+    v: 2, skin: any(SKINS), hair: Math.random() < .85 ? HAIRS[0] : any(['#2e2e33', '#24170f']), style: any(CHOICES.style),
     eyes: maybe(.3, 'eyes'), brows: maybe(.4, 'brows'), beard: Math.random() < .3 ? any(CHOICES.beard) : 0, glasses: Math.random() < .2 ? 1 + r(2) : 0,
     height: r(4), weight: maybe(.4, 'weight'), muscle: r(3), socks: maybe(.3, 'socks'), shoeType: r(3),
     band: some(.2, BANDS), wrist: some(.25, BANDS), stripe: some(.2, BANDS), shoe: any(SHOES), shoeAcc: some(.5, SHOES),
@@ -141,16 +142,13 @@ function sprite(c, num, pose) {
   // ---- legs, socks, shoes
   const L1 = bx + 1, L2 = bx + bw - 3, sockH = [2, 1 + legSkin, 1][c.socks];
   [L1, L2].forEach(L => { r(L, legY, 2, legSkin + 2, S); r(L, legY + legSkin + 2 - sockH, 2, sockH, T); if (c.stripe) r(L, legY + legSkin + 2 - sockH, 2, 1, c.stripe); });
-  // Shoes in two colours. Classic: a flash on the side. High-top: up over the ankle with a coloured collar. Runner: a long coloured sole.
+  // Shoes in two colours. Classic: a flash on the side. High-top: up over the ankle with a coloured collar. Runner: the classic shape on a coloured sole.
   const sy = legY + legSkin + 2, shoe = c.shoe, light = parseInt(shoe.slice(1, 3), 16) > 200, st = c.shoeType;
   const acc = c.shoeAcc || (light ? '#c9ccd2' : st === 2 ? '#f2f2f2' : mix(shoe, -.3));
-  if (st === 2) {
-    r(L1 - 1, sy, 4, 1, shoe); r(L1 - 3, sy + 1, 6, 1, acc); r(L2, sy, 4, 1, shoe); r(L2, sy + 1, 6, 1, acc);
-  } else {
-    r(L1 - 1, sy, 4, 1, shoe); r(L1 - 2, sy + 1, 5, 1, shoe); r(L2, sy, 4, 1, shoe); r(L2, sy + 1, 5, 1, shoe);
-    if (st === 1) { r(L1, sy - 1, 2, 1, acc); r(L2, sy - 1, 2, 1, acc); r(L1, sy, 2, 1, shoe); r(L2, sy, 2, 1, shoe); }
-    else { r(L1 - 1, sy + 1, 2, 1, acc); r(L2 + 2, sy + 1, 2, 1, acc); }
-  }
+  // Classic and runner share a shape; the runner's second colour is its whole sole.
+  r(L1 - 1, sy, 4, 1, shoe); r(L1 - 2, sy + 1, 5, 1, st === 2 ? acc : shoe); r(L2, sy, 4, 1, shoe); r(L2, sy + 1, 5, 1, st === 2 ? acc : shoe);
+  if (st === 1) { r(L1, sy - 1, 2, 1, acc); r(L2, sy - 1, 2, 1, acc); r(L1, sy, 2, 1, shoe); r(L2, sy, 2, 1, shoe); }
+  else if (st === 0) { r(L1 - 1, sy + 1, 2, 1, acc); r(L2 + 2, sy + 1, 2, 1, acc); }
   // ---- shorts
   r(bx, shortsY, bw, 4, J); r(bx + Math.floor(bw / 2) - 1, shortsY + 3, 1, 1, null); r(bx + bw - 1, shortsY, 1, 4, T);
   // ---- back arm: hangs just off the body, thickening from the shoulder to the hand
@@ -163,7 +161,14 @@ function sprite(c, num, pose) {
     if (c.sleeve) side(ARM.slice(0, 5), c.sleeve, mirror);
     if (c.wrist) side([[6, -3, 3], [7, -3, 3]], c.wrist, mirror);
   };
-  freeArm(false);
+  // Shooting, catching a rebound and blocking put the free arm up too.
+  const up = pose === 'shoot' || pose === 'catch' || pose === 'block';
+  if (up) {
+    const top = pose === 'shoot' ? hy + 1 : hy - 2, ax = bx - 2 - aw;
+    r(ax, top + 3, 2 + aw, ty + 2 - top - 3, SB); r(ax - 1, top - 1, 4 + aw, 4, SB); r(ax - 1, top - 2, 1, 1, SB); r(ax + 1, top - 2, 1, 1, SB); r(ax + 3 + aw, top - 2, 1, 1, SB);
+    if (c.sleeve) r(ax, ty - 2, 2 + aw, 4, c.sleeve);
+    if (c.wrist) r(ax, top + 3, 2 + aw, 2, c.wrist);
+  } else freeArm(false);
   // ---- jersey and number
   r(bx, ty, bw, torsoH, J); r(bx + bw - 1, ty, 1, torsoH, T); r(bx + bw - 2, ty + 1, 1, torsoH - 1, J2);
   r(bx + 3, ty, bw - 6, 1, T); r(bx + 4, ty, bw - 8, 1, S2); r(bx, ty, 1, 1, S);
@@ -207,7 +212,7 @@ function sprite(c, num, pose) {
   // glasses: two thin 4 x 4 frames round the eyes with clear lenses, a bridge and an arm back to the ear.
   // Rectangle frames, or round ones with the corners cut.
   if (c.glasses) {
-    const G = '#3b3946';
+    const G = c.glassesC || '#3b3946';
     [hx + 1, hx + 6].forEach(x => {
       const o = c.glasses === 2 ? 1 : 0;
       r(x + o, ey - 1, 4 - 2 * o, 1, G); r(x + o, ey + 2, 4 - 2 * o, 1, G); r(x, ey, 1, 2, G); r(x + 3, ey, 1, 2, G);
@@ -222,6 +227,13 @@ function sprite(c, num, pose) {
     ball(fx + 5, ty + 8, r);
     [[1, -1, 3 + aw], [2, 0, 5 + aw], [3, 1, 5 + aw], [4, 3, 5], [5, 3, 5]].forEach(([j, dx, w]) => r(fx + dx, ty + j, w, 1, S));
     [3, 5, 7].forEach(dx => r(fx + dx, ty + 6, 1, 1, S));
+  } else if (up) {
+    // Arm straight up with an open hand: the release on a shot, both hands up for a rebound or a block.
+    r(fx - 1, ty, 2, 2, S); r(fx, hy + 1, 2 + aw, ty - hy, S); r(fx + 1 + aw, hy + 1, 1, ty - hy, S2);
+    r(fx - 1, hy - 3, 4 + aw, 4, S); [0, 2, 3 + aw].forEach(dx => r(fx - 1 + dx, hy - 4, 1, 1, S));
+  } else if (pose === 'pass') {
+    // Arm thrust out level, as on a pass or a reach for a steal.
+    r(fx - 1, ty + 1, 7, 2 + aw, S); r(fx + 6, ty, 2, 4 + aw, S); r(fx - 1, ty + 2 + aw, 7, 1, S2);
   } else if (pose === 'fist') {
     r(fx - 1, ty, 2, 3, S); r(fx, hy + 2, 2 + aw, ty - hy - 1, S); r(fx + 1 + aw, hy + 2, 1, ty - hy - 1, S2);
     r(fx - 1, hy - 2, 4 + aw, 4, S); r(fx, hy - 1, 2, 1, S2); r(fx + 2 + aw, hy - 2, 1, 4, S2);
@@ -260,7 +272,7 @@ function paths(g, layer) {
 const cache = new Map();
 // SVG markup for a player. Round avatars (the default) show the head and the top of the jersey in a 100 × 100 box.
 // opts.stage draws the whole player at their height, feet on the bottom of a 100 × 104 box: the court, the Home
-// photo, the player page and the builder. opts.pose: 'fist', 'ball', 'trophy', 'down' (arms down), or palming the ball (the default, as in the reference).
+// photo, the player page and the builder. opts.pose: 'fist', 'ball', 'trophy', 'shoot', 'catch', 'block', 'pass', 'down' (arms down), or palming the ball (the default, as in the reference).
 export function figure(raw, opts = {}) {
   const c = cleanLook(raw), key = JSON.stringify([c, raw.num, !!opts.stage, opts.pose || '']);
   if (cache.has(key)) return cache.get(key);

@@ -11,14 +11,19 @@ const TABS = [
   ['body', 'Body', [['height', 'Height', 'body'], ['weight', 'Build', 'body'], ['muscle', 'Muscle', 'body'], ['skin', 'Skin tone']]],
   ['hair', 'Hair', [['style', 'Style', 'head'], ['hair', 'Colour']]],
   ['face', 'Face', [['eyes', 'Eyes', 'face'], ['eyeY', 'Eye height', 'face'], ['brows', 'Eyebrows', 'face'], ['beard', 'Facial hair', 'face']]],
-  ['gear', 'Extras', [['glasses', 'Glasses', 'face'], ['band', 'Headband'], ['wrist', 'Wristband'], ['sleeve', 'Arm sleeve'], ['socks', 'Socks', 'body'], ['stripe', 'Sock stripe']]],
+  ['gear', 'Extras', [['glasses', 'Glasses', 'face'], ['glassesC', 'Frame colour'], ['band', 'Headband'], ['wrist', 'Wristband'], ['sleeve', 'Arm sleeve'], ['socks', 'Socks', 'body'], ['stripe', 'Sock stripe']]],
   ['shoes', 'Shoes', [['shoeType', 'Shape', 'feet'], ['shoe', 'Main colour'], ['shoeAcc', 'Second colour']]],
 ];
-const SWATCH = { skin: SKINS, hair: HAIRS, band: BANDS, wrist: BANDS, sleeve: BANDS, stripe: BANDS, shoe: SHOES, shoeAcc: SHOES };
-const OPTIONAL = ['band', 'wrist', 'sleeve', 'stripe', 'shoeAcc'];
+const SWATCH = { skin: SKINS, hair: HAIRS, band: BANDS, wrist: BANDS, sleeve: BANDS, stripe: BANDS, shoe: SHOES, shoeAcc: SHOES, glassesC: BANDS };
+const OPTIONAL = ['band', 'wrist', 'sleeve', 'stripe', 'shoeAcc', 'glassesC'];
+// These colours also get a picker for any colour at all.
+const PICKER = ['hair', 'shoe', 'shoeAcc', 'glassesC'];
+const NONE = { glassesC: 'Default', shoeAcc: 'Auto' };
+const Dropper = () => <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <path d="m2 22 1-1h3l9-9" /><path d="M3 21v-3l9-9" /><path d="m15 6 3.4-3.4a2.1 2.1 0 1 1 3 3L18 9l.4.4a2.1 2.1 0 1 1-3 3l-3.8-3.8a2.1 2.1 0 1 1 3-3l.4.4Z" /></svg>;
 
 const Thumb = ({ look, num, view }) => <svg viewBox={VIEW[view]} aria-hidden="true"
-  dangerouslySetInnerHTML={{ __html: figure({ ...look, num }, { stage: view === 'body' || view === 'feet' }) }} />;
+  dangerouslySetInnerHTML={{ __html: figure({ ...look, num }, { stage: view === 'body' || view === 'feet', pose: 'down' }) }} />;
 
 // The avatar builder: a live preview, and every part as a row of choices.
 export function AvatarSheet({ id }) {
@@ -32,15 +37,18 @@ export function AvatarSheet({ id }) {
   const row = ([k, label, view]) => {
     const sw = SWATCH[k];
     const optional = OPTIONAL.includes(k);
-    const list = sw ? [...(optional ? [null] : []), ...sw, ...(!optional && !sw.includes(look[k]) ? [look[k]] : [])] : (CHOICES[k] || OPTS[k].map((_, i) => i));
+    if (k === 'glassesC' && !look.glasses) return null;
+    const custom = sw && look[k] && !sw.includes(look[k]) ? [look[k]] : [];
+    const list = sw ? [...(optional ? [null] : []), ...sw, ...custom] : (CHOICES[k] || OPTS[k].map((_, i) => i));
     return <div className="avb-row" key={k}><div className="avb-label">{label}</div>
       <div className={sw ? 'avb-swatches' : 'avb-opts'} role="radiogroup" aria-label={label}>{list.map(v => {
-        const on = look[k] === v, name = sw ? (v ? v : 'None') : OPTS[k][v];
+        const on = look[k] === v, name = sw ? (v ? v : NONE[k] || 'None') : OPTS[k][v];
         return sw
           ? <button key={String(v)} role="radio" aria-checked={on} aria-label={name} data-k={k} data-v={String(v)} className={`avb-sw${v ? '' : ' none'}`} style={v ? { background: v } : undefined} onClick={() => put(k, v)} />
           : <button key={v} role="radio" aria-checked={on} data-k={k} data-v={v} className={`avb-opt ${view}`} onClick={() => put(k, v)}>
             <Thumb look={{ ...look, [k]: v, ...(k === 'style' ? { band: null } : {}), ...(k === 'eyeY' || k === 'eyes' ? { glasses: 0 } : {}) }} num={num} view={view} /><span>{name}</span></button>;
-      })}</div></div>;
+      })}{PICKER.includes(k) && <label className="avb-sw pick" title="Pick any colour" data-pick={k}><Dropper />
+        <input type="color" aria-label={`${label}: pick any colour`} value={look[k] || '#888888'} onChange={e => put(k, e.target.value)} /></label>}</div></div>;
   };
 
   const save = () => run(() => adminEdit('save_look', { p_id: id, p_look: lookOf(look) }));
