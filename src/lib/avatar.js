@@ -317,8 +317,8 @@ function sprite(c, num, pose) {
     walk(front, x => x >= fx - 1 && x <= fx, d => c.shirt && d <= 1 ? c.shirt : d <= 4 ? FS : d <= 6 ? FW : null);
   }
   if (back) walk(back, x => x >= bx - 2 - aw, d => d <= 1 ? c.shirt : null);
-  // The undershirt's collar shows in the jersey's neckline.
-  if (c.shirt) r(bx + 4, ty, bw - 8, 1, c.shirt);
+  // The undershirt's collar shows in the jersey's neckline, and it covers the back shoulder at the jersey's corner.
+  if (c.shirt) { r(bx + 4, ty, bw - 8, 1, c.shirt); r(bx, ty, 1, 1, c.shirt); }
   return { g, go, ge, hy };
 }
 // A shadow in the same chunky pixels as the players: three stepped rows, centred on (cx, cy), u units to a pixel.
