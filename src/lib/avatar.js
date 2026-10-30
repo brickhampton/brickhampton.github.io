@@ -1,6 +1,6 @@
 // Pixel-art players in the team jersey, drawn from each player's look (saved in players.look).
 // A look is { v: 2, skin, hair, style, eyes, eyeY, brows, beard, glasses, height, weight, muscle, socks,
-// band, wrist, sleeve, stripe, shoe, shoeAcc, glassesC, hairFlip, wristFlip, sleeveFlip }: colours as hex, everything else an index into OPTS (0 is the default).
+// band, wrist, sleeve, stripe, shoe, shoeAcc, glassesC, shirt, hairFlip, wristFlip, sleeveFlip }: colours as hex, everything else an index into OPTS (0 is the default).
 // Looks saved before the pixel style (no v) are converted, so every saved avatar still draws.
 
 const HEX = /^#[0-9a-f]{6}$/i;
@@ -43,7 +43,7 @@ export const CHOICES = {
   beard: [0, 1, 4, 5], glasses: [0, 1, 2], height: [4, 1, 0, 2, 3],
 };
 const NUMS = ['hairFlip', 'wristFlip', 'sleeveFlip', 'height', 'weight', 'muscle', 'style', 'eyes', 'eyeY', 'brows', 'beard', 'glasses', 'socks', 'shoeType'];
-const COLOURS = ['band', 'wrist', 'sleeve', 'stripe', 'shoeAcc', 'glassesC'];
+const COLOURS = ['shirt', 'band', 'wrist', 'sleeve', 'stripe', 'shoeAcc', 'glassesC'];
 
 // Looks saved by the first (cartoon) builder used other lists; map each old choice to its nearest pixel one.
 const OLD = {
@@ -141,9 +141,9 @@ function sprite(c, num, pose) {
   // smiling ones, no hole opens onto the background.
   const ge = Array.from({ length: H }, () => Array(W).fill(null));
   let layer = 'b';
-  // While rec is set, the skin pixels drawn go into it too (the front arm, so its accessories can go on afterwards).
+  // While rec is set, the body pixels drawn go into it too (an arm, so its accessories can go on afterwards).
   let rec = null;
-  const r = (x, y, w = 1, h = 1, col, lay = layer) => { const t = lay === 'o' ? go : lay === 'e' ? ge : g; for (let j = y; j < y + h; j++) for (let i = x; i < x + w; i++) if (j >= 0 && j < H && i >= 0 && i < W) { t[j][i] = col ? [col, lay] : null; if (rec && lay === 'b' && (col === S || col === S2)) rec.push([i, j]); } };
+  const r = (x, y, w = 1, h = 1, col, lay = layer) => { const t = lay === 'o' ? go : lay === 'e' ? ge : g; for (let j = y; j < y + h; j++) for (let i = x; i < x + w; i++) if (j >= 0 && j < H && i >= 0 && i < W) { t[j][i] = col ? [col, lay] : null; if (rec && lay === 'b' && col) rec.push([i, j, col]); } };
   const S = c.skin, S2 = mix(S, .12), SB = mix(S, .06), HR = c.hair;
   // Broad and Heavy add one and two pixels to the body's width, mostly at the back.
   const tall = TALL[c.height], wide = c.weight, aw = c.muscle > 1 ? 1 : 0;
@@ -173,6 +173,7 @@ function sprite(c, num, pose) {
     if (BS) side(ARM.slice(0, 5), BS, mirror);
     if (BW) side([[6, -3, 3], [7, -3, 3]], BW, mirror);
   };
+  rec = c.shirt ? [] : null;
   // Shooting, catching a rebound and blocking put the free arm up too.
   const up = pose === 'shoot' || pose === 'catch' || pose === 'block';
   if (up) {
@@ -192,6 +193,8 @@ function sprite(c, num, pose) {
     // Both hands hold the trophy by its handles: this upper arm comes forward from the shoulder to the near handle.
     r(bx - 2, ty + 1, 2, 4, SB); if (BS) r(bx - 2, ty + 1, 2, 2, BS);
   } else freeArm(false);
+  const back = rec && rec.filter(([x]) => x < bx);
+  rec = null;
   // ---- jersey and number
   r(bx, ty, bw, torsoH, J); r(bx + bw - 1, ty, 1, torsoH, T); r(bx + bw - 2, ty + 1, 1, torsoH - 1, J2);
   r(bx + 3, ty, bw - 6, 1, T); r(bx + 4, ty, bw - 8, 1, S2); r(bx, ty, 1, 1, S);
@@ -250,7 +253,7 @@ function sprite(c, num, pose) {
   // ---- front arm and whatever it holds
   layer = 'b';
   const FS = c.sleeveFlip ? c.sleeve : null, FW = c.wristFlip ? c.wrist : null;
-  if (FS || FW) rec = [];
+  if (FS || FW || c.shirt) rec = [];
   if (pose === 'dribble' || !pose) {
     // Palming the ball: the forearm comes out level and a big hand sits on top, fingers spread over the ball.
     ball(fx + 5, ty + 8, r);
@@ -291,11 +294,12 @@ function sprite(c, num, pose) {
   } else {
     [...ARM, ...HAND].forEach(([j, dx, w]) => r(fx - dx - w, ty + j, w + aw, 1, S));
   }
-  if (rec) {
-    // Walk the front arm out from the shoulder: the sleeve covers the first few pixels, the wristband the two after.
-    const key = (x, y) => y * W + x, arm = new Set(rec.map(([x, y]) => key(x, y))), dist = new Map();
-    let edge = rec.filter(([x, y]) => x >= fx - 1 && x <= fx && y >= ty - 1 && y <= ty + 1);
-    if (!edge.length) edge = [rec.reduce((a, b) => (b[1] < a[1] || (b[1] === a[1] && Math.abs(b[0] - fx) < Math.abs(a[0] - fx)) ? b : a))];
+  // Walk each arm out from the shoulder, painting accessories by how far along the arm a pixel is: the sleeve covers the
+  // first few pixels, the wristband the two after, and an undershirt's short sleeve just the top of the arm.
+  const walk = (cells, near, paint) => {
+    const key = (x, y) => y * W + x, arm = new Set(cells.map(([x, y]) => key(x, y))), dist = new Map();
+    let edge = cells.filter(([x, y]) => near(x) && y >= ty - 1 && y <= ty + 1);
+    if (!edge.length && cells.length) edge = [cells.reduce((a, b) => (b[1] < a[1] ? b : a))];
     edge.forEach(([x, y]) => dist.set(key(x, y), 0));
     for (let q = edge; q.length;) {
       const next = [];
@@ -305,12 +309,16 @@ function sprite(c, num, pose) {
       }));
       q = next;
     }
+    dist.forEach((d, k) => { const col = paint(d); if (col) g[Math.floor(k / W)][k % W] = [col, 'b']; });
+  };
+  if (rec) {
+    const front = rec.filter(([, , col]) => col === S || col === S2);
     rec = null;
-    dist.forEach((d, k) => {
-      const col = d <= 4 ? FS : d <= 6 ? FW : null;
-      if (col) g[Math.floor(k / W)][k % W] = [col, 'b'];
-    });
+    walk(front, x => x >= fx - 1 && x <= fx, d => c.shirt && d <= 1 ? c.shirt : d <= 4 ? FS : d <= 6 ? FW : null);
   }
+  if (back) walk(back, x => x >= bx - 2 - aw, d => d <= 1 ? c.shirt : null);
+  // The undershirt's collar shows in the jersey's neckline.
+  if (c.shirt) r(bx + 4, ty, bw - 8, 1, c.shirt);
   return { g, go, ge, hy };
 }
 // A shadow in the same chunky pixels as the players: three stepped rows, centred on (cx, cy), u units to a pixel.
