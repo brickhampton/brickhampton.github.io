@@ -1037,3 +1037,6 @@ button:hover .lid,button:focus-visible .lid,button:active .lid{transform:transla
 .avb-sw.pick svg{width:20px;height:20px}
 .avb-sw.pick input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;border:0;padding:0}
 .avb-sw.pick:focus-within{box-shadow:inset 0 0 0 1px var(--stroke),0 0 0 2px var(--lift),0 0 0 4px var(--bone)}
+/* Phone flashes going off now and then in the crowd behind the team. */
+.hflash{opacity:0;animation:hflash var(--fd) steps(1,end) var(--fl) infinite}
+@keyframes hflash{0%,96%{opacity:0}97%,99%{opacity:.85}}
