@@ -86,10 +86,9 @@ h1.page{font-size:40px;font-weight:500;letter-spacing:-.04em;margin:0;line-heigh
 /* avatars */
 .av-wrap{border-radius:50%;overflow:hidden;background:var(--lift2);flex:none;position:relative}
 .av-wrap svg{display:block;width:100%;height:100%}
-.av-head{animation:bob 2.6s ease-in-out infinite;transform-box:fill-box;transform-origin:50% 100%}
+.av-head{transform-box:fill-box;transform-origin:50% 100%}
 .av-eyes{animation:blink 5s infinite;transform-box:fill-box;transform-origin:center}
 .av-fig{transform-box:fill-box;transform-origin:50% 100%}
-@keyframes bob{50%{transform:translateY(-1.6px)}}
 @keyframes blink{0%,94%,100%{transform:scaleY(1)}96%{transform:scaleY(.1)}}
 .celebrate .av-fig{animation:jump .5s var(--ease-out)}
 .slump .av-head{animation:slump .55s ease-out}
@@ -520,7 +519,6 @@ tr.tot td{font-weight:600;border-top:1px solid var(--stroke)}
 .pglow{position:absolute;inset:6%;border-radius:50%;background:radial-gradient(circle at 50% 42%,rgba(79,124,255,.55),rgba(47,85,212,.18) 55%,transparent 72%);animation:glow 4s ease-in-out infinite}
 .pring{position:absolute;inset:0;border-radius:50%;border:1.5px dashed rgba(79,124,255,.35);animation:spin 36s linear infinite}
 .pfig{position:absolute;left:12%;top:8%;width:76%;height:auto;overflow:visible;animation:float 3.6s ease-in-out infinite, enter .7s var(--ease-out) both}
-.pfig .av-head{animation-duration:2.2s}
 .pshadow{position:absolute;left:30%;right:30%;bottom:4%;height:6%;border-radius:50%;background:rgba(0,0,0,.45);filter:blur(4px);animation:shadow 3.6s ease-in-out infinite}
 .pball{position:absolute;right:4%;bottom:14%;width:17%;aspect-ratio:1;animation:dribble 1.1s cubic-bezier(.5,0,.5,1) infinite}
 .pball svg{width:100%;height:100%;display:block;animation:spin 2.2s linear infinite}
@@ -979,7 +977,7 @@ button:hover .lid,button:focus-visible .lid,button:active .lid{transform:transla
 .avb-opts{display:grid;grid-template-columns:repeat(auto-fill,minmax(76px,1fr));gap:8px}
 .avb-opt{display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 4px 8px;border-radius:12px;background:var(--lift2);box-shadow:inset 0 0 0 1px transparent;font-size:12px;color:var(--stone);min-width:0}
 .avb-opt svg{width:100%;aspect-ratio:1;height:auto;display:block}
-.avb-opt.body svg{aspect-ratio:88/120}
+.avb-opt.body svg{aspect-ratio:92/108}
 .avb-opt span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
 .avb-opt[aria-checked="true"]{box-shadow:inset 0 0 0 2px var(--bone);color:var(--bone);background:var(--mid)}
 .avb-swatches{display:flex;flex-wrap:wrap;gap:10px}

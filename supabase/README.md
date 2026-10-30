@@ -8,6 +8,7 @@ Run these once, in order, in the Supabase dashboard: **SQL Editor → New query*
 4. `04-record.sql`: saving a recorded game, and editing a season's opponents.
 5. `05-admin.sql`: every Admin mode edit, plus Change history with Undo. Safe to run again.
 6. `06-avatars.sql`: saving avatars from the avatar builder, and the starters' first looks. Safe to run again.
+7. `07-pixel-avatars.sql`: the starters' pixel avatars (leaves any avatar already changed in the builder alone). Safe to run again.
 
 How it's protected:
 
