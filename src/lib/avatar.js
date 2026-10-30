@@ -22,7 +22,7 @@ export const SHOES = ['#f2f2f2', '#1b1b1b', '#2f55d4', '#8a8f98', '#c0392b'];
 
 // Each option list: the label shown in the builder. Index 0 is the default.
 export const OPTS = {
-  height: ['Average', 'Short', 'Tall', 'Very tall'],
+  height: ['Average', 'Short', 'Tall', 'Very tall', 'Very short'],
   // Hair mirrored left to right; wristband and arm sleeve on the right arm (as you look at the player) instead of the left.
   hairFlip: ['Normal', 'Flipped'], accFlip: ['Left arm', 'Right arm'],
   weight: ['Average', 'Broad', 'Heavy'],
@@ -40,7 +40,7 @@ export const OPTS = {
 // What the builder offers, in order. Parts left out (moustache, goatee, shades, sport glasses) still draw for old looks.
 export const CHOICES = {
   style: [0, 14, 5, 15, 7, 16, 17, 18, 19, 3, 4, 6, 8, 1, 2, 9, 10, 11, 12, 13],
-  beard: [0, 1, 4, 5], glasses: [0, 1, 2], height: [1, 0, 2, 3],
+  beard: [0, 1, 4, 5], glasses: [0, 1, 2], height: [4, 1, 0, 2, 3],
 };
 const NUMS = ['hairFlip', 'accFlip', 'height', 'weight', 'muscle', 'style', 'eyes', 'eyeY', 'brows', 'beard', 'glasses', 'socks', 'shoeType'];
 const COLOURS = ['band', 'wrist', 'sleeve', 'stripe', 'shoeAcc', 'glassesC'];
@@ -88,7 +88,7 @@ export function randomLook() {
   return lookOf({
     v: 2, skin: any(SKINS), hair: Math.random() < .85 ? HAIRS[0] : any(['#2e2e33', '#24170f']), style: any(CHOICES.style), hairFlip: r(2),
     eyes: maybe(.3, 'eyes'), brows: maybe(.4, 'brows'), beard: Math.random() < .3 ? any(CHOICES.beard) : 0, glasses: Math.random() < .2 ? 1 + r(2) : 0,
-    height: r(4), weight: maybe(.4, 'weight'), socks: maybe(.3, 'socks'), shoeType: r(3),
+    height: r(5), weight: maybe(.4, 'weight'), socks: maybe(.3, 'socks'), shoeType: r(3),
     band: some(.2, BANDS), wrist: some(.25, BANDS), stripe: some(.2, BANDS), shoe: any(SHOES), shoeAcc: some(.5, SHOES),
   });
 }
@@ -129,7 +129,7 @@ const HAIR = [
   // Wolf cut: shaggy layers, longer and choppy at the back
   [[-2, 1, 'H.HHHH.H'], [-1, 0, 'HHHHHHHHHH'], [0, -1, 'HHHHHHHHHHHH'], [1, -2, 'HHHHHHHHHHHHH'], [2, -2, 'HHHHHHHHHHHHH'], [3, -2, 'HHHHHH.HH.HHH'], [4, -2, 'HHHH.H.....H'], [5, -2, 'HHH'], [6, -2, 'HHH'], [7, -2, 'HH'], [8, -2, 'H.H'], [9, -1, 'H']],
 ];
-const TALL = [1, 0, 2, 3], EYE_ROW = [6, 5, 7];
+const TALL = [1, 0, 2, 3, -1], EYE_ROW = [6, 5, 7];
 const K = '#16121a', T = '#f2f2f2', J = '#2f55d4', J2 = mix(J, .2);
 
 // The sprite as a grid of [colour, layer] (layer: b body, h head, e eyes), plus where the head sits.
@@ -145,8 +145,9 @@ function sprite(c, num, pose) {
   let rec = null;
   const r = (x, y, w = 1, h = 1, col, lay = layer) => { const t = lay === 'o' ? go : lay === 'e' ? ge : g; for (let j = y; j < y + h; j++) for (let i = x; i < x + w; i++) if (j >= 0 && j < H && i >= 0 && i < W) { t[j][i] = col ? [col, lay] : null; if (rec && lay === 'b' && (col === S || col === S2)) rec.push([i, j]); } };
   const S = c.skin, S2 = mix(S, .12), SB = mix(S, .06), HR = c.hair;
+  // Broad and Heavy add one and two pixels to the body's width, mostly at the back.
   const tall = TALL[c.height], wide = c.weight, aw = c.muscle > 1 ? 1 : 0;
-  const hx = 8, hy = 3 + (3 - tall), ty = hy + 11, bx = hx - wide, bw = 10 + wide * 2;
+  const hx = 8, hy = 3 + (3 - tall), ty = hy + 11, bx = hx - Math.ceil(wide / 2), bw = 10 + wide;
   const torsoH = 8 + Math.floor(tall / 2), shortsY = ty + torsoH, legY = shortsY + 4, legSkin = 1 + Math.ceil(tall / 2);
   // ---- legs, socks, shoes
   const L1 = bx + 1, L2 = bx + bw - 3, sockH = [2, 1 + legSkin, 1][c.socks];
