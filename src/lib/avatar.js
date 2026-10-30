@@ -181,6 +181,9 @@ function sprite(c, num, pose) {
     [[1, -1, 3 + aw], [2, 0, 5 + aw], [3, 1, 5 + aw], [4, 3, 5], [5, 3, 5]].forEach(([j, dx, w]) => r(bx - dx - w, ty + j, w, 1, SB));
     [3, 5, 7].forEach(dx => r(bx - dx - 1, ty + 6, 1, 1, SB));
     if (c.sleeve) r(bx - 1 - aw, ty + 1, 1 + aw, 2, c.sleeve);
+  } else if (pose === 'trophy') {
+    // The free hand holds the trophy: the upper arm comes forward from the shoulder to the trophy's near side.
+    r(bx - 2, ty + 1, 2, 3, SB); if (c.sleeve) r(bx - 2, ty + 1, 2, 2, c.sleeve);
   } else freeArm(false);
   // ---- jersey and number
   r(bx, ty, bw, torsoH, J); r(bx + bw - 1, ty, 1, torsoH, T); r(bx + bw - 2, ty + 1, 1, torsoH - 1, J2);
@@ -271,7 +274,9 @@ function sprite(c, num, pose) {
     const cx = bx + Math.floor(bw / 2) - 1, G = '#f2c14e', G2 = '#c98f22';
     r(cx - 2, ty + 1, 6, 3, G); r(cx - 1, ty + 4, 4, 1, G); r(cx, ty + 5, 2, 1, G2); r(cx - 1, ty + 6, 4, 1, G); r(cx - 2, ty + 7, 6, 1, '#4a3418');
     r(cx + 2, ty + 1, 2, 4, G2); r(cx - 1, ty + 1, 1, 2, '#fff2c4'); r(cx - 4, ty + 1, 2, 1, G); r(cx + 4, ty + 1, 2, 1, G);
-    r(cx - 4, ty + 2, 2, 2, S); r(cx + 4, ty + 2, 2, 2, S); r(fx - 1, ty + 1, 2, 2, S);
+    r(cx - 4, ty + 2, 2, 2, SB);
+    // The other arm hangs relaxed.
+    [...ARM, ...HAND].forEach(([j, dx, w]) => r(fx - dx - w, ty + j, w + aw, 1, S));
   } else {
     [...ARM, ...HAND].forEach(([j, dx, w]) => r(fx - dx - w, ty + j, w + aw, 1, S));
   }
