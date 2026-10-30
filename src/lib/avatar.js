@@ -1,6 +1,6 @@
 // Pixel-art players in the team jersey, drawn from each player's look (saved in players.look).
 // A look is { v: 2, skin, hair, style, eyes, eyeY, brows, beard, glasses, height, weight, muscle, socks,
-// band, wrist, sleeve, stripe, shoe, shoeAcc, glassesC }: colours as hex, everything else an index into OPTS (0 is the default).
+// band, wrist, sleeve, stripe, shoe, shoeAcc, glassesC, hairFlip, wristFlip, sleeveFlip }: colours as hex, everything else an index into OPTS (0 is the default).
 // Looks saved before the pixel style (no v) are converted, so every saved avatar still draws.
 
 const HEX = /^#[0-9a-f]{6}$/i;
@@ -22,7 +22,9 @@ export const SHOES = ['#f2f2f2', '#1b1b1b', '#2f55d4', '#8a8f98', '#c0392b'];
 
 // Each option list: the label shown in the builder. Index 0 is the default.
 export const OPTS = {
-  height: ['Average', 'Short', 'Tall', 'Very tall'],
+  height: ['Average', 'Short', 'Tall', 'Very tall', 'Very short'],
+  // Hair mirrored left to right; the wristband or arm sleeve on the right arm (as you look at the player) instead of the left.
+  hairFlip: ['Normal', 'Flipped'], wristFlip: ['Left arm', 'Right arm'], sleeveFlip: ['Left arm', 'Right arm'],
   weight: ['Average', 'Broad', 'Heavy'],
   muscle: ['Toned', 'Athletic', 'Muscular'],
   style: ['Short', 'Buzz', 'Bald', 'Fringe', 'Swept', 'Curtains', 'Messy', 'Two-block', 'Spiky', 'Mohawk', 'Afro', 'Bun', 'Long', 'Cornrows',
@@ -38,9 +40,9 @@ export const OPTS = {
 // What the builder offers, in order. Parts left out (moustache, goatee, shades, sport glasses) still draw for old looks.
 export const CHOICES = {
   style: [0, 14, 5, 15, 7, 16, 17, 18, 19, 3, 4, 6, 8, 1, 2, 9, 10, 11, 12, 13],
-  beard: [0, 1, 4, 5], glasses: [0, 1, 2], height: [1, 0, 2, 3],
+  beard: [0, 1, 4, 5], glasses: [0, 1, 2], height: [4, 1, 0, 2, 3],
 };
-const NUMS = ['height', 'weight', 'muscle', 'style', 'eyes', 'eyeY', 'brows', 'beard', 'glasses', 'socks', 'shoeType'];
+const NUMS = ['hairFlip', 'wristFlip', 'sleeveFlip', 'height', 'weight', 'muscle', 'style', 'eyes', 'eyeY', 'brows', 'beard', 'glasses', 'socks', 'shoeType'];
 const COLOURS = ['band', 'wrist', 'sleeve', 'stripe', 'shoeAcc', 'glassesC'];
 
 // Looks saved by the first (cartoon) builder used other lists; map each old choice to its nearest pixel one.
@@ -84,9 +86,9 @@ export function randomLook() {
   const some = (chance, list) => Math.random() < chance ? any(list) : null;
   const maybe = (chance, k) => Math.random() < chance ? 1 + r(OPTS[k].length - 1) : 0;
   return lookOf({
-    v: 2, skin: any(SKINS), hair: Math.random() < .85 ? HAIRS[0] : any(['#2e2e33', '#24170f']), style: any(CHOICES.style),
+    v: 2, skin: any(SKINS), hair: Math.random() < .85 ? HAIRS[0] : any(['#2e2e33', '#24170f']), style: any(CHOICES.style), hairFlip: r(2),
     eyes: maybe(.3, 'eyes'), brows: maybe(.4, 'brows'), beard: Math.random() < .3 ? any(CHOICES.beard) : 0, glasses: Math.random() < .2 ? 1 + r(2) : 0,
-    height: r(4), weight: maybe(.4, 'weight'), socks: maybe(.3, 'socks'), shoeType: r(3),
+    height: r(5), weight: maybe(.4, 'weight'), socks: maybe(.3, 'socks'), shoeType: r(3),
     band: some(.2, BANDS), wrist: some(.25, BANDS), stripe: some(.2, BANDS), shoe: any(SHOES), shoeAcc: some(.5, SHOES),
   });
 }
@@ -127,7 +129,7 @@ const HAIR = [
   // Wolf cut: shaggy layers, longer and choppy at the back
   [[-2, 1, 'H.HHHH.H'], [-1, 0, 'HHHHHHHHHH'], [0, -1, 'HHHHHHHHHHHH'], [1, -2, 'HHHHHHHHHHHHH'], [2, -2, 'HHHHHHHHHHHHH'], [3, -2, 'HHHHHH.HH.HHH'], [4, -2, 'HHHH.H.....H'], [5, -2, 'HHH'], [6, -2, 'HHH'], [7, -2, 'HH'], [8, -2, 'H.H'], [9, -1, 'H']],
 ];
-const TALL = [1, 0, 2, 3], EYE_ROW = [6, 5, 7];
+const TALL = [1, 0, 2, 3, -1], EYE_ROW = [6, 5, 7];
 const K = '#16121a', T = '#f2f2f2', J = '#2f55d4', J2 = mix(J, .2);
 
 // The sprite as a grid of [colour, layer] (layer: b body, h head, e eyes), plus where the head sits.
@@ -139,10 +141,13 @@ function sprite(c, num, pose) {
   // smiling ones, no hole opens onto the background.
   const ge = Array.from({ length: H }, () => Array(W).fill(null));
   let layer = 'b';
-  const r = (x, y, w = 1, h = 1, col, lay = layer) => { const t = lay === 'o' ? go : lay === 'e' ? ge : g; for (let j = y; j < y + h; j++) for (let i = x; i < x + w; i++) if (j >= 0 && j < H && i >= 0 && i < W) t[j][i] = col ? [col, lay] : null; };
+  // While rec is set, the skin pixels drawn go into it too (the front arm, so its accessories can go on afterwards).
+  let rec = null;
+  const r = (x, y, w = 1, h = 1, col, lay = layer) => { const t = lay === 'o' ? go : lay === 'e' ? ge : g; for (let j = y; j < y + h; j++) for (let i = x; i < x + w; i++) if (j >= 0 && j < H && i >= 0 && i < W) { t[j][i] = col ? [col, lay] : null; if (rec && lay === 'b' && (col === S || col === S2)) rec.push([i, j]); } };
   const S = c.skin, S2 = mix(S, .12), SB = mix(S, .06), HR = c.hair;
+  // Broad and Heavy add one and two pixels to the body's width, mostly at the back.
   const tall = TALL[c.height], wide = c.weight, aw = c.muscle > 1 ? 1 : 0;
-  const hx = 8, hy = 3 + (3 - tall), ty = hy + 11, bx = hx - wide, bw = 10 + wide * 2;
+  const hx = 8, hy = 3 + (3 - tall), ty = hy + 11, bx = hx - Math.ceil(wide / 2), bw = 10 + wide;
   const torsoH = 8 + Math.floor(tall / 2), shortsY = ty + torsoH, legY = shortsY + 4, legSkin = 1 + Math.ceil(tall / 2);
   // ---- legs, socks, shoes
   const L1 = bx + 1, L2 = bx + bw - 3, sockH = [2, 1 + legSkin, 1][c.socks];
@@ -161,18 +166,20 @@ function sprite(c, num, pose) {
   // The arm sleeve and wristband go on this arm.
   const ARM = [[1, -1, 1], [2, -1, 1], [3, -2, 2], [4, -2, 2], [5, -2, 2], [6, -3, 3], [7, -3, 3]], HAND = [[8, -4, 4], [9, -4, 2], [9, -1, 1], [10, -3, 1]];
   const side = (spans, col, mirror) => spans.forEach(([j, dx, w]) => mirror ? r(fx - 1 - dx - w + 1, ty + j, w + aw, 1, col) : r(bx + dx - aw, ty + j, w + aw, 1, col));
+  // A swapped wristband or sleeve goes on the front arm instead.
+  const BS = c.sleeveFlip ? null : c.sleeve, BW = c.wristFlip ? null : c.wrist;
   const fx = bx + bw, freeArm = mirror => {
     side(ARM, SB, mirror); side(HAND, SB, mirror);
-    if (c.sleeve) side(ARM.slice(0, 5), c.sleeve, mirror);
-    if (c.wrist) side([[6, -3, 3], [7, -3, 3]], c.wrist, mirror);
+    if (BS) side(ARM.slice(0, 5), BS, mirror);
+    if (BW) side([[6, -3, 3], [7, -3, 3]], BW, mirror);
   };
   // Shooting, catching a rebound and blocking put the free arm up too.
   const up = pose === 'shoot' || pose === 'catch' || pose === 'block';
   if (up) {
     const top = pose === 'shoot' ? hy + 1 : hy - 2, ax = bx - 2 - aw;
     r(ax, top + 3, 2 + aw, ty + 2 - top - 3, SB); r(ax - 1, top - 1, 4 + aw, 4, SB); r(ax - 1, top - 2, 1, 1, SB); r(ax + 1, top - 2, 1, 1, SB); r(ax + 3 + aw, top - 2, 1, 1, SB);
-    if (c.sleeve) r(ax, ty - 2, 2 + aw, 4, c.sleeve);
-    if (c.wrist) r(ax, top + 3, 2 + aw, 2, c.wrist);
+    if (BS) r(ax, ty - 2, 2 + aw, 4, BS);
+    if (BW) r(ax, top + 3, 2 + aw, 2, BW);
   } else if (pose === 'pass2') {
     // A two-handed pass: the free arm is drawn reaching across the jersey with the other one, below.
   } else if (pose === 'dribbleL') {
@@ -180,10 +187,10 @@ function sprite(c, num, pose) {
     ball(Math.max(bx - 5, 3), ty + 8, r);
     [[1, -1, 3 + aw], [2, 0, 5 + aw], [3, 1, 5 + aw], [4, 3, 5], [5, 3, 5]].forEach(([j, dx, w]) => r(bx - dx - w, ty + j, w, 1, SB));
     [3, 5, 7].forEach(dx => r(bx - dx - 1, ty + 6, 1, 1, SB));
-    if (c.sleeve) r(bx - 1 - aw, ty + 1, 1 + aw, 2, c.sleeve);
+    if (BS) r(bx - 1 - aw, ty + 1, 1 + aw, 2, BS);
   } else if (pose === 'trophy') {
     // Both hands hold the trophy by its handles: this upper arm comes forward from the shoulder to the near handle.
-    r(bx - 2, ty + 1, 2, 4, SB); if (c.sleeve) r(bx - 2, ty + 1, 2, 2, c.sleeve);
+    r(bx - 2, ty + 1, 2, 4, SB); if (BS) r(bx - 2, ty + 1, 2, 2, BS);
   } else freeArm(false);
   // ---- jersey and number
   r(bx, ty, bw, torsoH, J); r(bx + bw - 1, ty, 1, torsoH, T); r(bx + bw - 2, ty + 1, 1, torsoH - 1, J2);
@@ -223,7 +230,9 @@ function sprite(c, num, pose) {
   });
   // hair
   const pal = { H: HR, D: mix(HR, .25), B: blend(S, HR, .8) };
-  HAIR[c.style].forEach(([y, x, pat]) => [...pat].forEach((ch, i) => { if (pal[ch]) r(hx + x + i, hy + y, 1, 1, pal[ch]); }));
+  // Flipped hair is mirrored across the head, so a style swept one way sweeps the other.
+  const hf = c.hairFlip ? (x => 9 - x) : (x => x);
+  HAIR[c.style].forEach(([y, x, pat]) => [...pat].forEach((ch, i) => { if (pal[ch]) r(hx + hf(x + i), hy + y, 1, 1, pal[ch]); }));
   if (c.style === 2) r(hx + 3, hy + 1, 2, 1, mix(S, -.35));
   // glasses: two thin 4 x 4 frames round the eyes with clear lenses, a bridge and an arm back to the ear.
   // Rectangle frames, or round ones with the corners cut.
@@ -240,6 +249,8 @@ function sprite(c, num, pose) {
   if (c.band) { r(hx - 1, hy + 2, 11, 2, c.band); r(hx - 1, hy + 2, 11, 1, mix(c.band, -.25)); }
   // ---- front arm and whatever it holds
   layer = 'b';
+  const FS = c.sleeveFlip ? c.sleeve : null, FW = c.wristFlip ? c.wrist : null;
+  if (FS || FW) rec = [];
   if (pose === 'dribble' || !pose) {
     // Palming the ball: the forearm comes out level and a big hand sits on top, fingers spread over the ball.
     ball(fx + 5, ty + 8, r);
@@ -279,6 +290,26 @@ function sprite(c, num, pose) {
     r(fx - 1, ty + 1, 2, 3, S); r(cx + 4, t + 2, 2, 2, S);
   } else {
     [...ARM, ...HAND].forEach(([j, dx, w]) => r(fx - dx - w, ty + j, w + aw, 1, S));
+  }
+  if (rec) {
+    // Walk the front arm out from the shoulder: the sleeve covers the first few pixels, the wristband the two after.
+    const key = (x, y) => y * W + x, arm = new Set(rec.map(([x, y]) => key(x, y))), dist = new Map();
+    let edge = rec.filter(([x, y]) => x >= fx - 1 && x <= fx && y >= ty - 1 && y <= ty + 1);
+    if (!edge.length) edge = [rec.reduce((a, b) => (b[1] < a[1] || (b[1] === a[1] && Math.abs(b[0] - fx) < Math.abs(a[0] - fx)) ? b : a))];
+    edge.forEach(([x, y]) => dist.set(key(x, y), 0));
+    for (let q = edge; q.length;) {
+      const next = [];
+      q.forEach(([x, y]) => [[1, 0], [-1, 0], [0, 1], [0, -1]].forEach(([dx, dy]) => {
+        const k = key(x + dx, y + dy);
+        if (arm.has(k) && !dist.has(k)) { dist.set(k, dist.get(key(x, y)) + 1); next.push([x + dx, y + dy]); }
+      }));
+      q = next;
+    }
+    rec = null;
+    dist.forEach((d, k) => {
+      const col = d <= 4 ? FS : d <= 6 ? FW : null;
+      if (col) g[Math.floor(k / W)][k % W] = [col, 'b'];
+    });
   }
   return { g, go, ge, hy };
 }
