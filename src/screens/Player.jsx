@@ -166,7 +166,7 @@ export function Player() {
       <div className="pid"><h1 className="page pname">{p.name}<span className="pno num">#{num}</span></h1><Badges id={id} key={id} /></div>
     </div>
 
-    {last5.length ? <div className="sec"><h3>Recent form</h3><p className="hint">Over the last {last5.length} games.</p>
+    {last5.length ? <div className="sec"><h3>Recent form</h3>
       <div className="form">{last5.slice().reverse().map(g => {
         const s = calc(g.rows[id]);
         return <button key={g.id} className="fchip" data-g={g.id} title={`${g.opp}, ${g.season} Game ${g.no}`} onClick={() => openGame(g.id)}><span className="fo">{g.opp}<em>{g.season} Game {g.no}</em></span><PerPill v={s.per} /><span className="fs num">{s.pts} PTS<i> · {s.reb} REB · {s.ast} AST</i></span></button>;
@@ -175,7 +175,7 @@ export function Player() {
     </div> : null}
 
     <div className="sec">
-      <div className="phead"><div><h3>{scope === 'ALL' ? 'Career' : scopeName}</h3><p className="hint"><span id="p-modeh">{totals ? 'Season totals' : 'Per-game averages'}</span>{starter ? ', ranked against the starting lineup' : ''}. Shooting is the same either way.</p></div>
+      <div className="phead"><h3>{scope === 'ALL' ? 'Career' : scopeName}</h3>
         <span className="grow" />
         <div className={`tog${totals ? ' r' : ''}`} id="p-mode" role="group" aria-label="Averages or totals">
           <button data-m="avg" aria-pressed={!totals} onClick={() => totals && set({ pTotals: false })}>Averages</button>
@@ -185,11 +185,11 @@ export function Player() {
     </div>
 
     <div className="two">
-      <div className="sec"><h3>Skill shape</h3><p className="hint">Per game in {scope === 'ALL' ? 'all games' : scope}, scaled so the team's best reaches the edge.</p>
+      <div className="sec"><h3>Skill shape</h3><p className="hint">Per game in {scope === 'ALL' ? 'all games' : scope}, scaled to team best</p>
         <div className="card"><div className="ctrl"><div className="legend rleg"><span><i style={{ background: '#4f7cff' }} />{p.name}</span><span><i className="dash" />{pcmp === 'team' ? 'Team average' : P(pcmp).name}</span></div>
           <span className="grow" /><select id="p-cmp" aria-label="Compare with" value={pcmp} onChange={e => set({ pCmp: e.target.value })}><option value="team">vs team average</option>{peers.filter(x => x.id !== id).map(x => <option key={x.id} value={x.id}>vs {P(x.id).name}</option>)}</select></div>
           <Chart id="p-radar" draw={w => drawRadar(w, a, peers, pcmp)} deps={[id, scope, pcmp, games]} /></div></div>
-      <div className="sec"><h3>Shooting</h3><p className="hint">How {p.name} scores in {scope === 'ALL' ? 'all games' : scope}.</p>
+      <div className="sec"><h3>Shooting</h3>
         <div className="card pshoot">
           <div className="mixh"><span>Where the points come from</span><b className="num">{a.s.pts} PTS</b></div>
           <div className="mix">{mix.map(([l, v, c]) => v ? <span key={l} style={{ flex: v, background: c }} title={`${l} ${v} points`} /> : null)}</div>
@@ -203,18 +203,18 @@ export function Player() {
         </div></div>
     </div>
 
-    <div className="sec"><h3>{scope === 'ALL' ? 'Season by season' : 'Season performance'}</h3><p className="hint">{scope === 'ALL' ? 'Per-game average in each season played.' : `Every ${scope} game. A faint dashed dip to zero means they missed that game (DNP).`} The dashed line is their average.</p>
+    <div className="sec"><h3>{scope === 'ALL' ? 'Season by season' : 'Season performance'}</h3>
       <div className="card"><div className="ctrl"><StatChips id="p-stat" main={P_STATS} more={P_MORE} value={pStat} onPick={k => set({ pStat: k })} /></div>
         <Chart id="p-trend" draw={w => drawTrend(w, games, { k: pStat, ids: [id], season: scope, single: true })} deps={[id, scope, pStat, games]} /></div></div>
 
     <div className="two">
-      <div className="sec"><h3>Season vs season</h3><p className="hint">Per game. The brighter bar wins the row.</p><SeasonCmp id={id} seasonsPlayed={seasonsPlayed} /></div>
-      <div className="sec"><h3 className="h-ico">{scope === 'ALL' ? 'Career highs' : scope + ' highs'}<MedalGold /></h3><p className="hint">Tap one to open the game.</p><div className="recs one" id="p-highs">
+      <div className="sec"><h3>Season vs season</h3><SeasonCmp id={id} seasonsPlayed={seasonsPlayed} /></div>
+      <div className="sec"><h3 className="h-ico">{scope === 'ALL' ? 'Career highs' : scope + ' highs'}<MedalGold /></h3><div className="recs one" id="p-highs">
         {highs.map(({ k, l, b }) => <button key={k} className="rec" data-g={b.g.id} onClick={() => openGame(b.g.id)}><span className="rk">{P_STATS[k] || (k === 'm3' ? '3PM' : 'FTM')}</span><span><div className="rl">{l}</div><div className="rg">vs {b.g.opp}, {b.g.season} Game {b.g.no}</div></span><b className={`num${k === 'per' && b.s.per > 0 ? ' great' : ''}`}>{k === 'per' ? perTxt(b.s.per) : b.s[k]}</b></button>)}
       </div></div>
     </div>
 
-    <div className="sec"><h3>Game log</h3><p className="hint">Newest first. Blue marks their best {scope === 'ALL' ? 'ever' : 'in ' + scope}. Tap a game to open it.</p>
+    <div className="sec"><h3>Game log</h3>
       <div className="tbl-wrap"><table className="plog"><thead><tr><th>Game</th><th className="c">Result</th><th className="c">PER</th><th>PTS</th><th>REB</th><th>AST</th><th>STL</th><th>BLK</th><th>TO</th><th>FG</th><th>3FG</th><th>FT</th><th>TS%</th></tr></thead><tbody>
         {shown.map(({ g, s }) => (
           <tr key={g.id} data-g={g.id} tabIndex={0} onClick={() => openGame(g.id)} onKeyDown={e => e.key === 'Enter' && openGame(g.id)}>
@@ -227,6 +227,5 @@ export function Player() {
       </tbody></table></div>
       {logRows.length > 10 ? <MoreBtn id="p-logmore" open={!!S.pLogAll} n={logRows.length} noun="games" onClick={() => keepScroll({ pLogAll: !S.pLogAll })} /> : null}
     </div>
-    <p className="foot">{starter ? '' : 'Subs don\'t appear on the Stats tab, so their ranks aren\'t shown here. '}From your master sheet plus any game recorded here.</p>
   </>;
 }

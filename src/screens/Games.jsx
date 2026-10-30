@@ -66,6 +66,5 @@ export function Games() {
       );
     })}
     {shown.some(c => games.some(g => g.season === c)) ? null : <EmptyState title={`No ${S.gSeason} games yet`} text="Games show up here as soon as they are recorded." />}
-    <p className="foot">Every game from your master sheet, W24 to S26. PER is worked out with your current formula. The sheet had no win or loss column, so past results show as Unknown.</p>
   </>;
 }

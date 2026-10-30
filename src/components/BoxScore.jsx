@@ -44,8 +44,7 @@ export function BoxScore({ rows }) {
       <div className="legend"><span><b style={{ color: 'var(--green)', fontWeight: 500 }}>52%</b>Good shooting</span>
         <span><b style={{ color: 'var(--neg)', fontWeight: 500 }}>21%</b>Poor shooting</span>
         <span><i style={{ background: 'var(--royal-soft)', boxShadow: 'inset 0 0 0 1px rgba(120,150,255,.6)' }} />Game best</span>
-        <span><span className="per p-great" style={{ minWidth: 0, padding: '1px 6px' }}>+15</span>PER 15 or more</span>
-        <span>Tap a column: best first, then worst first, then back to your order</span></div>
+        <span><span className="per p-great" style={{ minWidth: 0, padding: '1px 6px' }}>+15</span>PER 15 or more</span></div>
       <div className="tbl-wrap"><table>
         <thead><tr>
           <th className="sortable" data-bk="name" aria-sort={aria('name')} onClick={() => setSort('box', 'name')}>Player{arrow('name')}</th>

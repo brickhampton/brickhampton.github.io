@@ -108,32 +108,30 @@ export function Stats() {
   const togglePlayer = id => set({ trend: trend.includes(id) ? trend.filter(x => x !== id) : [...trend, id].slice(-7) });
   return <>
     {head}
-    <div className="sec"><h3>{all ? 'All-time leaders' : label + ' season leaders'}</h3><p className="hint">Per game, across {inSeason.length} games.</p><div className="lgrid">
+    <div className="sec"><h3>{all ? 'All-time leaders' : label + ' season leaders'}</h3><div className="lgrid">
       {leadTile('per', 'PER', v => perTxt(v, true))}{leadTile('pts', 'Points', f1)}{leadTile('reb', 'Rebounds', f1)}{leadTile('ast', 'Assists', f1)}{leadTile('stl', 'Steals', f1)}{leadTile('ts', 'True shooting', pctTxt)}
     </div></div>
 
-    <div className="sec"><h3>Rankings</h3><p className="hint">Per-game averages. Tap a column to sort by best first or worst first.</p>
+    <div className="sec"><h3>{all ? 'All time averages' : 'Season averages'}</h3>
       <div id="rank-wrap"><Rankings aggs={aggs} /></div></div>
 
     <div className="sec"><h3>{all ? 'Season by season' : 'Trend over the season'}</h3>
-      <p className="hint">{all ? 'Each point is a player\'s per-game average for that season.' : 'Game by game. A faint dashed dip to zero means the player missed that game (DNP).'}</p>
       <div className="card" id="trend-card"><div className="ctrl"><div className="chips" id="t-players">{pickable.map(id => (
         <button key={id} data-id={id} aria-pressed={trend.includes(id)} onClick={() => togglePlayer(id)}><span className="sw" style={{ background: trend.includes(id) ? SLOT_COL[trend.indexOf(id)] : 'var(--mid)' }} />{P(id).name}</button>))}</div>
         <span className="grow" /><label className="sr" htmlFor="t-stat" style={{ fontSize: 13, color: 'var(--granite)' }}>Stat</label>
         <select id="t-stat" value={S.tStat} onChange={e => set({ tStat: e.target.value })}>{Object.entries(STATS).map(([k, l]) => <option key={k} value={k}>{l}</option>)}</select></div>
         <Chart id="trend" draw={w => drawTrend(w, games, { k: S.tStat, ids: trend, season: S.sSeason })} deps={[games, S.tStat, trend.join(), S.sSeason]} /></div></div>
 
-    <div className="sec"><h3>Volume and efficiency</h3><p className="hint">Shots a game against true shooting, {all ? 'all time' : 'in ' + label}. The dashed lines are the team averages. Tap a player to open their page.</p>
+    <div className="sec"><h3>Volume and efficiency</h3><p className="hint">Shots per game against true shooting {all ? 'in all games' : 'in ' + S.sSeason}</p>
       <div className="card"><Chart id="scatter" draw={w => drawScatter(w, qual, openPlayer)} deps={[games, S.sSeason]} /></div></div>
 
     <div className="two">
-      <div className="sec"><h3>Head to head</h3><p className="hint">{label}, per game. The brighter bar wins the row.</p><HeadToHead games={inSeason} pickable={pickable} /></div>
-      <div className="sec"><h3>Team stats per game</h3><p className="hint">{all ? 'Team average per game in each season.' : `Every ${S.sSeason} game so far. The dashed line is the season average.`}</p>
+      <div className="sec"><h3>Head to head</h3><HeadToHead games={inSeason} pickable={pickable} /></div>
+      <div className="sec"><h3>Team stats per game</h3>
         <div className="card"><div className="ctrl"><div className="chips" id="tb-stat">{Object.entries(TB_STATS).map(([k, l]) => <button key={k} data-k={k} aria-pressed={S.tbStat === k} onClick={() => set({ tbStat: k })}>{l}</button>)}</div></div>
           <Chart id="sbars" draw={w => drawSeasonBars(w, games, S.tbStat, S.sSeason)} deps={[games, S.tbStat, S.sSeason, S.h2h.join()]} /></div></div>
     </div>
 
-    <div className="sec"><h3 className="h-ico">{all ? 'All-time records' : S.sSeason + ' records'}<TrophyGold /></h3><p className="hint">Best single-game performances {all ? 'since W24' : 'in ' + label}. Tap one to open the game.</p><Records games={inSeason} /></div>
-    <p className="foot">From your master sheet, W24 to S26, plus any game you record here. Player stats cover the starting lineup only. Team totals include subs.</p>
+    <div className="sec"><h3 className="h-ico">{all ? 'All-time records' : S.sSeason + ' records'}<TrophyGold /></h3><p className="hint">Best single-game performances {all ? 'of all time' : 'in ' + S.sSeason}</p><Records games={inSeason} /></div>
   </>;
 }

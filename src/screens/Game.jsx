@@ -1,5 +1,5 @@
 import { S, set } from '../lib/store.js';
-import { allGames, calc, sumRows, ratio, pctTxt, perTxt, tier, f1, fmtDate, seasonName, RES, P, numIn, perfTags, teamFeat } from '../lib/core.js';
+import { allGames, calc, sumRows, ratio, pctTxt, perTxt, tier, f1, fmtDate, RES, P, numIn, perfTags, teamFeat } from '../lib/core.js';
 import { go } from '../lib/nav.js';
 import { drawGameTrend, GT_STATS, moreFor } from '../lib/charts.js';
 import { Avatar } from '../components/Avatar.jsx';
@@ -33,8 +33,9 @@ function Leader({ rows, k, label, fmt = v => v, g, games }) {
 }
 
 function CmpTile({ label, val, base, lowerBetter, pctMode }) {
-  const d = val - base, good = lowerBetter ? d < 0 : d > 0, flat = Math.abs(d) < (pctMode ? .005 : .05);
-  const txt = pctMode ? (d >= 0 ? '+' : '−') + Math.abs(Math.round(d * 100)) + '%' : (d >= 0 ? '+' : '−') + f1(Math.abs(d));
+  const d = val - base, good = lowerBetter ? d < 0 : d > 0, flat = Math.abs(d) < (pctMode ? .0005 : .05);
+  // TS% moves by a tenth of a point; the game's own TS% stays a whole number.
+  const txt = pctMode ? (d >= 0 ? '+' : '−') + (Math.abs(d) * 100).toFixed(1) + '%' : (d >= 0 ? '+' : '−') + f1(Math.abs(d));
   return <div><span>{label}</span><b className="num">{pctMode ? pctTxt(val) : val}</b><em className={flat ? 'flat' : good ? 'up' : 'down'}>{flat ? '=' : good ? '▲' : '▼'} {txt}</em></div>;
 }
 
@@ -53,7 +54,7 @@ export function Game() {
     const avg = k => tots.reduce((a, b) => a + b[k], 0) / tots.length;
     const tsAvg = tots.reduce((a, b) => a + (b.ts || 0), 0) / tots.length;
     cmp = (
-      <div className="sec"><h3>Compared with season average</h3><p className="hint">Team totals for this game against the other {seasonGames.length} games in {seasonName(g.season)}.</p>
+      <div className="sec"><h3>Compared with season average</h3><p className="hint">Team totals this game against the other {seasonGames.length} game{seasonGames.length === 1 ? '' : 's'} in {g.season}</p>
         <div className="cmp">
           <CmpTile label="Points" val={t.pts} base={avg('pts')} /><CmpTile label="Rebounds" val={t.reb} base={avg('reb')} /><CmpTile label="Assists" val={t.ast} base={avg('ast')} />
           <CmpTile label="Steals" val={t.stl} base={avg('stl')} /><CmpTile label="Turnovers" val={t.to} base={avg('to')} lowerBetter /><CmpTile label="TS%" val={t.ts} base={tsAvg} pctMode />
@@ -85,7 +86,7 @@ export function Game() {
       <Leader rows={rows} g={g} games={games} k="blk" label="Most blocks" />
     </div></div>
     {cmp}
-    <div className="sec"><h3>Team shooting</h3><p className="hint">Green is a good night for this league, clay is a cold one.</p><div className="shoot">
+    <div className="sec"><h3>Team shooting</h3><div className="shoot">
       <ShootBar k="fg" label="FG" m={`${t.fgm} of ${t.fga}`} a={t.fga} v={ratio(t.fgm, t.fga)} />
       <ShootBar k="m2" label="2FG" m={`${t.m2} of ${t.a2}`} a={t.a2} v={ratio(t.m2, t.a2)} />
       <ShootBar k="m3" label="3FG" m={`${t.m3} of ${t.a3}`} a={t.a3} v={ratio(t.m3, t.a3)} />
@@ -93,7 +94,7 @@ export function Game() {
       <ShootBar k="ts" label="TS%" m={`${t.tsa.toFixed(1)} TSA`} a={t.tsa} v={t.ts} />
     </div></div>
     <div className="sec"><h3>Box score</h3><BoxScore rows={rows} /></div>
-    <div className="sec"><h3>{g.season} game by game</h3><p className="hint">Team totals in every {seasonName(g.season)} game, with this game highlighted. The dashed line is the season average.</p>
+    <div className="sec"><h3>{g.season} game by game</h3>
       <div className="card" id="gtrend-card"><div className="ctrl"><StatChips id="gt-stat" main={GT_STATS} more={more} value={stat} onPick={k => set({ gtStat: k })} /></div>
         <Chart id="gtrend" draw={w => drawGameTrend(w, g, games, stat)} deps={[g, games, stat]} /></div></div>
   </>;
