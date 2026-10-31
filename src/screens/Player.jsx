@@ -67,10 +67,11 @@ function SeasonCmp({ id, seasonsPlayed }) {
 }
 
 // The big player on the player page, bobbing like the player on the recording court. Every few seconds they bounce the
-// ball a few times or cross it over, and now and then they yawn and stretch or look around. Tapping them gets a
-// reaction like the team photo on Home: a smile and a bob with each tap, then a random trick after a single tap.
+// ball a few times (or five quick ones), cross it over, or look around. Tapping them gets a
+// reaction like the team photo on Home: a bob with each tap, then a random trick after a single tap. Rapid taps
+// always smile; a single tap smiles only some of the time.
 // Each trick is a few steps: a class that animates it, a pose, how long it lasts, and something to float over their
-// head (a "+2", their last game's PER when it beat their season average, or one of their badges).
+// head (their last game's PER when it beat their season average, or one of their badges).
 const bounces = () => Array.from({ length: 3 + Math.floor(Math.random() * 3) }, () => ['bounce', '', 500]);
 const TRICKS = {
   hop: () => [['hop', '', 700]],
@@ -79,17 +80,14 @@ const TRICKS = {
   cross: () => [['bounce', '', 520], ['bounce', 'dribbleL', 520], ['bounce', '', 520], ['bounce', 'dribbleL', 520], ['bounce', '', 520]],
   spin: () => [['spin', 'spin', 2000]],
   behind: () => [['bounce', '', 520], ['behind', 'lowball', 360], ['bounce', 'dribbleL', 520], ['behindR', 'lowball', 360], ['bounce', '', 520]],
-  shot: () => [['crouch', '', 220], ['shot', 'shoot', 1000, { text: '+2', tone: 'gold' }], ['', '', 200]],
-  bonk: () => [['toss', '', 420], ['bonk', 'down', 900], ['sheep', 'down', 1000]],
   fumble: () => [['fumble', 'down', 750], ['chase', 'down', 600], ['comeback', '', 600]],
   dance: () => [['dance', 'down', 1400]],
-  shimmy: () => [['shimmy', 'down', 1000]],
   mood: (m) => [['cheer', 'block', 1300, { text: `${m.per} PER`, tone: 'pos' }]],
   badge: (m) => { const b = m.badges[Math.floor(Math.random() * m.badges.length)]; return [['brag', '', 1700, { badge: b }]]; },
-  yawn: () => [['yawn', 'catch', 1800], ['', 'down', 300]],
   look: () => [['look', '', 1900]],
+  quick: () => Array.from({ length: 5 }, () => ['qbounce', '', 300]),
 };
-const IDLE = ['dribble', 'cross', 'dribble', 'cross', 'yawn', 'look'], IDLE_ONLY = ['yawn', 'look'], RAPID = 320;
+const IDLE = ['dribble', 'cross', 'quick', 'dribble', 'cross', 'quick', 'look'], IDLE_ONLY = ['quick', 'look'], RAPID = 320;
 // The ball on its own, for when it leaves the player's hands: centred on (0, 0) in the stage's units.
 const U = 104 / 34, LOOSE = BALL.map(([o, w], j) => `<rect x="${((o - 3.5) * U).toFixed(2)}" y="${((j - 3) * U).toFixed(2)}" width="${(w * U).toFixed(2)}" height="${U.toFixed(2)}" fill="${BALL_C}"/>`).join('');
 function PStage({ p, num, mood }) {
@@ -118,11 +116,12 @@ function PStage({ p, num, mood }) {
     const t = taps.current, now = performance.now();
     t.n = now - t.at < RAPID * 1.4 ? t.n + 1 : 1; t.at = now;
     clearTimeout(timer.current); busy.current = true;
-    setStep({ cls: 'smile bob', pose: '', n: now });
+    const smile = t.n > 1 || Math.random() < .5 ? ' smile' : '';
+    setStep({ cls: 'bob' + smile, pose: '', n: now });
     timer.current = setTimeout(() => {
       if (t.n > 1 || reduced) { timer.current = setTimeout(() => { setStep(null); busy.current = false; }, 400); return; }
       const ks = Object.keys(TRICKS).filter(x => x !== last.current && !IDLE_ONLY.includes(x) && (x !== 'badge' || m.current.badges.length) && (x !== 'mood' || m.current.per));
-      run(ks[Math.floor(Math.random() * ks.length)], ' smile');
+      run(ks[Math.floor(Math.random() * ks.length)], smile);
     }, RAPID);
   };
   const fx = step?.fx;
