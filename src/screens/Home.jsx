@@ -45,8 +45,8 @@ function homeScene(cw, ch) {
     // A faint reflection in the polished floor, flipped about the player's feet.
     if (S.refl) { const fy = top + w * 1.035; refl.push(`<g class="alive" style="${st}" mask="url(#hrmask)" opacity="${S.refl}"><g transform="translate(0 ${(2 * fy).toFixed(1)}) scale(1 -1)">${svg(figure(P(id), { stage: true, pose: POSE.hold[id] || 'down' }))}</g></g>`); }
     // Tapping a player makes them react (see onTap): everything that moves sits in .hpt, over a wide invisible
-    // target so a tap anywhere on them counts. Players with free hands can also pump a fist: either one, or both.
-    const fist = POSE.hold[id] ? '' : ['fist', 'fistL', 'fist2'].map(k => `<g class="hf hf-${k}">${figure(P(id), { stage: true, pose: k })}</g>`).join('');
+    // target so a tap anywhere on them counts. Players with free hands can also pump a fist (either one, or both) or stretch.
+    const fist = POSE.hold[id] ? '' : [['fist'], ['fistL'], ['fist2'], ['stretch', 'catch']].map(([k, pose = k]) => `<g class="hf hf-${k}">${figure(P(id), { stage: true, pose })}</g>`).join('');
     // The trophy and ball holders get their own: lifting the trophy overhead, or bouncing the ball and spinning it.
     const own = (HELD[POSE.hold[id]] || []).map(([k, pose]) => `<g class="hx hx-${k}">${figure(P(id), { stage: true, pose })}${k === 't-raise' ? raisedTrophy(P(id)) : ''}</g>`).join('');
     return `<g class="hp alive" style="${st}">${svg(`${pxShadow(50, 103.5, 22, 104 / 34)}<g class="hpt${fist ? ' can-fist' : ''}" data-id="${id}"${own ? ` data-own="${HELD[POSE.hold[id]].map(([k]) => k).join(' ')}"` : ''} role="button" aria-label="${esc(P(id).name)}"><rect x="27" y="10" width="46" height="94" fill="transparent"/><g class="hb">${body}</g>${fist}${own}</g>`)}</g>`; };
@@ -91,7 +91,10 @@ function homeScene(cw, ch) {
 // Tapping a player: they smile and give a little bob straight away. Tap again quickly and they bob with every tap;
 // tap once and wait, and they follow it with a random reaction.
 const HELD = { trophy: [['t-raise', 'catch']], ball: [['t-dribble'], ['t-twirl', 'spin']] };
-const REACTS = ['t-hop', 't-wiggle', 't-squash', 't-fist', 't-fistL', 't-fist2', 't-raise', 't-dribble', 't-twirl'], RAPID = 320;
+// Anyone can hop, squash, dance, shimmy or look around; players with free hands can also pump a fist or stretch.
+const GEN = ['t-hop', 't-squash', 't-dance', 't-shimmy', 't-look'], FREE = ['t-fist', 't-fistL', 't-fist2', 't-stretch'];
+const REACTS = [...GEN, ...FREE, 't-raise', 't-dribble', 't-twirl'], RAPID = 320;
+const LONG = { 't-dribble': 1600, 't-dance': 1500, 't-stretch': 1900, 't-look': 1900 };
 const restart = (el, cls) => { el.classList.remove(cls); void el.getBoundingClientRect(); el.classList.add(cls); };
 function onTap(e, taps) {
   const g = e.target.closest?.('.hpt'); if (!g) return;
@@ -104,9 +107,9 @@ function onTap(e, taps) {
     if (t.n > 1 || reduced) return done(700);
     // Holders get their own reactions twice in the draw, so they come up often.
     const own = (g.dataset.own || '').split(' ').filter(Boolean);
-    const ks = [...REACTS.slice(0, 3), ...(g.classList.contains('can-fist') ? REACTS.slice(3, 6) : []), ...own, ...own].filter(k => k !== t.last);
+    const ks = [...GEN, ...(g.classList.contains('can-fist') ? FREE : []), ...own, ...own].filter(k => k !== t.last);
     const k = t.last = ks[Math.floor(Math.random() * ks.length)];
-    g.classList.remove('t-bob'); restart(g, k); done(k === 't-dribble' ? 1600 : 1300);
+    g.classList.remove('t-bob'); if (k === 't-look' || k === 't-stretch') g.classList.remove('t-smile'); restart(g, k); done(LONG[k] || 1300);
   }, RAPID);
 }
 

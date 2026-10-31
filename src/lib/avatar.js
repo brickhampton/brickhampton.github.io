@@ -197,6 +197,10 @@ function sprite(c, num, pose) {
     const m = (dx, y, w, h, col) => r(bx - dx - w, y, w, h, col);
     m(-1, ty, 2, 3, SB); m(0, hy + 2, 2 + aw, ty - hy - 1, SB); m(1 + aw, hy + 2, 1, ty - hy - 1, S2);
     m(-1, hy - 2, 4 + aw, 4, SB); m(0, hy - 1, 2, 1, S2); m(2 + aw, hy - 2, 1, 4, S2);
+  } else if (pose === 'shrug') {
+    // A shrug: the upper arm hangs, the forearm comes out level and the hand turns palm up.
+    r(bx - 1, ty + 1, 2, 4, SB); r(bx - 5, ty + 4, 5, 2, SB); r(bx - 5, ty + 5, 4, 1, S2); r(bx - 6, ty + 2, 2, 3, SB);
+    if (BS) r(bx - 1, ty + 1, 2, 2, BS);
   } else freeArm(false);
   const back = rec && rec.filter(([x]) => x < bx);
   rec = null;
@@ -296,7 +300,11 @@ function sprite(c, num, pose) {
     r(cx + 2, t + 1, 2, 4, G2); r(cx - 1, t + 1, 1, 2, '#fff2c4'); r(cx - 4, t + 1, 2, 1, G); r(cx + 4, t + 1, 2, 1, G);
     r(cx - 4, t + 2, 2, 2, SB);
     r(fx - 1, ty + 1, 2, 3, S); r(cx + 4, t + 2, 2, 2, S);
+  } else if (pose === 'shrug') {
+    r(fx - 1, ty + 1, 2, 4, S); r(fx, ty + 4, 5, 2, S); r(fx + 1, ty + 5, 4, 1, S2); r(fx + 4, ty + 2, 2, 3, S);
   } else {
+    // Arms down. 'lowball' also has the ball behind the player's back, on its way from one hand to the other.
+    if (pose === 'lowball') ball(bx + Math.floor(bw / 2), ty + 8, r);
     [...ARM, ...HAND].forEach(([j, dx, w]) => r(fx - dx - w, ty + j, w + aw, 1, S));
   }
   // Walk each arm out from the shoulder, painting accessories by how far along the arm a pixel is: the sleeve covers the
@@ -366,7 +374,7 @@ export function raisedTrophy(raw) {
 const cache = new Map();
 // SVG markup for a player. Round avatars (the default) show the head and the top of the jersey in a 100 × 100 box.
 // opts.stage draws the whole player at their height, feet on the bottom of a 100 × 104 box: the court, the Home
-// photo, the player page and the builder. opts.pose: 'fist', 'fistL' (the other arm), 'fist2' (both), 'ball', 'trophy', 'shoot', 'catch', 'block', 'block1', 'pass', 'pass2', 'dribbleL', 'spin', 'down' (arms down), or palming the ball (the default, as in the reference).
+// photo, the player page and the builder. opts.pose: 'fist', 'fistL' (the other arm), 'fist2' (both), 'ball', 'trophy', 'shoot', 'catch', 'block', 'block1', 'pass', 'pass2', 'dribbleL', 'spin', 'shrug', 'lowball' (arms down, the ball behind the back), 'down' (arms down), or palming the ball (the default, as in the reference).
 export function figure(raw, opts = {}) {
   const c = cleanLook(raw), key = JSON.stringify([c, raw.num, !!opts.stage, opts.pose || '']);
   if (cache.has(key)) return cache.get(key);
