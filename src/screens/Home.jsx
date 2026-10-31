@@ -95,9 +95,9 @@ function homeScene(cw, ch) {
 const HELD = { trophy: [['t-raise', 'catch']], ball: [['t-dribble'], ['t-twirl', 'spin']] };
 // Anyone can hop, squash, dance or look around; players with free hands can also pump a fist.
 const GEN = ['t-hop', 't-squash', 't-dance', 't-look'], FREE = ['t-fist', 't-fistL', 't-fist2'];
-const IDLE = ['t-look', 't-nod', 't-turn', 't-headbob'];
+const IDLE = ['t-look', 't-nod', 't-turn'];
 const REACTS = [...GEN, ...FREE, ...IDLE, 't-raise', 't-dribble', 't-twirl'], RAPID = 320;
-const LONG = { 't-dribble': 1600, 't-dance': 1500, 't-look': 1900, 't-turn': 1900, 't-headbob': 1900 };
+const LONG = { 't-dribble': 1600, 't-dance': 1500, 't-look': 1900, 't-turn': 1900 };
 const restart = (el, cls) => { el.classList.remove(cls); void el.getBoundingClientRect(); el.classList.add(cls); };
 function onTap(e, taps) {
   const g = e.target.closest?.('.hpt'); if (!g) return;
@@ -117,7 +117,7 @@ function onTap(e, taps) {
 }
 
 // Now and then, one player who isn't already moving does something small on their own: looks round, nods, turns
-// their head or bobs it, or plays with the trophy or ball they hold.
+// their head, or plays with the trophy or ball they hold.
 function idleOne(root, taps) {
   const busy = g => [...g.classList].some(c => c.startsWith('t-'));
   const gs = [...root.querySelectorAll('.hpt')].filter(g => !busy(g)); if (!gs.length) return;
