@@ -467,8 +467,8 @@ tr.tot td{font-weight:600;border-top:1px solid var(--stroke)}
   .gnav .btn{padding:0 14px}
   #g-prev,#g-next{width:44px;padding:0;justify-content:center}
   .game-nav{flex-wrap:nowrap;gap:6px}
-  .game-nav .btn{padding:0 12px;gap:6px;flex:none}
-  .game-nav #g-prev,.game-nav #g-next{width:40px;padding:0}
+  .game-nav .btn{padding:0 10px;gap:6px;flex:none}
+  .game-nav #g-prev,.game-nav #g-next{width:44px;padding:0}
   .jersey .badge{justify-self:start}
   .entry .bar{gap:8px;min-height:0;padding-block:8px;flex-wrap:nowrap}
   .entry .wordmark{display:none}
@@ -734,8 +734,9 @@ table.plog tbody tr:hover td:first-child{background:var(--lift)}
 }
 /* Small phones: the game page buttons still fit on one row */
 @media (max-width:380px){
-  .game-nav .btn{padding:0 10px;font-size:15px}
-  .game-nav #g-prev,.game-nav #g-next{width:38px;padding:0}
+  .game-nav{gap:4px}
+  .game-nav .btn{padding:0 8px;gap:5px;font-size:15px}
+  .game-nav #g-prev,.game-nav #g-next{width:44px;padding:0}
 }
 
 @media (max-height:520px) and (min-width:701px){
