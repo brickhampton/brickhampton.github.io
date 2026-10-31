@@ -264,22 +264,36 @@ function makeStage() {
         });
         setTimeout(() => pop('Rejected!', SPOT.BK, 34, '#eeeeee', 18), 280); break;
       }
-      case 'TO': { // a bad pass: it sails over the teammate's reaching hands and bounces away out of bounds
-        const x = SPOT[k], G = FLOOR - 9, b = ball();
-        actorPose('pass2', D - 40, 520); actorMood('slump', D + 520);
-        const mate = mk('g', {}); mate.innerHTML = `<g transform="translate(${440 - 50 * SC} ${FLOOR - 104 * SC}) scale(${SC})">${figure({ ...MATE, num: '' }, { stage: true, pose: 'catch' })}</g>`;
-        mate.animate([{ opacity: 0 }, { opacity: .9, offset: .2 }, { opacity: .9, offset: .75 }, { opacity: 0 }], { duration: 1000, fill: 'forwards' }); setTimeout(() => mate.remove(), 1050);
-        // It goes grey once it's past the teammate: the possession is lost.
-        b.firstChild.animate([{ fill: BALL_C }, { fill: '#8a8380' }], { duration: 300, delay: D + 330, fill: 'forwards' });
-        then(b.animate([
-          { transform: `translate(${x + 20}px,${HAND_Y + 10}px)`, easing: 'cubic-bezier(.2,.6,.5,1)' },
-          { transform: `translate(${445}px,${HAND_Y - 52}px)`, offset: .3, easing: 'cubic-bezier(.5,0,.8,.6)' },
-          { transform: `translate(${560}px,${G}px)`, offset: .55, easing: 'cubic-bezier(.2,.6,.5,1)' },
-          { transform: `translate(${595}px,${G - 26}px)`, offset: .72, easing: 'cubic-bezier(.5,0,.8,.6)' },
-          { transform: `translate(${630}px,${G}px)`, opacity: 1, offset: .88, easing: 'ease-out' },
-          { transform: `translate(${660}px,${G - 8}px)`, opacity: 0 },
-        ], { duration: 1150, delay: D, fill: 'both' }), () => b.remove());
-        setTimeout(() => pop('Turnover', x + 60, 40, '#e3826f', 18), D + 400); break;
+      case 'TO': { // stripped: a defender closes in from the right while the player dribbles and pokes the ball loose
+        const x = SPOT[k], G = FLOOR - 9, H = FLOOR - 24, hx = x + 22, sel0 = sel;
+        actorPose('dribble', 0, 420); dribbles(0, 2);
+        // The defender, in an opponent's red, faces left at the player and comes in fast, then reaches with one arm.
+        const opp = (pose) => `<g transform="translate(100 0) scale(-1 1)">${figure({ ...MATE, hair: '#1c1714', num: '' }, { stage: true, pose })}</g>`.replaceAll('#2f55d4', '#a33a2e').replaceAll('#2644aa', '#822e25');
+        const def = mk('g', {}), inner = mk('g', { transform: `scale(${SC})` }, def);
+        inner.innerHTML = opp('down');
+        def.animate([{ transform: `translate(${x + 120 - 50 * SC}px,${FLOOR - 104 * SC}px)`, opacity: 0 }, { transform: `translate(${x + 52 - 50 * SC}px,${FLOOR - 104 * SC}px)`, opacity: .85, offset: .3 },
+          { transform: `translate(${x + 46 - 50 * SC}px,${FLOOR - 104 * SC}px)`, opacity: .85, offset: .8 }, { transform: `translate(${x + 46 - 50 * SC}px,${FLOOR - 104 * SC}px)`, opacity: 0 }], { duration: 1300, fill: 'forwards' });
+        setTimeout(() => { inner.innerHTML = opp('pass'); }, 340);
+        setTimeout(() => { inner.innerHTML = opp('down'); }, 620);
+        setTimeout(() => def.remove(), 1350);
+        setTimeout(() => {
+          if (actor?.dataset.id !== sel0) return;
+          actorPose('down', 0, 900); actorMood('slump', 120);
+          burst(hx + 4, H, '#eeeeee');
+          const b = ball();
+          // It goes grey once it's gone: the possession is lost.
+          b.firstChild.animate([{ fill: BALL_C }, { fill: '#8a8380' }], { duration: 400, delay: 100, fill: 'forwards' });
+          then(b.animate([
+            { transform: `translate(${hx}px,${H}px)`, easing: 'cubic-bezier(.2,.6,.5,1)' },
+            { transform: `translate(${hx + 20}px,${H - 22}px)`, offset: .1, easing: 'cubic-bezier(.5,0,.8,.6)' },
+            { transform: `translate(${hx + 70}px,${G}px)`, offset: .24, easing: 'cubic-bezier(.2,.6,.5,1)' },
+            { transform: `translate(${hx + 100}px,${G - 16}px)`, offset: .34, easing: 'cubic-bezier(.5,0,.8,.6)' },
+            { transform: `translate(${hx + 130}px,${G}px)`, offset: .44, easing: 'cubic-bezier(.25,.6,.45,1)' },
+            { transform: `translate(${hx + 260}px,${G}px)`, opacity: 1, offset: .86 },
+            { transform: `translate(${hx + 280}px,${G}px)`, opacity: 0 },
+          ], { duration: 1500, fill: 'both' }), () => b.remove());
+        }, 400);
+        setTimeout(() => pop('Stripped', x + 60, 40, '#e3826f', 18), 440); break;
       }
     }
   }
