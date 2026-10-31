@@ -258,27 +258,35 @@ function makeStage() {
         });
         setTimeout(() => pop('Rejected!', SPOT.BK, 34, '#eeeeee', 18), 280); break;
       }
-      case 'TO': { // the player is dribbling, the ball comes off their hand wrong, hits the floor and rolls away to the right
-        const x = SPOT[k], G = FLOOR - 9, hx = x + 22, sel0 = sel;
-        actorPose('dribble', 0, 260); dribbles(0, 1);
-        setTimeout(() => {
-          if (actor?.dataset.id !== sel0) return;
-          actorPose('down', 0, 900); actorMood('slump', 120);
+      case 'TO': { // a quick crossover, and on the way back the ball gets past the hand and rolls away to the right
+        const x = SPOT[k], G = FLOOR - 9, hx = x + 22, lx = x - 22, H = FLOOR - 24, sel0 = sel, mine = () => actor?.dataset.id === sel0;
+        actorPose('dribble', 0, 200); dribbles(0, 1);
+        setTimeout(() => { // across the body, low, into the other hand
+          if (!mine()) return;
+          actorPose('down', 0, 400);
+          const c = ball();
+          then(c.animate([{ transform: `translate(${hx}px,${H}px)`, easing: 'ease-in' }, { transform: `translate(${x}px,${G}px)`, easing: 'ease-out' }, { transform: `translate(${lx}px,${H}px)` }],
+            { duration: 170, fill: 'both' }), () => { c.remove(); if (mine()) actorPose('dribbleL', 0, 400); });
+        }, 190);
+        setTimeout(() => { // the crossover back: it hits the floor, skips past the hand and rolls off
+          if (!mine()) return;
+          actorPose('down', 0, 900); actorMood('slump', 160);
           const b = ball();
           // It goes grey once it's gone: the possession is lost.
           b.firstChild.animate([{ fill: BALL_C }, { fill: '#8a8380' }], { duration: 500, delay: 150, fill: 'forwards' });
-          // Down off the hand, one small skip, then a long roll that slows and fades.
           const a = b.animate([
-            { transform: `translate(${hx}px,${FLOOR - 24}px)`, easing: 'cubic-bezier(.5,0,1,1)' },
-            { transform: `translate(${hx + 8}px,${G}px)`, offset: .05, easing: 'cubic-bezier(0,0,.5,1)' },
-            { transform: `translate(${hx + 22}px,${G - 7}px)`, offset: .13, easing: 'cubic-bezier(.5,0,1,1)' },
-            { transform: `translate(${hx + 34}px,${G}px)`, offset: .18, easing: 'cubic-bezier(.25,.6,.45,1)' },
-            { transform: `translate(${hx + 230}px,${G}px)`, opacity: 1, offset: .82 },
+            { transform: `translate(${lx}px,${H}px)`, easing: 'ease-in' },
+            { transform: `translate(${x + 2}px,${G}px)`, offset: .05, easing: 'cubic-bezier(0,0,.5,1)' },
+            { transform: `translate(${hx + 14}px,${H - 6}px)`, offset: .13, easing: 'cubic-bezier(.5,0,1,1)' },
+            { transform: `translate(${hx + 32}px,${G}px)`, offset: .19, easing: 'cubic-bezier(0,0,.5,1)' },
+            { transform: `translate(${hx + 42}px,${G - 5}px)`, offset: .23, easing: 'cubic-bezier(.5,0,1,1)' },
+            { transform: `translate(${hx + 52}px,${G}px)`, offset: .27, easing: 'cubic-bezier(.25,.6,.45,1)' },
+            { transform: `translate(${hx + 230}px,${G}px)`, opacity: 1, offset: .84 },
             { transform: `translate(${hx + 250}px,${G}px)`, opacity: 0 },
           ], { duration: 1800, fill: 'both' });
           then(a, () => b.remove());
-        }, 200);
-        setTimeout(() => pop('Turnover', x + 120, 40, '#e3826f', 18), 300); break;
+        }, 480);
+        setTimeout(() => pop('Turnover', x + 120, 40, '#e3826f', 18), 560); break;
       }
     }
   }
