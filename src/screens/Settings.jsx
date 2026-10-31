@@ -227,7 +227,7 @@ function Admin() {
                 onClick={() => g.result !== r && edit('set_result', { p_game: g.id, p_result: r })}>{r === 'U' ? '–' : r}</button>)}</span>
               <button className="iconbtn sm" data-edit={g.id} aria-label={`Edit Game ${g.no}`} onClick={() => openSheet(<EditGame id={g.id} />, { wide: true })}><Pencil width="16" height="16" /></button></div>))
             : <div className="hempty">No {aRes} games yet.</div>}
-            <div className="arow"><button className="btn sm" id="a-add-game" onClick={() => openSheet(<AddGame season={aRes} />, { wide: true })}>+ Add a game without stats</button></div></div></div></div>
+            <div className="arow"><button className="btn sm" id="a-add-game" onClick={() => openSheet(<AddGame season={aRes} />, { wide: true })}>+ Add a game</button></div></div></div></div>
       <div className="sec"><h3>Roster</h3><p className="hint">Starters show on Who played and in Stats. Subs only appear in the games they played. Tap an avatar to change it. Renaming a player to an existing player's name merges them</p>
         <div className="card alist" id="a-roster"><div className="sub-h">Starters</div>{s.roster.map(p => prow(p, 'starter'))}
           <div className="sub-h">Subs</div>{(open.subs ? subs : subs.slice(0, 5)).map(p => prow(p, 'sub'))}
