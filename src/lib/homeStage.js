@@ -30,7 +30,7 @@ export function stage({ vx, vy, vw, vh, vb, A }) {
       <g fill="none" stroke="#fff" stroke-opacity=".2" stroke-width="2" stroke-linejoin="round"><path d="${lines.solid}"/><path d="${lines.dash}" stroke-dasharray="7 7"/></g>
       <rect ${floor} fill="url(#hside)"/>
       <ellipse cx="400" cy="${cy}" rx="380" ry="170" fill="url(#hpool)"/>
-      ${hoop(c, { dim: .65 })}
+      ${hoop(c, { dim: .8 })}
       <ellipse cx="400" cy="${f1(vy + (pool[1] - vy) * .35)}" rx="230" ry="${f1((pool[1] - vy) * .55)}" fill="#fff6e0" opacity=".2" filter="url(#hbig)"/>
       <ellipse cx="400" cy="${cy}" rx="520" ry="220" fill="url(#hov)"/>
       ${skylights(vy, pool[1])}`,
