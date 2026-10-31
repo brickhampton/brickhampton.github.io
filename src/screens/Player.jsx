@@ -70,7 +70,7 @@ function SeasonCmp({ id, seasonsPlayed }) {
 // ball a few times or cross it over, and now and then they yawn and stretch or look around. Tapping them gets a
 // reaction like the team photo on Home: a smile and a bob with each tap, then a random trick after a single tap.
 // Each trick is a few steps: a class that animates it, a pose, how long it lasts, and something to float over their
-// head (a "+2", their PER or one of their badges).
+// head (a "+2", their last game's PER when it beat their season average, or one of their badges).
 const bounces = () => Array.from({ length: 3 + Math.floor(Math.random() * 3) }, () => ['bounce', '', 500]);
 const TRICKS = {
   hop: () => [['hop', '', 700]],
@@ -84,7 +84,7 @@ const TRICKS = {
   fumble: () => [['fumble', 'down', 750], ['chase', 'down', 600], ['comeback', '', 600]],
   dance: () => [['dance', 'down', 1400]],
   shimmy: () => [['shimmy', 'down', 1000]],
-  mood: (m) => m.up ? [['cheer', 'block', 1300, { text: `${m.per} PER`, tone: 'pos' }]] : [['shrug', 'shrug', 1500, { text: `${m.per} PER`, tone: 'neg' }]],
+  mood: (m) => [['cheer', 'block', 1300, { text: `${m.per} PER`, tone: 'pos' }]],
   badge: (m) => { const b = m.badges[Math.floor(Math.random() * m.badges.length)]; return [['brag', '', 1700, { badge: b }]]; },
   yawn: () => [['yawn', 'catch', 1800], ['', 'down', 300]],
   look: () => [['look', '', 1900]],
@@ -164,9 +164,9 @@ export function Player() {
     return 1 + peers.filter(x => x.id !== id && val(x, k, tot) !== null && (lowerBetter ? val(x, k, tot) < v : val(x, k, tot) > v)).length;
   };
 
-  // The player on the stage celebrates a PER above the team's average for the season shown, and shrugs at one below it.
-  const teamPer = peers.reduce((t, x) => t + x.pg('per'), 0) / (peers.length || 1);
-  const mood = { up: a.pg('per') >= teamPer, per: perTxt(a.pg('per'), true), badges: playerBadges(id) };
+  // The player on the stage celebrates when their latest game's PER beat their own average for that season.
+  const lastG = mine[mine.length - 1], lastPer = calc(lastG.rows[id]).per, seasonAvg = playerAgg(games.filter(g => g.season === lastG.season), id).pg('per');
+  const mood = { per: lastPer > seasonAvg ? perTxt(lastPer, true) : '', badges: playerBadges(id) };
 
   // Stat tiles
   const n1 = (v, tot) => tot ? v : f1(v);

@@ -609,12 +609,8 @@ tr.tot td{font-weight:600;border-top:1px solid var(--stroke)}
 @keyframes pDance{12%{transform:translate(-5%,-3%) rotate(-6deg)}25%{transform:translateX(-5%) rotate(-4deg)}37%{transform:translate(5%,-3%) rotate(6deg)}50%{transform:translateX(5%) rotate(4deg)}62%{transform:translate(-5%,-3%) rotate(-6deg)}75%{transform:translateX(-5%) rotate(-4deg)}87%{transform:translate(0,-3%)}100%{transform:none}}
 .pstage.shimmy .phop{transform-origin:50% 92%;animation:pShimmy .14s linear 7 alternate}
 @keyframes pShimmy{from{transform:skewX(-5deg) translateX(-1.5%)}to{transform:skewX(5deg) translateX(1.5%)}}
-/* How their season is going: arms up and a jump for a PER above the team's average, a shrug for one below it. */
+/* Arms up and a jump when their last game's PER beat their season average. */
 .pstage.cheer .phop{animation:hop .65s var(--ease-out) 2}
-.pstage.shrug .av-head{animation:pShrug 1.5s ease-in-out}
-@keyframes pShrug{15%,80%{transform:translateY(2px) rotate(-6deg)}}
-.pstage.shrug .phop{animation:pShrugUp 1.5s ease-in-out}
-@keyframes pShrugUp{15%,80%{transform:translateY(-2%)}}
 /* A yawn and a stretch, eyes shut, and a look round left and right (idle only). */
 .pstage.yawn .phop{transform-origin:50% 92%;animation:pStretch 1.8s ease-in-out}
 @keyframes pStretch{30%,75%{transform:scale(.98,1.05)}}
@@ -626,7 +622,6 @@ tr.tot td{font-weight:600;border-top:1px solid var(--stroke)}
   animation:pFloat 1.5s var(--ease-out) both;font-variant-numeric:tabular-nums}
 .pfloat.gold{color:#f4d37c}
 .pfloat.pos{color:var(--green)}
-.pfloat.neg{color:var(--granite,#9aa0aa)}
 .pfloat.brag{font-size:14px;font-weight:600;padding:6px 12px 6px 10px;border-radius:999px;background:rgba(20,24,38,.9);border:1px solid rgba(233,185,73,.55);color:#f4d37c}
 .pfloat svg{width:18px;height:18px}
 @keyframes pFloat{0%{opacity:0;transform:translate(-50%,10px) scale(.7)}15%{opacity:1;transform:translate(-50%,0) scale(1.05)}25%{transform:translate(-50%,0) scale(1)}80%{opacity:1}100%{opacity:0;transform:translate(-50%,-18px)}}
@@ -1053,11 +1048,11 @@ button:hover .lid,button:focus-visible .lid,button:active .lid{transform:transla
 /* Enough room below the photo to scroll it fully away, even with a short list. */
 .ghero + .wrap{min-height:100%;box-sizing:border-box}
 .hp{animation:hpBob 3.2s steps(4,jump-none) var(--hd) infinite}
-/* A pose that comes and goes (A. Shan's fist pump): shown for a moment every few seconds. */
-.hp-now{visibility:hidden;animation:hpNow 7s steps(1,end) 2s infinite}
-.hp-rest{animation:hpRest 7s steps(1,end) 2s infinite}
-@keyframes hpNow{0%,69%{visibility:hidden}70%,89%{visibility:visible}90%,100%{visibility:hidden}}
-@keyframes hpRest{0%,69%{visibility:visible}70%,89%{visibility:hidden}90%,100%{visibility:visible}}
+/* A pose that comes and goes (A. Shan's fist pump, R. Liu's double fist pump): shown for a moment every so often. */
+.hp-now{visibility:hidden;animation:hpNow var(--nc,18s) steps(1,end) var(--nd,2s) infinite}
+.hp-rest{animation:hpRest var(--nc,18s) steps(1,end) var(--nd,2s) infinite}
+@keyframes hpNow{0%,91%{visibility:hidden}92%,99%{visibility:visible}100%{visibility:hidden}}
+@keyframes hpRest{0%,91%{visibility:visible}92%,99%{visibility:hidden}100%{visibility:visible}}
 @keyframes hpBob{0%,100%{transform:none}50%{transform:translateY(-2.5px)}}
 .cf0{transform-box:fill-box;transform-origin:center;transform:rotate(var(--r,0deg))}
 .cf{transform-box:fill-box;transform-origin:center;animation:cfDrift var(--d) ease-in-out var(--dl) infinite alternate}
