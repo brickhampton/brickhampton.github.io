@@ -178,7 +178,7 @@ function sprite(c, num, pose) {
   rec = c.shirt ? [] : null;
   // Shooting, catching a rebound and blocking put the free arm up too.
   const up = pose === 'shoot' || pose === 'catch' || pose === 'block';
-  if (up || pose === 'blockL') { // 'blockL': only this arm goes up, as on a block with the hand nearest the shooter
+  if (up) {
     const top = pose === 'shoot' ? hy + 1 : hy - 2, ax = bx - 2 - aw;
     r(ax, top + 3, 2 + aw, ty + 2 - top - 3, SB); r(ax - 1, top - 1, 4 + aw, 4, SB); r(ax - 1, top - 2, 1, 1, SB); r(ax + 1, top - 2, 1, 1, SB); r(ax + 3 + aw, top - 2, 1, 1, SB);
     if (BS) r(ax, ty - 2, 2 + aw, 4, BS);
