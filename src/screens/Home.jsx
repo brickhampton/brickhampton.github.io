@@ -44,7 +44,10 @@ function homeScene(cw, ch) {
     const svg = inner => `<svg x="${cx - w / 2}" y="${top}" width="${w}" height="${w * 1.04}" viewBox="0 0 100 104" overflow="visible">${inner}</svg>`;
     // A faint reflection in the polished floor, flipped about the player's feet.
     if (S.refl) { const fy = top + w * 1.035; refl.push(`<g class="alive" style="${st}" mask="url(#hrmask)" opacity="${S.refl}"><g transform="translate(0 ${(2 * fy).toFixed(1)}) scale(1 -1)">${svg(figure(P(id), { stage: true, pose: POSE.hold[id] || 'down' }))}</g></g>`); }
-    return `<g class="hp alive" style="${st}">${svg(pxShadow(50, 103.5, 22, 104 / 34) + body)}</g>`; };
+    // Tapping a player makes them react (see onTap): everything that moves sits in .hpt, over a wide invisible
+    // target so a tap anywhere on them counts. Players with free hands can also pump a fist.
+    const fist = !POSE.now[id] && !POSE.hold[id] ? `<g class="hf">${figure(P(id), { stage: true, pose: 'fist' })}</g>` : '';
+    return `<g class="hp alive" style="${st}">${svg(`${pxShadow(50, 103.5, 22, 104 / 34)}<g class="hpt${fist ? ' can-fist' : ''}" data-id="${id}" role="button" aria-label="${esc(P(id).name)}"><rect x="27" y="10" width="46" height="94" fill="transparent"/><g class="hb">${body}</g>${fist}</g>`)}</g>`; };
   const COLS = ['#4f7cff', '#eeeeee', '#e9b949', '#9db4ff', '#f4d37c', '#2f55d4'];
   const n = Math.min(110, Math.round(54 * vw * (Math.min(vb, 470) - vy) / (800 * 470)));
   const pieces = Array.from({ length: n }, (_, i) => {
@@ -79,6 +82,25 @@ function homeScene(cw, ch) {
   </svg>`;
 }
 
+// Tapping a player: they smile and give a little bob straight away. Tap again quickly and they bob with every tap;
+// tap once and wait, and they follow it with a random reaction.
+const REACTS = ['t-hop', 't-spin', 't-wiggle', 't-squash', 't-fist'], RAPID = 320;
+const restart = (el, cls) => { el.classList.remove(cls); void el.getBoundingClientRect(); el.classList.add(cls); };
+function onTap(e, taps) {
+  const g = e.target.closest?.('.hpt'); if (!g) return;
+  const id = g.dataset.id, t = taps[id] ||= { n: 0, at: 0, wait: 0, end: 0, last: '' }, now = performance.now();
+  t.n = now - t.at < RAPID * 1.4 ? t.n + 1 : 1; t.at = now;
+  clearTimeout(t.wait); clearTimeout(t.end);
+  g.classList.remove(...REACTS); g.classList.add('t-smile'); restart(g, 't-bob');
+  const done = ms => { t.end = setTimeout(() => g.classList.remove('t-smile', 't-bob', ...REACTS), ms); };
+  t.wait = setTimeout(() => {
+    if (t.n > 1 || reduced) return done(700);
+    const ks = REACTS.filter(k => k !== t.last && (k !== 't-fist' || g.classList.contains('can-fist')));
+    const k = t.last = ks[Math.floor(Math.random() * ks.length)];
+    g.classList.remove('t-bob'); restart(g, k); done(1300);
+  }, RAPID);
+}
+
 export const heroH = () => document.getElementById('home')?.offsetHeight || 0;
 
 // Home is the top of the Games screen: a full-screen team photo with the game list underneath.
@@ -97,10 +119,11 @@ export function Home() {
     const ro = new ResizeObserver(fit); ro.observe(scr);
     return () => ro.disconnect();
   }, []);
+  const taps = useRef({});
   const scrollDown = () => document.getElementById('s-games').scrollTo({ top: heroH(), behavior: reduced ? 'auto' : 'smooth' });
   return (
     <div className="ghero" id="home" ref={ref}>
-      {size && <div className="hstage" dangerouslySetInnerHTML={{ __html: homeScene(size.w, size.h) }}/>}
+      {size && <div className="hstage" onPointerDown={e => onTap(e, taps.current)} dangerouslySetInnerHTML={{ __html: homeScene(size.w, size.h) }}/>}
       <button className="hcue" id="h-cue" aria-label="Scroll down to games" onClick={scrollDown}>Games<ChevDown width="18" height="18" /></button>
     </div>
   );
