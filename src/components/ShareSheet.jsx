@@ -16,6 +16,10 @@ export function ShareSheet({ g, games }) {
   useEffect(() => () => card && URL.revokeObjectURL(card.url), [card]);
   const file = card && new File([card.blob], card.name, { type: 'image/png' });
   const canShare = file && navigator.canShare?.({ files: [file] });
+  // Phones and iPads can't download straight into Photos, so there the save button opens the share sheet with just the
+  // picture, which puts Save Image at the top. Computers download the PNG.
+  const touch = matchMedia('(pointer: coarse)').matches || /iPad|iPhone|Android/.test(navigator.userAgent) || (navigator.maxTouchPoints > 1 && /Mac/.test(navigator.platform));
+  const saveToPhotos = () => navigator.share({ files: [file] }).catch(() => {});
   const share = () => navigator.share({ files: [file], title: `Brickhampton vs ${g.opp}`, text: `Player of the game: ${P(card.potg.id).name}` }).catch(() => {});
   return <>
     <div className="share-top"><h2>Share box score</h2><button className="iconbtn share-ic" aria-label="Close" title="Close" onClick={closeSheet}><X width="20" height="20" /></button></div>
@@ -23,7 +27,9 @@ export function ShareSheet({ g, games }) {
     <div className="share-acts">
       <button className="iconbtn share-ic" aria-label="New celebration" title="New celebration" disabled={!card} onClick={() => { setCard(null); setCel(randomCelebration(cel)); }}><Dice /></button>
       <span className="grow" />
-      {card && <a className="iconbtn share-ic" href={card.url} download={card.name} aria-label="Save image" title="Save image"><Download /></a>}
+      {card && (touch && canShare
+        ? <button className="iconbtn share-ic" aria-label="Save image" title="Save image" onClick={saveToPhotos}><Download /></button>
+        : <a className="iconbtn share-ic" href={card.url} download={card.name} aria-label="Save image" title="Save image"><Download /></a>)}
       {canShare && <button className="iconbtn share-ic primary" aria-label="Share" title="Share" onClick={share}><ShareIcon width="20" height="20" /></button>}
     </div>
   </>;
