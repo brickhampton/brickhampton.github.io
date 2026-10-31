@@ -28,14 +28,34 @@ const MATE = { v: 2, skin: '#d9b48e', hair: '#2e2e33', style: 3 }; // a short fr
 // The crowd behind the courtside boards: one sparse row of soft, dim figures in muted colours (never the team's blue),
 // so they sit back in the dark and the player stays the focus. Most fans get up for a made 2; every third fan is one
 // of the few who clap the smaller plays.
-const CROWD = (() => {
-  const SK = ['#5a4a3e', '#66533f', '#4e4036'], HR = ['#1c1714', '#241d18', '#2b2420'], TOP = ['#2c2724', '#33291f', '#2a2a26', '#3a2c2a', '#302b30'];
-  const out = [];
-  for (let i = 0; i < 34; i++) {
-    const x = i * 36 - 402 + ((i * 11) % 3) * 3;
-    if (x > 548 && x < 650) continue; // leave room for the hoop
-    out.push({ i, x, y: 111 + ((i * 5) % 2) * 3, skin: SK[i % 3], hair: HR[(i * 2) % 3], top: TOP[(i * 3) % 5], few: i % 3 === 0, most: i % 4 !== 3, d: ((i * 37) % 100) / 100 * .25, h: 2.6 + ((i * 13) % 10) / 5 });
+// The three-point line's rows on the floor, front (bottom) to back: [y, x, width]. Each row's run reaches back to where the
+// row behind it ends, so the line is one stepped curve.
+const THREE = (() => {
+  const out = []; let prev = null;
+  for (let y = 170; y < 180; y += 2) {
+    const t = (180 - y) / 10, x = 156 + Math.round(6 * (1 - Math.sqrt(1 - t * t)) / 2) * 2;
+    out.push([y, x, Math.max(x, prev ?? x) - x + 3]); prev = x;
   }
+  return out;
+})();
+
+// Two rows of fans in muted greys and navies with a little white, dimmed toward the background so they stay part of it.
+// Shirts are scattered by a hash so no pattern repeats along the row. Each fan has their own reaction to the smaller
+// plays (a steal, block or assist): a hop, a shake, a clap or a cheer, and a few stay seated.
+const CROWD = (() => {
+  const dim = c => '#' + [1, 3, 5].map(i => Math.round(parseInt(c.slice(i, i + 2), 16) * .3 + parseInt('1d1a18'.slice(i - 1, i + 1), 16) * .7).toString(16).padStart(2, '0')).join('');
+  const SK = ['#c9a27e', '#a87a55', '#e0b994', '#7a5238'].map(dim), HR = ['#1c1714', '#3a2a1e', '#0f0c0c'].map(dim);
+  const TOP = ['#6e7076', '#8a8380', '#eeeeee', '#1f2d5c', '#b8b3b0', '#5a5c63', '#2a3a72', '#9a9da4', '#7b7f88', '#22388f', '#7b7570', '#1f2d5c'].map(dim);
+  const RX = ['bob', 'bob', 'shake', 'shake', 'clap', 'clap', 'cheer', 'cheer', '', ''];
+  const hash = k => (Math.imul(k + 7, 2654435761) >>> 0) % 9973;
+  const out = [];
+  const row = (y0, dx, k0) => { for (let i = 0; i < 34; i++) {
+    const x = i * 36 - 402 + ((i * 11) % 3) * 3 + dx, k = i + k0;
+    if (x > 548 && x < 650) continue; // leave room for the hoop
+    out.push({ i: k, x, y: y0 + ((k * 5) % 2) * 3, skin: SK[k % SK.length], hair: HR[(k * 2) % HR.length], top: TOP[hash(k) % TOP.length], rx: RX[(hash(k) >> 4) % RX.length], few: k % 3 === 0, most: k % 4 !== 3, d: ((k * 37) % 100) / 100 * .25, h: 2.6 + ((k * 13) % 10) / 5 });
+  } };
+  row(95, 18, 100);
+  row(111, 0, 0);
   return out;
 })();
 
@@ -74,8 +94,8 @@ function makeStage() {
   function cheer(delay, level) {
     setTimeout(() => {
       const c = $('#crowd'); if (!c) return;
-      c.classList.remove('big', 'most', 'clap'); void c.getBBox(); c.classList.add(level);
-      clearTimeout(c._t); c._t = setTimeout(() => c.classList.remove(level), level === 'big' ? 1700 : 1300);
+      c.classList.remove('big', 'most', 'clap', 'hype'); void c.getBBox(); c.classList.add(level);
+      clearTimeout(c._t); c._t = setTimeout(() => c.classList.remove(level), level === 'big' ? 1700 : level === 'hype' ? 1500 : 1300);
     }, delay);
   }
   // A leap for a block: the player springs up and drops back down.
@@ -135,7 +155,7 @@ function makeStage() {
     const pose = { '2M': ['shoot', 0, D + 380], '2X': ['shoot', 0, D + 380], '3M': ['shoot', 0, D + 480], '3X': ['shoot', 0, D + 480], 'FM': ['shoot', 0, D + 340], 'FX': ['shoot', 0, D + 340],
       'OR': ['catch', 200, 700], 'DR': ['catch', 200, 700], 'AS': ['pass2', D - 40, 520], 'ST': ['pass', 120, 260], 'BK': ['block1', 0, 760] }[k];
     if (pose) actorPose(...pose);
-    const cheers = { '2M': [D + 360, 'most'], '3M': [D + 460, 'big'], 'FM': [D + 320, 'clap'], 'AS': [D + 580, 'clap'], 'ST': [420, 'clap'], 'BK': [280, 'clap'], 'OR': [300, 'clap'], 'DR': [300, 'clap'] }[k];
+    const cheers = { '2M': [D + 360, 'most'], '3M': [D + 460, 'big'], 'FM': [D + 320, 'clap'], 'AS': [D + 580, 'hype'], 'ST': [420, 'hype'], 'BK': [280, 'hype'], 'OR': [300, 'clap'], 'DR': [300, 'clap'] }[k];
     if (cheers) cheer(...cheers);
     switch (k) {
       case '2M': actorMood('celebrate', D); shot(SPOT[k], 80, 360, true); setTimeout(() => pop('+2', RX, 40), D + 360); break;
@@ -334,7 +354,7 @@ export function Entry() {
           <div className="stage" aria-hidden="true">
             <svg viewBox="0 0 640 180" preserveAspectRatio="xMidYMax meet">
               <g id="crowd" shapeRendering="crispEdges">{CROWD.map(f => (
-                <g key={f.i} className={`fan${f.few ? ' few' : ''}${f.most ? ' most' : ''}`} style={{ '--d': `${f.d}s`, '--h': `${f.h}s` }}>
+                <g key={f.i} className={`fan${f.few ? ' few' : ''}${f.most ? ' most' : ''}${f.rx ? ' rx-' + f.rx : ''}`} style={{ '--d': `${f.d}s`, '--h': `${f.h}s` }}>
                   {/* Drawn in the players' 3-unit pixels: a square head with a hair line, blocky shoulders, arms for a 3. */}
                   <rect x={f.x - 3} y={f.y + 3} width="3" height="9" fill={f.skin} className="arms" /><rect x={f.x + 12} y={f.y + 3} width="3" height="9" fill={f.skin} className="arms" />
                   <rect x={f.x + 3} y={f.y} width="6" height="3" fill={f.hair} /><rect x={f.x} y={f.y + 3} width="12" height="9" fill={f.skin} /><rect x={f.x} y={f.y + 3} width="12" height="3" fill={f.hair} />
@@ -346,6 +366,8 @@ export function Entry() {
                 <rect x="-400" y="168" width="1440" height="12" fill="#e2c9a0" /><rect x="-400" y="168" width="1440" height="2" fill="#efdcbb" />
                 {Array.from({ length: 44 }, (_, i) => <rect key={i} x={i * 33 - 400 + (i % 2) * 9} y="174" width="3" height="6" fill="#cfb185" />)}
                 <rect x="400" y="170" width="180" height="10" fill="#2f55d4" opacity=".55" /><rect x="400" y="170" width="2" height="10" fill="#f4ead8" />
+                {/* The three-point line, curving slightly back toward the basket at the far side, with the floor beyond it tinted. */}
+                {THREE.map(([y, x, w]) => <g key={y}><rect x="-400" y={y} width={x + 397} height="2" fill="#ee6018" opacity=".22" /><rect x={x - 3} y={y} width={w} height="2" fill="#f4ead8" /></g>)}
                 {/* A portable stadium hoop, all white with an orange rim: a padded base on the floor, a post, and an arm that
                     angles up to the padded bottom of the backboard. */}
                 <rect x="592" y="132" width="48" height="36" fill="#e8e6e3" /><rect x="592" y="162" width="48" height="6" fill="#c4c1bd" /><rect x="592" y="132" width="48" height="3" fill="#f7f6f4" />
