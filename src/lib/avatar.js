@@ -33,14 +33,14 @@ export const OPTS = {
   eyeY: ['Default', 'Higher', 'Lower'],
   brows: ['None', 'Thin', 'Thick', 'Angled', 'Raised'],
   beard: ['None', 'Stubble', 'Moustache', 'Goatee', 'Chinstrap', 'Beard'],
-  glasses: ['None', 'Square', 'Round', 'Shades', 'Sport'],
+  glasses: ['None', 'Square', 'Round', 'Shades', 'Sport', 'Half frame'],
   socks: ['Crew', 'High', 'Low'],
   shoeType: ['Classic', 'High-top', 'Runner'],
 };
 // What the builder offers, in order. Parts left out (moustache, goatee, shades, sport glasses) still draw for old looks.
 export const CHOICES = {
   style: [0, 14, 5, 15, 7, 16, 17, 18, 19, 3, 4, 6, 8, 1, 2, 9, 10, 11, 12, 13],
-  beard: [0, 1, 4, 5], glasses: [0, 1, 2], height: [4, 1, 0, 2, 3, 5],
+  beard: [0, 1, 4, 5], glasses: [0, 1, 2, 5], height: [4, 1, 0, 2, 3, 5],
 };
 const NUMS = ['hairFlip', 'wristFlip', 'sleeveFlip', 'height', 'weight', 'muscle', 'style', 'eyes', 'eyeY', 'brows', 'beard', 'glasses', 'socks', 'shoeType'];
 const COLOURS = ['shirt', 'band', 'wrist', 'sleeve', 'stripe', 'shoeAcc', 'glassesC'];
@@ -66,7 +66,7 @@ export function cleanLook(raw = {}) {
   if (p.band === true) out.band = BANDS[2];
   // Moustache and goatee became stubble; shades and sport glasses became the rectangle frames.
   if (out.beard === 2 || out.beard === 3) out.beard = 1;
-  if (out.glasses > 2) out.glasses = 1;
+  if (out.glasses === 3 || out.glasses === 4) out.glasses = 1;
   // Muscle is no longer a choice in the builder, so every player is drawn with the standard arms.
   out.muscle = 0;
   return out;
@@ -245,12 +245,13 @@ function sprite(c, num, pose) {
   HAIR[c.style].forEach(([y, x, pat]) => [...pat].forEach((ch, i) => { if (pal[ch]) r(hx + hf(x + i), hy + y, 1, 1, pal[ch]); }));
   if (c.style === 2) r(hx + 3, hy + 1, 2, 1, mix(S, -.35));
   // glasses: two thin 4 x 4 frames round the eyes with clear lenses, a bridge and an arm back to the ear.
-  // Rectangle frames, or round ones with the corners cut.
+  // Rectangle frames, round ones with the corners cut, or half frames with no top rim.
   if (c.glasses) {
     const G = c.glassesC || '#3b3946';
     [hx + 1, hx + 6].forEach(x => {
       const o = c.glasses === 2 ? 1 : 0;
-      r(x + o, ey - 1, 4 - 2 * o, 1, G); r(x + o, ey + 2, 4 - 2 * o, 1, G); r(x, ey, 1, 2, G); r(x + 3, ey, 1, 2, G);
+      if (c.glasses !== 5) r(x + o, ey - 1, 4 - 2 * o, 1, G);
+      r(x + o, ey + 2, 4 - 2 * o, 1, G); r(x, ey, 1, 2, G); r(x + 3, ey, 1, 2, G);
     });
     r(hx + 5, ey, 1, 1, G); r(hx, ey, 1, 1, G);
     // The frames sit over the eyes, as they did before the eyes had their own grid.
