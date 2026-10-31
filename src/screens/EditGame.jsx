@@ -99,16 +99,17 @@ export function AddGame({ season }) {
   const date = before ? (addDays(before.date, 7) < today ? addDays(before.date, 7) : today) : today;
   const [d, setD] = useState({ season, no, date, opp: '', result: 'U', oppPts: '' });
   const { err, setErr, busy, run } = useSave();
-  const seasonOpps = S.opps[d.season] || [];
-  const allOpps = [...new Set([...seasonOpps, ...[...new Set(S.games.map(x => x.opp))].sort()])];
-  const patch = p => { setD(x => ({ ...x, ...p })); setErr(''); };
+  // The season's teams: its opponent list in order, then any other team it played.
+  const teamsIn = code => [...new Set([...(S.opps[code] || []), ...S.games.filter(x => x.season === code).map(x => x.opp).sort()])];
+  const teams = teamsIn(d.season);
+  const patch = p => { setD(x => ({ ...x, ...p, ...(p.season && !teamsIn(p.season).includes(x.opp) ? { opp: '' } : {}) })); setErr(''); };
 
   const save = () => {
     const opp = d.opp.trim(), pts = String(d.oppPts).trim();
     if (S.games.some(x => x.season === d.season && x.no === d.no)) return setErr(`${d.season} Game ${d.no} already exists. Pick another game number.`);
     if (!d.date || d.date > todayIso()) return setErr('The date can\'t be in the future.');
     if (!isSunday(d.date)) return setErr('Games are always on a Sunday.');
-    if (!opp) return setErr('Add the opponent.');
+    if (!opp) return setErr('Pick the opponent.');
     if (pts && !/^\d{1,3}$/.test(pts)) return setErr('The opponent score should be a number, or left blank.');
     run(() => adminEdit('add_game', { p_game: { season: d.season, no: d.no, date: d.date, opp, result: d.result, opp_pts: pts } }));
   };
@@ -123,8 +124,8 @@ export function AddGame({ season }) {
         <output id="ag-no" className="num">{d.no}</output>
         <button type="button" id="ag-up" aria-label="Next game number" disabled={d.no >= 40} onClick={() => patch({ no: Math.min(40, d.no + 1) })}><ChevUp width="18" height="18" /></button></div></div>
       <div className="field"><label htmlFor="ag-date">Date</label><input id="ag-date" type="date" value={d.date} max={todayIso()} onChange={e => patch({ date: e.target.value })} /></div>
-      <div className="field"><label htmlFor="ag-opp">Opponent</label><input id="ag-opp" value={d.opp} list="ag-opps" autoComplete="off" placeholder="Team name" onChange={e => patch({ opp: e.target.value })} />
-        <datalist id="ag-opps">{allOpps.map(o => <option key={o} value={o} />)}</datalist></div>
+      <div className="field"><label htmlFor="ag-opp">Opponent</label><select id="ag-opp" value={d.opp} onChange={e => patch({ opp: e.target.value })}>
+        <option value="" disabled>Pick a team</option>{teams.map(o => <option key={o} value={o}>{o}</option>)}</select></div>
       <div className="field res"><label>Result</label><div className="rseg big" id="ag-res">{['W', 'L', 'D', 'U'].map(x => <button key={x} type="button" data-r={x} aria-pressed={d.result === x} onClick={() => patch({ result: x })}>{x === 'U' ? 'Unknown' : RES[x]}</button>)}</div></div>
       <div className="field"><label htmlFor="ag-opp-pts">Opponent score</label><input id="ag-opp-pts" inputMode="numeric" value={d.oppPts} placeholder="Optional" onChange={e => patch({ oppPts: e.target.value })} /></div>
     </div>
