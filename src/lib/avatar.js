@@ -130,8 +130,8 @@ const HAIR = [
   // Wolf cut: shaggy layers, longer and choppy at the back
   [[-2, 1, 'H.HHHH.H'], [-1, 0, 'HHHHHHHHHH'], [0, -1, 'HHHHHHHHHHHH'], [1, -2, 'HHHHHHHHHHHHH'], [2, -2, 'HHHHHHHHHHHHH'], [3, -2, 'HHHHHH.HH.HHH'], [4, -2, 'HHHH.H.....H'], [5, -2, 'HHH'], [6, -2, 'HHH'], [7, -2, 'HH'], [8, -2, 'H.H'], [9, -1, 'H']],
 ];
-// Shandy is Very tall plus a pixel of jersey and a pixel of leg.
-const TALL = [1, 0, 2, 3, -1, 5], EYE_ROW = [6, 5, 7];
+// Very tall has an extra pixel of jersey; Shandy adds a pixel of leg on top.
+const TALL = [1, 0, 2, 4, -1, 5], EYE_ROW = [6, 5, 7];
 const K = '#16121a', T = '#f2f2f2', J = '#2f55d4', J2 = mix(J, .2);
 
 // The sprite as a grid of [colour, layer] (layer: b body, h head, e eyes), plus where the head sits.
