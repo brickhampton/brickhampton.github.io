@@ -229,10 +229,11 @@ function makeStage() {
         const x = SPOT[k];
         const mate = mk('g', {}); mate.innerHTML = `<g transform="translate(${440 - 50 * SC} ${FLOOR - 104 * SC}) scale(${SC})">${figure({ ...MATE, num: '' }, { stage: true, pose: 'catch' })}</g>`;
         mate.animate([{ opacity: 0 }, { opacity: .9, offset: .2 }, { opacity: .9, offset: .8 }, { opacity: 0 }], { duration: 900, fill: 'forwards' }); setTimeout(() => mate.remove(), 950);
-        const trail = mk('path', { d: `M${x + 20} ${HAND_Y + 10} Q300 ${HAND_Y - 20} 430 ${HAND_Y + 30}`, stroke: '#ee6018', 'stroke-width': 2, fill: 'none', 'stroke-dasharray': '3 7', 'stroke-linecap': 'round' });
+        const trail = mk('path', { d: `M${x + 20} ${HAND_Y + 10} Q300 ${HAND_Y - 46} 442 ${HAND_Y - 24}`, stroke: '#ee6018', 'stroke-width': 2, fill: 'none', 'stroke-dasharray': '3 7', 'stroke-linecap': 'round' });
         trail.animate([{ opacity: 0 }, { opacity: .9, offset: .3 }, { opacity: 0 }], { duration: 700, fill: 'forwards' }); setTimeout(() => trail.remove(), 750);
         const b = ball(); actorMood('celebrate', D);
-        then(fly(b, arc(x + 20, HAND_Y + 10, 430, HAND_Y + 30, 28, 10, 420), 320, 'ease-out', D), () => then(fly(b, arc(430, HAND_Y + 30, RX, RY - 2, 45, 8, 200, 420), 260), () => { ripple(); then(fly(b, [[RX, RY - 2], [RX, 110, 0, 0]], 220, 'ease-in'), () => b.remove()); }));
+        // The pass lands on top of the teammate's raised hands, and they lay it in from there.
+        then(fly(b, arc(x + 20, HAND_Y + 10, 442, HAND_Y - 24, 28, 10, 420), 320, 'ease-out', D), () => then(fly(b, arc(442, HAND_Y - 24, RX, RY - 2, 30, 8, 200, 420), 260), () => { ripple(); then(fly(b, [[RX, RY - 2], [RX, 110, 0, 0]], 220, 'ease-in'), () => b.remove()); }));
         setTimeout(() => pop('Dime', 300, 40, '#eeeeee', 18), 160); break;
       }
       case 'ST': { // an opponent dribbles in, the player pokes the ball loose, scoops it up and takes off the other way
@@ -264,6 +265,8 @@ function makeStage() {
           if (actor?.dataset.id !== sel0) return;
           actorPose('down', 0, 900); actorMood('slump', 120);
           const b = ball();
+          // It goes grey once it's gone: the possession is lost.
+          b.firstChild.animate([{ fill: BALL_C }, { fill: '#8a8380' }], { duration: 500, delay: 150, fill: 'forwards' });
           // Down off the hand, one small skip, then a long roll that slows and fades.
           const a = b.animate([
             { transform: `translate(${hx}px,${FLOOR - 24}px)`, easing: 'cubic-bezier(.5,0,1,1)' },
