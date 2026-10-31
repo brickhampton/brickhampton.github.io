@@ -18,9 +18,17 @@ const Trash = ({ lid = true }) => <svg width="20" height="20" viewBox="0 0 24 24
 // Ported as-is from the mockup: plain SVG and Web Animations, so a tap never waits for an animation.
 const NS = 'http://www.w3.org/2000/svg';
 const RX = 542, RY = 64, FLOOR = 168, SC = .78;
-const SPOT = { '2M': 330, '2X': 330, '3M': 120, '3X': 120, 'FM': 400, 'FX': 400, 'OR': 470, 'DR': 450, 'AS': 150, 'ST': 300, 'BK': 470, 'TO': 300 };
+const SPOT = { '2M': 330, '2X': 330, '3M': 120, '3X': 120, 'FM': 383, 'FX': 383, 'OR': 470, 'DR': 450, 'AS': 150, 'ST': 300, 'BK': 470, 'TO': 300 };
 const HAND_Y = FLOOR - 104 * SC + 22; // just above the head
 const D = 140; // let the player get to their spot before the ball moves
+// A free throw starts with two quick dribbles behind the line; the ball goes up once they're done.
+const BOUNCE = 190, FT_D = 60 + 2 * BOUNCE + 60;
+// A 2 goes up from somewhere new each time: in the paint, or between the three-point line and the free-throw line,
+// never from the free-throw spot itself. A 3 moves up to a player's width either way, but always stays behind the arc.
+const THREE_SPOT = [88, 138];
+const TWO = [[180, 352], [420, 520]];
+const between = ([a, b]) => Math.round(a + Math.random() * (b - a));
+const twoSpot = () => between(TWO[Math.random() < .5 ? 0 : 1]);
 // The ball and hoop are drawn in the same flat pixel style as the players (3 screen units to a pixel).
 const PX = 3, BALL_D = BALL.map(([o, w], j) => `M${o} ${j}h${w}v1h${-w}z`).join('');
 const NET = Array.from({ length: 8 }, (_, j) => Array.from({ length: 12 - j }, (_, i) => (i + j) % 2 ? '' : `M${542 - (12 - j) * 2 + i * 4} ${73 + j * 4}h3v3h-3z`).join('')).join('');
@@ -141,29 +149,44 @@ function makeStage() {
     });
     setTimeout(() => g.remove(), 600);
   }
-  function shot(x0, h, d, made) {
+  function shot(x0, h, d, made, delay = D) {
+    // A late shot (after the free-throw dribbles) only puts its ball up once the player rises to shoot.
+    if (delay > D) { setTimeout(() => shot(x0, h, d, made, 0), delay); return; }
     const b = ball();
     const tx = made ? RX : RX - 20, ty = made ? RY - 2 : RY - 4;
-    then(fly(b, arc(x0, HAND_Y, tx, ty, h), d, 'linear', D), () => {
+    then(fly(b, arc(x0, HAND_Y, tx, ty, h), d, 'linear', delay), () => {
       if (made) { ripple(); then(fly(b, [[RX, RY - 2, 300], [RX, 96, 330], [RX - 4, FLOOR - 14, 360, 0]], 300, 'ease-in'), () => b.remove()); }
       else { shake(); then(fly(b, arc(RX - 20, RY - 4, RX - 130, FLOOR, 60, 10, -200, 300).map((p, i, arr) => [...p, i === arr.length - 1 ? 0 : 1]), 440, 'ease-in'), () => b.remove()); }
     });
   }
+  // Two quick bounces of the ball the player is palming, down to the floor and back up into the hand.
+  function dribbles(delay, n = 2) {
+    const id = actor?.dataset.id;
+    setTimeout(() => {
+      const bl = actor?.dataset.id === id && actor.querySelector('.av-ball'); if (!bl) return;
+      const drop = parseFloat(bl.style.getPropertyValue('--drop')) || 20;
+      bl.animate([{ transform: 'none' }, { transform: `translateY(${drop}px)` }, { transform: 'none' }], { duration: BOUNCE, iterations: n, easing: 'cubic-bezier(.5,0,.5,1)' });
+    }, delay);
+  }
   function play(sel, k) {
-    placeActor(sel, false, SPOT[k]);
+    const x = k === '2M' || k === '2X' ? twoSpot() : k === '3M' || k === '3X' ? between(THREE_SPOT) : SPOT[k];
+    placeActor(sel, false, x);
     if (reduced) return;
-    const pose = { '2M': ['shoot', 0, D + 380], '2X': ['shoot', 0, D + 380], '3M': ['shoot', 0, D + 480], '3X': ['shoot', 0, D + 480], 'FM': ['shoot', 0, D + 340], 'FX': ['shoot', 0, D + 340],
+    // The closer the 2, the flatter and quicker the shot.
+    const h2 = Math.round(50 + (RX - x) * .14), d2 = Math.round(260 + (RX - x) * .45);
+    const pose = { '2M': ['shoot', 0, D + d2 + 20], '2X': ['shoot', 0, D + d2 + 20], '3M': ['shoot', 0, D + 480], '3X': ['shoot', 0, D + 480], 'FM': ['shoot', FT_D, 340], 'FX': ['shoot', FT_D, 340],
       'OR': ['catch', 200, 700], 'DR': ['catch', 200, 700], 'AS': ['pass2', D - 40, 520], 'ST': ['pass', 120, 260], 'BK': ['block1', 0, 760] }[k];
+    if (k === 'FM' || k === 'FX') { actorPose('dribble', 0, FT_D + 40); dribbles(60); }
     if (pose) actorPose(...pose);
-    const cheers = { '2M': [D + 360, 'most'], '3M': [D + 460, 'big'], 'FM': [D + 320, 'clap'], 'AS': [D + 580, 'hype'], 'ST': [420, 'hype'], 'BK': [280, 'hype'], 'OR': [300, 'clap'], 'DR': [300, 'clap'] }[k];
+    const cheers = { '2M': [D + d2, 'most'], '3M': [D + 460, 'big'], 'FM': [FT_D + 320, 'clap'], 'AS': [D + 580, 'hype'], 'ST': [420, 'hype'], 'BK': [280, 'hype'], 'OR': [300, 'clap'], 'DR': [300, 'clap'] }[k];
     if (cheers) cheer(...cheers);
     switch (k) {
-      case '2M': actorMood('celebrate', D); shot(SPOT[k], 80, 360, true); setTimeout(() => pop('+2', RX, 40), D + 360); break;
-      case '2X': actorMood('celebrate', D); shot(SPOT[k], 80, 360, false); actorMood('slump', D + 420); break;
-      case '3M': actorMood('celebrate', D); shot(SPOT[k], 125, 460, true); setTimeout(() => { burst(RX, RY + 6); pop('+3', RX, 36, '#ee6018', 32); }, D + 460); break;
-      case '3X': actorMood('celebrate', D); shot(SPOT[k], 125, 460, false); actorMood('slump', D + 520); break;
-      case 'FM': shot(SPOT[k], 50, 320, true); actorMood('celebrate', D + 320); setTimeout(() => pop('+1', RX, 40), D + 320); break;
-      case 'FX': shot(SPOT[k], 50, 320, false); actorMood('slump', D + 360); break;
+      case '2M': actorMood('celebrate', D); shot(x, h2, d2, true); setTimeout(() => pop('+2', RX, 40), D + d2); break;
+      case '2X': actorMood('celebrate', D); shot(x, h2, d2, false); actorMood('slump', D + d2 + 60); break;
+      case '3M': actorMood('celebrate', D); shot(x, 125, 460, true); setTimeout(() => { burst(RX, RY + 6); pop('+3', RX, 36, '#ee6018', 32); }, D + 460); break;
+      case '3X': actorMood('celebrate', D); shot(x, 125, 460, false); actorMood('slump', D + 520); break;
+      case 'FM': shot(x, 50, 320, true, FT_D); actorMood('celebrate', FT_D + 320); setTimeout(() => pop('+1', RX, 40), FT_D + 320); break;
+      case 'FX': shot(x, 50, 320, false, FT_D); actorMood('slump', FT_D + 360); break;
       case 'OR': case 'DR': { // the ball comes off the rim into the player's hands
         const x = SPOT[k], b = ball(); shake(); actorMood('celebrate', 150);
         then(fly(b, arc(RX - 14, RY, x, HAND_Y - 8, 36, 10, -160), 300, 'ease-in'), () => {
@@ -201,9 +224,14 @@ function makeStage() {
         });
         setTimeout(() => pop('Rejected!', SPOT.BK, 34, '#eeeeee', 18), 280); break;
       }
-      case 'TO': { // the ball squirts away out of bounds
-        const x = SPOT[k], b = ball('#8a8380'); actorMood('slump', 220);
-        then(fly(b, [[x + 20, FLOOR - 30, 0], [x + 60, FLOOR - 14, 40], [x + 110, FLOOR - 34, 90], [x + 170, FLOOR - 14, 140], [x + 240, FLOOR - 60, 260], [560, FLOOR - 110, 420], [680, FLOOR - 130, 560, 0]], 640, 'linear', D), () => b.remove());
+      case 'TO': { // the ball slips loose, bounces a few times lower and lower, then slowly rolls away and fades by the hoop's post
+        const x = SPOT[k], b = ball('#8a8380'), G = FLOOR - 9; actorMood('slump', 220);
+        const up = 'cubic-bezier(.3,.6,.5,1)', down = 'cubic-bezier(.5,0,.7,.4)';
+        const keys = [[x + 20, FLOOR - 30, 0, down], [x + 44, G, .1, up], [x + 72, G - 30, .2, down], [x + 100, G, .3, up], [x + 120, G - 15, .37, down],
+          [x + 140, G, .44, up], [x + 152, G - 6, .48, down], [x + 164, G, .52, 'cubic-bezier(.2,.5,.4,1)'], [575, G, .92], [600, G, 1]];
+        const a = b.animate(keys.map(([kx, ky, offset, easing], i) => ({ transform: `translate(${kx}px,${ky}px)`, opacity: i === keys.length - 1 ? 0 : 1, offset, ...(easing && { easing }) })),
+          { duration: 1900, delay: D, fill: 'both' });
+        then(a, () => b.remove());
         setTimeout(() => pop('Turnover', x + 120, 40, '#e3826f', 18), 300); break;
       }
     }
