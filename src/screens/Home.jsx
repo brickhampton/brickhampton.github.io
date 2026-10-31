@@ -25,11 +25,11 @@ function rows(ids) {
 function homeScene(cw, ch) {
   const ids = statPlayers(), A = cw / Math.max(ch, 1);
   // Keep the team (x 170–630, y 60–440) in view; grow the other way to fill the screen.
-  // On a tall phone screen, crop the sides a little so the players are bigger, and sit them just above the middle.
+  // On a tall phone screen, crop the sides a little so the players are bigger, and sit them a little lower.
   // Zoomed out a little (Z) so more of the arena shows round the team.
   const Z = 1.12;
   let vw = (A < 1 ? 520 : 760) * Z, vh = 390 * Z; if (A > vw / vh) vw = vh * A; else vh = vw / A;
-  let vy = Math.min(60, 265 - vh * (A < 1 ? .44 : .5));
+  let vy = Math.min(60, 265 - vh * (A < 1 ? .52 : .5));
   // Keep the "Games" scroll hint at the bottom clear of the trophy: drop the empty sky first, then zoom out a touch.
   const need = 428 + 64 * vw / cw;
   if (vy + vh < need) vy = Math.min(105, need - vh);
@@ -52,12 +52,16 @@ function homeScene(cw, ch) {
     return `<g class="hp alive" style="${st}">${svg(`${pxShadow(50, 103.5, 22, 104 / 34)}<g class="hpt${fist ? ' can-fist' : ''}" data-id="${id}"${own ? ` data-own="${HELD[POSE.hold[id]].map(([k]) => k).join(' ')}"` : ''} role="button" aria-label="${esc(P(id).name)}"><rect x="27" y="10" width="46" height="94" fill="transparent"/><g class="hb">${body}</g>${fist}${own}</g>`)}</g>`; };
   const COLS = ['#4f7cff', '#eeeeee', '#e9b949', '#9db4ff', '#f4d37c', '#2f55d4'];
   const n = Math.min(110, Math.round(54 * vw * (Math.min(vb, 470) - vy) / (800 * 470)));
+  // Confetti in front of the team stays clear of the players, so none of it covers a face.
+  const half = Math.round(n * .55), k = A < 1 ? 1.3 : 1, onTeam = (x, y) => Math.abs(x - 400) < 165 * k && y > 300 - 195 * k && y < 300 + 50 * k;
   const pieces = Array.from({ length: n }, (_, i) => {
-    const x = vx + rnd() * vw, y = vy + rnd() * ((i % 4 ? 250 : 470) - vy), c = COLS[i % COLS.length], r = Math.round(rnd() * 180), w = 5 + rnd() * 5, ani = i % 3 === 0;
+    let x, y;
+    do { x = vx + rnd() * vw; y = vy + rnd() * ((i % 4 ? 250 : 470) - vy); } while (i >= half && onTeam(x, y));
+    const c = COLS[i % COLS.length], r = Math.round(rnd() * 180), w = 5 + rnd() * 5, ani = i % 3 === 0;
     return i % 5 === 4 ? `<circle class="${ani ? 'cf' : 'cf0'}" cx="${x.toFixed(0)}" cy="${y.toFixed(0)}" r="2.6" fill="${c}" style="--d:${(4 + rnd() * 4).toFixed(1)}s;--dl:${(-rnd() * 4).toFixed(1)}s"/>`
       : `<rect class="${ani ? 'cf' : 'cf0'}" x="${x.toFixed(0)}" y="${y.toFixed(0)}" width="${w.toFixed(1)}" height="${(w * .45).toFixed(1)}" rx="1" fill="${c}" style="--r:${r}deg;--d:${(4 + rnd() * 4).toFixed(1)}s;--dl:${(-rnd() * 4).toFixed(1)}s"/>`;
   });
-  const half = Math.round(n * .55), { back, front } = rows(ids);
+  const { back, front } = rows(ids);
   // Huddled: the back row stands shoulder to shoulder at slightly different depths, and the front row stands close in
   // front of them, in the gaps. Players nearer the middle are drawn last, so they overlap the ones beside them.
   const BW = 132, BT = 116, FW = 156, FT = 178, STAGGER = [4, -3, 2, -4, 3, -2];
