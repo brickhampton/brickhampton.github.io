@@ -192,6 +192,11 @@ function sprite(c, num, pose) {
   } else if (pose === 'trophy') {
     // Both hands hold the trophy by its handles: this upper arm comes forward from the shoulder to the near handle.
     r(bx - 2, ty + 1, 2, 4, SB); if (BS) r(bx - 2, ty + 1, 2, 2, BS);
+  } else if (pose === 'fistL' || pose === 'fist2') {
+    // A fist pump with this arm: the front arm's fist, mirrored onto this side.
+    const m = (dx, y, w, h, col) => r(bx - dx - w, y, w, h, col);
+    m(-1, ty, 2, 3, SB); m(0, hy + 2, 2 + aw, ty - hy - 1, SB); m(1 + aw, hy + 2, 1, ty - hy - 1, S2);
+    m(-1, hy - 2, 4 + aw, 4, SB); m(0, hy - 1, 2, 1, S2); m(2 + aw, hy - 2, 1, 4, S2);
   } else freeArm(false);
   const back = rec && rec.filter(([x]) => x < bx);
   rec = null;
@@ -278,7 +283,7 @@ function sprite(c, num, pose) {
   } else if (pose === 'pass') {
     // Arm thrust out level, as on a pass or a reach for a steal.
     r(fx - 1, ty + 1, 7, 2 + aw, S); r(fx + 6, ty, 2, 4 + aw, S); r(fx - 1, ty + 2 + aw, 7, 1, S2);
-  } else if (pose === 'fist') {
+  } else if (pose === 'fist' || pose === 'fist2') {
     r(fx - 1, ty, 2, 3, S); r(fx, hy + 2, 2 + aw, ty - hy - 1, S); r(fx + 1 + aw, hy + 2, 1, ty - hy - 1, S2);
     r(fx - 1, hy - 2, 4 + aw, 4, S); r(fx, hy - 1, 2, 1, S2); r(fx + 2 + aw, hy - 2, 1, 4, S2);
   } else if (pose === 'ball') {
@@ -348,7 +353,7 @@ function paths(g, layer) {
 const cache = new Map();
 // SVG markup for a player. Round avatars (the default) show the head and the top of the jersey in a 100 × 100 box.
 // opts.stage draws the whole player at their height, feet on the bottom of a 100 × 104 box: the court, the Home
-// photo, the player page and the builder. opts.pose: 'fist', 'ball', 'trophy', 'shoot', 'catch', 'block', 'block1', 'pass', 'pass2', 'dribbleL', 'spin', 'down' (arms down), or palming the ball (the default, as in the reference).
+// photo, the player page and the builder. opts.pose: 'fist', 'fistL' (the other arm), 'fist2' (both), 'ball', 'trophy', 'shoot', 'catch', 'block', 'block1', 'pass', 'pass2', 'dribbleL', 'spin', 'down' (arms down), or palming the ball (the default, as in the reference).
 export function figure(raw, opts = {}) {
   const c = cleanLook(raw), key = JSON.stringify([c, raw.num, !!opts.stage, opts.pose || '']);
   if (cache.has(key)) return cache.get(key);

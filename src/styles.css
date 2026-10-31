@@ -1041,7 +1041,7 @@ button:hover .lid,button:focus-visible .lid,button:active .lid{transform:transla
 /* Home skylights: hidden most of the time; about once a minute they drift in, sweep across and fade. */
 .hsweep{opacity:0;animation:hsweep 60s ease-in-out -38s infinite}
 @keyframes hsweep{0%,86%{opacity:0;transform:translateX(-240px)}90%{opacity:1}96%{opacity:1}100%{opacity:0;transform:translateX(240px)}}
-/* Tapping a player on Home: a smile and a quick bob on every tap, then one of a few reactions after a single tap. */
+/* Tapping a player on Home: a smile and a quick bob on every tap, then one of a few reactions after a single tap: a hop, a wiggle, a squash and stretch, or a fist pump with either arm or both. */
 .hpt{cursor:pointer;transform-box:fill-box;transform-origin:50% 100%;-webkit-tap-highlight-color:transparent}
 .hpt:focus{outline:none}
 .hpt .hf{display:none}
@@ -1050,12 +1050,10 @@ button:hover .lid,button:focus-visible .lid,button:active .lid{transform:transla
 .hpt.t-bob{animation:tBob .26s cubic-bezier(.3,.7,.4,1)}
 @keyframes tBob{40%{transform:translateY(-9px)}}
 .hpt.t-hop{animation:hop .7s var(--ease-out)}
-.hpt.t-spin{animation:tSpin .9s ease-in-out}
-@keyframes tSpin{20%{transform:translateY(-14px) scaleX(.12)}40%{transform:translateY(-20px)}60%{transform:translateY(-14px) scaleX(.12)}85%{transform:none}}
 .hpt.t-wiggle{animation:tWiggle .8s ease-in-out}
 @keyframes tWiggle{20%{transform:rotate(-7deg)}40%{transform:rotate(6deg)}60%{transform:rotate(-5deg)}80%{transform:rotate(3deg)}}
 .hpt.t-squash{animation:tSquash .8s ease-out}
 @keyframes tSquash{15%{transform:scale(1.14,.84)}40%{transform:scale(.9,1.12) translateY(-22px)}65%{transform:scale(1.1,.9)}85%{transform:scale(.97,1.03)}100%{transform:none}}
-.hpt.t-fist .hb{display:none}
-.hpt.t-fist .hf{display:inline}
-.hpt.t-fist{animation:tBob .4s cubic-bezier(.3,.7,.4,1) 2}
+.hpt:is(.t-fist,.t-fistL,.t-fist2) .hb{display:none}
+.hpt.t-fist .hf-fist,.hpt.t-fistL .hf-fistL,.hpt.t-fist2 .hf-fist2{display:inline}
+.hpt:is(.t-fist,.t-fistL,.t-fist2){animation:tBob .4s cubic-bezier(.3,.7,.4,1) 2}
