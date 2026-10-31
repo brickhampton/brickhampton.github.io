@@ -4,7 +4,7 @@ import { allGames, seasonList, seasonName, statPlayers, isStarter, playerAgg, ca
 import { go } from '../lib/nav.js';
 import { drawRadar, drawTrend, P_STATS, P_MORE, SLOT_COL, SC_B, reduced } from '../lib/charts.js';
 import { Avatar, figure } from '../components/Avatar.jsx';
-import { pxShadow } from '../lib/avatar.js';
+import { pxShadow, BALL, BALL_C } from '../lib/avatar.js';
 import { Back, BIC, MedalGold } from '../components/icons.jsx';
 import { Chart, SeasonPick, StatChips, MoreBtn, EmptyState, PerPill } from '../components/ui.jsx';
 import { ShootBar } from './Game.jsx';
@@ -66,45 +66,72 @@ function SeasonCmp({ id, seasonsPlayed }) {
   );
 }
 
-// The big player on the player page, bobbing like the player on the recording court. Every few seconds they do a
-// little trick with the ball, and tapping them gets a random reaction. Each trick is a few steps: a pose, a class
-// that animates it, and how long it lasts.
+// The big player on the player page, bobbing like the player on the recording court. Every few seconds they bounce the
+// ball a few times or cross it over, and now and then they yawn and stretch or look around. Tapping them gets a
+// reaction like the team photo on Home: a smile and a bob with each tap, then a random trick after a single tap.
+// Each trick is a few steps: a class that animates it, a pose, how long it lasts, and something to float over their
+// head (a "+2", their last game's PER when it beat their season average, or one of their badges).
+const bounces = () => Array.from({ length: 3 + Math.floor(Math.random() * 3) }, () => ['bounce', '', 500]);
 const TRICKS = {
-  hop: [['hop', '', 650]],
-  smile: [['smile', '', 1600]],
-  dribble: [['dribble', '', 1500]],
-  cross: [['bounce', '', 520], ['bounce', 'dribbleL', 1040], ['bounce', '', 520]],
-  spin: [['spin', 'spin', 2200]],
+  hop: () => [['hop', '', 700]],
+  squash: () => [['squash', '', 800]],
+  dribble: bounces,
+  cross: () => [['bounce', '', 520], ['bounce', 'dribbleL', 520], ['bounce', '', 520], ['bounce', 'dribbleL', 520], ['bounce', '', 520]],
+  spin: () => [['spin', 'spin', 2000]],
+  behind: () => [['bounce', '', 520], ['behind', 'lowball', 360], ['bounce', 'dribbleL', 520], ['behindR', 'lowball', 360], ['bounce', '', 520]],
+  shot: () => [['crouch', '', 220], ['shot', 'shoot', 1000, { text: '+2', tone: 'gold' }], ['', '', 200]],
+  bonk: () => [['toss', '', 420], ['bonk', 'down', 900], ['sheep', 'down', 1000]],
+  fumble: () => [['fumble', 'down', 750], ['chase', 'down', 600], ['comeback', '', 600]],
+  dance: () => [['dance', 'down', 1400]],
+  shimmy: () => [['shimmy', 'down', 1000]],
+  mood: (m) => [['cheer', 'block', 1300, { text: `${m.per} PER`, tone: 'pos' }]],
+  badge: (m) => { const b = m.badges[Math.floor(Math.random() * m.badges.length)]; return [['brag', '', 1700, { badge: b }]]; },
+  yawn: () => [['yawn', 'catch', 1800], ['', 'down', 300]],
+  look: () => [['look', '', 1900]],
 };
-const IDLE = ['dribble', 'cross', 'spin', 'dribble'];
-function PStage({ p, num }) {
-  const [step, setStep] = useState(null), timer = useRef(0), last = useRef('');
-  const run = (k, done) => {
-    clearTimeout(timer.current); last.current = k;
-    const steps = TRICKS[k];
+const IDLE = ['dribble', 'cross', 'dribble', 'cross', 'yawn', 'look'], IDLE_ONLY = ['yawn', 'look'], RAPID = 320;
+// The ball on its own, for when it leaves the player's hands: centred on (0, 0) in the stage's units.
+const U = 104 / 34, LOOSE = BALL.map(([o, w], j) => `<rect x="${((o - 3.5) * U).toFixed(2)}" y="${((j - 3) * U).toFixed(2)}" width="${(w * U).toFixed(2)}" height="${U.toFixed(2)}" fill="${BALL_C}"/>`).join('');
+function PStage({ p, num, mood }) {
+  const [step, setStep] = useState(null), timer = useRef(0), busy = useRef(false), last = useRef(''), taps = useRef({ n: 0, at: 0 });
+  const m = useRef(mood); m.current = mood;
+  const run = (k, extra = '') => {
+    clearTimeout(timer.current); last.current = k; busy.current = true;
+    const steps = TRICKS[k](m.current);
     const next = i => {
-      if (i === steps.length) { setStep(null); done?.(); return; }
-      const [cls, pose, ms] = steps[i]; setStep({ cls, pose, n: Date.now() + i });
+      if (i === steps.length) { setStep(null); busy.current = false; return; }
+      const [cls, pose, ms, fx] = steps[i]; setStep({ cls: cls + extra, pose, fx, n: Date.now() + i });
       timer.current = setTimeout(() => next(i + 1), ms);
     };
     next(0);
   };
-  // Idle tricks, now and then, unless the viewer prefers less motion.
+  // Idle tricks, now and then, unless the viewer prefers less motion or is playing with the player.
   useEffect(() => {
     if (reduced) return;
     let idle = 0;
-    const wait = () => { idle = setTimeout(() => run(IDLE[Math.floor(Math.random() * IDLE.length)], wait), 3500 + Math.random() * 3500); };
+    const wait = () => { idle = setTimeout(() => { if (!busy.current) run(IDLE.filter(k => k !== last.current)[Math.floor(Math.random() * (IDLE.length - 1))] || 'dribble'); wait(); }, 4000 + Math.random() * 4000); };
     wait();
     return () => { clearTimeout(idle); clearTimeout(timer.current); };
   }, []);
+  // Every tap smiles and bobs; rapid taps keep bobbing, and a single tap is followed by a random trick.
   const tap = () => {
-    const ks = Object.keys(TRICKS).filter(x => x !== last.current);
-    run(ks[Math.floor(Math.random() * ks.length)]);
+    const t = taps.current, now = performance.now();
+    t.n = now - t.at < RAPID * 1.4 ? t.n + 1 : 1; t.at = now;
+    clearTimeout(timer.current); busy.current = true;
+    setStep({ cls: 'smile bob', pose: '', n: now });
+    timer.current = setTimeout(() => {
+      if (t.n > 1 || reduced) { timer.current = setTimeout(() => { setStep(null); busy.current = false; }, 400); return; }
+      const ks = Object.keys(TRICKS).filter(x => x !== last.current && !IDLE_ONLY.includes(x) && (x !== 'badge' || m.current.badges.length) && (x !== 'mood' || m.current.per));
+      run(ks[Math.floor(Math.random() * ks.length)], ' smile');
+    }, RAPID);
   };
-  return <button className={`pstage alive${step ? ' ' + step.cls : ''}`} id="p-stage" aria-label="Wave hello" onClick={tap}>
+  const fx = step?.fx;
+  return <button className={`pstage alive${step ? ' ' + step.cls : ''}`} id="p-stage" aria-label="Wave hello" onPointerDown={tap} onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), tap())}>
     <span className="pglow" />
     <svg className="pfig" viewBox="0 0 100 104" aria-hidden="true" dangerouslySetInnerHTML={{ __html: pxShadow(50, 103.5, 22, 104 / 34) }} />
-    <span className="phop"><svg key={step?.n || 0} className="pfig" viewBox="0 0 100 104" aria-hidden="true" dangerouslySetInnerHTML={{ __html: figure({ ...p, num }, { stage: true, pose: step?.pose || undefined }) }} /></span>
+    <span className="phop" key={step?.n || 0}><svg className="pfig" viewBox="0 0 100 104" aria-hidden="true" dangerouslySetInnerHTML={{ __html: figure({ ...p, num }, { stage: true, pose: step?.pose || undefined }) }} /></span>
+    <svg className="pfig ploose" viewBox="0 0 100 104" aria-hidden="true" key={'b' + (step?.n || 0)} dangerouslySetInnerHTML={{ __html: `<g class="pball" shape-rendering="crispEdges">${LOOSE}</g>` }} />
+    {fx ? <span key={'f' + step.n} className={`pfloat ${fx.tone || 'brag'}`} aria-hidden="true">{fx.badge ? <>{BIC[fx.badge.icon]}{fx.badge.name}</> : fx.text}</span> : null}
   </button>;
 }
 
@@ -136,6 +163,10 @@ export function Player() {
     if (!starter || peers.length < 2) return 0; const v = val(a, k, tot); if (v === null) return 0;
     return 1 + peers.filter(x => x.id !== id && val(x, k, tot) !== null && (lowerBetter ? val(x, k, tot) < v : val(x, k, tot) > v)).length;
   };
+
+  // The player on the stage celebrates when their latest game's PER beat their own average for that season.
+  const lastG = mine[mine.length - 1], lastPer = calc(lastG.rows[id]).per, seasonAvg = playerAgg(games.filter(g => g.season === lastG.season), id).pg('per');
+  const mood = { per: lastPer > seasonAvg ? perTxt(lastPer, true) : '', badges: playerBadges(id) };
 
   // Stat tiles
   const n1 = (v, tot) => tot ? v : f1(v);
@@ -199,7 +230,7 @@ export function Player() {
 
     <div className="phero">
       <div className="pnum" aria-hidden="true">{num}</div>
-      <PStage p={p} num={num} />
+      <PStage p={p} num={num} mood={mood} />
       <div className="pid"><h1 className="page pname">{p.name}<span className="pno num">#{num}</span></h1><Badges id={id} key={id} /></div>
     </div>
 

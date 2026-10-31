@@ -565,7 +565,67 @@ tr.tot td{font-weight:600;border-top:1px solid var(--stroke)}
 .pstage.spin .av-ball{transform-box:fill-box;transform-origin:center;animation:ballSpin .24s steps(2,jump-none) infinite}
 @keyframes ballSpin{50%{transform:scaleX(.72)}}
 .phop{position:absolute;inset:0}
-.pstage.hop .phop{animation:hop .6s var(--ease-out)}
+.pstage.hop .phop{animation:hop .7s var(--ease-out)}
+/* Tap reactions, as on Home: a bob with each tap, a squash and stretch. */
+.pstage.bob .phop{animation:tBob .26s cubic-bezier(.3,.7,.4,1)}
+.pstage.squash .phop{transform-origin:50% 92%;animation:tSquash .8s ease-out}
+.ploose{pointer-events:none}
+.pball{opacity:0}
+/* The ball behind the back: it slides from one hand to the other, hidden behind the body halfway. */
+.pstage.behind .av-ball{animation:pxBehind .36s ease-in-out both}
+.pstage.behindR .av-ball{animation:pxBehind .36s ease-in-out reverse both}
+@keyframes pxBehind{from{transform:translateX(30px)}to{transform:translateX(-30px)}}
+/* A jump shot: a little crouch, up, the ball flies off and a "+2" floats up. */
+.pstage.crouch .phop{transform-origin:50% 92%;animation:pCrouch .22s ease-out both}
+@keyframes pCrouch{to{transform:scale(1.04,.93)}}
+.pstage.shot .phop{animation:pShot .7s cubic-bezier(.3,.7,.4,1)}
+@keyframes pShot{0%{transform:none}35%,50%{transform:translateY(-14%)}100%{transform:none}}
+.pstage.shot .pball{animation:pShotBall .9s cubic-bezier(.2,.6,.4,1) both}
+@keyframes pShotBall{0%,25%{opacity:1;transform:translate(68px,-8px)}100%{opacity:0;transform:translate(118px,-70px)}}
+/* The ball tossed up comes down on their head, bounces away, and they look sheepish. */
+.pstage.toss .av-ball{animation:pToss .42s ease-out both}
+@keyframes pToss{80%{opacity:1}to{opacity:0;transform:translate(-25px,-95px)}}
+.pstage.bonk .pball{animation:pBonk .9s linear both}
+@keyframes pBonk{0%{opacity:1;transform:translate(50px,-55px);animation-timing-function:ease-in}30%{transform:translate(50px,6px);animation-timing-function:ease-out}55%{transform:translate(82px,-14px);animation-timing-function:ease-in}90%{opacity:1}100%{opacity:0;transform:translate(112px,100px)}}
+.pstage.bonk .av-head{animation:pBonkHead .9s ease-out}
+@keyframes pBonkHead{0%,28%{transform:none}36%{transform:translateY(2px) scaleY(.92)}60%,100%{transform:none}}
+.pstage.bonk .av-eyes{animation:pSquint .9s steps(1)}
+@keyframes pSquint{0%,28%{transform:none}30%,65%{transform:scaleY(.2)}}
+.pstage.sheep .av-head{animation:pTilt 1s ease-in-out}
+@keyframes pTilt{20%,80%{transform:rotate(-7deg) translateY(1px)}}
+.pstage.sheep .phop{animation:tBob .5s cubic-bezier(.3,.7,.4,1)}
+/* A fumble: the ball slips and rolls off, the player runs after it and comes back with it from the other side. */
+.pstage.fumble .pball{animation:pFumble .75s linear both}
+@keyframes pFumble{0%{opacity:1;transform:translate(80px,73px);animation-timing-function:ease-in}30%{transform:translate(86px,98px);animation-timing-function:ease-out}50%{transform:translate(92px,86px);animation-timing-function:ease-in}68%{transform:translate(97px,98px)}85%{opacity:1}100%{opacity:0;transform:translate(130px,98px)}}
+.pstage.fumble .av-head{animation:pTilt .75s ease-in-out}
+.pstage.chase .phop{animation:pChase .6s ease-in both}
+.pstage.comeback .phop{animation:pChase .6s ease-out reverse both}
+@keyframes pChase{from{transform:none;opacity:1}70%{opacity:1}to{transform:translateX(60%);opacity:0}}
+.pstage.comeback .phop{animation-name:pBack}
+@keyframes pBack{from{transform:none;opacity:1}30%{opacity:1}to{transform:translateX(-60%);opacity:0}}
+.pstage:is(.chase,.comeback) .av-fig{animation:idleBob .16s steps(2,jump-none) infinite}
+/* A little two-step, and a shimmy. */
+.pstage.dance .phop{transform-origin:50% 92%;animation:pDance 1.4s ease-in-out}
+@keyframes pDance{12%{transform:translate(-5%,-3%) rotate(-6deg)}25%{transform:translateX(-5%) rotate(-4deg)}37%{transform:translate(5%,-3%) rotate(6deg)}50%{transform:translateX(5%) rotate(4deg)}62%{transform:translate(-5%,-3%) rotate(-6deg)}75%{transform:translateX(-5%) rotate(-4deg)}87%{transform:translate(0,-3%)}100%{transform:none}}
+.pstage.shimmy .phop{transform-origin:50% 92%;animation:pShimmy .14s linear 7 alternate}
+@keyframes pShimmy{from{transform:skewX(-5deg) translateX(-1.5%)}to{transform:skewX(5deg) translateX(1.5%)}}
+/* Arms up and a jump when their last game's PER beat their season average. */
+.pstage.cheer .phop{animation:hop .65s var(--ease-out) 2}
+/* A yawn and a stretch, eyes shut, and a look round left and right (idle only). */
+.pstage.yawn .phop{transform-origin:50% 92%;animation:pStretch 1.8s ease-in-out}
+@keyframes pStretch{30%,75%{transform:scale(.98,1.05)}}
+.pstage.yawn .av-eyes{animation:none;transform:scaleY(.15)}
+.pstage.look .av-eyes{animation:pLook 1.9s steps(1)}
+@keyframes pLook{0%,12%{transform:none}15%,42%{transform:translateX(-4px)}45%,75%{transform:translateX(4px)}78%,100%{transform:none}}
+/* Floating over the head: a "+2", their PER, or one of their badges. */
+.pfloat{position:absolute;left:50%;top:-4%;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;font-weight:700;font-size:20px;letter-spacing:-.01em;pointer-events:none;
+  animation:pFloat 1.5s var(--ease-out) both;font-variant-numeric:tabular-nums}
+.pfloat.gold{color:#f4d37c}
+.pfloat.pos{color:var(--green)}
+.pfloat.brag{font-size:14px;font-weight:600;padding:6px 12px 6px 10px;border-radius:999px;background:rgba(20,24,38,.9);border:1px solid rgba(233,185,73,.55);color:#f4d37c}
+.pfloat svg{width:18px;height:18px}
+@keyframes pFloat{0%{opacity:0;transform:translate(-50%,10px) scale(.7)}15%{opacity:1;transform:translate(-50%,0) scale(1.05)}25%{transform:translate(-50%,0) scale(1)}80%{opacity:1}100%{opacity:0;transform:translate(-50%,-18px)}}
+.pstage.brag .phop{animation:tBob .4s cubic-bezier(.3,.7,.4,1) 2}
 @keyframes float{50%{transform:translateY(-6px)}}
 @keyframes shadow{50%{transform:scaleX(.86);opacity:.7}}
 @keyframes glow{50%{opacity:.75;transform:scale(1.04)}}
@@ -988,11 +1048,11 @@ button:hover .lid,button:focus-visible .lid,button:active .lid{transform:transla
 /* Enough room below the photo to scroll it fully away, even with a short list. */
 .ghero + .wrap{min-height:100%;box-sizing:border-box}
 .hp{animation:hpBob 3.2s steps(4,jump-none) var(--hd) infinite}
-/* A pose that comes and goes (A. Shan's fist pump): shown for a moment every few seconds. */
-.hp-now{visibility:hidden;animation:hpNow 7s steps(1,end) 2s infinite}
-.hp-rest{animation:hpRest 7s steps(1,end) 2s infinite}
-@keyframes hpNow{0%,69%{visibility:hidden}70%,89%{visibility:visible}90%,100%{visibility:hidden}}
-@keyframes hpRest{0%,69%{visibility:visible}70%,89%{visibility:hidden}90%,100%{visibility:visible}}
+/* A pose that comes and goes (A. Shan's fist pump, R. Liu's double fist pump): shown for a moment every so often. */
+.hp-now{visibility:hidden;animation:hpNow var(--nc,18s) steps(1,end) var(--nd,2s) infinite}
+.hp-rest{animation:hpRest var(--nc,18s) steps(1,end) var(--nd,2s) infinite}
+@keyframes hpNow{0%,91%{visibility:hidden}92%,99%{visibility:visible}100%{visibility:hidden}}
+@keyframes hpRest{0%,91%{visibility:visible}92%,99%{visibility:hidden}100%{visibility:visible}}
 @keyframes hpBob{0%,100%{transform:none}50%{transform:translateY(-2.5px)}}
 .cf0{transform-box:fill-box;transform-origin:center;transform:rotate(var(--r,0deg))}
 .cf{transform-box:fill-box;transform-origin:center;animation:cfDrift var(--d) ease-in-out var(--dl) infinite alternate}
@@ -1049,7 +1109,7 @@ button:hover .lid,button:focus-visible .lid,button:active .lid{transform:transla
 /* Home skylights: hidden most of the time; about once a minute they drift in, sweep across and fade. */
 .hsweep{opacity:0;animation:hsweep 60s ease-in-out -38s infinite}
 @keyframes hsweep{0%,86%{opacity:0;transform:translateX(-240px)}90%{opacity:1}96%{opacity:1}100%{opacity:0;transform:translateX(240px)}}
-/* Tapping a player on Home: a smile and a quick bob on every tap, then one of a few reactions after a single tap: a hop, a wiggle, a squash and stretch, or a fist pump with either arm or both. */
+/* Tapping a player on Home: a smile and a quick bob on every tap, then one of a few reactions after a single tap: a hop, a squash and stretch, a dance, a shimmy, a look round, a stretch, or a fist pump with either arm or both. */
 .hpt{cursor:pointer;transform-box:fill-box;transform-origin:50% 100%;-webkit-tap-highlight-color:transparent}
 .hpt:focus{outline:none}
 .hpt :is(.hf,.hx){display:none}
@@ -1058,8 +1118,6 @@ button:hover .lid,button:focus-visible .lid,button:active .lid{transform:transla
 .hpt.t-bob{animation:tBob .26s cubic-bezier(.3,.7,.4,1)}
 @keyframes tBob{40%{transform:translateY(-9px)}}
 .hpt.t-hop{animation:hop .7s var(--ease-out)}
-.hpt.t-wiggle{animation:tWiggle .8s ease-in-out}
-@keyframes tWiggle{20%{transform:rotate(-7deg)}40%{transform:rotate(6deg)}60%{transform:rotate(-5deg)}80%{transform:rotate(3deg)}}
 .hpt.t-squash{animation:tSquash .8s ease-out}
 @keyframes tSquash{15%{transform:scale(1.14,.84)}40%{transform:scale(.9,1.12) translateY(-22px)}65%{transform:scale(1.1,.9)}85%{transform:scale(.97,1.03)}100%{transform:none}}
 .hpt:is(.t-fist,.t-fistL,.t-fist2,.t-raise,.t-dribble,.t-twirl) .hb{display:none}
@@ -1069,3 +1127,13 @@ button:hover .lid,button:focus-visible .lid,button:active .lid{transform:transla
 .hpt.t-raise .hx-t-raise,.hpt.t-dribble .hx-t-dribble,.hpt.t-twirl .hx-t-twirl{display:inline}
 .hpt.t-dribble .av-ball{animation:pxDribble .5s cubic-bezier(.5,0,.5,1) 3}
 .hpt.t-twirl .av-ball{transform-box:fill-box;transform-origin:center;animation:ballSpin .24s steps(2,jump-none) infinite}
+/* A dance, a shimmy and a look round for anyone; a stretch (both arms up, eyes shut) for players with free hands. */
+.hpt.t-dance{animation:hDance 1.4s ease-in-out}
+@keyframes hDance{12%{transform:translate(-5px,-3px) rotate(-6deg)}25%{transform:translateX(-5px) rotate(-4deg)}37%{transform:translate(5px,-3px) rotate(6deg)}50%{transform:translateX(5px) rotate(4deg)}62%{transform:translate(-5px,-3px) rotate(-6deg)}75%{transform:translateX(-5px) rotate(-4deg)}87%{transform:translate(0,-3px)}100%{transform:none}}
+.hpt.t-shimmy{animation:hShimmy .14s linear 7 alternate}
+@keyframes hShimmy{from{transform:skewX(-5deg) translateX(-1.5px)}to{transform:skewX(5deg) translateX(1.5px)}}
+.hpt.t-look .av-eyes{animation:pLook 1.9s steps(1)}
+.hpt.t-stretch .hb{display:none}
+.hpt.t-stretch .hf-stretch{display:inline}
+.hpt.t-stretch{animation:pStretch 1.8s ease-in-out}
+.hpt.t-stretch .av-eyes{animation:none;transform:scaleY(.15)}

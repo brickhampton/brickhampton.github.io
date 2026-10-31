@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { P, statPlayers, esc } from '../lib/core.js';
 import { reduced } from '../lib/charts.js';
 import { figure, pxShadow, raisedTrophy } from '../lib/avatar.js';
@@ -13,7 +13,9 @@ const TROPHY = `<svg x="345" y="262" width="110" height="122" preserveAspectRati
 // The team photo is posed like the real championship photo: four standing at the back, three in front holding the ball
 // and the trophy. Anyone else on the roster fills in on the shorter row.
 // A. Shan's raised fist comes and goes now and then instead of being held all the time.
-const POSE = { back: ['hoang', 'liu', 'yoon', 'shan'], front: ['lim', 'yao', 'lin'], hold: { yao: 'trophy', lim: 'ball' }, now: { shan: 'fist' } };
+const POSE = { back: ['hoang', 'liu', 'yoon', 'shan'], front: ['lim', 'yao', 'lin'], hold: { yao: 'trophy', lim: 'ball' }, now: { shan: 'fist', liu: 'fist2' } };
+// How often each of those poses comes round, and when it first shows: [seconds per cycle, delay].
+const NOW_T = { shan: [18, 3], liu: [23, -9] };
 function rows(ids) {
   const back = POSE.back.filter(id => ids.includes(id)), front = POSE.front.filter(id => ids.includes(id));
   for (const id of ids) if (!back.includes(id) && !front.includes(id)) (back.length <= front.length ? back : front).push(id);
@@ -40,13 +42,13 @@ function homeScene(cw, ch) {
   // Each player bobs, blinks and smiles on their own timing.
   const vars = () => `--hd:${(rnd() * 1.6).toFixed(2)}s;--bd:${(rnd() * -5).toFixed(2)}s;--sd:${(rnd() * -12).toFixed(2)}s;--sl:${(10 + rnd() * 6).toFixed(1)}s`;
   const refl = [];
-  const fig = (id, cx, top, w) => { const st = vars(), body = POSE.now[id] ? `<g class="hp-rest">${figure(P(id), { stage: true, pose: 'down' })}</g><g class="hp-now">${figure(P(id), { stage: true, pose: POSE.now[id] })}</g>` : figure(P(id), { stage: true, pose: POSE.hold[id] || 'down' });
+  const fig = (id, cx, top, w) => { const st = vars(), nt = POSE.now[id] && `--nc:${NOW_T[id][0]}s;--nd:${NOW_T[id][1]}s`, body = POSE.now[id] ? `<g class="hp-rest" style="${nt}">${figure(P(id), { stage: true, pose: 'down' })}</g><g class="hp-now" style="${nt}">${figure(P(id), { stage: true, pose: POSE.now[id] })}</g>` : figure(P(id), { stage: true, pose: POSE.hold[id] || 'down' });
     const svg = inner => `<svg x="${cx - w / 2}" y="${top}" width="${w}" height="${w * 1.04}" viewBox="0 0 100 104" overflow="visible">${inner}</svg>`;
     // A faint reflection in the polished floor, flipped about the player's feet.
     if (S.refl) { const fy = top + w * 1.035; refl.push(`<g class="alive" style="${st}" mask="url(#hrmask)" opacity="${S.refl}"><g transform="translate(0 ${(2 * fy).toFixed(1)}) scale(1 -1)">${svg(figure(P(id), { stage: true, pose: POSE.hold[id] || 'down' }))}</g></g>`); }
     // Tapping a player makes them react (see onTap): everything that moves sits in .hpt, over a wide invisible
-    // target so a tap anywhere on them counts. Players with free hands can also pump a fist: either one, or both.
-    const fist = POSE.hold[id] ? '' : ['fist', 'fistL', 'fist2'].map(k => `<g class="hf hf-${k}">${figure(P(id), { stage: true, pose: k })}</g>`).join('');
+    // target so a tap anywhere on them counts. Players with free hands can also pump a fist (either one, or both) or stretch.
+    const fist = POSE.hold[id] ? '' : [['fist'], ['fistL'], ['fist2'], ['stretch', 'catch']].map(([k, pose = k]) => `<g class="hf hf-${k}">${figure(P(id), { stage: true, pose })}</g>`).join('');
     // The trophy and ball holders get their own: lifting the trophy overhead, or bouncing the ball and spinning it.
     const own = (HELD[POSE.hold[id]] || []).map(([k, pose]) => `<g class="hx hx-${k}">${figure(P(id), { stage: true, pose })}${k === 't-raise' ? raisedTrophy(P(id)) : ''}</g>`).join('');
     return `<g class="hp alive" style="${st}">${svg(`${pxShadow(50, 103.5, 22, 104 / 34)}<g class="hpt${fist ? ' can-fist' : ''}" data-id="${id}"${own ? ` data-own="${HELD[POSE.hold[id]].map(([k]) => k).join(' ')}"` : ''} role="button" aria-label="${esc(P(id).name)}"><rect x="27" y="10" width="46" height="94" fill="transparent"/><g class="hb">${body}</g>${fist}${own}</g>`)}</g>`; };
@@ -91,7 +93,10 @@ function homeScene(cw, ch) {
 // Tapping a player: they smile and give a little bob straight away. Tap again quickly and they bob with every tap;
 // tap once and wait, and they follow it with a random reaction.
 const HELD = { trophy: [['t-raise', 'catch']], ball: [['t-dribble'], ['t-twirl', 'spin']] };
-const REACTS = ['t-hop', 't-wiggle', 't-squash', 't-fist', 't-fistL', 't-fist2', 't-raise', 't-dribble', 't-twirl'], RAPID = 320;
+// Anyone can hop, squash, dance, shimmy or look around; players with free hands can also pump a fist or stretch.
+const GEN = ['t-hop', 't-squash', 't-dance', 't-shimmy', 't-look'], FREE = ['t-fist', 't-fistL', 't-fist2', 't-stretch'];
+const REACTS = [...GEN, ...FREE, 't-raise', 't-dribble', 't-twirl'], RAPID = 320;
+const LONG = { 't-dribble': 1600, 't-dance': 1500, 't-stretch': 1900, 't-look': 1900 };
 const restart = (el, cls) => { el.classList.remove(cls); void el.getBoundingClientRect(); el.classList.add(cls); };
 function onTap(e, taps) {
   const g = e.target.closest?.('.hpt'); if (!g) return;
@@ -104,10 +109,23 @@ function onTap(e, taps) {
     if (t.n > 1 || reduced) return done(700);
     // Holders get their own reactions twice in the draw, so they come up often.
     const own = (g.dataset.own || '').split(' ').filter(Boolean);
-    const ks = [...REACTS.slice(0, 3), ...(g.classList.contains('can-fist') ? REACTS.slice(3, 6) : []), ...own, ...own].filter(k => k !== t.last);
+    const ks = [...GEN, ...(g.classList.contains('can-fist') ? FREE : []), ...own, ...own].filter(k => k !== t.last);
     const k = t.last = ks[Math.floor(Math.random() * ks.length)];
-    g.classList.remove('t-bob'); restart(g, k); done(k === 't-dribble' ? 1600 : 1300);
+    g.classList.remove('t-bob'); if (k === 't-look' || k === 't-stretch') g.classList.remove('t-smile'); restart(g, k); done(LONG[k] || 1300);
   }, RAPID);
+}
+
+// Now and then, one player who isn't already moving does something on their own: looks round, shimmies, hops,
+// stretches, or plays with the trophy or ball they hold.
+const IDLE = ['t-look', 't-look', 't-shimmy', 't-hop'];
+function idleOne(root, taps) {
+  const busy = g => [...g.classList].some(c => c.startsWith('t-'));
+  const gs = [...root.querySelectorAll('.hpt')].filter(g => !busy(g)); if (!gs.length) return;
+  const g = gs[Math.floor(Math.random() * gs.length)], t = taps[g.dataset.id] ||= { n: 0, at: 0, wait: 0, end: 0, last: '' };
+  const own = (g.dataset.own || '').split(' ').filter(Boolean);
+  const ks = [...IDLE, ...(g.classList.contains('can-fist') ? ['t-stretch'] : []), ...own];
+  const k = ks[Math.floor(Math.random() * ks.length)];
+  restart(g, k); clearTimeout(t.end); t.end = setTimeout(() => g.classList.remove(k), LONG[k] || 1300);
 }
 
 export const heroH = () => document.getElementById('home')?.offsetHeight || 0;
@@ -129,6 +147,13 @@ export function Home() {
     return () => ro.disconnect();
   }, []);
   const taps = useRef({});
+  useEffect(() => {
+    if (reduced) return;
+    let t = 0;
+    const next = () => { t = setTimeout(() => { if (ref.current && !document.hidden) idleOne(ref.current, taps.current); next(); }, 2000 + Math.random() * 2500); };
+    next();
+    return () => clearTimeout(t);
+  }, []);
   const scrollDown = () => document.getElementById('s-games').scrollTo({ top: heroH(), behavior: reduced ? 'auto' : 'smooth' });
   return (
     <div className="ghero" id="home" ref={ref}>

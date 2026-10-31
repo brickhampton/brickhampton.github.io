@@ -297,6 +297,8 @@ function sprite(c, num, pose) {
     r(cx - 4, t + 2, 2, 2, SB);
     r(fx - 1, ty + 1, 2, 3, S); r(cx + 4, t + 2, 2, 2, S);
   } else {
+    // Arms down. 'lowball' also has the ball behind the player's back, on its way from one hand to the other.
+    if (pose === 'lowball') ball(bx + Math.floor(bw / 2), ty + 8, r);
     [...ARM, ...HAND].forEach(([j, dx, w]) => r(fx - dx - w, ty + j, w + aw, 1, S));
   }
   // Walk each arm out from the shoulder, painting accessories by how far along the arm a pixel is: the sleeve covers the
@@ -366,7 +368,7 @@ export function raisedTrophy(raw) {
 const cache = new Map();
 // SVG markup for a player. Round avatars (the default) show the head and the top of the jersey in a 100 × 100 box.
 // opts.stage draws the whole player at their height, feet on the bottom of a 100 × 104 box: the court, the Home
-// photo, the player page and the builder. opts.pose: 'fist', 'fistL' (the other arm), 'fist2' (both), 'ball', 'trophy', 'shoot', 'catch', 'block', 'block1', 'pass', 'pass2', 'dribbleL', 'spin', 'down' (arms down), or palming the ball (the default, as in the reference).
+// photo, the player page and the builder. opts.pose: 'fist', 'fistL' (the other arm), 'fist2' (both), 'ball', 'trophy', 'shoot', 'catch', 'block', 'block1', 'pass', 'pass2', 'dribbleL', 'spin', 'lowball' (arms down, the ball behind the back), 'down' (arms down), or palming the ball (the default, as in the reference).
 export function figure(raw, opts = {}) {
   const c = cleanLook(raw), key = JSON.stringify([c, raw.num, !!opts.stage, opts.pose || '']);
   if (cache.has(key)) return cache.get(key);
