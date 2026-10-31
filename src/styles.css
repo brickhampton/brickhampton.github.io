@@ -185,6 +185,17 @@ td.t-poor{color:var(--neg)}
 /* ---------- Game summary ---------- */
 .summary{display:flex;flex-direction:column;gap:30px;padding-block:20px 48px}
 .gnav{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+/* Page nav: soft filled pills with no outline; Previous and Next share one split pill */
+.gnav .btn{height:40px;border-radius:999px;padding:0 16px}
+.gnav .btn.ghost,.gnav .pager{background:#1f1c1b;box-shadow:inset 0 1px 0 rgba(255,255,255,.05)}
+.gnav .btn.ghost{padding:0 16px 0 12px;gap:6px}
+.gnav .btn.ghost:not(:disabled):hover{background:#292524}
+.gnav .pager{display:inline-flex;align-items:center;height:40px;border-radius:999px;flex:none}
+.gnav .pager .btn{background:none;box-shadow:none}
+.gnav .pager .btn:not(:disabled):hover{background:rgba(255,255,255,.06)}
+.gnav .pager #g-prev{padding:0 14px 0 12px}
+.gnav .pager #g-next{padding:0 12px 0 14px}
+.gnav .pager i{width:1px;height:18px;background:#3a3533;flex:none}
 .jersey{position:relative;padding:6px 0 24px;display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:32px;align-items:end;border-bottom:1px solid var(--lift2)}
 .jersey::after{content:"";position:absolute;left:0;bottom:-1px;width:80px;height:2px;background:var(--royal)}
 .jersey .team{font-size:15px;font-weight:500;color:var(--granite);margin-bottom:10px}
@@ -464,11 +475,9 @@ tr.tot td{font-weight:600;border-top:1px solid var(--stroke)}
   .appbar .wordmark{font-size:18px}
   .nl{display:none}
   #new-game{width:36px;padding:0;justify-content:center}
-  .gnav .btn{padding:0 14px}
-  #g-prev,#g-next{width:44px;padding:0;justify-content:center}
   .game-nav{flex-wrap:nowrap;gap:6px}
-  .game-nav .btn{padding:0 10px;gap:6px;flex:none}
-  .game-nav #g-prev,.game-nav #g-next{width:44px;padding:0}
+  .game-nav .btn{flex:none}
+  .gnav .pager #g-prev,.gnav .pager #g-next{width:44px;padding:0;justify-content:center}
   .jersey .badge{justify-self:start}
   .entry .bar{gap:8px;min-height:0;padding-block:8px;flex-wrap:nowrap}
   .entry .wordmark{display:none}
@@ -735,8 +744,8 @@ table.plog tbody tr:hover td:first-child{background:var(--lift)}
 /* Small phones: the game page buttons still fit on one row */
 @media (max-width:380px){
   .game-nav{gap:4px}
-  .game-nav .btn{padding:0 8px;gap:5px;font-size:15px}
-  .game-nav #g-prev,.game-nav #g-next{width:44px;padding:0}
+  .game-nav>.btn{padding:0 12px 0 10px;gap:5px;font-size:15px}
+  .gnav .pager #g-prev,.gnav .pager #g-next{width:40px}
 }
 
 @media (max-height:520px) and (min-width:701px){
