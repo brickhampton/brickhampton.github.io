@@ -19,6 +19,7 @@ function svgImage(svg, vb, w, h) {
   return new Promise((ok, fail) => { const im = new Image(); im.onload = () => ok(im); im.onerror = fail; im.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(src); });
 }
 // Smiling eyes on, open eyes off (the page does this with CSS; a standalone image needs it inline).
+const plain = svg => svg.replace('<g class="av-smile">', '<g class="av-smile" opacity="0">');
 const smiling = svg => svg.replace('<g class="av-eyes">', '<g class="av-eyes" opacity="0">');
 const round = (ctx, x, y, w, h, r) => { ctx.beginPath(); ctx.roundRect(x, y, w, h, r); };
 function pill(ctx, x, y, text, { bg, fg, f = font(600, 20), h = 34, px = 12, align = 'left', r = 8 }) {
@@ -148,7 +149,7 @@ export async function drawShareCard(g, games, cel = randomCelebration()) {
   ctx.textAlign = 'center'; COLS.forEach((c, i) => ctx.fillText(c.l, cx(i), y + TH / 2));
   const tops = Object.fromEntries(COLS.filter(c => c.hi).map(c => [c.k, Math.max(...rows.map(r => r.s[c.k]))]));
   const tos = rows.map(r => r.s.to), loTo = new Set(tos).size > 1 ? Math.min(...tos) : null;
-  const heads = await Promise.all(rows.map(r => svgImage(figure({ ...P(r.id), num: r.num }), '0 0 100 100', 88, 88)));
+  const heads = await Promise.all(rows.map(r => svgImage(plain(figure({ ...P(r.id), num: r.num })), '0 0 100 100', 88, 88)));
   y += TH;
   const drawRow = (s, yy, r, head) => {
     const m = yy + ROW / 2;

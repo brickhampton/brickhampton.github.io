@@ -1200,3 +1200,11 @@ button:hover .lid,button:focus-visible .lid,button:active .lid{transform:transla
 .share-img img{display:block;width:100%;height:auto}
 .share-wait{aspect-ratio:1080/1600;background:linear-gradient(100deg,var(--lift) 30%,var(--lift2) 50%,var(--lift) 70%);background-size:250% 100%;animation:shine 1.4s linear infinite}
 .panel a.btn{text-decoration:none}
+.share-top{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.share-top h2{margin:0}
+.share-acts{display:flex;align-items:center;gap:10px}
+.share-acts .grow{flex:1}
+.iconbtn.share-ic{width:48px;height:48px;border-radius:999px;color:var(--bone);background:var(--lift2);border-color:var(--stroke)}
+.iconbtn.share-ic.primary{background:var(--bone);color:var(--canvas);border-color:var(--bone)}
+.iconbtn.share-ic:disabled{opacity:.4}
+.share-top .iconbtn.share-ic{width:40px;height:40px;background:none}
