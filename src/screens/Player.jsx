@@ -5,6 +5,7 @@ import { go } from '../lib/nav.js';
 import { drawRadar, drawTrend, P_STATS, P_MORE, SLOT_COL, SC_B, reduced } from '../lib/charts.js';
 import { Avatar, figure } from '../components/Avatar.jsx';
 import { pxShadow, BALL, BALL_C } from '../lib/avatar.js';
+import { playerCourt, COURT_VIEW } from '../lib/playerCourt.js';
 import { Back, BIC, MedalGold } from '../components/icons.jsx';
 import { Chart, SeasonPick, StatChips, MoreBtn, EmptyState, PerPill } from '../components/ui.jsx';
 import { ShootBar } from './Game.jsx';
@@ -126,6 +127,7 @@ function PStage({ p, num, mood }) {
   };
   const fx = step?.fx;
   return <button className={`pstage alive${step ? ' ' + step.cls : ''}`} id="p-stage" aria-label="Wave hello" onPointerDown={tap} onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), tap())}>
+    <svg className="pcourt" viewBox={COURT_VIEW} aria-hidden="true" dangerouslySetInnerHTML={{ __html: COURT }} />
     <span className="pglow" />
     <svg className="pfig" viewBox="0 0 100 104" aria-hidden="true" dangerouslySetInnerHTML={{ __html: pxShadow(50, 103.5, 22, 104 / 34) }} />
     <span className="phop" key={step?.n || 0}><svg className="pfig" viewBox="0 0 100 104" aria-hidden="true" dangerouslySetInnerHTML={{ __html: figure({ ...p, num }, { stage: true, pose: step?.pose || undefined }) }} /></span>
@@ -133,6 +135,8 @@ function PStage({ p, num, mood }) {
     {fx ? <span key={'f' + step.n} className={`pfloat ${fx.tone || 'brag'}`} aria-hidden="true">{fx.badge ? <>{BIC[fx.badge.icon]}{fx.badge.name}</> : fx.text}</span> : null}
   </button>;
 }
+
+const COURT = playerCourt();
 
 export function Player() {
   const games = allGames();
