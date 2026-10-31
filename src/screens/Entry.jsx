@@ -24,9 +24,11 @@ const D = 140; // let the player get to their spot before the ball moves
 // A free throw starts with two quick dribbles behind the line; the ball goes up once they're done.
 const BOUNCE = 190, FT_D = 60 + 2 * BOUNCE + 60;
 // A 2 goes up from somewhere new each time: in the paint, or between the three-point line and the free-throw line,
-// never from the free-throw spot itself.
+// never from the free-throw spot itself. A 3 moves up to a player's width either way, but always stays behind the arc.
+const THREE_SPOT = [88, 138];
 const TWO = [[180, 352], [420, 520]];
-const twoSpot = () => { const [a, b] = TWO[Math.random() < .5 ? 0 : 1]; return Math.round(a + Math.random() * (b - a)); };
+const between = ([a, b]) => Math.round(a + Math.random() * (b - a));
+const twoSpot = () => between(TWO[Math.random() < .5 ? 0 : 1]);
 // The ball and hoop are drawn in the same flat pixel style as the players (3 screen units to a pixel).
 const PX = 3, BALL_D = BALL.map(([o, w], j) => `M${o} ${j}h${w}v1h${-w}z`).join('');
 const NET = Array.from({ length: 8 }, (_, j) => Array.from({ length: 12 - j }, (_, i) => (i + j) % 2 ? '' : `M${542 - (12 - j) * 2 + i * 4} ${73 + j * 4}h3v3h-3z`).join('')).join('');
@@ -167,7 +169,7 @@ function makeStage() {
     }, delay);
   }
   function play(sel, k) {
-    const x = k === '2M' || k === '2X' ? twoSpot() : SPOT[k];
+    const x = k === '2M' || k === '2X' ? twoSpot() : k === '3M' || k === '3X' ? between(THREE_SPOT) : SPOT[k];
     placeActor(sel, false, x);
     if (reduced) return;
     // The closer the 2, the flatter and quicker the shot.
@@ -181,8 +183,8 @@ function makeStage() {
     switch (k) {
       case '2M': actorMood('celebrate', D); shot(x, h2, d2, true); setTimeout(() => pop('+2', RX, 40), D + d2); break;
       case '2X': actorMood('celebrate', D); shot(x, h2, d2, false); actorMood('slump', D + d2 + 60); break;
-      case '3M': actorMood('celebrate', D); shot(SPOT[k], 125, 460, true); setTimeout(() => { burst(RX, RY + 6); pop('+3', RX, 36, '#ee6018', 32); }, D + 460); break;
-      case '3X': actorMood('celebrate', D); shot(SPOT[k], 125, 460, false); actorMood('slump', D + 520); break;
+      case '3M': actorMood('celebrate', D); shot(x, 125, 460, true); setTimeout(() => { burst(RX, RY + 6); pop('+3', RX, 36, '#ee6018', 32); }, D + 460); break;
+      case '3X': actorMood('celebrate', D); shot(x, 125, 460, false); actorMood('slump', D + 520); break;
       case 'FM': shot(x, 50, 320, true, FT_D); actorMood('celebrate', FT_D + 320); setTimeout(() => pop('+1', RX, 40), FT_D + 320); break;
       case 'FX': shot(x, 50, 320, false, FT_D); actorMood('slump', FT_D + 360); break;
       case 'OR': case 'DR': { // the ball comes off the rim into the player's hands
@@ -222,9 +224,14 @@ function makeStage() {
         });
         setTimeout(() => pop('Rejected!', SPOT.BK, 34, '#eeeeee', 18), 280); break;
       }
-      case 'TO': { // the ball squirts away out of bounds
-        const x = SPOT[k], b = ball('#8a8380'); actorMood('slump', 220);
-        then(fly(b, [[x + 20, FLOOR - 30, 0], [x + 60, FLOOR - 14, 40], [x + 110, FLOOR - 34, 90], [x + 170, FLOOR - 14, 140], [x + 240, FLOOR - 60, 260], [560, FLOOR - 110, 420], [680, FLOOR - 130, 560, 0]], 640, 'linear', D), () => b.remove());
+      case 'TO': { // the ball slips loose, bounces a few times lower and lower, then slowly rolls away and fades by the hoop's post
+        const x = SPOT[k], b = ball('#8a8380'), G = FLOOR - 9; actorMood('slump', 220);
+        const up = 'cubic-bezier(.3,.6,.5,1)', down = 'cubic-bezier(.5,0,.7,.4)';
+        const keys = [[x + 20, FLOOR - 30, 0, down], [x + 44, G, .1, up], [x + 72, G - 30, .2, down], [x + 100, G, .3, up], [x + 120, G - 15, .37, down],
+          [x + 140, G, .44, up], [x + 152, G - 6, .48, down], [x + 164, G, .52, 'cubic-bezier(.2,.5,.4,1)'], [575, G, .92], [600, G, 1]];
+        const a = b.animate(keys.map(([kx, ky, offset, easing], i) => ({ transform: `translate(${kx}px,${ky}px)`, opacity: i === keys.length - 1 ? 0 : 1, offset, ...(easing && { easing }) })),
+          { duration: 1900, delay: D, fill: 'both' });
+        then(a, () => b.remove());
         setTimeout(() => pop('Turnover', x + 120, 40, '#e3826f', 18), 300); break;
       }
     }
