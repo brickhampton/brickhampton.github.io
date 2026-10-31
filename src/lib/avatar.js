@@ -178,7 +178,7 @@ function sprite(c, num, pose) {
   rec = c.shirt ? [] : null;
   // Shooting, catching a rebound and blocking put the free arm up too.
   const up = pose === 'shoot' || pose === 'catch' || pose === 'block';
-  if (up) {
+  if (up || pose === 'blockL') { // 'blockL': only this arm goes up, as on a block with the hand nearest the shooter
     const top = pose === 'shoot' ? hy + 1 : hy - 2, ax = bx - 2 - aw;
     r(ax, top + 3, 2 + aw, ty + 2 - top - 3, SB); r(ax - 1, top - 1, 4 + aw, 4, SB); r(ax - 1, top - 2, 1, 1, SB); r(ax + 1, top - 2, 1, 1, SB); r(ax + 3 + aw, top - 2, 1, 1, SB);
     if (BS) r(ax, ty - 2, 2 + aw, 4, BS);
@@ -278,10 +278,9 @@ function sprite(c, num, pose) {
     r(fx, hy + 4, 4 + aw, 3, S); r(fx + 1, hy + 2, 1, 2, S);
     ball(fx + 1, hy - 1, r);
   } else if (pose === 'pass2') {
-    // Both arms push out toward the teammate, not quite at full stretch, hands together at the end.
-    r(fx - 1, ty + 1, 5, 2, S); r(fx - 1, ty + 2, 5, 1, S2);
-    r(bx + 2, ty + 4, fx + 4 - bx - 2, 2, SB); r(bx + 2, ty + 5, fx + 4 - bx - 2, 1, S2);
-    r(fx + 4, ty, 2, 7, S);
+    // Both arms push out toward the teammate, not quite at full stretch: the top one further, the lower one bent in short.
+    r(fx - 1, ty + 1, 5, 2, S); r(fx - 1, ty + 2, 5, 1, S2); r(fx + 4, ty, 2, 4, S);
+    r(bx + 2, ty + 4, fx + 1 - bx - 2, 2, SB); r(bx + 2, ty + 5, fx + 1 - bx - 2, 1, S2); r(fx + 1, ty + 3, 2, 4, S);
   } else if (pose === 'pass') {
     // Arm thrust out level, as on a pass or a reach for a steal.
     r(fx - 1, ty + 1, 7, 2 + aw, S); r(fx + 6, ty, 2, 4 + aw, S); r(fx - 1, ty + 2 + aw, 7, 1, S2);

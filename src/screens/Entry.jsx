@@ -191,7 +191,7 @@ function makeStage() {
     // The closer the 2, the flatter and quicker the shot.
     const h2 = Math.round(50 + (RX - x) * .14), d2 = Math.round(260 + (RX - x) * .45);
     const pose = { '2M': ['shoot', 0, D + d2 + 20], '2X': ['shoot', 0, D + d2 + 20], '3M': ['shoot', 0, D + 480], '3X': ['shoot', 0, D + 480], 'FM': ['shoot', FT_D, 340], 'FX': ['shoot', FT_D, 340],
-      'AS': ['pass2', D - 40, 520], 'ST': ['pass', 120, 260], 'BK': ['block', 0, 860] }[k];
+      'AS': ['pass2', D - 40, 520], 'ST': ['pass', 120, 260], 'BK': ['blockL', 0, 860] }[k];
     if (k === 'FM' || k === 'FX') { actorPose('dribble', 0, FT_D + 40); dribbles(60); }
     if (pose) actorPose(...pose);
     const cheers = { '2M': [D + d2, 'most'], '3M': [D + 460, 'big'], 'FM': [FT_D + 320, 'clap'], 'AS': [D + 580, 'hype'], 'ST': [420, 'hype'], 'BK': [280, 'hype'], 'OR': [300, 'clap'], 'DR': [300, 'clap'] }[k];
@@ -212,11 +212,16 @@ function makeStage() {
         then(fly(b, arc(RX - 14, RY, x + 2, HAND_Y - 24, 30, 10, -160), 300, 'ease-in', 120), () => { b.remove(); holdBall(x + 2, HAND_Y - 24); });
         setTimeout(() => pop('Gimme dat', x - 70, 34, '#eeeeee', 18), 420); break;
       }
-      case 'DR': { // waiting in the paint, the player pulls down the miss, then turns up court palming it in their right hand
-        const x = SPOT[k], b = ball();
+      case 'DR': { // waiting in the paint, the player pulls down the miss, turns and dribbles it up the other way
+        const x = SPOT[k], b = ball(), sel0 = sel;
         actorPose('catch', 200, 420); actorMood('celebrate', 150); shake();
         then(fly(b, arc(RX - 14, RY, x + 2, HAND_Y - 24, 30, 10, -160), 300, 'ease-in'), () => {
-          b.remove(); holdBall(x + 2, HAND_Y - 24); actorPose('', 140, 900, true);
+          b.remove(); holdBall(x + 2, HAND_Y - 24);
+          actorPose('dribble', 140, 1500, true);
+          setTimeout(() => {
+            if (actor?.dataset.id !== sel0) return;
+            placeActor(sel0, false, 230, 1200); strides(1200); dribbles(0, 6);
+          }, 260);
         });
         setTimeout(() => pop('Yoink', x - 70, 34, '#eeeeee', 18), 250); break;
       }
@@ -242,7 +247,7 @@ function makeStage() {
         setTimeout(() => pop('Cookiesss', x, 40, '#eeeeee', 18), 400); break;
       }
       case 'BK': { // an opponent's shot goes up and the player swats it
-        // Both hands go up and the player gets well off the floor; the ball meets the near (left) hand at the top of the jump.
+        // The hand on the shooter's side (the left) goes up and the player gets well off the floor; the ball meets it at the top of the jump.
         const b = ball(), top = HAND_Y - 66, hx = SPOT.BK - 12; leap(0);
         then(fly(b, arc(300, FLOOR - 30, hx, top, 50, 8, 180), 300, 'ease-out'), () => {
           burst(hx, top, '#eeeeee');
