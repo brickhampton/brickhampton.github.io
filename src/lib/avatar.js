@@ -278,10 +278,9 @@ function sprite(c, num, pose) {
     r(fx, hy + 4, 4 + aw, 3, S); r(fx + 1, hy + 2, 1, 2, S);
     ball(fx + 1, hy - 1, r);
   } else if (pose === 'pass2') {
-    // Both arms thrust out level toward the teammate, hands together at the end.
-    r(fx - 1, ty + 1, 7, 2, S); r(fx - 1, ty + 2, 7, 1, S2);
-    r(bx + 2, ty + 4, fx + 6 - bx - 2, 2, SB); r(bx + 2, ty + 5, fx + 6 - bx - 2, 1, S2);
-    r(fx + 6, ty, 2, 7, S);
+    // Both arms push out toward the teammate, not quite at full stretch: the top one further, the lower one bent in short.
+    r(fx - 1, ty + 1, 5, 2, S); r(fx - 1, ty + 2, 5, 1, S2); r(fx + 4, ty, 2, 4, S);
+    r(bx + 2, ty + 4, fx + 1 - bx - 2, 2, SB); r(bx + 2, ty + 5, fx + 1 - bx - 2, 1, S2); r(fx + 1, ty + 3, 2, 4, S);
   } else if (pose === 'pass') {
     // Arm thrust out level, as on a pass or a reach for a steal.
     r(fx - 1, ty + 1, 7, 2 + aw, S); r(fx + 6, ty, 2, 4 + aw, S); r(fx - 1, ty + 2 + aw, 7, 1, S2);
