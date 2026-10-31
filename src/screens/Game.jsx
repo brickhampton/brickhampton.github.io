@@ -4,10 +4,11 @@ import { go } from '../lib/nav.js';
 import { drawGameTrend, GT_STATS, moreFor } from '../lib/charts.js';
 import { Avatar } from '../components/Avatar.jsx';
 import { BoxScore } from '../components/BoxScore.jsx';
-import { Back, Fwd, BIC, Pencil } from '../components/icons.jsx';
+import { Back, Fwd, BIC, Pencil, ShareIcon } from '../components/icons.jsx';
 import { isAdmin } from '../lib/admin.js';
 import { openSheet } from '../components/Sheet.jsx';
 import { EditGame } from './EditGame.jsx';
+import { ShareSheet } from '../components/ShareSheet.jsx';
 import { Chart, StatChips } from '../components/ui.jsx';
 
 export function ShootBar({ k, label, m, a, v }) {
@@ -96,7 +97,7 @@ export function Game() {
       <ShootBar k="ft" label="FT" m={`${t.ftm} of ${t.fta}`} a={t.fta} v={ratio(t.ftm, t.fta)} />
       <ShootBar k="ts" label="TS%" m={`${t.tsa.toFixed(1)} TSA`} a={t.tsa} v={t.ts} />
     </div></div>
-    <div className="sec"><h3>Box score</h3><BoxScore rows={rows} /></div>
+    <div className="sec"><div className="sec-head"><h3>Box score</h3><button className="btn ghost share-btn" id="g-share" onClick={() => openSheet(<ShareSheet g={g} games={games} />, { cls: 'share-panel' })}><ShareIcon />Share</button></div><BoxScore rows={rows} /></div>
     <div className="sec"><h3>{g.season} game by game</h3>
       <div className="card" id="gtrend-card"><div className="ctrl"><StatChips id="gt-stat" main={GT_STATS} more={more} value={stat} onPick={k => set({ gtStat: k })} /></div>
         <Chart id="gtrend" draw={w => drawGameTrend(w, g, games, stat)} deps={[g, games, stat]} /></div></div>
