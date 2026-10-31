@@ -565,7 +565,12 @@ tr.tot td{font-weight:600;border-top:1px solid var(--stroke)}
 .pstage.spin .av-ball{transform-box:fill-box;transform-origin:center;animation:ballSpin .24s steps(2,jump-none) infinite}
 @keyframes ballSpin{50%{transform:scaleX(.72)}}
 .phop{position:absolute;inset:0}
-.pstage.hop .phop{animation:hop .6s var(--ease-out)}
+.pstage.hop .phop{animation:hop .7s var(--ease-out)}
+/* Tap reactions, as on Home: a bob with each tap, a wiggle, a squash and stretch, and fist pumps. */
+.pstage.bob .phop{animation:tBob .26s cubic-bezier(.3,.7,.4,1)}
+.pstage.wiggle .phop{transform-origin:50% 92%;animation:tWiggle .8s ease-in-out}
+.pstage.squash .phop{transform-origin:50% 92%;animation:tSquash .8s ease-out}
+.pstage.pump .phop{animation:tBob .4s cubic-bezier(.3,.7,.4,1) 2}
 @keyframes float{50%{transform:translateY(-6px)}}
 @keyframes shadow{50%{transform:scaleX(.86);opacity:.7}}
 @keyframes glow{50%{opacity:.75;transform:scale(1.04)}}
