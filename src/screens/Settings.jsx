@@ -7,7 +7,7 @@ import { openSheet, closeSheet } from '../components/Sheet.jsx';
 import { PinSheet } from '../components/PinSheet.jsx';
 import { Avatar } from '../components/Avatar.jsx';
 import { SeasonPick, MoreBtn } from '../components/ui.jsx';
-import { EditGame } from './EditGame.jsx';
+import { EditGame, AddGame } from './EditGame.jsx';
 import { AvatarSheet } from './AvatarSheet.jsx';
 import { randomLook } from '../lib/avatar.js';
 
@@ -218,7 +218,7 @@ function Admin() {
       <div className="sec"><h3>Change history</h3><p className="hint">Every Admin edit, newest first</p>
         <div className="card" id="a-hist">{h.length ? <ul className="hist">{h.map((x, i) => <li key={i}><span>{x.text}</span><em>{ago(x.at)}</em></li>)}</ul> : <div className="hempty">No changes yet.</div>}
           <div className="btnrow"><button className="btn ghost sm" id="a-undo" disabled={!h.length} onClick={() => edit('undo_last', {})}><UndoIc />Undo last change</button></div></div></div>
-      <div className="sec wide"><h3>Results</h3><p className="hint">Tap W, L or D for each game. The dash means unknown</p>
+      <div className="sec wide"><h3>Results</h3><p className="hint">Tap W, L or D for each game. The dash means unknown. Games nobody kept stats for can be added at the bottom</p>
         <div className="card"><SeasonPick id="a-res-chips" value={aRes} seasons={s.seasons} all={null} onPick={v => set({ aRes: v })} />
           <div className="alist" id="a-results">{rs.length ? rs.map(g => (
             <div className="arow rrow" key={g.id}><span className="g">Game {g.no}</span><span className="nm">vs {g.opp}<em>{fmtDate(g.date, { day: 'numeric', month: 'long' })}</em></span>
@@ -226,7 +226,8 @@ function Admin() {
               <span className="rseg">{['W', 'L', 'D', 'U'].map(r => <button key={r} data-id={g.id} data-r={r} aria-pressed={g.result === r} aria-label={RES[r]}
                 onClick={() => g.result !== r && edit('set_result', { p_game: g.id, p_result: r })}>{r === 'U' ? '–' : r}</button>)}</span>
               <button className="iconbtn sm" data-edit={g.id} aria-label={`Edit Game ${g.no}`} onClick={() => openSheet(<EditGame id={g.id} />, { wide: true })}><Pencil width="16" height="16" /></button></div>))
-            : <div className="hempty">No {aRes} games yet.</div>}</div></div></div>
+            : <div className="hempty">No {aRes} games yet.</div>}
+            <div className="arow"><button className="btn sm" id="a-add-game" onClick={() => openSheet(<AddGame season={aRes} />, { wide: true })}>+ Add a game without stats</button></div></div></div></div>
       <div className="sec"><h3>Roster</h3><p className="hint">Starters show on Who played and in Stats. Subs only appear in the games they played. Tap an avatar to change it. Renaming a player to an existing player's name merges them</p>
         <div className="card alist" id="a-roster"><div className="sub-h">Starters</div>{s.roster.map(p => prow(p, 'starter'))}
           <div className="sub-h">Subs</div>{(open.subs ? subs : subs.slice(0, 5)).map(p => prow(p, 'sub'))}
