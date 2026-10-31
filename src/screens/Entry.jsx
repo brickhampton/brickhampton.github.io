@@ -91,12 +91,13 @@ function makeStage() {
   }
   // The player strikes a pose for the action (arm up on a shot, both hands up for a rebound), then relaxes.
   // turned: they face the other way (mirrored), as when they turn up court with a rebound.
-  function actorPose(pose, delay, ms, turned) {
+  function actorPose(pose, delay, ms, turned, after) {
     const id = actor?.dataset.id; if (!id) return;
     setTimeout(() => {
       if (!actor || actor.dataset.id !== id) return;
       const body = actor.querySelector('.body'), f = figure(P(id), { stage: true, pose });
       body.innerHTML = turned ? `<g transform="translate(100 0) scale(-1 1)">${f}</g>` : f;
+      after?.();
       clearTimeout(actor._pose);
       actor._pose = setTimeout(() => { if (actor?.dataset.id === id) actor.querySelector('.body').innerHTML = figure(P(id), { stage: true, pose: 'down' }); }, ms);
     }, delay);
@@ -123,8 +124,9 @@ function makeStage() {
     f.animate([{ transform: 'none' }, { transform: 'translateY(-5px)' }, { transform: 'none' }], { duration: 130, iterations: Math.max(1, Math.round(ms / 130)) });
   }
   // A leap for a block: the player springs up and drops back down.
-  function leap(delay) {
-    setTimeout(() => { if (!actor) return; const b = actor.querySelector('.body'); b.classList.remove('leap'); void b.getBBox(); b.classList.add('leap'); setTimeout(() => b.classList.remove('leap'), 850); }, delay);
+  // cls 'hop' is a smaller jump, as for a rebound.
+  function leap(delay, cls = 'leap') {
+    setTimeout(() => { if (!actor) return; const b = actor.querySelector('.body'); b.classList.remove(cls); void b.getBBox(); b.classList.add(cls); setTimeout(() => b.classList.remove(cls), 850); }, delay);
   }
   function mk(tag, attrs, parent = fx) { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); parent.appendChild(e); return e; }
   function ball(fill = BALL_C) {
@@ -203,14 +205,18 @@ function makeStage() {
       case '3X': actorMood('celebrate', D); shot(x, 125, 460, false); actorMood('slump', D + 520); break;
       case 'FM': shot(x, 50, 320, true, FT_D); actorMood('celebrate', FT_D + 320); setTimeout(() => pop('+1', RX, 40), FT_D + 320); break;
       case 'FX': shot(x, 50, 320, false, FT_D); actorMood('slump', FT_D + 360); break;
-      case 'OR': { // the player crashes in toward the rim, grabs the miss and holds it up over their head
-        const x0 = 370, x = 486, b = ball();
-        placeActor(sel, true, x0); placeActor(sel, false, x, 380); strides(380);
-        actorPose('catch', 360, 900); actorMood('celebrate', 400);
-        setTimeout(shake, 120);
-        // The ball comes off the rim into both hands and stays held up over the head until the player relaxes.
-        then(fly(b, arc(RX - 14, RY, x + 2, HAND_Y - 24, 30, 10, -160), 300, 'ease-in', 120), () => { b.remove(); holdBall(x + 2, HAND_Y - 24); });
-        setTimeout(() => pop('Gimme dat', x - 70, 34, '#eeeeee', 18), 420); break;
+      case 'OR': { // the player crashes in, jumps toward the basket to grab the miss overhead, then looks left and right
+        const b = ball(), sel0 = sel, mine = () => actor?.dataset.id === sel0;
+        placeActor(sel, true, 370); placeActor(sel, false, 455, 300); strides(300);
+        setTimeout(() => { if (mine()) { actorPose('catch', 0, 1300); leap(0, 'hop'); placeActor(sel0, false, 490, 800); } }, 300);
+        setTimeout(shake, 300);
+        // Off the rim into both hands at the top of the jump; the ball is drawn into the figure so it comes down with them.
+        const hold = () => holdBall(actorX + 2, HAND_Y - 24);
+        then(fly(b, arc(RX - 14, RY, 472, HAND_Y - 46, 24, 10, -160), 300, 'ease-in', 320), () => {
+          b.remove(); if (!mine()) return; hold();
+          actorPose('catch', 520, 250, true, hold); actorPose('catch', 770, 380, false, hold);
+        });
+        setTimeout(() => pop('Gimme dat', 400, 34, '#eeeeee', 18), 560); break;
       }
       case 'DR': { // waiting in the paint, the player pulls down the miss, turns and dribbles it up the other way
         const x = SPOT[k], b = ball(), sel0 = sel;
@@ -258,35 +264,26 @@ function makeStage() {
         });
         setTimeout(() => pop('Rejected!', SPOT.BK, 34, '#eeeeee', 18), 280); break;
       }
-      case 'TO': { // a quick crossover, and on the way back the ball gets past the hand and rolls away to the right
-        const x = SPOT[k], G = FLOOR - 9, hx = x + 22, lx = x - 22, H = FLOOR - 24, sel0 = sel, mine = () => actor?.dataset.id === sel0;
-        actorPose('dribble', 0, 200); dribbles(0, 1);
-        setTimeout(() => { // across the body, low, into the other hand
-          if (!mine()) return;
-          actorPose('down', 0, 400);
-          const c = ball();
-          then(c.animate([{ transform: `translate(${hx}px,${H}px)`, easing: 'ease-in' }, { transform: `translate(${x}px,${G}px)`, easing: 'ease-out' }, { transform: `translate(${lx}px,${H}px)` }],
-            { duration: 170, fill: 'both' }), () => { c.remove(); if (mine()) actorPose('dribbleL', 0, 400); });
-        }, 190);
-        setTimeout(() => { // the crossover back: it hits the floor, skips past the hand and rolls off
-          if (!mine()) return;
+      case 'TO': { // off the foot: on a dribble the ball comes down on the player's shoe and squirts away to the right
+        const x = SPOT[k], G = FLOOR - 9, H = FLOOR - 24, hx = x + 22, sel0 = sel;
+        actorPose('dribble', 0, 400); dribbles(0, 2);
+        setTimeout(() => {
+          if (actor?.dataset.id !== sel0) return;
           actorPose('down', 0, 900); actorMood('slump', 160);
           const b = ball();
-          // It goes grey once it's gone: the possession is lost.
-          b.firstChild.animate([{ fill: BALL_C }, { fill: '#8a8380' }], { duration: 500, delay: 150, fill: 'forwards' });
-          const a = b.animate([
-            { transform: `translate(${lx}px,${H}px)`, easing: 'ease-in' },
-            { transform: `translate(${x + 2}px,${G}px)`, offset: .05, easing: 'cubic-bezier(0,0,.5,1)' },
-            { transform: `translate(${hx + 14}px,${H - 6}px)`, offset: .13, easing: 'cubic-bezier(.5,0,1,1)' },
-            { transform: `translate(${hx + 32}px,${G}px)`, offset: .19, easing: 'cubic-bezier(0,0,.5,1)' },
-            { transform: `translate(${hx + 42}px,${G - 5}px)`, offset: .23, easing: 'cubic-bezier(.5,0,1,1)' },
-            { transform: `translate(${hx + 52}px,${G}px)`, offset: .27, easing: 'cubic-bezier(.25,.6,.45,1)' },
-            { transform: `translate(${hx + 230}px,${G}px)`, opacity: 1, offset: .84 },
-            { transform: `translate(${hx + 250}px,${G}px)`, opacity: 0 },
-          ], { duration: 1800, fill: 'both' });
-          then(a, () => b.remove());
-        }, 480);
-        setTimeout(() => pop('Turnover', x + 120, 40, '#e3826f', 18), 560); break;
+          b.firstChild.animate([{ fill: BALL_C }, { fill: '#8a8380' }], { duration: 400, delay: 160, fill: 'forwards' });
+          then(b.animate([
+            { transform: `translate(${hx}px,${H}px)`, easing: 'cubic-bezier(.5,0,1,1)' },
+            { transform: `translate(${x + 14}px,${G - 4}px)`, offset: .07, easing: 'cubic-bezier(0,.4,.5,1)' },
+            { transform: `translate(${x + 48}px,${G - 14}px)`, offset: .15, easing: 'cubic-bezier(.5,0,.8,.6)' },
+            { transform: `translate(${x + 80}px,${G}px)`, offset: .23, easing: 'cubic-bezier(.2,.6,.5,1)' },
+            { transform: `translate(${x + 102}px,${G - 6}px)`, offset: .29, easing: 'cubic-bezier(.5,0,.8,.6)' },
+            { transform: `translate(${x + 122}px,${G}px)`, offset: .35, easing: 'cubic-bezier(.25,.6,.45,1)' },
+            { transform: `translate(${x + 280}px,${G}px)`, opacity: 1, offset: .86 },
+            { transform: `translate(${x + 300}px,${G}px)`, opacity: 0 },
+          ], { duration: 1600, fill: 'both' }), () => b.remove());
+        }, 380);
+        setTimeout(() => pop('Turnover', x + 60, 40, '#e3826f', 18), 440); break;
       }
     }
   }
