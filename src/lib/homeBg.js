@@ -75,7 +75,8 @@ export function hoop(c, { dim = 1, glass = '#d8e2f5' } = {}) {
   const b0 = P(0, z1 - .05, bh), b1 = P(0, (pz + az) / 2, (py + ay) / 2 - .05);
   const sw = Math.max(1.5, c.f * .09 / (c.dc - z1));
   const board = q([[-.9, 1.2, 3.95], [.9, 1.2, 3.95], [.9, 1.2, 2.9], [-.9, 1.2, 2.9]]);
-  const boardPad = q([[-.9, 1.2, 2.9], [.9, 1.2, 2.9], [.9, 1.2, 2.78], [-.9, 1.2, 2.78]]);
+  // The pad sits just under the board, behind its white frame.
+  const boardPad = q([[-.9, 1.2, 2.88], [.9, 1.2, 2.88], [.9, 1.2, 2.76], [-.9, 1.2, 2.76]]);
   const box = q([[-.295, 1.2, 3.5], [.295, 1.2, 3.5], [.295, 1.2, 3.05], [-.295, 1.2, 3.05]]);
   const rim = c.line(c.arc(0, 1.575, .23, 0, Math.PI * 2, 1, 3.05, 36));
   const net = Array.from({ length: 8 }, (_, i) => { const a = i / 8 * Math.PI * 2; return c.line([[.23 * Math.sin(a), 1.575 + .23 * Math.cos(a), 3.05], [.13 * Math.sin(a + .4), 1.575 + .13 * Math.cos(a + .4), 2.62]]); }).join('')
@@ -85,8 +86,8 @@ export function hoop(c, { dim = 1, glass = '#d8e2f5' } = {}) {
     <path d="M${f1(b0[0])} ${f1(b0[1])}L${f1(b1[0])} ${f1(b1[1])}" stroke="${S.postS}" stroke-width="${f1(sw)}"/>
     <polygon points="${post}" fill="${S.post}"/><polygon points="${postS}" fill="${S.postS}"/>
     <polygon points="${armMid}" fill="${S.postS}"/><polygon points="${armT}" fill="${S.post}"/>
-    <polygon points="${board}" fill="${glass}" fill-opacity=".22" stroke="#fff" stroke-opacity=".85" stroke-width="1.6"/>
     <polygon points="${boardPad}" fill="${S.pad}"/>
+    <polygon points="${board}" fill="${glass}" fill-opacity=".22" stroke="#fff" stroke-opacity=".85" stroke-width="1.6"/>
     <polygon points="${box}" fill="none" stroke="#fff" stroke-opacity=".85" stroke-width="1.3"/>
     <path d="${net}" stroke="#fff" stroke-opacity=".7" stroke-width=".9" fill="none"/>
     <path d="${rim}" stroke="#ee6018" stroke-width="2.4" fill="none"/></g>`;
