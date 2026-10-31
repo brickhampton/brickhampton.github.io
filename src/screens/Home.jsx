@@ -1,7 +1,7 @@
 import { useLayoutEffect, useRef, useState } from 'react';
 import { P, statPlayers, esc } from '../lib/core.js';
 import { reduced } from '../lib/charts.js';
-import { figure, pxShadow } from '../lib/avatar.js';
+import { figure, pxShadow, raisedTrophy } from '../lib/avatar.js';
 import { ChevDown } from '../components/icons.jsx';
 import { stage } from '../lib/homeStage.js';
 
@@ -47,7 +47,9 @@ function homeScene(cw, ch) {
     // Tapping a player makes them react (see onTap): everything that moves sits in .hpt, over a wide invisible
     // target so a tap anywhere on them counts. Players with free hands can also pump a fist: either one, or both.
     const fist = POSE.hold[id] ? '' : ['fist', 'fistL', 'fist2'].map(k => `<g class="hf hf-${k}">${figure(P(id), { stage: true, pose: k })}</g>`).join('');
-    return `<g class="hp alive" style="${st}">${svg(`${pxShadow(50, 103.5, 22, 104 / 34)}<g class="hpt${fist ? ' can-fist' : ''}" data-id="${id}" role="button" aria-label="${esc(P(id).name)}"><rect x="27" y="10" width="46" height="94" fill="transparent"/><g class="hb">${body}</g>${fist}</g>`)}</g>`; };
+    // The trophy and ball holders get their own: lifting the trophy overhead, or bouncing the ball and spinning it.
+    const own = (HELD[POSE.hold[id]] || []).map(([k, pose]) => `<g class="hx hx-${k}">${figure(P(id), { stage: true, pose })}${k === 't-raise' ? raisedTrophy(P(id)) : ''}</g>`).join('');
+    return `<g class="hp alive" style="${st}">${svg(`${pxShadow(50, 103.5, 22, 104 / 34)}<g class="hpt${fist ? ' can-fist' : ''}" data-id="${id}"${own ? ` data-own="${HELD[POSE.hold[id]].map(([k]) => k).join(' ')}"` : ''} role="button" aria-label="${esc(P(id).name)}"><rect x="27" y="10" width="46" height="94" fill="transparent"/><g class="hb">${body}</g>${fist}${own}</g>`)}</g>`; };
   const COLS = ['#4f7cff', '#eeeeee', '#e9b949', '#9db4ff', '#f4d37c', '#2f55d4'];
   const n = Math.min(110, Math.round(54 * vw * (Math.min(vb, 470) - vy) / (800 * 470)));
   const pieces = Array.from({ length: n }, (_, i) => {
@@ -84,7 +86,8 @@ function homeScene(cw, ch) {
 
 // Tapping a player: they smile and give a little bob straight away. Tap again quickly and they bob with every tap;
 // tap once and wait, and they follow it with a random reaction.
-const REACTS = ['t-hop', 't-wiggle', 't-squash', 't-fist', 't-fistL', 't-fist2'], RAPID = 320;
+const HELD = { trophy: [['t-raise', 'catch']], ball: [['t-dribble'], ['t-twirl', 'spin']] };
+const REACTS = ['t-hop', 't-wiggle', 't-squash', 't-fist', 't-fistL', 't-fist2', 't-raise', 't-dribble', 't-twirl'], RAPID = 320;
 const restart = (el, cls) => { el.classList.remove(cls); void el.getBoundingClientRect(); el.classList.add(cls); };
 function onTap(e, taps) {
   const g = e.target.closest?.('.hpt'); if (!g) return;
@@ -95,9 +98,11 @@ function onTap(e, taps) {
   const done = ms => { t.end = setTimeout(() => g.classList.remove('t-smile', 't-bob', ...REACTS), ms); };
   t.wait = setTimeout(() => {
     if (t.n > 1 || reduced) return done(700);
-    const ks = REACTS.filter(k => k !== t.last && (!k.startsWith('t-fist') || g.classList.contains('can-fist')));
+    // Holders get their own reactions twice in the draw, so they come up often.
+    const own = (g.dataset.own || '').split(' ').filter(Boolean);
+    const ks = [...REACTS.slice(0, 3), ...(g.classList.contains('can-fist') ? REACTS.slice(3, 6) : []), ...own, ...own].filter(k => k !== t.last);
     const k = t.last = ks[Math.floor(Math.random() * ks.length)];
-    g.classList.remove('t-bob'); restart(g, k); done(1300);
+    g.classList.remove('t-bob'); restart(g, k); done(k === 't-dribble' ? 1600 : 1300);
   }, RAPID);
 }
 

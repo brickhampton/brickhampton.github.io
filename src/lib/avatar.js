@@ -350,6 +350,19 @@ function paths(g, layer) {
   return [...runs].map(([c, d]) => `<path d="${d}" fill="${c}"/>`).join('');
 }
 
+// The trophy lifted over the head, to go with the 'catch' pose (both hands up): the hands hold the ends of its base.
+// It sits above the sprite's grid, so it's drawn on its own, in the same pixels and the same 100 × 104 stage box.
+export function raisedTrophy(raw) {
+  const c = cleanLook(raw), tall = TALL[c.height], aw = c.muscle > 1 ? 1 : 0;
+  const hy = 3 + (3 - tall), bx = 8 - Math.ceil(c.weight / 2), fx = bx + 10 + c.weight, ax = bx - 2 - aw;
+  const l = ax + 3 + aw, w = fx - 1 - l, t = hy - 10, G = '#f2c14e', G2 = '#c98f22';
+  const px = (x, y, ww, h, col) => `<rect x="${x}" y="${y}" width="${ww}" height="${h}" fill="${col}"/>`;
+  const m = l + Math.floor(w / 2);
+  return `<g class="av-trophy" transform="translate(50 0) scale(${(104 / FEET).toFixed(4)}) translate(-13 0)" shape-rendering="crispEdges">`
+    + px(l + 1, t, w - 2, 4, G) + px(l + w - 3, t, 2, 4, G2) + px(l + 2, t, 1, 2, '#fff2c4') + px(l, t + 1, 1, 1, G) + px(l + w - 1, t + 1, 1, 1, G)
+    + px(l + 2, t + 4, w - 4, 1, G) + px(m - 1, t + 5, 2, 1, G2) + px(m - 2, t + 6, 4, 1, G) + px(l - 1, t + 7, w + 2, 1, '#4a3418') + '</g>';
+}
+
 const cache = new Map();
 // SVG markup for a player. Round avatars (the default) show the head and the top of the jersey in a 100 × 100 box.
 // opts.stage draws the whole player at their height, feet on the bottom of a 100 × 104 box: the court, the Home
