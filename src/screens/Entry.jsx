@@ -91,12 +91,13 @@ function makeStage() {
   }
   // The player strikes a pose for the action (arm up on a shot, both hands up for a rebound), then relaxes.
   // turned: they face the other way (mirrored), as when they turn up court with a rebound.
-  function actorPose(pose, delay, ms, turned) {
+  function actorPose(pose, delay, ms, turned, after) {
     const id = actor?.dataset.id; if (!id) return;
     setTimeout(() => {
       if (!actor || actor.dataset.id !== id) return;
       const body = actor.querySelector('.body'), f = figure(P(id), { stage: true, pose });
       body.innerHTML = turned ? `<g transform="translate(100 0) scale(-1 1)">${f}</g>` : f;
+      after?.();
       clearTimeout(actor._pose);
       actor._pose = setTimeout(() => { if (actor?.dataset.id === id) actor.querySelector('.body').innerHTML = figure(P(id), { stage: true, pose: 'down' }); }, ms);
     }, delay);
@@ -203,14 +204,18 @@ function makeStage() {
       case '3X': actorMood('celebrate', D); shot(x, 125, 460, false); actorMood('slump', D + 520); break;
       case 'FM': shot(x, 50, 320, true, FT_D); actorMood('celebrate', FT_D + 320); setTimeout(() => pop('+1', RX, 40), FT_D + 320); break;
       case 'FX': shot(x, 50, 320, false, FT_D); actorMood('slump', FT_D + 360); break;
-      case 'OR': { // the player crashes in toward the rim, grabs the miss and holds it up over their head
-        const x0 = 370, x = 486, b = ball();
-        placeActor(sel, true, x0); placeActor(sel, false, x, 380); strides(380);
-        actorPose('catch', 360, 900); actorMood('celebrate', 400);
-        setTimeout(shake, 120);
-        // The ball comes off the rim into both hands and stays held up over the head until the player relaxes.
-        then(fly(b, arc(RX - 14, RY, x + 2, HAND_Y - 24, 30, 10, -160), 300, 'ease-in', 120), () => { b.remove(); holdBall(x + 2, HAND_Y - 24); });
-        setTimeout(() => pop('Gimme dat', x - 70, 34, '#eeeeee', 18), 420); break;
+      case 'OR': { // the player crashes in, jumps toward the basket to grab the miss overhead, then looks left and right
+        const b = ball(), sel0 = sel, mine = () => actor?.dataset.id === sel0;
+        placeActor(sel, true, 370); placeActor(sel, false, 455, 300); strides(300);
+        setTimeout(() => { if (mine()) { actorPose('catch', 0, 1300); leap(0); placeActor(sel0, false, 490, 800); } }, 300);
+        setTimeout(shake, 300);
+        // Off the rim into both hands at the top of the jump; the ball is drawn into the figure so it comes down with them.
+        const hold = () => holdBall(actorX + 2, HAND_Y - 24);
+        then(fly(b, arc(RX - 14, RY, 472, HAND_Y - 68, 24, 10, -160), 300, 'ease-in', 320), () => {
+          b.remove(); if (!mine()) return; hold();
+          actorPose('catch', 520, 250, true, hold); actorPose('catch', 770, 380, false, hold);
+        });
+        setTimeout(() => pop('Gimme dat', 400, 34, '#eeeeee', 18), 560); break;
       }
       case 'DR': { // waiting in the paint, the player pulls down the miss, turns and dribbles it up the other way
         const x = SPOT[k], b = ball(), sel0 = sel;
