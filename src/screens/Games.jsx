@@ -5,12 +5,13 @@ import { Avatar } from '../components/Avatar.jsx';
 import { ChevRight } from '../components/icons.jsx';
 import { PerPill, SeasonPick, MoreBtn, EmptyState } from '../components/ui.jsx';
 
-function SeasonRecord({ games }) {
+// Wins and losses count every game, including ones with no stats. Points a game only counts games with stats.
+function SeasonRecord({ games, withStats }) {
   const w = games.filter(g => g.result === 'W').length, l = games.filter(g => g.result === 'L').length, d = games.filter(g => g.result === 'D').length;
-  const avg = games.reduce((t, g) => t + teamPts(g), 0) / games.length;
+  const avg = withStats.reduce((t, g) => t + teamPts(g), 0) / withStats.length;
   return <>
-    {(w + l + d) ? <><span><b>{w}</b> wins</span><span><b>{l}</b> losses</span>{d ? <span><b>{d}</b> draw{d > 1 ? 's' : ''}</span> : null}</> : <span>Results not recorded</span>}
-    <span><b>{f1(avg)}</b> points a game</span>
+    {(w + l + d) ? <><span><b>{w}</b> win{w === 1 ? '' : 's'}</span><span><b>{l}</b> loss{l === 1 ? '' : 'es'}</span>{d ? <span><b>{d}</b> draw{d > 1 ? 's' : ''}</span> : null}</> : <span>Results not recorded</span>}
+    {withStats.length ? <span><b>{f1(avg)}</b> points a game</span> : null}
   </>;
 }
 
@@ -52,19 +53,19 @@ export function Games() {
       <SeasonPick id="g-chips" value={S.gSeason} seasons={codes} onPick={v => set({ gSeason: v })} /></div>
     {shown.map(code => {
       const list = games.filter(g => g.season === code).slice().reverse();
-      if (!list.length) return null;
       const rowsOf = [...list, ...emptyGames().filter(g => g.season === code)].sort((a, b) => b.no - a.no);
+      if (!rowsOf.length) return null;
       const open = !!S.gOpen?.[code];
       // On All time, each season shows its latest 3 games until expanded. A single season shows everything.
       const visible = S.gSeason !== 'ALL' || open ? rowsOf : rowsOf.slice(0, 3);
       return (
         <div className="season-block" key={code}>
-          <div className="season-h"><span className="code">{code}</span><span className="nm">{seasonName(code)}</span><span className="srec num"><SeasonRecord games={list} /></span></div>
+          <div className="season-h"><span className="code">{code}</span><span className="nm">{seasonName(code)}</span><span className="srec num"><SeasonRecord games={rowsOf} withStats={list} /></span></div>
           {visible.map(g => <GameRow key={g.id} g={g} />)}
           {S.gSeason === 'ALL' && rowsOf.length > 3 ? <MoreBtn data-more={code} open={open} n={rowsOf.length} noun="games" onClick={() => toggle(code)} /> : null}
         </div>
       );
     })}
-    {shown.some(c => games.some(g => g.season === c)) ? null : <EmptyState title={`No ${S.gSeason} games yet`} text="Games show up here as soon as they are recorded." />}
+    {shown.some(c => S.games.some(g => g.season === c)) ? null : <EmptyState title={`No ${S.gSeason} games yet`} text="Games show up here as soon as they are recorded." />}
   </>;
 }
