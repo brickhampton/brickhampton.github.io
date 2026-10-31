@@ -614,6 +614,14 @@ tr.tot td{font-weight:600;border-top:1px solid var(--stroke)}
 @keyframes enter{from{opacity:0;transform:translateY(16px) scale(.92)}}
 @keyframes hop{0%{transform:none}30%{transform:translateY(-18px) rotate(-4deg)}60%{transform:translateY(2px) rotate(2deg)}100%{transform:none}}
 .pid{position:relative;display:flex;flex-direction:column;gap:10px;min-width:0}
+/* Beside the stage, the name ends just above the arena's rail (57.7-61.5% of the stage's height) and the badges start
+   just below it. */
+@media (min-width:701px){
+  .pid{align-self:stretch;display:grid;grid-template-rows:57% auto 1fr;gap:0}
+  .pid .pname{align-self:end}
+  .pid .pbadges{margin-top:18px}
+  .pid .pbdesc{margin-top:10px}
+}
 .pid .team{font-size:15px;font-weight:500;color:var(--granite)}
 .pname{font-size:56px;display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
 .pno{font-size:22px;font-weight:500;letter-spacing:-.01em;color:var(--granite)}
