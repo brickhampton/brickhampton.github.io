@@ -1,8 +1,8 @@
 import { useLayoutEffect, useRef, useState } from 'react';
 import { flushSync } from 'react-dom';
 import { S } from '../lib/store.js';
-import { seasonList, seasonName, lastNo, isStarter } from '../lib/core.js';
-import { rec, change, setupPlayers, syncPlaying, addSub, subNumbers, todayIso, clearRecording } from '../lib/record.js';
+import { seasonList, seasonName, lastNo, isStarter, P } from '../lib/core.js';
+import { rec, change, setupPlayers, syncPlaying, newSub, addSubs, subNumbers, todayIso, clearRecording } from '../lib/record.js';
 import { adminCall } from '../lib/admin.js';
 import { go } from '../lib/nav.js';
 import { Avatar } from '../components/Avatar.jsx';
@@ -38,19 +38,65 @@ function Opponents({ season }) {
   </>;
 }
 
-function AddForm({ onClose }) {
+const Search = () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>;
+
+// How many games each sub has played, and their latest one, newest first.
+function subHistory() {
+  const rank = c => S.seasons.length - S.seasons.indexOf(c), h = {};
+  for (const g of S.games) for (const id of Object.keys(g.rows)) if (!isStarter(id)) {
+    const e = h[id] ||= { n: 0, last: null, k: 0 }, k = rank(g.season) * 100 + g.no;
+    e.n++; if (k > e.k) Object.assign(e, { k, last: g });
+  }
+  return h;
+}
+
+// Add subs: pick from everyone who has subbed before, or make a new one.
+export function SubPicker({ initial = [], making: makeOpen = false, query = '' }) {
+  const R = rec();
+  const [picked, setPicked] = useState(initial);
+  const [q, setQ] = useState(query);
+  const [making, setMaking] = useState(makeOpen);
   const [name, setName] = useState(''), [num, setNum] = useState('');
-  const ref = useRef(null);
-  useLayoutEffect(() => ref.current?.focus(), []);
-  const submit = e => { e.preventDefault(); const n = name.trim(); if (!n) return; addSub(n, num.trim()); onClose(); };
-  return (
-    <div className="ptile addtile"><form className="addform" id="addform" onSubmit={submit}>
-      <input id="add-name" ref={ref} placeholder="Name" required autoComplete="off" value={name} onChange={e => setName(e.target.value)} />
-      <input id="add-num" placeholder="Jersey number" inputMode="numeric" value={num} onChange={e => setNum(e.target.value)} />
-      <button className="btn primary" type="submit">Add sub</button>
-      <button className="btn ghost" type="button" id="add-cancel" onClick={onClose}>Cancel</button>
-    </form></div>
-  );
+  const [fresh, setFresh] = useState([]);
+  const hist = subHistory();
+  const list = S.subs.slice().sort((a, b) => fresh.includes(b.id) - fresh.includes(a.id) || (hist[b.id]?.k || 0) - (hist[a.id]?.k || 0) || a.name.localeCompare(b.name));
+  const t = q.trim().toLowerCase();
+  const shown = list.filter(p => !t || p.name.toLowerCase().includes(t));
+  const flip = id => setPicked(picked.includes(id) ? picked.filter(x => x !== id) : [...picked, id]);
+  const create = e => { e.preventDefault(); const n = name.trim(); if (!n) return; const p = newSub(n, num.trim()); setFresh([p.id, ...fresh]); setPicked([...picked, p.id]); setName(''); setNum(''); setMaking(false); setQ(''); };
+  const meta = p => R.todaySubs.includes(p.id) ? 'In this game' : fresh.includes(p.id) ? 'New sub' : hist[p.id] ? `${hist[p.id].n} game${hist[p.id].n > 1 ? 's' : ''} · ${hist[p.id].last.season} G${hist[p.id].last.no}` : 'No games yet';
+  const k = picked.length;
+  return <div className="subpick">
+    <button className="xbtn" type="button" aria-label="Close" onClick={closeSheet}><X width="18" height="18" /></button>
+    <h2>Add subs</h2><p className="sheet-sub">Tap everyone who subbed in today, or add someone new.</p>
+    <div className="subtools">
+      <label className="subsearch"><Search /><input placeholder="Search subs" autoComplete="off" value={q} onChange={e => setQ(e.target.value)} /></label>
+      {!making && <button className="btn pill" type="button" onClick={() => setMaking(true)}><span className="pplus">+</span>New sub</button>}
+    </div>
+    {making && <form className="newsub" onSubmit={create}>
+      <div className="newsub-h"><b>New sub</b><span>They’ll be saved to the subs list for next time.</span></div>
+      <div className="newsub-row">
+        <input placeholder="Name" autoFocus required autoComplete="off" value={name} onChange={e => setName(e.target.value)} />
+        <input className="nnum" placeholder="Jersey number" inputMode="numeric" value={num} onChange={e => setNum(e.target.value)} />
+        <button className="btn primary pill" type="submit">Add</button>
+        <button className="btn pill" type="button" onClick={() => setMaking(false)}>Cancel</button>
+      </div>
+    </form>}
+    <div className="subgrid">
+      {shown.map(p => {
+        const inGame = R.todaySubs.includes(p.id), on = inGame || picked.includes(p.id);
+        return <button key={p.id} type="button" className={`subcard${inGame ? ' in' : ''}`} aria-pressed={on} disabled={inGame} onClick={() => flip(p.id)}>
+          <Avatar id={p.id} /><span className="sc-t"><span className="nm">{p.name}</span><span className={`meta${fresh.includes(p.id) ? ' new' : ''}`}>{meta(p)}</span></span>
+          <span className="tick"><Tick /></span>
+        </button>;
+      })}
+      {!shown.length && <div className="subnone">No subs called “{q.trim()}”. <button type="button" onClick={() => { setName(q.trim()); setMaking(true); }}>Add them as a new sub</button></div>}
+    </div>
+    <div className="actions subacts">
+      <button className="btn pill" type="button" onClick={closeSheet}>Cancel</button>
+      <button className="btn primary pill" type="button" disabled={!k} onClick={() => { addSubs(picked); closeSheet(); }}>{k ? `Add ${k} sub${k > 1 ? 's' : ''}` : 'Pick a sub'}</button>
+    </div>
+  </div>;
 }
 
 export const startRecording = () => {
@@ -126,7 +172,6 @@ function useTileDrag(grid) {
 
 export function Setup() {
   const R = rec();
-  const [adding, setAdding] = useState(false);
   const [dateErr, setDateErr] = useState(false);
   const grid = useRef(null);
   const suppress = useTileDrag(grid);
@@ -140,7 +185,7 @@ export function Setup() {
     <div className="wrap setup">
       <div>
         <h1 className="page">Who played today?</h1>
-        <p className="lede">Every starter is starred. Tap anyone who missed the game to take them out. Add player brings in a sub for this game only. Hold a starter and drag them to change the order they appear in.</p>
+        <p className="lede">Every starter is starred. Tap anyone who missed the game to take them out. Add subs picks from past subs or adds a new one, for this game only. Hold a starter and drag them to change the order they appear in.</p>
       </div>
       <div className="fields">
         <div className="field"><label htmlFor="f-season">Season</label>
@@ -168,8 +213,7 @@ export function Setup() {
             </button>
           );
         })}
-        {adding ? <AddForm onClose={() => setAdding(false)} />
-          : <button className="ptile addtile" id="add" onClick={() => setAdding(true)}><span className="plus">+</span><span>Add player</span></button>}
+        <button className="ptile addtile" id="add" onClick={() => openSheet(<SubPicker />, { cls: 'subs' })}><span className="plus">+</span><span>Add subs</span></button>
       </div>
       <div className="startrow">
         <button className="btn primary" id="start" disabled={!n} onClick={startWarning}>{n ? `Start recording with ${n} player${n > 1 ? 's' : ''}` : 'Tick at least one player'}</button>

@@ -1149,3 +1149,44 @@ button:hover .lid,button:focus-visible .lid,button:active .lid{transform:transla
 @keyframes hTurn{20%,80%{transform:translateX(var(--tx,-1.5px)) rotate(var(--tr,-4deg))}}
 .hpt.t-turn .av-eyes{animation:blink 5s var(--bd,0s) infinite, eyesOff var(--sl,13s) var(--sd,0s) infinite, hTurnEyes 1.8s steps(1)}
 @keyframes hTurnEyes{0%,15%{translate:0}20%,80%{translate:var(--te,-3px) 0}85%,100%{translate:0}}
+
+/* Add subs sheet: past subs as soft cards, with search and a New sub pill */
+.btn.pill{border-radius:999px;height:42px;padding:0 18px;background:var(--lift2);box-shadow:inset 0 1px 0 rgba(255,255,255,.05)}
+.btn.pill:not(:disabled):hover{background:#302b29}
+.btn.primary.pill{background:var(--bone);color:var(--canvas)}
+.btn.pill .pplus{font-size:20px;line-height:1;margin-top:-2px;color:var(--stone)}
+.panel.subs{width:min(840px,100%);display:flex;flex-direction:column}
+.subpick{display:flex;flex-direction:column;min-height:0}
+.subtools{display:flex;gap:10px;align-items:center;margin-bottom:14px}
+.subsearch{flex:1;min-width:0;display:flex;align-items:center;gap:8px;height:42px;padding:0 16px;border-radius:999px;background:var(--canvas);box-shadow:inset 0 0 0 1px var(--lift2);color:var(--granite)}
+.subsearch input{flex:1;min-width:0;border:0;background:none;outline:none;font-size:16px;color:var(--bone)}
+.newsub{background:var(--lift2);border-radius:16px;padding:14px;margin-bottom:14px;animation:rise .25s var(--ease-out)}
+.newsub-h{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;margin-bottom:10px}
+.newsub-h b{font-weight:500}.newsub-h span{color:var(--granite);font-size:13px}
+.newsub-row{display:flex;gap:8px;flex-wrap:wrap}
+.newsub-row input{flex:2 1 160px;min-width:0;height:42px;border-radius:999px;border:0;box-shadow:inset 0 0 0 1px var(--stroke);background:var(--lift);padding:0 16px;font-size:16px;outline:none}
+.newsub-row input.nnum{flex:1 1 120px}
+.newsub-row .btn.pill:not(.primary){background:var(--lift)}
+.subgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px;overflow:auto;max-height:52vh;padding:2px;margin:-2px}
+.subcard{position:relative;display:flex;align-items:center;gap:12px;padding:8px 44px 8px 8px;border-radius:14px;background:var(--lift2);text-align:left;min-width:0;transition:background .2s,box-shadow .2s,transform .15s var(--ease-out)}
+.subcard:active{transform:scale(.97)}
+.subcard .av-wrap{width:52px;height:52px;flex:none;border-radius:50%;background:#2f2a28;overflow:hidden}
+.subcard .sc-t{display:flex;flex-direction:column;gap:2px;min-width:0}
+.subcard .nm{font-weight:500;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.subcard .meta{font-family:var(--mono);font-size:11.5px;color:var(--granite);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.subcard .meta.new{color:#9db4ff}
+.subcard .tick{position:absolute;right:12px;top:50%;margin-top:-13px;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;box-shadow:inset 0 0 0 1.5px var(--mid);color:transparent;transition:background .2s,transform .2s var(--ease-out)}
+.subcard[aria-pressed="true"]{background:rgba(57,105,230,.18);box-shadow:inset 0 0 0 1.5px rgba(120,150,255,.6)}
+.subcard[aria-pressed="true"] .tick{background:var(--bone);color:var(--canvas);box-shadow:none}
+.subcard.in{opacity:.5;box-shadow:none;background:var(--lift2)}
+.subcard.in .tick{background:var(--mid);color:var(--bone)}
+.subnone{grid-column:1/-1;color:var(--granite);padding:14px 4px}
+.subnone button{color:#9db4ff;text-decoration:underline;text-underline-offset:3px}
+.panel .subacts{margin-top:16px}
+@media (max-width:560px){
+  .subgrid{grid-template-columns:1fr;max-height:none}
+  .panel.subs{padding:20px 16px 16px}
+  .subtools .btn.pill{padding:0 14px}
+  .subacts .btn.pill{flex:1;justify-content:center}
+  .newsub-row .btn.pill{flex:1;justify-content:center}
+}
