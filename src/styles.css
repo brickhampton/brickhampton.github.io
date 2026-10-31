@@ -1044,7 +1044,7 @@ button:hover .lid,button:focus-visible .lid,button:active .lid{transform:transla
 /* Tapping a player on Home: a smile and a quick bob on every tap, then one of a few reactions after a single tap: a hop, a wiggle, a squash and stretch, or a fist pump with either arm or both. */
 .hpt{cursor:pointer;transform-box:fill-box;transform-origin:50% 100%;-webkit-tap-highlight-color:transparent}
 .hpt:focus{outline:none}
-.hpt .hf{display:none}
+.hpt :is(.hf,.hx){display:none}
 .hpt.t-smile .av-smile{animation:none;opacity:1}
 .hpt.t-smile .av-eyes{animation:none;opacity:0}
 .hpt.t-bob{animation:tBob .26s cubic-bezier(.3,.7,.4,1)}
@@ -1054,6 +1054,10 @@ button:hover .lid,button:focus-visible .lid,button:active .lid{transform:transla
 @keyframes tWiggle{20%{transform:rotate(-7deg)}40%{transform:rotate(6deg)}60%{transform:rotate(-5deg)}80%{transform:rotate(3deg)}}
 .hpt.t-squash{animation:tSquash .8s ease-out}
 @keyframes tSquash{15%{transform:scale(1.14,.84)}40%{transform:scale(.9,1.12) translateY(-22px)}65%{transform:scale(1.1,.9)}85%{transform:scale(.97,1.03)}100%{transform:none}}
-.hpt:is(.t-fist,.t-fistL,.t-fist2) .hb{display:none}
+.hpt:is(.t-fist,.t-fistL,.t-fist2,.t-raise,.t-dribble,.t-twirl) .hb{display:none}
 .hpt.t-fist .hf-fist,.hpt.t-fistL .hf-fistL,.hpt.t-fist2 .hf-fist2{display:inline}
-.hpt:is(.t-fist,.t-fistL,.t-fist2){animation:tBob .4s cubic-bezier(.3,.7,.4,1) 2}
+.hpt:is(.t-fist,.t-fistL,.t-fist2,.t-raise){animation:tBob .4s cubic-bezier(.3,.7,.4,1) 2}
+/* J. Yao lifts the trophy over his head; G. Lim bounces the ball or spins it on a finger. */
+.hpt.t-raise .hx-t-raise,.hpt.t-dribble .hx-t-dribble,.hpt.t-twirl .hx-t-twirl{display:inline}
+.hpt.t-dribble .av-ball{animation:pxDribble .5s cubic-bezier(.5,0,.5,1) 3}
+.hpt.t-twirl .av-ball{transform-box:fill-box;transform-origin:center;animation:ballSpin .24s steps(2,jump-none) infinite}
