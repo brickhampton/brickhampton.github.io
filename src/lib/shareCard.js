@@ -1,7 +1,7 @@
 // The box score share image: the player of the game celebrating in the arena, then the full box score.
 // Drawn on a canvas (1080 wide, at 2×) so it can be shared or saved as a PNG.
 import { P, calc, sumRows, ratio, pctTxt, perTxt, perCls, tier, fmtDate, RES, numIn, teamFeat } from './core.js';
-import { figure } from './avatar.js';
+import { figure, raisedBall, trickExtras } from './avatar.js';
 import { playerCourt } from './playerCourt.js';
 import { playerOfGame } from './potg.js';
 
@@ -31,8 +31,8 @@ const PER_COL = { 'p-great': [C.green, '#132010'], 'p-good': [C.goodBg, C.green]
 const TIER_COL = { 't-good': C.green, 't-poor': C.neg };
 
 // Little pixel confetti round the player: royal, white and gold squares, placed the same way every time.
-function confetti(cx, cy) {
-  let s = 7; const rnd = () => (s = (s * 16807) % 2147483647) / 2147483647, cols = ['#2f55d4', '#4f7cff', '#ffffff', '#e9b949', '#f4d37c'];
+function confetti(cx, cy, seed = 7) {
+  let s = seed; const rnd = () => (s = (s * 16807) % 2147483647) / 2147483647, cols = ['#2f55d4', '#4f7cff', '#ffffff', '#e9b949', '#f4d37c'];
   let out = '';
   for (let i = 0; i < 46; i++) {
     const a = rnd() * Math.PI * 2, d = 70 + rnd() * 120, x = cx + Math.cos(a) * d * 1.25, y = cy - 40 + Math.sin(a) * d * .75;
@@ -43,6 +43,19 @@ function confetti(cx, cy) {
   return out;
 }
 
+// The ways the player of the game can celebrate. One is picked at random each time the image is made.
+export const CELEBRATIONS = [
+  { pose: 'fist2', label: 'Both fists up' },
+  { pose: 'fist', label: 'Fist pump' },
+  { pose: 'fistL', label: 'Fist pump, other arm' },
+  { pose: 'catch', ball: true, label: 'Ball held up high' },
+  { pose: 'spin', trick: 'spin', label: 'Spinning the ball on a finger' },
+  { pose: 'dribble', label: 'Palming the ball' },
+  { pose: 'down', behind: 'behind', label: 'Ball round the back' },
+  { pose: 'ball', label: 'Ball under the arm' },
+];
+export const randomCelebration = not => { const l = CELEBRATIONS.filter(c => c !== not); return l[Math.floor(Math.random() * l.length)]; };
+
 // Box score columns: the same as the Game page, with each made-attempted pair and its % sharing one cell.
 const COLS = [
   { k: 'per', l: 'PER' }, { k: 'pts', l: 'PTS', hi: 1 }, { k: 'reb', l: 'REB', hi: 1 }, { k: 'ast', l: 'AST', hi: 1 }, { k: 'stl', l: 'STL', hi: 1 }, { k: 'blk', l: 'BLK', hi: 1 },
@@ -52,12 +65,12 @@ const COLS = [
   { k: 'ts', l: 'TS%', ts: 1 },
 ];
 
-export async function drawShareCard(g, games) {
+export async function drawShareCard(g, games, cel = randomCelebration()) {
   await Promise.all([font(400, 20), font(500, 20), font(600, 20), font(700, 20), font(400, 20, MONO), font(500, 20, MONO)].map(f => document.fonts.load(f).catch(() => {})));
   const rows = Object.entries(g.rows).map(([id, c]) => ({ id, s: calc(c), num: numIn(g, id) ?? P(id).num })), t = sumRows(Object.values(g.rows));
   const potg = playerOfGame(g, games), star = P(potg.id), feat = teamFeat(g, games);
 
-  const HEAD = 196, HERO = 560, ROW = 66, BOX_TOP = HEAD + HERO + 20, TH = 52;
+  const HEAD = 196, HERO = 400, ROW = 66, BOX_TOP = HEAD + HERO + 4, TH = 52;
   const H = BOX_TOP + 64 + TH + ROW * (rows.length + 1) + 72;
   const cv = document.createElement('canvas'); cv.width = W * SCALE; cv.height = H * SCALE;
   const ctx = cv.getContext('2d'); ctx.scale(SCALE, SCALE);
@@ -80,38 +93,46 @@ export async function drawShareCard(g, games) {
 
   // ---- Player of the game: the arena, the spotlight, the player celebrating ----
   // The backdrop is the player page's arena, in its own units (feet at 130, 226), with the player 1.976× a 100 × 104 box.
-  const vx = -52, vw = 600, vh = vw * HERO / W, vy = 226 - vh * .86;
-  const fig = smiling(figure({ ...star, num: numIn(g, potg.id) ?? star.num }, { stage: true, pose: 'fist2' }));
-  const spot = `<defs><radialGradient id="sp" cx="130" cy="120" r="150" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#fff" stop-opacity=".16"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
-    <linearGradient id="beam" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".12"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient></defs>
-    <path d="M100 ${vy}L160 ${vy}L230 226L30 226Z" fill="url(#beam)"/><circle cx="130" cy="120" r="150" fill="url(#sp)"/>`;
-  const shade = `<defs><linearGradient id="sh" x1="0" x2="1" y1="0" y2="0"><stop offset="0" stop-color="#101010" stop-opacity="0"/><stop offset=".45" stop-color="#101010" stop-opacity=".72"/><stop offset="1" stop-color="#101010" stop-opacity=".8"/></linearGradient><linearGradient id="bt" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#101010"/><stop offset="1" stop-color="#101010" stop-opacity="0"/></linearGradient></defs><rect x="250" y="${vy}" width="400" height="${vh}" fill="url(#sh)"/><rect x="${vx}" y="${vy}" width="${vw}" height="18" fill="url(#bt)"/>`;
-  const hero = `${playerCourt()}${shade}${spot}${confetti(130, 120)}<g transform="translate(31.2 20.8) scale(1.976)">${fig}</g>`;
-  const heroIm = await svgImage(hero, `${vx} ${vy.toFixed(1)} ${vw} ${vh.toFixed(1)}`, W * SCALE, HERO * SCALE);
+  // 1.22 px to a unit puts the player at about 250 px tall, standing on the centre circle on the left.
+  const K = 1.22, vw = W / K, vh = HERO / K, vx = 130 - 250 / K, vy = 226 + 52 - vh;
+  const look = { ...star, num: numIn(g, potg.id) ?? star.num };
+  const fig = smiling(figure(look, { stage: true, pose: cel.pose }));
+  const spot = `<defs><radialGradient id="sp" cx="130" cy="120" r="130" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#fff" stop-opacity=".14"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+    <linearGradient id="beam" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".1"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient></defs>
+    <path d="M105 ${vy.toFixed(1)}L155 ${vy.toFixed(1)}L220 226L40 226Z" fill="url(#beam)"/><circle cx="130" cy="120" r="130" fill="url(#sp)"/>`;
+  const player = `<g transform="translate(31.2 20.8) scale(1.976)">${cel.ball ? raisedBall(look) : ''}${cel.behind ? trickExtras(look, 'behind') : ''}${fig}${cel.trick ? trickExtras(look, cel.trick) : ''}</g>`;
+  const hero = `${playerCourt()}${spot}${confetti(130, 120, 1 + Math.floor(Math.random() * 9999))}${player}`;
+  const heroIm = await svgImage(hero, `${vx.toFixed(1)} ${vy.toFixed(1)} ${vw.toFixed(1)} ${vh.toFixed(1)}`, W * SCALE, HERO * SCALE);
   ctx.imageSmoothingEnabled = false; ctx.drawImage(heroIm, 0, HEAD, W, HERO); ctx.imageSmoothingEnabled = true;
+  // Blend the arena into the page: fade it out at the top, the left, the bottom, and under the words on the right.
+  const fade = (x0, y0, x1, y1, stops) => { const gr = ctx.createLinearGradient(x0, y0, x1, y1); stops.forEach(([o, a]) => gr.addColorStop(o, `rgba(16,16,16,${a})`)); return gr; };
+  ctx.fillStyle = fade(0, HEAD, 0, HEAD + 24, [[0, 1], [1, 0]]); ctx.fillRect(0, HEAD, W, 24);
+  ctx.fillStyle = fade(0, 0, 150, 0, [[0, 1], [.35, .75], [1, 0]]); ctx.fillRect(0, HEAD, 150, HERO);
+  ctx.fillStyle = fade(0, HEAD + HERO - 130, 0, HEAD + HERO, [[0, 0], [.6, .8], [1, 1]]); ctx.fillRect(0, HEAD + HERO - 130, W, 130);
+  ctx.fillStyle = fade(420, 0, W, 0, [[0, 0], [.3, .7], [1, .88]]); ctx.fillRect(420, HEAD, W - 420, HERO);
 
-  const tx = 560; let ty = HEAD + 116;
+  const tx = 500; let ty = HEAD + 104;
   ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
-  ctx.fillStyle = C.gold; ctx.font = font(500, 20, MONO); ctx.letterSpacing = '3px'; ctx.fillText('PLAYER OF THE GAME', tx, ty); ctx.letterSpacing = '0px';
-  ty += 70; ctx.fillStyle = C.bone; ctx.font = font(600, 64); ctx.letterSpacing = '-2px'; ctx.fillText(star.name, tx, ty); ctx.letterSpacing = '0px';
-  ty += 26;
+  ctx.fillStyle = C.gold; ctx.font = font(500, 16, MONO); ctx.letterSpacing = '3px'; ctx.fillText('PLAYER OF THE GAME', tx, ty); ctx.letterSpacing = '0px';
+  ty += 52; ctx.fillStyle = C.bone; ctx.font = font(600, 46); ctx.letterSpacing = '-1.5px'; ctx.fillText(star.name, tx, ty); ctx.letterSpacing = '0px';
+  ty += 18;
   const [pb, pf] = PER_COL[perCls(potg.s.per)];
-  const pw = pill(ctx, tx, ty, `${perTxt(potg.s.per, true)} PER`, { bg: pb, fg: pf, f: font(600, 26), h: 48, px: 16, r: 10 });
-  ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic'; ctx.fillStyle = C.stone; ctx.font = font(400, 22);
-  if (potg.why) ctx.fillText(potg.why, tx + pw + 16, ty + 32);
-  ty += 98;
+  const pw = pill(ctx, tx, ty, `${perTxt(potg.s.per, true)} PER`, { bg: pb, fg: pf, f: font(600, 20), h: 38, px: 12, r: 8 });
+  ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic'; ctx.fillStyle = C.stone; ctx.font = font(400, 18);
+  if (potg.why) ctx.fillText(potg.why, tx + pw + 14, ty + 25);
+  ty += 80;
   // The line: points, rebounds, assists, then steals and blocks if they had any.
-  const line = [['pts', 'PTS'], ['reb', 'REB'], ['ast', 'AST'], ['stl', 'STL'], ['blk', 'BLK']].filter(([k], i) => i < 3 || potg.s[k] > 0).slice(0, 4);
+  const line = [['pts', 'PTS'], ['reb', 'REB'], ['ast', 'AST'], ['stl', 'STL'], ['blk', 'BLK']].filter(([k], i) => i < 3 || potg.s[k] > 0).slice(0, 5);
   let lx = tx;
   for (const [k, l] of line) {
-    ctx.fillStyle = C.bone; ctx.font = font(500, 46); ctx.letterSpacing = '-1px'; ctx.fillText(String(potg.s[k]), lx, ty); const vw2 = ctx.measureText(String(potg.s[k])).width; ctx.letterSpacing = '0px';
-    ctx.fillStyle = C.granite; ctx.font = font(400, 17, MONO); ctx.fillText(l, lx, ty + 28);
-    lx += Math.max(vw2, 40) + 44;
+    ctx.fillStyle = C.bone; ctx.font = font(500, 34); ctx.letterSpacing = '-1px'; ctx.fillText(String(potg.s[k]), lx, ty); const vw2 = ctx.measureText(String(potg.s[k])).width; ctx.letterSpacing = '0px';
+    ctx.fillStyle = C.granite; ctx.font = font(400, 14, MONO); ctx.fillText(l, lx, ty + 22);
+    lx += Math.max(vw2, 32) + 34;
   }
-  ty += 62; lx = tx;
+  ty += 46; lx = tx;
   for (const tg of potg.tags) {
     const [bg, fg] = tg.t === 'high' ? ['rgba(233,185,73,.15)', C.gold] : ['rgba(47,85,212,.22)', '#c7d4ff'];
-    lx += pill(ctx, lx, ty, tg.label, { bg, fg, f: font(500, 18), h: 36, px: 14, r: 18 }) + 10;
+    lx += pill(ctx, lx, ty, tg.label, { bg, fg, f: font(500, 15), h: 30, px: 12, r: 15 }) + 8;
   }
 
   // ---- The full box score ----
@@ -161,5 +182,5 @@ export async function drawShareCard(g, games) {
   // ---- Where it's from ----
   ctx.textAlign = 'right'; ctx.textBaseline = 'alphabetic'; ctx.fillStyle = C.granite; ctx.font = font(400, 17, MONO);
   ctx.fillText('brickhampton.github.io', W - PAD, H - 30);
-  return { canvas: cv, potg, name: `Brickhampton ${g.season} G${g.no} vs ${g.opp}.png` };
+  return { canvas: cv, potg, cel, name: `Brickhampton ${g.season} G${g.no} vs ${g.opp}.png` };
 }

@@ -367,6 +367,27 @@ export function raisedTrophy(raw) {
     + px(l + 2, t + 4, w - 4, 1, G) + px(m - 1, t + 5, 2, 1, G2) + px(m - 2, t + 6, 4, 1, G) + px(l - 1, t + 7, w + 2, 1, '#4a3418') + '</g>';
 }
 
+// A ball held up over the head, to go with the 'catch' pose (both hands up): drawn behind the hands, between them.
+export function raisedBall(raw) {
+  const c = cleanLook(raw), tall = TALL[c.height], aw = c.muscle > 1 ? 1 : 0;
+  const hy = 3 + (3 - tall), bx = 8 - Math.ceil(c.weight / 2), fx = bx + 10 + c.weight, ax = bx - 2 - aw;
+  const l = ax + 3 + aw, w = fx - 1 - l, m = l + Math.floor(w / 2), t = hy - 8;
+  return `<g class="av-ballup" transform="translate(50 0) scale(${(104 / FEET).toFixed(4)}) translate(-13 0)" shape-rendering="crispEdges">`
+    + BALL.map(([o, bw], j) => `<rect x="${m - 3 + o}" y="${t + j}" width="${bw}" height="1" fill="${BALL_C}"/>`).join('') + '</g>';
+}
+
+// Extras for the share image's ball tricks, in the sprite's pixels. 'spin': motion marks round the ball spinning on a
+// finger. 'behind': the ball coming round the player's back (drawn behind the body), with a streak where it has been.
+export function trickExtras(raw, kind) {
+  const c = cleanLook(raw), tall = TALL[c.height], hy = 3 + (3 - tall), ty = hy + 11, bx = 8 - Math.ceil(c.weight / 2), fx = bx + 10 + c.weight;
+  const px = (x, y, w, h, col, o = 1) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${col}" opacity="${o}"/>`;
+  let out = '';
+  if (kind === 'spin') out = px(fx - 4, hy - 2, 1, 2, '#fff', .7) + px(fx - 5, hy, 1, 1, '#fff', .45) + px(fx + 6, hy - 1, 1, 2, '#fff', .7) + px(fx + 7, hy - 3, 1, 1, '#fff', .45)
+    + px(fx - 1, hy - 5, 3, 1, '#fff', .55);
+  if (kind === 'behind') { BALL.forEach(([o, w], j) => { out += px(bx - 7 + o, ty + 6 + j, w, 1, BALL_C); }); out += px(bx - 10, ty + 7, 2, 1, '#fff', .6) + px(bx - 12, ty + 9, 3, 1, '#fff', .45) + px(bx - 10, ty + 11, 2, 1, '#fff', .6); }
+  return `<g class="av-trick" transform="translate(50 0) scale(${(104 / FEET).toFixed(4)}) translate(-13 0)" shape-rendering="crispEdges">${out}</g>`;
+}
+
 const cache = new Map();
 // SVG markup for a player. Round avatars (the default) show the head and the top of the jersey in a 100 × 100 box.
 // opts.stage draws the whole player at their height, feet on the bottom of a 100 × 104 box: the court, the Home
