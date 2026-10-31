@@ -257,14 +257,24 @@ function makeStage() {
         });
         setTimeout(() => pop('Rejected!', SPOT.BK, 34, '#eeeeee', 18), 280); break;
       }
-      case 'TO': { // the ball slips loose, bounces a few times lower and lower, then slowly rolls away and fades by the hoop's post
-        const x = SPOT[k], b = ball('#8a8380'), G = FLOOR - 9; actorMood('slump', 220);
-        const up = 'cubic-bezier(.3,.6,.5,1)', down = 'cubic-bezier(.5,0,.7,.4)';
-        const keys = [[x + 20, FLOOR - 30, 0, down], [x + 44, G, .1, up], [x + 72, G - 30, .2, down], [x + 100, G, .3, up], [x + 120, G - 15, .37, down],
-          [x + 140, G, .44, up], [x + 152, G - 6, .48, down], [x + 164, G, .52, 'cubic-bezier(.2,.5,.4,1)'], [575, G, .92], [600, G, 1]];
-        const a = b.animate(keys.map(([kx, ky, offset, easing], i) => ({ transform: `translate(${kx}px,${ky}px)`, opacity: i === keys.length - 1 ? 0 : 1, offset, ...(easing && { easing }) })),
-          { duration: 1900, delay: D, fill: 'both' });
-        then(a, () => b.remove());
+      case 'TO': { // the player is dribbling, the ball comes off their hand wrong, hits the floor and rolls away to the right
+        const x = SPOT[k], G = FLOOR - 9, hx = x + 22, sel0 = sel;
+        actorPose('dribble', 0, 260); dribbles(0, 1);
+        setTimeout(() => {
+          if (actor?.dataset.id !== sel0) return;
+          actorPose('down', 0, 900); actorMood('slump', 120);
+          const b = ball();
+          // Down off the hand, one small skip, then a long roll that slows and fades.
+          const a = b.animate([
+            { transform: `translate(${hx}px,${FLOOR - 24}px)`, easing: 'cubic-bezier(.5,0,1,1)' },
+            { transform: `translate(${hx + 8}px,${G}px)`, offset: .05, easing: 'cubic-bezier(0,0,.5,1)' },
+            { transform: `translate(${hx + 22}px,${G - 7}px)`, offset: .13, easing: 'cubic-bezier(.5,0,1,1)' },
+            { transform: `translate(${hx + 34}px,${G}px)`, offset: .18, easing: 'cubic-bezier(.25,.6,.45,1)' },
+            { transform: `translate(${hx + 230}px,${G}px)`, opacity: 1, offset: .82 },
+            { transform: `translate(${hx + 250}px,${G}px)`, opacity: 0 },
+          ], { duration: 1800, fill: 'both' });
+          then(a, () => b.remove());
+        }, 200);
         setTimeout(() => pop('Turnover', x + 120, 40, '#e3826f', 18), 300); break;
       }
     }
