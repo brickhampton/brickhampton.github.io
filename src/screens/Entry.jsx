@@ -264,36 +264,26 @@ function makeStage() {
         });
         setTimeout(() => pop('Rejected!', SPOT.BK, 34, '#eeeeee', 18), 280); break;
       }
-      case 'TO': { // stripped: a defender closes in from the right while the player dribbles and pokes the ball loose
+      case 'TO': { // off the foot: on a dribble the ball comes down on the player's shoe and squirts away to the right
         const x = SPOT[k], G = FLOOR - 9, H = FLOOR - 24, hx = x + 22, sel0 = sel;
-        actorPose('dribble', 0, 420); dribbles(0, 2);
-        // The defender, in an opponent's red, faces left at the player and comes in fast, then reaches with one arm.
-        const opp = (pose) => `<g transform="translate(100 0) scale(-1 1)">${figure({ ...MATE, hair: '#1c1714', num: '' }, { stage: true, pose })}</g>`.replaceAll('#2f55d4', '#a33a2e').replaceAll('#2644aa', '#822e25');
-        const def = mk('g', {}), inner = mk('g', { transform: `scale(${SC})` }, def);
-        inner.innerHTML = opp('down');
-        def.animate([{ transform: `translate(${x + 120 - 50 * SC}px,${FLOOR - 104 * SC}px)`, opacity: 0 }, { transform: `translate(${x + 52 - 50 * SC}px,${FLOOR - 104 * SC}px)`, opacity: .85, offset: .3 },
-          { transform: `translate(${x + 46 - 50 * SC}px,${FLOOR - 104 * SC}px)`, opacity: .85, offset: .8 }, { transform: `translate(${x + 46 - 50 * SC}px,${FLOOR - 104 * SC}px)`, opacity: 0 }], { duration: 1300, fill: 'forwards' });
-        setTimeout(() => { inner.innerHTML = opp('pass'); }, 340);
-        setTimeout(() => { inner.innerHTML = opp('down'); }, 620);
-        setTimeout(() => def.remove(), 1350);
+        actorPose('dribble', 0, 400); dribbles(0, 2);
         setTimeout(() => {
           if (actor?.dataset.id !== sel0) return;
-          actorPose('down', 0, 900); actorMood('slump', 120);
-          burst(hx + 4, H, '#eeeeee');
+          actorPose('down', 0, 900); actorMood('slump', 160);
           const b = ball();
-          // It goes grey once it's gone: the possession is lost.
-          b.firstChild.animate([{ fill: BALL_C }, { fill: '#8a8380' }], { duration: 400, delay: 100, fill: 'forwards' });
+          b.firstChild.animate([{ fill: BALL_C }, { fill: '#8a8380' }], { duration: 400, delay: 160, fill: 'forwards' });
           then(b.animate([
-            { transform: `translate(${hx}px,${H}px)`, easing: 'cubic-bezier(.2,.6,.5,1)' },
-            { transform: `translate(${hx + 20}px,${H - 22}px)`, offset: .1, easing: 'cubic-bezier(.5,0,.8,.6)' },
-            { transform: `translate(${hx + 70}px,${G}px)`, offset: .24, easing: 'cubic-bezier(.2,.6,.5,1)' },
-            { transform: `translate(${hx + 100}px,${G - 16}px)`, offset: .34, easing: 'cubic-bezier(.5,0,.8,.6)' },
-            { transform: `translate(${hx + 130}px,${G}px)`, offset: .44, easing: 'cubic-bezier(.25,.6,.45,1)' },
-            { transform: `translate(${hx + 260}px,${G}px)`, opacity: 1, offset: .86 },
-            { transform: `translate(${hx + 280}px,${G}px)`, opacity: 0 },
-          ], { duration: 1500, fill: 'both' }), () => b.remove());
-        }, 400);
-        setTimeout(() => pop('Stripped', x + 60, 40, '#e3826f', 18), 440); break;
+            { transform: `translate(${hx}px,${H}px)`, easing: 'cubic-bezier(.5,0,1,1)' },
+            { transform: `translate(${x + 14}px,${G - 4}px)`, offset: .07, easing: 'cubic-bezier(0,.4,.5,1)' },
+            { transform: `translate(${x + 48}px,${G - 14}px)`, offset: .15, easing: 'cubic-bezier(.5,0,.8,.6)' },
+            { transform: `translate(${x + 80}px,${G}px)`, offset: .23, easing: 'cubic-bezier(.2,.6,.5,1)' },
+            { transform: `translate(${x + 102}px,${G - 6}px)`, offset: .29, easing: 'cubic-bezier(.5,0,.8,.6)' },
+            { transform: `translate(${x + 122}px,${G}px)`, offset: .35, easing: 'cubic-bezier(.25,.6,.45,1)' },
+            { transform: `translate(${x + 280}px,${G}px)`, opacity: 1, offset: .86 },
+            { transform: `translate(${x + 300}px,${G}px)`, opacity: 0 },
+          ], { duration: 1600, fill: 'both' }), () => b.remove());
+        }, 380);
+        setTimeout(() => pop('Turnover', x + 60, 40, '#e3826f', 18), 440); break;
       }
     }
   }
