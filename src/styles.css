@@ -122,6 +122,8 @@ h1.page{font-size:40px;font-weight:500;letter-spacing:-.04em;margin:0;line-heigh
 @keyframes clap{0%{opacity:1}50%{opacity:0}}
 .actor .body.leap .av-fig{animation:leap .8s cubic-bezier(.3,.8,.4,1)}
 @keyframes leap{40%{transform:translateY(-58px)}100%{transform:none}}
+.actor .body.hop .av-fig{animation:hop .8s cubic-bezier(.3,.8,.4,1)}
+@keyframes hop{40%{transform:translateY(-30px)}100%{transform:none}}
 @keyframes idleBob{50%{transform:translateY(-3px)}}
 .celebrate .av-fig{animation:jump .5s var(--ease-out)}
 .slump .av-head{animation:slump .55s ease-out}

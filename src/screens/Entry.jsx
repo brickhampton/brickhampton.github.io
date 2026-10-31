@@ -124,8 +124,9 @@ function makeStage() {
     f.animate([{ transform: 'none' }, { transform: 'translateY(-5px)' }, { transform: 'none' }], { duration: 130, iterations: Math.max(1, Math.round(ms / 130)) });
   }
   // A leap for a block: the player springs up and drops back down.
-  function leap(delay) {
-    setTimeout(() => { if (!actor) return; const b = actor.querySelector('.body'); b.classList.remove('leap'); void b.getBBox(); b.classList.add('leap'); setTimeout(() => b.classList.remove('leap'), 850); }, delay);
+  // cls 'hop' is a smaller jump, as for a rebound.
+  function leap(delay, cls = 'leap') {
+    setTimeout(() => { if (!actor) return; const b = actor.querySelector('.body'); b.classList.remove(cls); void b.getBBox(); b.classList.add(cls); setTimeout(() => b.classList.remove(cls), 850); }, delay);
   }
   function mk(tag, attrs, parent = fx) { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); parent.appendChild(e); return e; }
   function ball(fill = BALL_C) {
@@ -207,11 +208,11 @@ function makeStage() {
       case 'OR': { // the player crashes in, jumps toward the basket to grab the miss overhead, then looks left and right
         const b = ball(), sel0 = sel, mine = () => actor?.dataset.id === sel0;
         placeActor(sel, true, 370); placeActor(sel, false, 455, 300); strides(300);
-        setTimeout(() => { if (mine()) { actorPose('catch', 0, 1300); leap(0); placeActor(sel0, false, 490, 800); } }, 300);
+        setTimeout(() => { if (mine()) { actorPose('catch', 0, 1300); leap(0, 'hop'); placeActor(sel0, false, 490, 800); } }, 300);
         setTimeout(shake, 300);
         // Off the rim into both hands at the top of the jump; the ball is drawn into the figure so it comes down with them.
         const hold = () => holdBall(actorX + 2, HAND_Y - 24);
-        then(fly(b, arc(RX - 14, RY, 472, HAND_Y - 68, 24, 10, -160), 300, 'ease-in', 320), () => {
+        then(fly(b, arc(RX - 14, RY, 472, HAND_Y - 46, 24, 10, -160), 300, 'ease-in', 320), () => {
           b.remove(); if (!mine()) return; hold();
           actorPose('catch', 520, 250, true, hold); actorPose('catch', 770, 380, false, hold);
         });
@@ -263,35 +264,22 @@ function makeStage() {
         });
         setTimeout(() => pop('Rejected!', SPOT.BK, 34, '#eeeeee', 18), 280); break;
       }
-      case 'TO': { // a quick crossover, and on the way back the ball gets past the hand and rolls away to the right
-        const x = SPOT[k], G = FLOOR - 9, hx = x + 22, lx = x - 22, H = FLOOR - 24, sel0 = sel, mine = () => actor?.dataset.id === sel0;
-        actorPose('dribble', 0, 200); dribbles(0, 1);
-        setTimeout(() => { // across the body, low, into the other hand
-          if (!mine()) return;
-          actorPose('down', 0, 400);
-          const c = ball();
-          then(c.animate([{ transform: `translate(${hx}px,${H}px)`, easing: 'ease-in' }, { transform: `translate(${x}px,${G}px)`, easing: 'ease-out' }, { transform: `translate(${lx}px,${H}px)` }],
-            { duration: 170, fill: 'both' }), () => { c.remove(); if (mine()) actorPose('dribbleL', 0, 400); });
-        }, 190);
-        setTimeout(() => { // the crossover back: it hits the floor, skips past the hand and rolls off
-          if (!mine()) return;
-          actorPose('down', 0, 900); actorMood('slump', 160);
-          const b = ball();
-          // It goes grey once it's gone: the possession is lost.
-          b.firstChild.animate([{ fill: BALL_C }, { fill: '#8a8380' }], { duration: 500, delay: 150, fill: 'forwards' });
-          const a = b.animate([
-            { transform: `translate(${lx}px,${H}px)`, easing: 'ease-in' },
-            { transform: `translate(${x + 2}px,${G}px)`, offset: .05, easing: 'cubic-bezier(0,0,.5,1)' },
-            { transform: `translate(${hx + 14}px,${H - 6}px)`, offset: .13, easing: 'cubic-bezier(.5,0,1,1)' },
-            { transform: `translate(${hx + 32}px,${G}px)`, offset: .19, easing: 'cubic-bezier(0,0,.5,1)' },
-            { transform: `translate(${hx + 42}px,${G - 5}px)`, offset: .23, easing: 'cubic-bezier(.5,0,1,1)' },
-            { transform: `translate(${hx + 52}px,${G}px)`, offset: .27, easing: 'cubic-bezier(.25,.6,.45,1)' },
-            { transform: `translate(${hx + 230}px,${G}px)`, opacity: 1, offset: .84 },
-            { transform: `translate(${hx + 250}px,${G}px)`, opacity: 0 },
-          ], { duration: 1800, fill: 'both' });
-          then(a, () => b.remove());
-        }, 480);
-        setTimeout(() => pop('Turnover', x + 120, 40, '#e3826f', 18), 560); break;
+      case 'TO': { // a bad pass: it sails over the teammate's reaching hands and bounces away out of bounds
+        const x = SPOT[k], G = FLOOR - 9, b = ball();
+        actorPose('pass2', D - 40, 520); actorMood('slump', D + 520);
+        const mate = mk('g', {}); mate.innerHTML = `<g transform="translate(${440 - 50 * SC} ${FLOOR - 104 * SC}) scale(${SC})">${figure({ ...MATE, num: '' }, { stage: true, pose: 'catch' })}</g>`;
+        mate.animate([{ opacity: 0 }, { opacity: .9, offset: .2 }, { opacity: .9, offset: .75 }, { opacity: 0 }], { duration: 1000, fill: 'forwards' }); setTimeout(() => mate.remove(), 1050);
+        // It goes grey once it's past the teammate: the possession is lost.
+        b.firstChild.animate([{ fill: BALL_C }, { fill: '#8a8380' }], { duration: 300, delay: D + 330, fill: 'forwards' });
+        then(b.animate([
+          { transform: `translate(${x + 20}px,${HAND_Y + 10}px)`, easing: 'cubic-bezier(.2,.6,.5,1)' },
+          { transform: `translate(${445}px,${HAND_Y - 52}px)`, offset: .3, easing: 'cubic-bezier(.5,0,.8,.6)' },
+          { transform: `translate(${560}px,${G}px)`, offset: .55, easing: 'cubic-bezier(.2,.6,.5,1)' },
+          { transform: `translate(${595}px,${G - 26}px)`, offset: .72, easing: 'cubic-bezier(.5,0,.8,.6)' },
+          { transform: `translate(${630}px,${G}px)`, opacity: 1, offset: .88, easing: 'ease-out' },
+          { transform: `translate(${660}px,${G - 8}px)`, opacity: 0 },
+        ], { duration: 1150, delay: D, fill: 'both' }), () => b.remove());
+        setTimeout(() => pop('Turnover', x + 60, 40, '#e3826f', 18), D + 400); break;
       }
     }
   }
