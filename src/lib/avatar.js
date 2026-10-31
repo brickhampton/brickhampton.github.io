@@ -22,7 +22,7 @@ export const SHOES = ['#f2f2f2', '#1b1b1b', '#2f55d4', '#8a8f98', '#c0392b'];
 
 // Each option list: the label shown in the builder. Index 0 is the default.
 export const OPTS = {
-  height: ['Average', 'Short', 'Tall', 'Very tall', 'Very short'],
+  height: ['Average', 'Short', 'Tall', 'Very tall', 'Very short', 'Shandy'],
   // Hair mirrored left to right; the wristband or arm sleeve on the right arm (as you look at the player) instead of the left.
   hairFlip: ['Normal', 'Flipped'], wristFlip: ['Left arm', 'Right arm'], sleeveFlip: ['Left arm', 'Right arm'],
   weight: ['Average', 'Broad', 'Heavy'],
@@ -40,7 +40,7 @@ export const OPTS = {
 // What the builder offers, in order. Parts left out (moustache, goatee, shades, sport glasses) still draw for old looks.
 export const CHOICES = {
   style: [0, 14, 5, 15, 7, 16, 17, 18, 19, 3, 4, 6, 8, 1, 2, 9, 10, 11, 12, 13],
-  beard: [0, 1, 4, 5], glasses: [0, 1, 2], height: [4, 1, 0, 2, 3],
+  beard: [0, 1, 4, 5], glasses: [0, 1, 2], height: [4, 1, 0, 2, 3, 5],
 };
 const NUMS = ['hairFlip', 'wristFlip', 'sleeveFlip', 'height', 'weight', 'muscle', 'style', 'eyes', 'eyeY', 'brows', 'beard', 'glasses', 'socks', 'shoeType'];
 const COLOURS = ['shirt', 'band', 'wrist', 'sleeve', 'stripe', 'shoeAcc', 'glassesC'];
@@ -88,7 +88,7 @@ export function randomLook() {
   return lookOf({
     v: 2, skin: any(SKINS), hair: Math.random() < .85 ? HAIRS[0] : any(['#2e2e33', '#24170f']), style: any(CHOICES.style), hairFlip: r(2),
     eyes: maybe(.3, 'eyes'), brows: maybe(.4, 'brows'), beard: Math.random() < .3 ? any(CHOICES.beard) : 0, glasses: Math.random() < .2 ? 1 + r(2) : 0,
-    height: r(5), weight: maybe(.4, 'weight'), socks: maybe(.3, 'socks'), shoeType: r(3),
+    height: r(6), weight: maybe(.4, 'weight'), socks: maybe(.3, 'socks'), shoeType: r(3),
     band: some(.2, BANDS), wrist: some(.25, BANDS), stripe: some(.2, BANDS), shoe: any(SHOES), shoeAcc: some(.5, SHOES),
   });
 }
@@ -96,7 +96,8 @@ export function randomLook() {
 // ---------- The sprite ----------
 // Measured from Geoff's reference sprites: an 11-row head (hair rows 0-2, forehead 3-5, eyes on rows 6-7 nearer the
 // nose), no neck, no mouth, a 10-wide body (8 rows of jersey, 4 of shorts), arms 2-3 pixels thick, chunky shoes.
-const W = 30, H = 36, FEET = 34;
+// TOP rows above row 0 hold what a tall player puts over the box's top edge (hair, hands up), so it isn't cut off.
+const W = 30, H = 36, FEET = 34, TOPM = 6;
 const DIG = { 0: ['111', '101', '101', '101', '111'], 1: ['01', '11', '01', '01', '01'], 2: ['111', '001', '111', '100', '111'], 3: ['111', '001', '011', '001', '111'], 4: ['101', '101', '111', '001', '001'], 5: ['111', '100', '111', '001', '111'], 6: ['111', '100', '111', '101', '111'], 7: ['111', '001', '010', '010', '010'], 8: ['111', '101', '111', '101', '111'], 9: ['111', '101', '111', '001', '111'] };
 // Hair as spans on the head grid (x 0-9, nose at 10, back of the head at x 0): [y, x, pattern].
 // H hair, D shade, B buzzed (hair over skin), '.' leave alone. In the same order as OPTS.style.
@@ -129,21 +130,22 @@ const HAIR = [
   // Wolf cut: shaggy layers, longer and choppy at the back
   [[-2, 1, 'H.HHHH.H'], [-1, 0, 'HHHHHHHHHH'], [0, -1, 'HHHHHHHHHHHH'], [1, -2, 'HHHHHHHHHHHHH'], [2, -2, 'HHHHHHHHHHHHH'], [3, -2, 'HHHHHH.HH.HHH'], [4, -2, 'HHHH.H.....H'], [5, -2, 'HHH'], [6, -2, 'HHH'], [7, -2, 'HH'], [8, -2, 'H.H'], [9, -1, 'H']],
 ];
-const TALL = [1, 0, 2, 3, -1], EYE_ROW = [6, 5, 7];
+// Shandy is Very tall plus a pixel of jersey and a pixel of leg.
+const TALL = [1, 0, 2, 3, -1, 5], EYE_ROW = [6, 5, 7];
 const K = '#16121a', T = '#f2f2f2', J = '#2f55d4', J2 = mix(J, .2);
 
 // The sprite as a grid of [colour, layer] (layer: b body, h head, e eyes), plus where the head sits.
 function sprite(c, num, pose) {
-  const g = Array.from({ length: H }, () => Array(W).fill(null));
+  const g = Array.from({ length: H + TOPM }, () => Array(W).fill(null));
   // The ball has its own grid, so the hand drawn over it doesn't cut holes in it when it bounces away.
-  const go = Array.from({ length: H }, () => Array(W).fill(null));
+  const go = Array.from({ length: H + TOPM }, () => Array(W).fill(null));
   // The eyes have their own grid too, so the face stays solid skin underneath: when the eyes blink or swap for the
   // smiling ones, no hole opens onto the background.
-  const ge = Array.from({ length: H }, () => Array(W).fill(null));
+  const ge = Array.from({ length: H + TOPM }, () => Array(W).fill(null));
   let layer = 'b';
   // While rec is set, the body pixels drawn go into it too (an arm, so its accessories can go on afterwards).
   let rec = null;
-  const r = (x, y, w = 1, h = 1, col, lay = layer) => { const t = lay === 'o' ? go : lay === 'e' ? ge : g; for (let j = y; j < y + h; j++) for (let i = x; i < x + w; i++) if (j >= 0 && j < H && i >= 0 && i < W) { t[j][i] = col ? [col, lay] : null; if (rec && lay === 'b' && col) rec.push([i, j, col]); } };
+  const r = (x, y, w = 1, h = 1, col, lay = layer) => { const t = lay === 'o' ? go : lay === 'e' ? ge : g; for (let j = y; j < y + h; j++) for (let i = x; i < x + w; i++) if (j >= -TOPM && j < H && i >= 0 && i < W) { t[j + TOPM][i] = col ? [col, lay] : null; if (rec && lay === 'b' && col) rec.push([i, j, col]); } };
   const S = c.skin, S2 = mix(S, .12), SB = mix(S, .06), HR = c.hair;
   // Broad and Heavy add one and two pixels to the body's width, mostly at the back.
   const tall = TALL[c.height], wide = c.weight, aw = c.muscle > 1 ? 1 : 0;
@@ -304,7 +306,7 @@ function sprite(c, num, pose) {
   // Walk each arm out from the shoulder, painting accessories by how far along the arm a pixel is: the sleeve covers the
   // first few pixels, the wristband the two after, and an undershirt's short sleeve just the top of the arm.
   const walk = (cells, near, paint) => {
-    const key = (x, y) => y * W + x, arm = new Set(cells.map(([x, y]) => key(x, y))), dist = new Map();
+    const key = (x, y) => (y + TOPM) * W + x, arm = new Set(cells.map(([x, y]) => key(x, y))), dist = new Map();
     let edge = cells.filter(([x, y]) => near(x) && y >= ty - 1 && y <= ty + 1);
     if (!edge.length && cells.length) edge = [cells.reduce((a, b) => (b[1] < a[1] ? b : a))];
     edge.forEach(([x, y]) => dist.set(key(x, y), 0));
@@ -345,7 +347,7 @@ function paths(g, layer) {
       const px = row[x];
       if (!px || px[1] !== layer) { x++; continue; }
       let w = 1; while (x + w < W && row[x + w] && row[x + w][0] === px[0] && row[x + w][1] === layer) w++;
-      runs.set(px[0], (runs.get(px[0]) || '') + `M${x} ${y}h${w}v1h${-w}z`);
+      runs.set(px[0], (runs.get(px[0]) || '') + `M${x} ${y - TOPM}h${w}v1h${-w}z`);
       x += w;
     }
   });
