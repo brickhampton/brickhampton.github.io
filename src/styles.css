@@ -108,6 +108,14 @@ h1.page{font-size:40px;font-weight:500;letter-spacing:-.04em;margin:0;line-heigh
 #crowd.most .fan.most{animation:fanHop .32s steps(2,jump-none) var(--d,0s) 3}
 #crowd.big .fan{animation:fanHop .28s steps(2,jump-none) var(--d,0s) 5}
 #crowd.most .fan.most .arms,#crowd.big .fan .arms{opacity:1;transform:translateY(-7px)}
+/* A steal, block or assist gets the crowd going: each fan hops, shakes, claps or cheers, and a few stay seated. */
+#crowd.hype .fan.rx-bob{animation:fanHop .3s steps(2,jump-none) var(--d,0s) 4}
+#crowd.hype .fan.rx-shake{animation:fanShake .14s steps(2,jump-none) var(--d,0s) 8}
+#crowd.hype .fan.rx-clap{animation:fanBob .3s steps(2,jump-none) var(--d,0s) 4}
+#crowd.hype .fan.rx-clap .clap{animation:clap .2s steps(2,jump-none) var(--d,0s) 6}
+#crowd.hype .fan.rx-cheer{animation:fanHop .28s steps(2,jump-none) var(--d,0s) 4}
+#crowd.hype .fan.rx-cheer .arms{opacity:1;transform:translateY(-7px)}
+@keyframes fanShake{50%{transform:translateX(2px)}}
 @keyframes fanIdle{50%{transform:translateY(1px)}}
 @keyframes fanBob{50%{transform:translateY(-1px)}}
 @keyframes fanHop{50%{transform:translateY(-3px)}}
