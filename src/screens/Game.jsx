@@ -65,7 +65,7 @@ export function Game() {
   const more = Object.fromEntries(moreFor(seasonList));
   const stat = S.gtStat in GT_STATS || S.gtStat in more ? S.gtStat : 'pts';
   return <>
-    <div className="gnav">
+    <div className="gnav game-nav">
       <button className="btn ghost" id="g-back" onClick={() => go('games', { gSeason: g.season })}><Back />All games</button>
       {isAdmin() && <button className="btn admin-edit" id="g-edit" onClick={() => openSheet(<EditGame id={g.id} />, { wide: true })}><Pencil width="16" height="16" />Edit game</button>}
       <span className="grow" />
