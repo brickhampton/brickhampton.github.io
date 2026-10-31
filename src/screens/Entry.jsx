@@ -191,7 +191,7 @@ function makeStage() {
     // The closer the 2, the flatter and quicker the shot.
     const h2 = Math.round(50 + (RX - x) * .14), d2 = Math.round(260 + (RX - x) * .45);
     const pose = { '2M': ['shoot', 0, D + d2 + 20], '2X': ['shoot', 0, D + d2 + 20], '3M': ['shoot', 0, D + 480], '3X': ['shoot', 0, D + 480], 'FM': ['shoot', FT_D, 340], 'FX': ['shoot', FT_D, 340],
-      'AS': ['pass2', D - 40, 520], 'ST': ['pass', 120, 260], 'BK': ['blockL', 0, 860] }[k];
+      'AS': ['pass2', D - 40, 520], 'ST': ['pass', 120, 260], 'BK': ['block1', 0, 860, true] }[k];
     if (k === 'FM' || k === 'FX') { actorPose('dribble', 0, FT_D + 40); dribbles(60); }
     if (pose) actorPose(...pose);
     const cheers = { '2M': [D + d2, 'most'], '3M': [D + 460, 'big'], 'FM': [FT_D + 320, 'clap'], 'AS': [D + 580, 'hype'], 'ST': [420, 'hype'], 'BK': [280, 'hype'], 'OR': [300, 'clap'], 'DR': [300, 'clap'] }[k];
@@ -247,8 +247,10 @@ function makeStage() {
         setTimeout(() => pop('Cookiesss', x, 40, '#eeeeee', 18), 400); break;
       }
       case 'BK': { // an opponent's shot goes up and the player swats it
-        // The hand on the shooter's side (the left) goes up and the player gets well off the floor; the ball meets it at the top of the jump.
-        const b = ball(), top = HAND_Y - 66, hx = SPOT.BK - 12; leap(0);
+        // The player turns to face the shooter (on the left), that hand goes up and the player gets well off the floor; the ball meets it at the top of the jump.
+        // They take off a little to the right of their spot and drift left toward the shooter through the jump.
+        const b = ball(), top = HAND_Y - 66, hx = SPOT.BK + 2; leap(0);
+        placeActor(sel, true, SPOT.BK + 30); placeActor(sel, false, SPOT.BK - 15, 800);
         then(fly(b, arc(300, FLOOR - 30, hx, top, 50, 8, 180), 300, 'ease-out'), () => {
           burst(hx, top, '#eeeeee');
           then(fly(b, [[hx, top, 180], [340, FLOOR - 4, -200], [220, FLOOR - 30, -420], [150, FLOOR - 6, -560, 0]], 480, 'cubic-bezier(.2,.7,.4,1)'), () => b.remove());
