@@ -1,6 +1,7 @@
 import { S } from '../lib/store.js';
 import { P, sumRows, ratio, pctTxt, perTxt, tier } from '../lib/core.js';
 import { Avatar } from './Avatar.jsx';
+import { rebSplit } from '../lib/prefs.js';
 import { PerPill, setSort } from './ui.jsx';
 
 // Box score columns, in Geoff's order with TO straight after BLK. Every header sorts.
@@ -16,8 +17,14 @@ const BOXCOLS = [
 ];
 
 // rows: [{id, c (counts), s (calculated), num}] in playing order.
+// With the Settings option on, REB becomes OREB and DREB in games that recorded them.
+const SPLITCOLS = BOXCOLS.flatMap(c => c.k === 'reb' ? [{ k: 'oreb', l: 'OREB', hi: true }, { k: 'dreb', l: 'DREB', hi: true }] : [c]);
+
 export function BoxScore({ rows }) {
   const t = sumRows(rows.map(r => r.c));
+  const split = rebSplit() && rows.length > 0 && rows.every(r => r.s.split);
+  const COLS = split ? SPLITCOLS : BOXCOLS;
+  if (split) for (const k of ['oreb', 'dreb']) t[k] = rows.reduce((a, r) => a + r.s[k], 0);
   const max = k => Math.max(...rows.map(r => r.s[k]));
   const val = (col, s) => col.v ? col.v(s) : col.pct ? col.pct[1](s) : s[col.k];
   const cell = (col, s, total) => {
@@ -30,7 +37,7 @@ export function BoxScore({ rows }) {
   };
   // No sort means the playing order.
   const sk = S.box?.k, bestDir = (sk === 'name' || sk === 'to') ? 1 : -1, dir = S.box?.best ? bestDir : -bestDir;
-  const sortCol = BOXCOLS.find(c => c.k === sk);
+  const sortCol = COLS.find(c => c.k === sk);
   const sorted = !sk ? rows : rows.slice().sort((a, b) => {
     if (sk === 'name') return dir * P(a.id).name.localeCompare(P(b.id).name);
     const va = val(sortCol, a.s), vb = val(sortCol, b.s);
@@ -48,11 +55,11 @@ export function BoxScore({ rows }) {
       <div className="tbl-wrap"><table>
         <thead><tr>
           <th className="sortable" data-bk="name" aria-sort={aria('name')} onClick={() => setSort('box', 'name')}>Player{arrow('name')}</th>
-          {BOXCOLS.map(c => <th key={c.k} className={`sortable${c.c ? ' c' : ''}`} data-bk={c.k} aria-sort={aria(c.k)} onClick={() => setSort('box', c.k)}>{arrow(c.k)}{c.l}</th>)}
+          {COLS.map(c => <th key={c.k} className={`sortable${c.c ? ' c' : ''}`} data-bk={c.k} aria-sort={aria(c.k)} onClick={() => setSort('box', c.k)}>{arrow(c.k)}{c.l}</th>)}
         </tr></thead>
         <tbody>
-          {sorted.map(r => <tr key={r.id}><td className="pl"><div className="plc"><Avatar id={r.id} num={r.num} />{P(r.id).name}</div></td>{BOXCOLS.map(c => cell(c, r.s, false))}</tr>)}
-          <tr className="tot"><td className="pl"><div className="plc">Team</div></td>{BOXCOLS.map(c => cell(c, t, true))}</tr>
+          {sorted.map(r => <tr key={r.id}><td className="pl"><div className="plc"><Avatar id={r.id} num={r.num} />{P(r.id).name}</div></td>{COLS.map(c => cell(c, r.s, false))}</tr>)}
+          <tr className="tot"><td className="pl"><div className="plc">Team</div></td>{COLS.map(c => cell(c, t, true))}</tr>
         </tbody>
       </table></div>
     </div>
