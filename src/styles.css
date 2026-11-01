@@ -1024,6 +1024,7 @@ button:hover .lid,button:focus-visible .lid,button:active .lid{transform:transla
 .pbadge.blue{color:#c7d4ff;background:rgba(47,85,212,.2);box-shadow:inset 0 0 0 1px rgba(79,124,255,.35)}
 .pbadge.green{color:#b9dcae;background:var(--good-bg);box-shadow:inset 0 0 0 1px rgba(160,202,146,.32)}
 .pbadge.gold{color:#f4d37c;background:rgba(233,185,73,.13);box-shadow:inset 0 0 0 1px rgba(233,185,73,.32)}
+.pbadge.red{color:#f3958a;background:rgba(214,64,52,.16);box-shadow:inset 0 0 0 1px rgba(232,92,80,.4)}
 .pbadge.grey{color:var(--stone);background:var(--lift2);box-shadow:inset 0 0 0 1px var(--stroke)}
 .pbadge[aria-pressed="true"]{box-shadow:inset 0 0 0 1.5px currentColor}
 .pbdesc{margin:0;font-size:14px;color:var(--stone);max-width:520px;min-height:0;opacity:0;transform:translateY(-4px);transition:opacity .2s, transform .25s var(--ease-out)}
