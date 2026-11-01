@@ -34,6 +34,7 @@ export const BIC = {
   shield: <B><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z" /><path d="m9 12 2 2 4-4" /></B>,
   ball: <B><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3v18M5.6 5.6q5 6.4 0 12.8M18.4 5.6q-5 6.4 0 12.8" /></B>,
   up: <B><path d="M12 19V5M5 12l7-7 7 7" /></B>,
+  crash: <B><ellipse cx="12" cy="5.5" rx="7" ry="2.3" /><path d="M7 7.5 9 11M17 7.5 15 11" /><path d="M12 21v-7M8.5 17.5 12 14l3.5 3.5" /></B>,
   pass: <B><path d="M4 12h14M12 6l6 6-6 6" /></B>,
   trend: <B><path d="M3 17l6-6 4 4 8-8M15 7h6v6" /></B>,
   iron: <B><path d="M6 7v10M18 7v10M3 10v4M21 10v4M6 12h12" /></B>,

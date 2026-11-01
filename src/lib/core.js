@@ -161,6 +161,10 @@ export function playerBadges(id, asOf) {
   if (l5.length === 5 && f5 - car >= BT.up) add('up', 'Heating up', 'trend', 'hot', `Averaging ${f1(f5)} PER over their last 5, ${f1(f5 - car)} above their career average.`);
   if (best(x => x.pg('pts'))) add('pts', 'Bucket getter', 'ball', 'blue', `Most points a game in ${nm} (${f1(a.pg('pts'))}).`);
   if (best(x => x.pg('reb'))) add('reb', 'Glass cleaner', 'up', 'blue', `Most rebounds a game in ${nm} (${f1(a.pg('reb'))}).`);
+  // Offensive rebounds are only recorded in newer games, so only those games count, and a season without any gives no badge.
+  const orAgg = x => { const l = sg.filter(g => g.rows[x] && g.rows[x].oreb !== undefined).map(g => g.rows[x].oreb); return { id: x, gp: l.length, pg: l.reduce((t, v) => t + v, 0) / (l.length || 1) }; };
+  const oa = orAgg(id), oPeers = statPlayers().map(orAgg).filter(x => x.gp >= Math.min(3, oa.gp));
+  if (starter && oa.gp >= 3 && oa.pg > 0 && oPeers.length > 2 && oPeers.every(x => x.id === id || x.pg < oa.pg)) add('oreb', 'Crash out', 'crash', 'blue', `Most offensive rebounds a game in ${nm} (${f1(oa.pg)}).`);
   if (best(x => x.pg('ast'))) add('ast', 'Assistaholic', 'pass', 'blue', `Most assists a game in ${nm} (${f1(a.pg('ast'))}).`);
   const def = x => (x.s.stl + x.s.blk) / x.gp;
   if (starter && a.gp >= 3 && (def(a) >= 3 || best(def))) add('def', 'Lockdown', 'shield', 'green', `${f1(def(a))} steals and blocks a game in ${nm}${best(def) ? ', the most on the team' : ''}.`);
