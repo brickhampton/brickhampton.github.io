@@ -569,6 +569,8 @@ tr.tot td{font-weight:600;border-top:1px solid var(--stroke)}
 .pnum{position:absolute;right:-10px;top:50%;transform:translateY(-54%);font-size:clamp(160px,26vw,300px);font-weight:700;letter-spacing:-.07em;line-height:1;color:transparent;
   -webkit-text-stroke:1.5px rgba(79,124,255,.22);pointer-events:none;font-variant-numeric:tabular-nums}
 .pstage{position:relative;width:clamp(180px,24vw,260px);aspect-ratio:1;display:block;padding:0;border-radius:50%}
+/* Only the stage's own circle reacts to taps: the spotlight, arena and pop-ups reach far outside it and would cover the player picker above. */
+.pstage>*{pointer-events:none}
 .pfig{position:absolute;left:12%;top:8%;width:76%;height:auto;overflow:visible}
 .pstage .av-fig{animation:idleBob .9s steps(2,jump-none) infinite}
 /* The arena behind the player, much wider than the stage and cut off by the hero. */
