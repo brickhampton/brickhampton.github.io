@@ -290,23 +290,20 @@ function RebCard() {
       <button data-s="split" aria-pressed={on} onClick={() => pick(true)}>Split</button></div></div>;
 }
 
-// Our supporter on the Home photo: her outfit and camera, the same for everyone who opens the site.
-const OUTFIT_OPTS = [['dress', 'Dress'], ['tee', 'T-shirt and jeans']], CAM_OPTS = [['digital', 'Digital camera'], ['film', 'Film camera']];
+// Our supporter on the Home photo: her outfit, the same for everyone who opens the site.
+const OUTFIT_OPTS = [['dress', 'Dress'], ['tee', 'T-shirt and jeans']];
 const supFig = look => <svg viewBox="8 2 84 102" aria-hidden="true" dangerouslySetInnerHTML={{ __html: supporter('rest', look) }} />;
 function SupporterCard({ onErr }) {
   const s = useStore(), look = supLook(s.supporter || {});
   const save = async next => {
-    if (next.outfit === look.outfit && next.cam === look.cam) return;
+    if (next.outfit === look.outfit) return;
     sfx('select'); onErr('');
     try { await adminEdit('set_supporter', { p_look: next }); }
     catch (e) { onErr(/set_supporter/.test(e.message) ? 'Run 10-supporter.sql in Supabase first, then try again.' : errText(e)); }
   };
-  return <div className="sec wide"><h3>Supporter</h3><p className="hint">What she wears and the camera she brings, on the Home photo</p>
+  return <div className="sec wide"><h3>Supporter</h3><p className="hint">What she wears on the Home photo</p>
     <div className="card sup-card" id="a-sup">
-      <div className="avb-label">Outfit</div>
       <div className="avb-opts sup-opts">{OUTFIT_OPTS.map(([k, label]) => <button key={k} className="avb-opt body" data-outfit={k} role="radio" aria-checked={look.outfit === k} onClick={() => save({ ...look, outfit: k })}>{supFig({ ...look, outfit: k })}<span>{label}</span></button>)}</div>
-      <div className="avb-label">Camera</div>
-      <div className="avb-opts sup-opts">{CAM_OPTS.map(([k, label]) => <button key={k} className="avb-opt body" data-cam={k} role="radio" aria-checked={look.cam === k} onClick={() => save({ ...look, cam: k })}>{supFig({ ...look, cam: k })}<span>{label}</span></button>)}</div>
     </div></div>;
 }
 

@@ -1,6 +1,7 @@
 // Our supporter on Home: she comes to every game, cheers us on and takes photos. Drawn in the same pixels as the
 // players (same grid and scale, facing the same way), but in her own clothes: long dark-brown hair with bangs, and a
-// cream sundress with a small floral print and thin straps. She holds a camera.
+// cream sundress with a small floral print and thin straps, or a white T-shirt and light blue jeans. She holds a
+// classic film camera.
 //
 // supporter(frame) gives one frame of her: 'rest' (camera at her chest), 'cheer' / 'cheer2' (pumping her free fist,
 // up and halfway down) or 'snap' (camera up to her eye). The flash that goes with 'snap' is supporterFlash().
@@ -11,7 +12,6 @@ const SKIN = '#f6d9bf', SKIN2 = '#e8c4a6', HAIR = '#2c1811', HAIR2 = '#1e100b', 
 const DRESS = '#f4ecdc', DRESS2 = '#dfd2bb', K = '#16121a', BLUSH = '#f2b2a6';
 const FLOWERS = ['#e895ac', '#86a8de', '#e895ac', '#9cc58c', '#f0bf6a'];
 const TEE = '#fbfbf8', TEE2 = '#e3e3df', JEAN = '#a9c4e4', JEAN2 = '#8eaad0', JEANL = '#c3d7ee';
-const CAM = '#25252d', CAM2 = '#3c3c48', LENS = '#5d6676', GLINT = '#bfe3ff';
 const TF = `translate(50 0) scale(${(104 / FEET).toFixed(4)}) translate(-13 0)`;
 
 function grid() { return Array.from({ length: H + TOPM }, () => Array(W).fill(null)); }
@@ -82,38 +82,18 @@ function draw(frame, look) {
   HSP.forEach(([y, x, s]) => [...s].forEach((ch, i) => { if (pal[ch]) r(hx + x + i, hy + y, 1, 1, pal[ch]); }));
   // A strand falling forward over her front shoulder.
   r(hx + 8, hy + 9, 1, 3, HAIR);
-  // ---- front arm and the camera
-  if (look.cam === 'film') {
-    // The film camera faces out of the picture, so she holds it square on: at her chest, or up in front of her face.
-    if (frame === 'snap') {
-      r(16, ty, 2, 2, SKIN); r(19, hy + 9, 2, ty - hy - 8, SKIN); r(20, hy + 10, 1, ty - hy - 9, SKIN2);
-      if (tee) r(16, ty, 2, 2, TEE);
-      film(r, 13, hy + 3); r(21, hy + 6, 1, 3, SKIN);
-    } else {
-      [[1, 0, 1], [2, 0, 2], [3, 0, 2]].forEach(([j, dx, w]) => r(16 + dx, ty + j, w, 1, SKIN));
-      if (tee) { r(16, ty + 1, 1, 1, TEE); r(16, ty + 2, 2, 1, TEE); }
-      film(r, 14, ty + 1); r(22, ty + 4, 1, 3, SKIN);
-    }
-  } else if (frame === 'snap') {
-    // Camera up to her eye, the lens pointing at the team; elbow down, hand under the camera.
-    r(16, ty, 2, 2, SKIN); r(17, ty - 3, 2, 3, SKIN); r(18, ty - 2, 1, 2, SKIN2);
-    camera(r, 15, hy + 5);
-    r(16, hy + 9, 3, 1, SKIN);
+  // ---- front arm and her film camera. It faces out of the picture, so she holds it square on: at her chest, or up in
+  // front of her face.
+  if (frame === 'snap') {
+    r(16, ty, 2, 2, SKIN); r(19, hy + 9, 2, ty - hy - 8, SKIN); r(20, hy + 10, 1, ty - hy - 9, SKIN2);
     if (tee) r(16, ty, 2, 2, TEE);
+    film(r, 13, hy + 3); r(21, hy + 6, 1, 3, SKIN);
   } else {
-    // Camera held at her chest, ready.
-    [[1, 0, 1], [2, 0, 2], [3, 0, 2], [4, 1, 2]].forEach(([j, dx, w]) => r(16 + dx, ty + j, w, 1, SKIN));
+    [[1, 0, 1], [2, 0, 2], [3, 0, 2]].forEach(([j, dx, w]) => r(16 + dx, ty + j, w, 1, SKIN));
     if (tee) { r(16, ty + 1, 1, 1, TEE); r(16, ty + 2, 2, 1, TEE); }
-    camera(r, 16, ty + 3);
-    r(16, ty + 6, 3, 1, SKIN); r(17, ty + 6, 2, 1, SKIN2);
+    film(r, 14, ty + 1); r(22, ty + 4, 1, 3, SKIN);
   }
   return { g, ge };
-}
-
-// A small mirrorless camera, side on: a black body, a dark lens pointing right with a glint, a little flash on top.
-function camera(r, x, y) {
-  r(x, y, 6, 4, CAM); r(x, y, 6, 1, CAM2); r(x + 1, y - 1, 2, 1, CAM2); r(x + 4, y + 1, 1, 1, '#d0d0d8');
-  r(x + 6, y + 1, 2, 2, LENS); r(x + 7, y + 1, 1, 1, GLINT); r(x, y + 3, 6, 1, '#101016');
 }
 
 // A classic film SLR, front on: a chrome top with the prism hump, a knob and a button either side, a black body and a
@@ -144,13 +124,12 @@ function paths(g) {
   return [...runs].map(([c, d]) => `<path d="${d}" fill="${c}"/>`).join('');
 }
 
-// Her look: outfit 'dress' (the default) or 'tee' (a white T-shirt and light blue jeans), and her camera: 'digital'
-// (the default, a small mirrorless one) or 'film' (a classic film SLR).
-export const OUTFITS = ['dress', 'tee'], CAMERAS = ['digital', 'film'];
-export const supLook = (raw = {}) => ({ outfit: OUTFITS.includes(raw?.outfit) ? raw.outfit : 'dress', cam: CAMERAS.includes(raw?.cam) ? raw.cam : 'digital' });
+// Her look: outfit 'dress' (the default) or 'tee' (a white T-shirt and light blue jeans).
+export const OUTFITS = ['dress', 'tee'];
+export const supLook = (raw = {}) => ({ outfit: OUTFITS.includes(raw?.outfit) ? raw.outfit : 'dress' });
 const cache = new Map();
 export function supporter(frame = 'rest', raw) {
-  const look = supLook(raw), key = [frame, look.outfit, look.cam].join();
+  const look = supLook(raw), key = frame + look.outfit;
   if (cache.has(key)) return cache.get(key);
   const { g, ge } = draw(frame, look);
   const svg = `<g class="av-fig" shape-rendering="crispEdges"><g transform="${TF}">${paths(g)}</g><g class="av-eyes"><g transform="${TF}">${paths(ge)}</g></g></g>`;
@@ -158,10 +137,9 @@ export function supporter(frame = 'rest', raw) {
   return svg;
 }
 
-// The camera flash for the 'snap' frame: a bright pixel star at the flash and a soft burst of light round it.
-// The digital camera's flash is at its lens; the film camera's is a flashgun on top.
-export function supporterFlash(raw) {
-  const film = supLook(raw).cam === 'film', x = film ? 22.5 : 26, y = film ? 8.5 : 12.5, px = (a, b, w, h, o = 1) => `<rect x="${a}" y="${b}" width="${w}" height="${h}" fill="#fff" opacity="${o}"/>`;
+// The camera flash for the 'snap' frame, from the top of the camera: a bright pixel star and a soft burst of light.
+export function supporterFlash() {
+  const x = 22.5, y = 8.5, px = (a, b, w, h, o = 1) => `<rect x="${a}" y="${b}" width="${w}" height="${h}" fill="#fff" opacity="${o}"/>`;
   return `<g class="sup-flash"><g transform="${TF}"><circle cx="${x}" cy="${y}" r="4.2" fill="#fff8d8" opacity=".3"/><circle cx="${x}" cy="${y}" r="2.6" fill="#fff" opacity=".5"/>`
     + `<g shape-rendering="crispEdges">${px(x - .5, y - 4.5, 1, 9)}${px(x - 4.5, y - .5, 9, 1)}${px(x - 1.5, y - 1.5, 3, 3)}${px(x - 3.5, y - 3.5, 1, 1, .7)}${px(x + 2.5, y - 3.5, 1, 1, .7)}${px(x - 3.5, y + 2.5, 1, 1, .7)}${px(x + 2.5, y + 2.5, 1, 1, .7)}</g></g></g>`;
 }

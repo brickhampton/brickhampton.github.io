@@ -59,7 +59,7 @@ function homeScene(cw, ch) {
   const n = Math.min(110, Math.round(54 * vw * (Math.min(vb, 470) - vy) / (800 * 470)));
   // Confetti in front of the team stays clear of the players, so none of it covers a face.
   const half = Math.round(n * .55), k = A < 1 ? 1.3 : 1, onTeam = (x, y) => (Math.abs(x - 400) < 165 * k && y > 300 - 195 * k && y < 300 + 50 * k)
-    || (x > 400 - (400 - sx + 60) * k && x < 400 - (400 - sx - 35) * k && y > 300 - 110 * k && y < 300 + 25 * k);
+    || (x > 400 - (400 - sx + 55) * k && x < 400 - (400 - sx - 30) * k && y > 300 - 175 * k && y < 300 - 50 * k);
   const pieces = Array.from({ length: n }, (_, i) => {
     let x, y;
     do { x = vx + rnd() * vw; y = vy + rnd() * ((i % 4 ? 250 : 470) - vy); } while (i >= half && onTeam(x, y));
@@ -78,10 +78,9 @@ function homeScene(cw, ch) {
   const has = k => front.some(id => POSE.hold[id] === k);
   const ball = has('ball') ? '' : `<g transform="translate(108 386)">${pxShadow(0, 24, 18, 4)}<circle r="21" fill="#ee6018"/><path d="M-21 0h42M0-21v42M-14.5-14.5q8.5 14.5 0 29M14.5-14.5q-8.5 14.5 0 29" stroke="#2a1206" stroke-width="2.2" fill="none"/></g>`;
   const trophy = has('trophy') ? '' : `${pxShadow(400, 390, 56, 5, .4)}${TROPHY}`;
-  // Our supporter: smaller than the team, beside G. Lim, cheering and taking photos of them.
+  // Our supporter: smaller and further back, behind I. Hoang's left shoulder, cheering and taking photos of the team.
   const sup = fan(sx, SUP.feet - SUP.w * 1.035, SUP.w, S.refl);
   const team = `${inward(back, bx).map(([id, i]) => fig(id, bx(i), BT + STAGGER[i % 6], BW)).join('')}
-    ${sup.fig}
     ${inward(front, fx).map(([id, i]) => fig(id, fx(i), FT + (i === Math.floor(front.length / 2) ? 10 : 0) + STAGGER[(i + 3) % 6], FW)).join('')}`;
   const box = `x="${vx.toFixed(1)}" y="${vy.toFixed(1)}" width="${vw.toFixed(1)}" height="${vh.toFixed(1)}"`;
   return `<svg class="hscene" viewBox="${vx.toFixed(1)} ${vy.toFixed(1)} ${vw.toFixed(1)} ${vh.toFixed(1)}" role="img" aria-label="Team photo: ${ids.map(id => esc(P(id).name)).join(', ')} with the trophy">
@@ -90,6 +89,7 @@ function homeScene(cw, ch) {
     <g${A < 1 ? ' transform="translate(400 300) scale(1.3) translate(-400 -300)"' : ''}>${sup.refl}${refl.join('')}</g>
     <g>${pieces.slice(0, half).join('')}</g>
     <g${A < 1 ? ' transform="translate(400 300) scale(1.3) translate(-400 -300)"' : ''}>
+    ${sup.fig}
     ${team}
     </g>
     ${trophy}${ball}
@@ -97,16 +97,16 @@ function homeScene(cw, ch) {
   </svg>`;
 }
 
-// Where she stands (the middle of her box, her feet, and the box's width; the players' front row is 156 wide), and her
+// Where she stands (the middle of her box, her feet, and the box's width; the players' back row is 132 wide), and her
 // frames: at rest with the camera, pumping a fist, and taking a photo with the flash going off.
-// She stands just behind G. Lim's left shoulder, toward the half-court line. On a phone the sides are cropped, so she
+// She stands further back than the team, behind I. Hoang's left shoulder. On a phone the sides are cropped, so she
 // stands a little closer in.
-const SUP = { x: 236, phoneX: 248, feet: 318, w: 112 };
+const SUP = { x: 212, phoneX: 232, feet: 242, w: 100 };
 const SUP_FRAMES = ['rest', 'cheer', 'cheer2', 'snap'];
 function fan(cx, top, w, refl) {
   const svg = inner => `<svg x="${cx - w / 2}" y="${top}" width="${w}" height="${w * 1.04}" viewBox="0 0 100 104" overflow="visible">${inner}</svg>`;
   const look = DATA.supporter, frames = SUP_FRAMES.map(f => `<g class="sf sf-${f}">${supporter(f, look)}</g>`).join('');
-  const fig = `<g class="hsup alive" style="--hd:.7s;--bd:-2.1s">${svg(`${pxShadow(50, 103.5, 18, 104 / 34)}<g class="hsupt" role="button" aria-label="Our supporter, taking photos"><rect x="12" y="10" width="76" height="94" fill="transparent"/>${frames}${supporterFlash(look)}</g>`)}</g>`;
+  const fig = `<g class="hsup alive" style="--hd:.7s;--bd:-2.1s">${svg(`${pxShadow(50, 103.5, 18, 104 / 34)}<g class="hsupt" role="button" aria-label="Our supporter, taking photos"><rect x="12" y="10" width="76" height="94" fill="transparent"/>${frames}${supporterFlash()}</g>`)}</g>`;
   const fy = top + w * 1.035;
   return { fig, refl: refl ? `<g mask="url(#hrmask)" opacity="${refl}"><g transform="translate(0 ${(2 * fy).toFixed(1)}) scale(1 -1)">${svg(supporter('rest', look))}</g></g>` : '' };
 }
