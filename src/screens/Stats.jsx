@@ -1,5 +1,5 @@
 import { S, set } from '../lib/store.js';
-import { allGames, seasonList, seasonName, statPlayers, playerAgg, ratio, pctTxt, perTxt, tier, f1, calc, P, numIn } from '../lib/core.js';
+import { allGames, seasonList, seasonName, statPlayers, playerAgg, sumRows, ratio, pctTxt, perTxt, tier, f1, calc, P, numIn } from '../lib/core.js';
 import { go, openPlayer } from '../lib/nav.js';
 import { drawTrend, drawScatter, drawSeasonBars, STATS, TB_STATS, SLOT_COL, SC_B } from '../lib/charts.js';
 import { Avatar } from '../components/Avatar.jsx';
@@ -8,32 +8,44 @@ import { Chart, SeasonPick, EmptyState, setSort } from '../components/ui.jsx';
 
 const RCOLS = [['per', 'PER'], ['pts', 'PTS'], ['reb', 'REB'], ['ast', 'AST'], ['stl', 'STL'], ['blk', 'BLK'], ['to', 'TO'], ['fg', 'FG%'], ['m3', '3FG%'], ['ft', 'FT%'], ['ts', 'TS%'], ['gp', 'GP']];
 export const aggVal = (a, k) => k === 'ts' ? a.s.ts : k === 'fg' ? ratio(a.s.fgm, a.s.fga) : k === 'm3' ? ratio(a.s.m3, a.s.a3) : k === 'ft' ? ratio(a.s.ftm, a.s.fta) : k === 'gp' ? a.gp : a.pg(k);
+// Shooting columns: made and attempted keys, so Totals can show them as made-attempts (2-8).
+const SHOTS = { fg: ['fgm', 'fga'], m3: ['m3', 'a3'], ft: ['ftm', 'fta'] };
+// Totals sort counting stats by their sums and shooting columns by shots made, like the box score.
+const totVal = (a, k) => k === 'ts' ? a.s.ts : k === 'gp' ? a.gp : SHOTS[k] ? a.s[SHOTS[k][0]] : a.s[k];
 
-function Rankings({ aggs }) {
+function Rankings({ aggs, team, tot }) {
+  const val = tot ? totVal : aggVal;
   const sk = S.rsort?.k, bestDir = (sk === 'name' || sk === 'to') ? 1 : -1, dir = S.rsort?.best ? bestDir : -bestDir;
   const sorted = !sk ? aggs : aggs.slice().sort((a, b) => {
     if (sk === 'name') return dir * P(a.id).name.localeCompare(P(b.id).name);
-    const va = aggVal(a, sk), vb = aggVal(b, sk); if (va === null) return 1; if (vb === null) return -1; return dir * (va - vb);
+    const va = val(a, sk), vb = val(b, sk); if (va === null) return 1; if (vb === null) return -1; return dir * (va - vb);
   });
-  const cell = (a, k) => {
-    const v = aggVal(a, k);
+  const cell = (a, k, isTeam) => {
+    const v = val(a, k);
     if (k === 'gp') return <td key={k}>{v}</td>;
-    // PER: the leader in bright green, the next three in soft green, everyone else grey
+    // PER: the leader in bright green, the next three in soft green, everyone else grey. The team row is plain.
     if (k === 'per') {
-      const rank = aggs.filter(x => x.pg('per') > v).length;
-      return <td key={k} className="c"><span className={`per ${rank === 0 ? 'p-great' : rank <= 3 ? 'p-good' : 'p-mid'}`}>{perTxt(v, true)}</span></td>;
+      if (isTeam) return <td key={k} className="c"><span className="per p-tot">{perTxt(v, !tot)}</span></td>;
+      const rank = aggs.filter(x => val(x, 'per') > v).length;
+      return <td key={k} className="c"><span className={`per ${rank === 0 ? 'p-great' : rank <= 3 ? 'p-good' : 'p-mid'}`}>{perTxt(v, !tot)}</span></td>;
     }
-    if (['fg', 'm3', 'ft', 'ts'].includes(k)) return <td key={k} className={tier(k, v) || undefined}>{pctTxt(v)}</td>;
-    const all = aggs.map(x => aggVal(x, k)), top = k === 'to' ? v === Math.min(...all) : v === Math.max(...all);
-    return <td key={k}><span className={`n${top && aggs.length > 1 ? ' hi' : ''}`}>{f1(v)}</span></td>;
+    if (SHOTS[k] || k === 'ts') {
+      const pct = aggVal(a, k);
+      if (!tot || k === 'ts') return <td key={k} className={tier(k, pct) || undefined}>{pctTxt(pct)}</td>;
+      const [m, at] = SHOTS[k];
+      return <td key={k} className={tier(k, pct, a.s[at]) || undefined}>{a.s[m]}-{a.s[at]}</td>;
+    }
+    const all = aggs.map(x => val(x, k)), top = !isTeam && (k === 'to' ? v === Math.min(...all) : v === Math.max(...all));
+    return <td key={k}><span className={`n${top && aggs.length > 1 ? ' hi' : ''}`}>{tot ? v : f1(v)}</span></td>;
   };
   const arrow = k => sk === k ? <span className="arr">{dir < 0 ? '▼' : '▲'}</span> : null;
   const aria = k => sk === k ? (dir < 0 ? 'descending' : 'ascending') : undefined;
   return (
     <div className="tbl-wrap"><table id="rank">
       <thead><tr><th className="sortable" data-rk="name" aria-sort={aria('name')} onClick={() => setSort('rsort', 'name')}>Player{arrow('name')}</th>
-        {RCOLS.map(([k, l]) => <th key={k} className={`sortable${k === 'per' ? ' c' : ''}`} data-rk={k} aria-sort={aria(k)} onClick={() => setSort('rsort', k)}>{arrow(k)}{l}</th>)}</tr></thead>
-      <tbody>{sorted.map(a => <tr key={a.id}><td className="pl"><div className="plc"><Avatar id={a.id} />{P(a.id).name}</div></td>{RCOLS.map(([k]) => cell(a, k))}</tr>)}</tbody>
+        {RCOLS.map(([k, l]) => <th key={k} className={`sortable${k === 'per' ? ' c' : ''}`} data-rk={k} aria-sort={aria(k)} onClick={() => setSort('rsort', k)}>{arrow(k)}{tot && SHOTS[k] ? l.slice(0, -1) : l}</th>)}</tr></thead>
+      <tbody>{sorted.map(a => <tr key={a.id}><td className="pl"><div className="plc"><Avatar id={a.id} />{P(a.id).name}</div></td>{RCOLS.map(([k]) => cell(a, k))}</tr>)}
+        {team ? <tr className="tot"><td className="pl"><div className="plc">Team</div></td>{RCOLS.map(([k]) => cell(team, k, true))}</tr> : null}</tbody>
     </table></div>
   );
 }
@@ -96,6 +108,10 @@ export function Stats() {
   const head = <div className="ghead"><div><h1 className="page">Stats</h1></div><span className="grow" />
     <SeasonPick id="s-chips" value={S.sSeason} seasons={codes} onPick={v => set({ sSeason: v })} /></div>;
   if (!aggs.length) return <>{head}<EmptyState title={`No ${S.sSeason} stats yet`} text="Leaders, rankings and charts appear here after the first game of the season is recorded." /></>;
+  const totals = !!S.sTotals;
+  // The team row counts everyone who played, subs included, across the games with stats.
+  const teamS = sumRows(inSeason.flatMap(g => Object.values(g.rows)));
+  const team = { id: 'team', gp: inSeason.length, s: teamS, pg: k => teamS[k] / inSeason.length };
   const minGP = Math.min(3, Math.max(...aggs.map(a => a.gp))), qual = aggs.filter(a => a.gp >= minGP);
   const pickable = statPlayers();
   const trend = S.trend.filter(id => pickable.includes(id));
@@ -112,8 +128,13 @@ export function Stats() {
       {leadTile('per', 'PER', v => perTxt(v, true))}{leadTile('pts', 'Points', f1)}{leadTile('reb', 'Rebounds', f1)}{leadTile('ast', 'Assists', f1)}{leadTile('stl', 'Steals', f1)}{leadTile('ts', 'True shooting', pctTxt)}
     </div></div>
 
-    <div className="sec"><h3>{all ? 'All time averages' : 'Season averages'}</h3>
-      <div id="rank-wrap"><Rankings aggs={aggs} /></div></div>
+    <div className="sec">
+      <div className="phead rhead"><h3>{all ? 'All time' : 'Season'} {totals ? 'totals' : 'averages'}</h3>
+        <span className="grow" />
+        <div className={`tog${totals ? ' r' : ''}`} id="s-mode" role="group" aria-label="Averages or totals">
+          <button data-m="avg" aria-pressed={!totals} onClick={() => totals && set({ sTotals: false })}>Averages</button>
+          <button data-m="tot" aria-pressed={totals} onClick={() => !totals && set({ sTotals: true })}>Totals</button></div></div>
+      <div id="rank-wrap"><Rankings aggs={aggs} team={team} tot={totals} /></div></div>
 
     <div className="sec"><h3>{all ? 'Season by season' : 'Trend over the season'}</h3>
       <div className="card" id="trend-card"><div className="ctrl"><div className="chips" id="t-players">{pickable.map(id => (
