@@ -66,7 +66,7 @@ function noise({ t = 0, d = 0.2, f = 2000, to, q = 1, v = 0.3, kind = 'bandpass'
 
 const N = { G4: 392, A4: 440, Bb4: 466.16, C5: 523.25, D5: 587.33, E5: 659.25, G5: 783.99, A5: 880, B5: 987.77, C6: 1046.5, E6: 1318.5 };
 const arp = (notes, t = 0, step = 0.07, d = 0.14, v = 0.28) => notes.forEach((f, i) => tone({ f, t: t + i * step, d, v }));
-const swish = (t = 0, v = 0.08) => noise({ t, d: 0.32, f: 7000, to: 1500, q: 0.8, v, swell: true });
+const swish = (t = 0, v = 0.04) => noise({ t, d: 0.32, f: 7000, to: 1500, q: 0.8, v, swell: true });
 const thud = (t = 0, v = 0.5) => { tone({ f: 150, to: 55, t, d: 0.14, v }); noise({ t, d: 0.05, f: 400, v: v * 0.4, kind: 'lowpass' }); };
 const clank = (t = 0) => { [523, 741, 1109, 1567].forEach((f, i) => tone({ f, t, d: 0.28 - i * 0.04, type: 'triangle', v: 0.12 })); noise({ t, d: 0.06, f: 3000, v: 0.2 }); };
 
@@ -93,7 +93,7 @@ const SOUNDS = {
   // Pieces of the recording sounds, each played when its moment comes in the court animation.
   // The net swish is kept well under the chimes (noise sounds much louder than a tone at the same level).
   swish: () => swish(),
-  swishSoft: () => swish(0, 0.065),
+  swishSoft: () => swish(0, 0.033),
   made2: () => arp([N.E5, N.G5], 0, 0.07, 0.12, 0.2),
   made3: () => arp([N.C5, N.E5, N.G5, N.C6], 0, 0.065, 0.16, 0.22),
   madeFt: () => tone({ f: N.G5, d: 0.14, v: 0.16 }),
