@@ -82,6 +82,8 @@ const SOUNDS = {
   pinOk: () => { tone({ f: N.G5, d: 0.07, v: 0.16 }); tone({ f: N.C6, t: 0.07, d: 0.14, v: 0.16 }); },
   pinBad: () => { tone({ f: 140, d: 0.12, v: 0.25, type: 'square' }); tone({ f: 120, t: 0.15, d: 0.18, v: 0.25, type: 'square' }); },
   // Avatars
+  // A camera shutter: a quick double click.
+  shutter: () => { noise({ d: 0.03, f: 3500, q: 1.5, v: 0.3 }); noise({ t: 0.07, d: 0.04, f: 2500, q: 1.5, v: 0.25 }); },
   boing: () => tone({ f: 220, to: 660, d: 0.22, v: 0.3, vib: 25 }),
   blip: () => { tone({ f: N.B5, d: 0.07, v: 0.2 }); tone({ f: N.E6, t: 0.07, d: 0.16, v: 0.2 }); },
   trick: () => arp([N.C5, N.D5, N.E5, N.G5, N.C6, N.E6], 0, 0.045, 0.09, 0.18),
