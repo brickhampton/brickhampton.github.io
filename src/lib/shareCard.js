@@ -1,7 +1,7 @@
 // The box score share image: the player of the game celebrating in the arena, then the full box score.
 // Drawn on a canvas (1080 wide, at 2×) so it can be shared or saved as a PNG.
 import { P, calc, sumRows, ratio, pctTxt, perTxt, perCls, tier, fmtDate, RES, numIn, teamFeat } from './core.js';
-import { figure, raisedBall, trickExtras } from './avatar.js';
+import { figure, raisedBall, trickExtras, cleanLook } from './avatar.js';
 import { playerCourt } from './playerCourt.js';
 import { playerOfGame } from './potg.js';
 
@@ -105,7 +105,8 @@ export async function drawShareCard(g, games, cel = randomCelebration(null, g)) 
   // 1.22 px to a unit puts the player at about 250 px tall, standing on the centre circle on the left.
   const K = 1.22, vw = W / K, vh = HERO / K, vx = 130 - 250 / K, vy = 226 + 52 - vh;
   const look = { ...star, num: numIn(g, potg.id) ?? star.num };
-  const fig = (cel.calm ? plain : smiling)(figure(look, { stage: true, pose: cel.pose }));
+  // Glasses wearers don't do the smiling eyes (they read oddly behind the frames), so they keep their normal eyes.
+  const fig = (cel.calm || cleanLook(look).glasses ? plain : smiling)(figure(look, { stage: true, pose: cel.pose }));
   const spot = `<defs><radialGradient id="sp" cx="130" cy="120" r="130" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#fff" stop-opacity=".14"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
     <linearGradient id="beam" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".1"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient></defs>
     <path d="M105 ${vy.toFixed(1)}L155 ${vy.toFixed(1)}L220 226L40 226Z" fill="url(#beam)"/><circle cx="130" cy="120" r="130" fill="url(#sp)"/>`;
