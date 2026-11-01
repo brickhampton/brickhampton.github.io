@@ -10,12 +10,14 @@ const W = 30, H = 36, TOPM = 6, FEET = 34;
 const SKIN = '#f6d9bf', SKIN2 = '#e8c4a6', HAIR = '#3a2219', HAIR2 = '#2a1812', HAIRL = '#4f3023';
 const DRESS = '#f4ecdc', DRESS2 = '#dfd2bb', K = '#16121a', BLUSH = '#f2b2a6';
 const FLOWERS = ['#e895ac', '#86a8de', '#e895ac', '#9cc58c', '#f0bf6a'];
+const TEE = '#fbfbf8', TEE2 = '#e3e3df', JEAN = '#a9c4e4', JEAN2 = '#8eaad0', JEANL = '#c3d7ee', STRAP = '#2b2320', CHROME = '#d2d5db', CHROME2 = '#a3a8b1';
 const CAM = '#25252d', CAM2 = '#3c3c48', LENS = '#5d6676', GLINT = '#bfe3ff';
 const TF = `translate(50 0) scale(${(104 / FEET).toFixed(4)}) translate(-13 0)`;
 
 function grid() { return Array.from({ length: H + TOPM }, () => Array(W).fill(null)); }
 
-function draw(frame) {
+function draw(frame, look) {
+  const tee = look.outfit === 'tee';
   const g = grid(), ge = grid();
   let t = g;
   const r = (x, y, w = 1, h = 1, col) => { for (let j = y; j < y + h; j++) for (let i = x; i < x + w; i++) if (j >= -TOPM && j < H && i >= 0 && i < W) t[j + TOPM][i] = col; };
@@ -32,22 +34,35 @@ function draw(frame) {
   } else {
     [[1, -1, 1], [2, -1, 1], [3, -1, 2], [4, -2, 2], [5, -2, 2], [6, -2, 2], [7, -2, 2], [8, -3, 3], [9, -3, 2]].forEach(([j, dx, w]) => r(9 + dx, ty + j, w, 1, SKIN2));
   }
-  // ---- legs and shoes (white sneakers, toes pointing the way she faces)
-  [10, 14].forEach(L => { r(L, 30, 2, 2, SKIN); r(L, 32, 3, 1, '#f1efea'); r(L, 33, 4, 1, '#f1efea'); r(L, 33, 4, 1, '#d6d3cc'); r(L + 1, 32, 1, 1, '#d6d3cc'); });
-  // ---- dress: thin straps over bare shoulders, a fitted bodice, a gathered skirt flaring to mid-calf
-  r(9, ty, 8, 2, SKIN); r(9, ty, 1, 1, SKIN2);
-  r(10, ty, 1, 2, DRESS); r(15, ty, 1, 2, DRESS);
-  r(9, ty + 2, 8, 4, DRESS); r(16, ty + 2, 1, 4, DRESS2); r(9, ty + 2, 8, 1, DRESS);
-  r(12, ty + 2, 1, 4, DRESS2);                     // the seam down the bodice
-  r(9, ty + 6, 8, 1, DRESS2);                      // the waist
-  const SK = [[9, 8], [9, 9], [8, 10], [8, 10], [8, 11], [7, 12], [7, 12]];
-  SK.forEach(([x, w], k) => r(x, ty + 7 + k, w, 1, DRESS));
-  // Gathers: soft fold lines down the skirt, and a shaded far side.
-  [[10, 2], [13, 1], [16, 3]].forEach(([x, from]) => r(x, ty + 7 + from, 1, 7 - from, DRESS2));
-  SK.forEach(([x, w], k) => r(x + w - 1, ty + 7 + k, 1, 1, DRESS2));
-  r(7, ty + 13, 12, 1, DRESS2);
-  // A scattering of tiny flowers.
-  [[10, 3], [14, 2], [11, 5], [15, 4], [13, 9], [9, 10], [16, 8], [11, 12], [14, 12], [17, 11], [8, 13], [12, 7]].forEach(([x, y], i) => r(x, ty + y, 1, 1, FLOWERS[i % FLOWERS.length]));
+  // ---- shoes: white sneakers, toes pointing the way she faces
+  [10, 14].forEach(L => { r(L, 32, 3, 1, '#f1efea'); r(L, 33, 4, 1, '#d6d3cc'); r(L + 1, 32, 1, 1, '#d6d3cc'); });
+  if (tee) {
+    // ---- a small white T-shirt (short sleeves, crew neck) and light blue jeans down to the sneakers
+    r(9, ty, 8, 6, TEE); r(16, ty, 1, 6, TEE2); r(11, ty, 4, 1, SKIN); r(12, ty + 1, 2, 1, TEE2);
+    r(9, ty + 6, 8, 3, JEAN); r(9, ty + 6, 8, 1, JEAN2); r(13, ty + 6, 1, 1, '#c9a24a');
+    [9, 13].forEach(L => { r(L, ty + 9, 3, 6, JEAN); r(L + 2, ty + 9, 1, 6, JEAN2); r(L, ty + 14, 3, 1, JEANL); });
+    r(16, ty + 9, 1, 5, JEAN2); r(12, ty + 8, 1, 1, JEAN2);
+  } else {
+    [10, 14].forEach(L => r(L, 30, 2, 2, SKIN));
+    // ---- dress: thin straps over bare shoulders, a fitted bodice, a gathered skirt flaring to mid-calf
+    r(9, ty, 8, 2, SKIN); r(9, ty, 1, 1, SKIN2);
+    r(10, ty, 1, 2, DRESS); r(15, ty, 1, 2, DRESS);
+    r(9, ty + 2, 8, 4, DRESS); r(16, ty + 2, 1, 4, DRESS2); r(9, ty + 2, 8, 1, DRESS);
+    r(12, ty + 2, 1, 4, DRESS2);                     // the seam down the bodice
+    r(9, ty + 6, 8, 1, DRESS2);                      // the waist
+    const SK = [[9, 8], [9, 9], [8, 10], [8, 10], [8, 11], [7, 12], [7, 12]];
+    SK.forEach(([x, w], k) => r(x, ty + 7 + k, w, 1, DRESS));
+    // Gathers: soft fold lines down the skirt, and a shaded far side.
+    [[10, 2], [13, 1], [16, 3]].forEach(([x, from]) => r(x, ty + 7 + from, 1, 7 - from, DRESS2));
+    SK.forEach(([x, w], k) => r(x + w - 1, ty + 7 + k, 1, 1, DRESS2));
+    r(7, ty + 13, 12, 1, DRESS2);
+    // A scattering of tiny flowers.
+    [[10, 3], [14, 2], [11, 5], [15, 4], [13, 9], [9, 10], [16, 8], [11, 12], [14, 12], [17, 11], [8, 13], [12, 7]].forEach(([x, y], i) => r(x, ty + y, 1, 1, FLOWERS[i % FLOWERS.length]));
+  }
+  // The T-shirt's short sleeves cover the top of each arm.
+  if (tee) {
+    if (frame === 'cheer') { r(7, 17, 2, 1, TEE2); r(6, 16, 2, 1, TEE2); } else if (frame === 'cheer2') r(6, 17, 3, 1, TEE2); else r(8, 18, 1, 2, TEE2);
+  }
   // ---- head (as the players': 10 wide, a one-pixel nose), a little blush
   r(hx + 2, hy, 6, 1, SKIN); r(hx + 1, hy + 1, 8, 1, SKIN); r(hx, hy + 2, 10, 8, SKIN); r(hx + 1, hy + 10, 8, 1, SKIN); r(hx + 10, hy + 6, 1, 2, SKIN);
   r(hx + 8, hy + 8, 1, 1, BLUSH); r(hx + 3, hy + 8, 1, 1, BLUSH);
@@ -71,21 +86,43 @@ function draw(frame) {
   if (frame === 'snap') {
     // Camera up to her eye, the lens pointing at the team; elbow down, hand under the camera.
     r(16, ty, 2, 2, SKIN); r(17, ty - 3, 2, 3, SKIN); r(18, ty - 2, 1, 2, SKIN2);
-    camera(r, 15, hy + 5);
+    camera(r, 15, hy + 5, look.cam);
     r(16, hy + 9, 3, 1, SKIN);
+    if (tee) r(16, ty, 2, 2, TEE);
   } else {
     // Camera held at her chest, ready.
     [[1, 0, 1], [2, 0, 2], [3, 0, 2], [4, 1, 2]].forEach(([j, dx, w]) => r(16 + dx, ty + j, w, 1, SKIN));
-    camera(r, 16, ty + 3);
+    if (tee) { r(16, ty + 1, 1, 1, TEE); r(16, ty + 2, 2, 1, TEE); }
+    // A film camera hangs from a strap round her neck.
+    if (look.cam !== 'digital') { r(15, ty + 1, 1, 2, STRAP); r(14, ty, 1, 1, STRAP); }
+    camera(r, 16, ty + 3, look.cam);
     r(16, ty + 6, 3, 1, SKIN); r(17, ty + 6, 2, 1, SKIN2);
   }
   return { g, ge };
 }
 
-// A small mirrorless camera, side on: a black body, a dark lens pointing right with a glint, a little flash on top.
-function camera(r, x, y) {
-  r(x, y, 6, 4, CAM); r(x, y, 6, 1, CAM2); r(x + 1, y - 1, 2, 1, CAM2); r(x + 4, y + 1, 1, 1, '#d0d0d8');
-  r(x + 6, y + 1, 2, 2, LENS); r(x + 7, y + 1, 1, 1, GLINT); r(x, y + 3, 6, 1, '#101016');
+// Her camera, side on, the lens pointing at the team. 'digital' is a small black mirrorless one; the others are classic
+// film cameras: 'slr' (chrome top with the prism hump, black leatherette), 'range' (a flat-topped rangefinder with a
+// viewfinder window), 'black' (an all-black SLR with a chrome lens ring) and 'brown' (a rangefinder in brown leather).
+export const CAMERAS = ['slr', 'range', 'black', 'brown', 'digital'];
+function camera(r, x, y, kind = 'slr') {
+  if (kind === 'digital') {
+    r(x, y, 6, 4, CAM); r(x, y, 6, 1, CAM2); r(x + 1, y - 1, 2, 1, CAM2); r(x + 4, y + 1, 1, 1, '#d0d0d8');
+    r(x + 6, y + 1, 2, 2, LENS); r(x + 7, y + 1, 1, 1, GLINT); r(x, y + 3, 6, 1, '#101016');
+    return;
+  }
+  const slr = kind === 'slr' || kind === 'black';
+  const top = kind === 'black' ? '#34343c' : CHROME, top2 = kind === 'black' ? '#4a4a55' : CHROME2;
+  const body = kind === 'brown' ? '#7a4a2c' : '#1e1d23', body2 = kind === 'brown' ? '#5e3820' : '#141318';
+  // Top plate, with the rewind knob and shutter button on top; an SLR's prism hump in the middle.
+  r(x, y, 6, 1, top); r(x, y + 1, 6, 1, top2); r(x, y - 1, 1, 1, '#2a2a30'); r(x + 4, y - 1, 1, 1, top2);
+  if (slr) { r(x + 1, y - 1, 3, 1, top); r(x + 2, y - 2, 1, 1, top2); r(x + 1, y - 1, 1, 1, top2); }
+  else r(x + 5, y, 1, 1, '#a9d6f5');
+  // The leatherette body, a little texture, and the lens: chrome ring, black barrel, a glint on the glass.
+  r(x, y + 2, 6, 2, body); r(x + 1, y + 3, 1, 1, body2); r(x + 3, y + 2, 1, 1, body2); r(x + 5, y + 3, 1, 1, body2);
+  const lh = slr ? 3 : 2;
+  r(x + 6, y + 1, 1, lh, CHROME); r(x + 7, y + 1, 1, lh, '#18181d'); r(x + 7, y + 1, 1, 1, GLINT);
+  if (slr) r(x + 8, y + 2, 1, 1, LENS);
 }
 
 function mix(hex, t) {
@@ -105,12 +142,16 @@ function paths(g) {
   return [...runs].map(([c, d]) => `<path d="${d}" fill="${c}"/>`).join('');
 }
 
+// Her look: outfit 'dress' (the default) or 'tee' (white T-shirt and jeans), and which camera she carries.
+export const OUTFITS = ['dress', 'tee'];
+export const supLook = (raw = {}) => ({ outfit: OUTFITS.includes(raw.outfit) ? raw.outfit : 'dress', cam: CAMERAS.includes(raw.cam) ? raw.cam : 'slr' });
 const cache = new Map();
-export function supporter(frame = 'rest') {
-  if (cache.has(frame)) return cache.get(frame);
-  const { g, ge } = draw(frame);
+export function supporter(frame = 'rest', raw) {
+  const look = supLook(raw), key = [frame, look.outfit, look.cam].join();
+  if (cache.has(key)) return cache.get(key);
+  const { g, ge } = draw(frame, look);
   const svg = `<g class="av-fig" shape-rendering="crispEdges"><g transform="${TF}">${paths(g)}</g><g class="av-eyes"><g transform="${TF}">${paths(ge)}</g></g></g>`;
-  cache.set(frame, svg);
+  cache.set(key, svg);
   return svg;
 }
 

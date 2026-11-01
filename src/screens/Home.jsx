@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { P, statPlayers, esc } from '../lib/core.js';
+import { S as DATA } from '../lib/store.js';
 import { reduced } from '../lib/charts.js';
 import { figure, pxShadow, raisedTrophy } from '../lib/avatar.js';
 import { ChevDown } from '../components/icons.jsx';
@@ -103,10 +104,10 @@ const SUP = { x: 212, phoneX: 232, feet: 242, w: 100 };
 const SUP_FRAMES = ['rest', 'cheer', 'cheer2', 'snap'];
 function fan(cx, top, w, refl) {
   const svg = inner => `<svg x="${cx - w / 2}" y="${top}" width="${w}" height="${w * 1.04}" viewBox="0 0 100 104" overflow="visible">${inner}</svg>`;
-  const frames = SUP_FRAMES.map(f => `<g class="sf sf-${f}">${supporter(f)}</g>`).join('');
+  const look = DATA.supporter, frames = SUP_FRAMES.map(f => `<g class="sf sf-${f}">${supporter(f, look)}</g>`).join('');
   const fig = `<g class="hsup alive" style="--hd:.7s;--bd:-2.1s">${svg(`${pxShadow(50, 103.5, 18, 104 / 34)}<g class="hsupt" role="button" aria-label="Our supporter, taking photos"><rect x="12" y="10" width="76" height="94" fill="transparent"/>${frames}${supporterFlash()}</g>`)}</g>`;
   const fy = top + w * 1.035;
-  return { fig, refl: refl ? `<g mask="url(#hrmask)" opacity="${refl}"><g transform="translate(0 ${(2 * fy).toFixed(1)}) scale(1 -1)">${svg(supporter('rest'))}</g></g>` : '' };
+  return { fig, refl: refl ? `<g mask="url(#hrmask)" opacity="${refl}"><g transform="translate(0 ${(2 * fy).toFixed(1)}) scale(1 -1)">${svg(supporter('rest', look))}</g></g>` : '' };
 }
 // Tapping her: she takes a photo straight away.
 function onSup(g) {

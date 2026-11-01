@@ -27,10 +27,13 @@ export async function loadData() {
     // '*' so the site keeps working before 09-game-video.sql adds the video column.
     db.from('games').select('*, lines(*)').order('season').order('no'),
   ]);
+  // The supporter's outfit and camera (10-supporter.sql). Before that runs she keeps her defaults.
+  const site = await db.from('site').select('key, value').then(r => r, () => ({ data: null }));
   const err = [seasons, players, opps, games].find(r => r.error)?.error;
   if (err) throw new Error(err.message);
   const data = {
     seasons: seasons.data.map(s => s.code),
+    supporter: site.data?.find(r => r.key === 'supporter')?.value || null,
     current: seasons.data.find(s => s.is_current)?.code || seasons.data[0]?.code,
     roster: players.data.filter(p => p.role === 'starter').map(player).sort((a, b) => a.num - b.num),
     subs: players.data.filter(p => p.role === 'sub').map(player),

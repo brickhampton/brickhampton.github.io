@@ -1136,6 +1136,10 @@ a.vbtn:active,button.vbtn:active{transform:scale(.94)}
 /* Home skylights: hidden most of the time; about once a minute they drift in, sweep across and fade. */
 .hsweep{opacity:0;animation:hsweep 60s ease-in-out -38s infinite}
 @keyframes hsweep{0%,86%{opacity:0;transform:translateX(-240px)}90%{opacity:1}96%{opacity:1}100%{opacity:0;transform:translateX(240px)}}
+/* Admin > Supporter: her outfit and camera choices, drawn like the avatar builder's options. */
+.sup-card{display:flex;flex-direction:column;gap:8px}
+.sup-card .sup-opts{grid-template-columns:repeat(auto-fill,minmax(96px,120px));margin-bottom:8px}
+.sup-card .avb-opt svg{aspect-ratio:84/102}
 /* Our supporter on Home: every 16 seconds she pumps her fist a few times, then lifts her camera and takes a photo
    (the flash pops). Tapping her takes a photo straight away. */
 .hsup{animation:hpBob 3.2s steps(4,jump-none) var(--hd) infinite}
