@@ -6,11 +6,11 @@ import { loadData, cachedData } from './data.js';
 // View choices (picked season, sort, chart stat) are remembered in this browser only.
 const UI_KEY = 'bh-ui-v1';
 const UI_KEYS = ['gSeason', 'sSeason', 'gOpen', 'rsort', 'box', 'gtStat', 'tbStat', 'trend', 'tStat', 'h2h',
-  'pStat', 'pTotals', 'pCmp', 'pSc', 'pLogAll'];
+  'pStat', 'pTotals', 'sTotals', 'pCmp', 'pSc', 'pLogAll'];
 
 const freshUi = () => ({
   gSeason: null, sSeason: null, gOpen: {}, rsort: null, box: null, gtStat: 'pts', tbStat: 'pts',
-  trend: null, tStat: 'per', h2h: null, pStat: 'per', pTotals: false, pCmp: null, pSc: null, pLogAll: false,
+  trend: null, tStat: 'per', h2h: null, pStat: 'per', pTotals: false, sTotals: false, pCmp: null, pSc: null, pLogAll: false,
 });
 
 export const S = {
