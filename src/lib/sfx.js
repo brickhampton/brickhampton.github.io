@@ -68,8 +68,6 @@ const N = { G4: 392, A4: 440, Bb4: 466.16, C5: 523.25, D5: 587.33, E5: 659.25, G
 const arp = (notes, t = 0, step = 0.07, d = 0.14, v = 0.28) => notes.forEach((f, i) => tone({ f, t: t + i * step, d, v }));
 const swish = (t = 0, v = 0.35) => noise({ t, d: 0.32, f: 7000, to: 1500, q: 0.8, v, swell: true });
 const thud = (t = 0, v = 0.5) => { tone({ f: 150, to: 55, t, d: 0.14, v }); noise({ t, d: 0.05, f: 400, v: v * 0.4, kind: 'lowpass' }); };
-// A dribble is a bright "pock" off a wooden floor, not a deep thud.
-const pock = (t = 0, v = 0.32) => { tone({ f: 620, to: 260, t, d: 0.07, v }); tone({ f: 300, to: 180, t, d: 0.09, v: v * 0.45, type: 'triangle' }); noise({ t, d: 0.03, f: 2200, q: 1.5, v: v * 0.5 }); };
 const clank = (t = 0) => { [523, 741, 1109, 1567].forEach((f, i) => tone({ f, t, d: 0.28 - i * 0.04, type: 'triangle', v: 0.12 })); noise({ t, d: 0.06, f: 3000, v: 0.2 }); };
 const crowd = (t = 0, d = 1.2, v = 0.18) => { noise({ t, d, f: 1100, q: 0.6, v, swell: true }); noise({ t: t + 0.05, d: d * 0.9, f: 2200, q: 1.2, v: v * 0.6, swell: true }); };
 
@@ -87,7 +85,7 @@ const SOUNDS = {
   boing: () => tone({ f: 220, to: 660, d: 0.22, v: 0.3, vib: 25 }),
   blip: () => { tone({ f: N.B5, d: 0.07, v: 0.2 }); tone({ f: N.E6, t: 0.07, d: 0.16, v: 0.2 }); },
   trick: () => arp([N.C5, N.D5, N.E5, N.G5, N.C6, N.E6], 0, 0.045, 0.09, 0.18),
-  dribble: () => pock(),
+  dribble: () => thud(),
   cheer: () => crowd(0, 1.6, 0.22),
   trophy: () => { arp([N.G4, N.C5, N.E5, N.G5], 0, 0.11, 0.16, 0.22); tone({ f: N.C6, t: 0.44, d: 0.5, v: 0.22, vib: 6 }); },
   // Pieces of the recording sounds, each played when its moment comes in the court animation.
@@ -105,7 +103,7 @@ const SOUNDS = {
   steal: () => { tone({ f: 400, to: 1800, d: 0.12, v: 0.22 }); noise({ d: 0.1, f: 2500, to: 6000, q: 2, v: 0.18 }); tone({ f: N.G5, t: 0.13, d: 0.1, v: 0.16 }); },
   block: () => { noise({ d: 0.12, f: 1200, q: 0.7, v: 0.55 }); tone({ f: 180, to: 60, d: 0.22, v: 0.4 }); crowd(0.08, 0.9, 0.12); },
   turnover: () => { tone({ f: N.Bb4, d: 0.18, v: 0.2, type: 'triangle' }); tone({ f: N.A4, t: 0.2, d: 0.18, v: 0.2, type: 'triangle' }); tone({ f: 415.3, to: 370, t: 0.4, d: 0.45, v: 0.2, type: 'triangle', vib: 9 }); },
-  roll: () => pock(0, 0.14),
+  roll: () => thud(0, 0.25),
 };
 
 export function sfx(name, ms = 0) {
