@@ -46,7 +46,25 @@ function tone({ f, to, t = 0, d = 0.1, type = 'sine', v = 0.3, vib = 0 }) {
   o.connect(g); g.connect(out);
   o.start(now); o.stop(now + d + 0.02);
 }
-// Filtered noise: swishes, whooshes, the crowd.
+// One voice in the crowd going "woo": a buzzy tone through a vowel-like filter, sliding up and back down, with a wobble.
+function woo({ t = 0, d = 0.8, f = 400, v = 0.04 }) {
+  const now = ctx.currentTime + t, o = ctx.createOscillator(), fl = ctx.createBiquadFilter(), lp = ctx.createBiquadFilter(), g = ctx.createGain();
+  const l = ctx.createOscillator(), lg = ctx.createGain();
+  o.type = 'sawtooth';
+  o.frequency.setValueAtTime(f, now);
+  o.frequency.exponentialRampToValueAtTime(f * 1.45, now + d * 0.35);
+  o.frequency.exponentialRampToValueAtTime(f * 1.1, now + d);
+  l.frequency.value = 5.5 + Math.random(); lg.gain.value = f * 0.025; l.connect(lg); lg.connect(o.frequency);
+  fl.type = 'bandpass'; fl.frequency.value = 800 + Math.random() * 300; fl.Q.value = 2.5;
+  lp.type = 'lowpass'; lp.frequency.value = 2400;
+  g.gain.setValueAtTime(0.0001, now);
+  g.gain.exponentialRampToValueAtTime(v, now + 0.12);
+  g.gain.setValueAtTime(v, now + d * 0.6);
+  g.gain.exponentialRampToValueAtTime(0.0001, now + d);
+  o.connect(fl); fl.connect(lp); lp.connect(g); g.connect(out);
+  o.start(now); o.stop(now + d + 0.05); l.start(now); l.stop(now + d + 0.05);
+}
+// Filtered noise: swishes, whooshes, claps and the crowd's murmur.
 function noise({ t = 0, d = 0.2, f = 2000, to, q = 1, v = 0.3, kind = 'bandpass', swell = false }) {
   if (!nbuf) {
     nbuf = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate);
@@ -69,7 +87,14 @@ const arp = (notes, t = 0, step = 0.07, d = 0.14, v = 0.28) => notes.forEach((f,
 const swish = (t = 0, v = 0.35) => noise({ t, d: 0.32, f: 7000, to: 1500, q: 0.8, v, swell: true });
 const thud = (t = 0, v = 0.5) => { tone({ f: 150, to: 55, t, d: 0.14, v }); noise({ t, d: 0.05, f: 400, v: v * 0.4, kind: 'lowpass' }); };
 const clank = (t = 0) => { [523, 741, 1109, 1567].forEach((f, i) => tone({ f, t, d: 0.28 - i * 0.04, type: 'triangle', v: 0.12 })); noise({ t, d: 0.06, f: 3000, v: 0.2 }); };
-const crowd = (t = 0, d = 1.2, v = 0.18) => { noise({ t, d, f: 1100, q: 0.6, v, swell: true }); noise({ t: t + 0.05, d: d * 0.9, f: 2200, q: 1.2, v: v * 0.6, swell: true }); };
+// A crowd cheering: a low murmur underneath, a scatter of hand claps, and a few voices going "woo", each a little
+// different in pitch and timing. v sets how loud the whole crowd is.
+const crowd = (t = 0, d = 1.2, v = 0.18) => {
+  noise({ t, d, f: 600, q: 0.5, v: v * 0.35, kind: 'lowpass', swell: true });
+  const claps = Math.round(d * 16);
+  for (let i = 0; i < claps; i++) noise({ t: t + Math.random() * d * 0.85, d: 0.03, f: 1300 + Math.random() * 1400, q: 1.4, v: v * (0.7 + Math.random() * 0.8) });
+  [330, 415, 494, 370].forEach((f, i) => woo({ t: t + 0.04 + i * 0.07 + Math.random() * 0.08, d: d * (0.55 + Math.random() * 0.25), f: f * (0.95 + Math.random() * 0.1), v: v * 0.16 }));
+};
 
 const SOUNDS = {
   // Buttons and screens: short and quiet, like a click.
