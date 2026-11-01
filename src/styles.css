@@ -1151,10 +1151,35 @@ a.vbtn:active,button.vbtn:active{transform:scale(.94)}
 @keyframes sCheer2{0%,32%{visibility:hidden}33%,35%{visibility:visible}36%,38%{visibility:hidden}39%,41%{visibility:visible}42%,100%{visibility:hidden}}
 @keyframes sSnap{0%,63%{visibility:hidden}64%,77%{visibility:visible}78%,100%{visibility:hidden}}
 @keyframes sFlash{0%,69%{visibility:hidden}70%,71%{visibility:visible}72%,100%{visibility:hidden}}
-.hsupt.t-snap :is(.sf,.sup-flash){animation:none;visibility:hidden}
+/* Ash's reactions (tapped, or now and then on her own). While one plays, her 16-second loop steps aside, she smiles
+   (except when looking round), and only the frames the reaction uses show. */
+.hsupt{transform-box:fill-box;transform-origin:50% 100%}
+.hsupt[class*="t-"] :is(.sf,.sup-flash){animation:none;visibility:hidden}
+.hsupt:is(.t-smile,.t-hop,.t-look) .sf-rest{visibility:visible}
+.hsupt[class*="t-"]:not(.t-look) .av-smile{animation:none;opacity:1}
+.hsupt[class*="t-"]:not(.t-look) .av-eyes{animation:none;opacity:0}
+/* Photo: camera up, the flash pops. */
 .hsupt.t-snap .sf-snap{visibility:visible}
 .hsupt.t-snap .sup-flash{animation:sTapFlash 1.3s steps(1,end)}
 @keyframes sTapFlash{0%,34%{visibility:hidden}35%,46%{visibility:visible}47%,100%{visibility:hidden}}
+/* Fist pumps: the fist goes up and down, fast. */
+.hsupt:is(.t-cheer,.t-yay,.t-dance) .sf-cheer{animation:sPumpA .36s steps(1,end) infinite}
+.hsupt:is(.t-cheer,.t-yay,.t-dance) .sf-cheer2{animation:sPumpB .36s steps(1,end) infinite}
+@keyframes sPumpA{0%,49%{visibility:visible}50%,100%{visibility:hidden}}
+@keyframes sPumpB{0%,49%{visibility:hidden}50%,100%{visibility:visible}}
+.hsupt.t-cheer{animation:tBob .35s cubic-bezier(.3,.7,.4,1) 4}
+/* Jumping for joy: two big hops, fist in the air. */
+.hsupt.t-yay{animation:sYay .65s cubic-bezier(.3,.7,.4,1) 2}
+@keyframes sYay{0%,100%{transform:none}10%{transform:scale(1.06,.92)}45%{transform:translateY(-16px)}80%{transform:scale(1.04,.95)}}
+/* Dancing: swaying side to side, fist pumping. */
+.hsupt.t-dance{animation:hDance 1.5s ease-in-out}
+/* Waving: the hand goes up and rocks from the shoulder height to the side of her head. */
+.hsupt.t-wave .sf-cheer{animation:sPumpA .5s steps(1,end) infinite}
+.hsupt.t-wave .sf-cheer2{animation:sPumpB .5s steps(1,end) infinite}
+/* A smile with a little bob, a small hop, or a look round. */
+.hsupt.t-smile{animation:tBob .5s cubic-bezier(.3,.7,.4,1)}
+.hsupt.t-hop{animation:hop .7s var(--ease-out)}
+.hsupt.t-look .av-eyes{animation:blink 5s var(--bd,0s) infinite, hLook 1.9s steps(1)}
 @media (prefers-reduced-motion:reduce){.hsupt :is(.sf,.sup-flash){animation:none}.hsupt .sf-rest{visibility:visible}}
 /* Tapping a player on Home: a smile and a quick bob on every tap, then one of a few reactions after a single tap: a hop, a squash and stretch, a dance, a look round, or a fist pump with either arm or both. */
 .hpt{cursor:pointer;transform-box:fill-box;transform-origin:50% 100%;-webkit-tap-highlight-color:transparent}
