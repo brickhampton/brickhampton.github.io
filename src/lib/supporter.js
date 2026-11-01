@@ -7,10 +7,10 @@
 // Everything sits in the players' 100 × 104 stage box, feet on the bottom.
 
 const W = 30, H = 36, TOPM = 6, FEET = 34;
-const SKIN = '#f6d9bf', SKIN2 = '#e8c4a6', HAIR = '#3a2219', HAIR2 = '#2a1812', HAIRL = '#4f3023';
+const SKIN = '#f6d9bf', SKIN2 = '#e8c4a6', HAIR = '#2c1811', HAIR2 = '#1e100b', HAIRL = '#3e251a';
 const DRESS = '#f4ecdc', DRESS2 = '#dfd2bb', K = '#16121a', BLUSH = '#f2b2a6';
 const FLOWERS = ['#e895ac', '#86a8de', '#e895ac', '#9cc58c', '#f0bf6a'];
-const TEE = '#fbfbf8', TEE2 = '#e3e3df', JEAN = '#a9c4e4', JEAN2 = '#8eaad0', JEANL = '#c3d7ee', STRAP = '#2b2320', CHROME = '#d2d5db', CHROME2 = '#a3a8b1';
+const TEE = '#fbfbf8', TEE2 = '#e3e3df', JEAN = '#a9c4e4', JEAN2 = '#8eaad0', JEANL = '#c3d7ee';
 const CAM = '#25252d', CAM2 = '#3c3c48', LENS = '#5d6676', GLINT = '#bfe3ff';
 const TF = `translate(50 0) scale(${(104 / FEET).toFixed(4)}) translate(-13 0)`;
 
@@ -83,46 +83,48 @@ function draw(frame, look) {
   // A strand falling forward over her front shoulder.
   r(hx + 8, hy + 9, 1, 3, HAIR);
   // ---- front arm and the camera
-  if (frame === 'snap') {
+  if (look.cam === 'film') {
+    // The film camera faces out of the picture, so she holds it square on: at her chest, or up in front of her face.
+    if (frame === 'snap') {
+      r(16, ty, 2, 2, SKIN); r(19, hy + 9, 2, ty - hy - 8, SKIN); r(20, hy + 10, 1, ty - hy - 9, SKIN2);
+      if (tee) r(16, ty, 2, 2, TEE);
+      film(r, 13, hy + 3); r(21, hy + 6, 1, 3, SKIN);
+    } else {
+      [[1, 0, 1], [2, 0, 2], [3, 0, 2]].forEach(([j, dx, w]) => r(16 + dx, ty + j, w, 1, SKIN));
+      if (tee) { r(16, ty + 1, 1, 1, TEE); r(16, ty + 2, 2, 1, TEE); }
+      film(r, 14, ty + 1); r(22, ty + 4, 1, 3, SKIN);
+    }
+  } else if (frame === 'snap') {
     // Camera up to her eye, the lens pointing at the team; elbow down, hand under the camera.
     r(16, ty, 2, 2, SKIN); r(17, ty - 3, 2, 3, SKIN); r(18, ty - 2, 1, 2, SKIN2);
-    camera(r, 15, hy + 5, look.cam);
+    camera(r, 15, hy + 5);
     r(16, hy + 9, 3, 1, SKIN);
     if (tee) r(16, ty, 2, 2, TEE);
   } else {
     // Camera held at her chest, ready.
     [[1, 0, 1], [2, 0, 2], [3, 0, 2], [4, 1, 2]].forEach(([j, dx, w]) => r(16 + dx, ty + j, w, 1, SKIN));
     if (tee) { r(16, ty + 1, 1, 1, TEE); r(16, ty + 2, 2, 1, TEE); }
-    // A film camera hangs from a strap round her neck.
-    if (look.cam !== 'digital') { r(15, ty + 1, 1, 2, STRAP); r(14, ty, 1, 1, STRAP); }
-    camera(r, 16, ty + 3, look.cam);
+    camera(r, 16, ty + 3);
     r(16, ty + 6, 3, 1, SKIN); r(17, ty + 6, 2, 1, SKIN2);
   }
   return { g, ge };
 }
 
-// Her camera, side on, the lens pointing at the team. 'digital' is a small black mirrorless one; the others are classic
-// film cameras: 'slr' (chrome top with the prism hump, black leatherette), 'range' (a flat-topped rangefinder with a
-// viewfinder window), 'black' (an all-black SLR with a chrome lens ring) and 'brown' (a rangefinder in brown leather).
-export const CAMERAS = ['slr', 'range', 'black', 'brown', 'digital'];
-function camera(r, x, y, kind = 'slr') {
-  if (kind === 'digital') {
-    r(x, y, 6, 4, CAM); r(x, y, 6, 1, CAM2); r(x + 1, y - 1, 2, 1, CAM2); r(x + 4, y + 1, 1, 1, '#d0d0d8');
-    r(x + 6, y + 1, 2, 2, LENS); r(x + 7, y + 1, 1, 1, GLINT); r(x, y + 3, 6, 1, '#101016');
-    return;
-  }
-  const slr = kind === 'slr' || kind === 'black';
-  const top = kind === 'black' ? '#34343c' : CHROME, top2 = kind === 'black' ? '#4a4a55' : CHROME2;
-  const body = kind === 'brown' ? '#7a4a2c' : '#1e1d23', body2 = kind === 'brown' ? '#5e3820' : '#141318';
-  // Top plate, with the rewind knob and shutter button on top; an SLR's prism hump in the middle.
-  r(x, y, 6, 1, top); r(x, y + 1, 6, 1, top2); r(x, y - 1, 1, 1, '#2a2a30'); r(x + 4, y - 1, 1, 1, top2);
-  if (slr) { r(x + 1, y - 1, 3, 1, top); r(x + 2, y - 2, 1, 1, top2); r(x + 1, y - 1, 1, 1, top2); }
-  else r(x + 5, y, 1, 1, '#a9d6f5');
-  // The leatherette body, a little texture, and the lens: chrome ring, black barrel, a glint on the glass.
-  r(x, y + 2, 6, 2, body); r(x + 1, y + 3, 1, 1, body2); r(x + 3, y + 2, 1, 1, body2); r(x + 5, y + 3, 1, 1, body2);
-  const lh = slr ? 3 : 2;
-  r(x + 6, y + 1, 1, lh, CHROME); r(x + 7, y + 1, 1, lh, '#18181d'); r(x + 7, y + 1, 1, 1, GLINT);
-  if (slr) r(x + 8, y + 2, 1, 1, LENS);
+// A small mirrorless camera, side on: a black body, a dark lens pointing right with a glint, a little flash on top.
+function camera(r, x, y) {
+  r(x, y, 6, 4, CAM); r(x, y, 6, 1, CAM2); r(x + 1, y - 1, 2, 1, CAM2); r(x + 4, y + 1, 1, 1, '#d0d0d8');
+  r(x + 6, y + 1, 2, 2, LENS); r(x + 7, y + 1, 1, 1, GLINT); r(x, y + 3, 6, 1, '#101016');
+}
+
+// A classic film SLR, front on: a chrome top with the prism hump, a knob and a button either side, a black body and a
+// big lens in the middle with coloured reflections in the glass.
+function film(r, x, y) {
+  const C = '#e4e6ea', C2 = '#b4b8bf', RING = '#8b8f97', B = '#232228';
+  r(x + 3, y, 2, 1, C); r(x, y + 1, 2, 1, C2); r(x + 2, y + 1, 4, 1, C); r(x + 6, y + 1, 2, 1, C2);
+  r(x, y + 2, 8, 1, C); r(x, y + 3, 8, 3, B); r(x, y + 6, 8, 1, '#17161b'); r(x, y + 3, 1, 3, '#2e2d34');
+  r(x + 2, y + 2, 4, 5, RING); r(x + 2, y + 2, 1, 1, C2); r(x + 5, y + 6, 1, 1, '#6f737b');
+  r(x + 3, y + 3, 2, 3, '#2a2836'); r(x + 3, y + 3, 1, 1, '#8f7fc4'); r(x + 4, y + 4, 1, 1, '#c27f86'); r(x + 3, y + 5, 1, 1, '#4b4466');
+  r(x + 6, y + 4, 1, 1, '#3a3940');
 }
 
 function mix(hex, t) {
@@ -142,9 +144,10 @@ function paths(g) {
   return [...runs].map(([c, d]) => `<path d="${d}" fill="${c}"/>`).join('');
 }
 
-// Her look: outfit 'dress' (the default) or 'tee' (white T-shirt and jeans), and which camera she carries.
-export const OUTFITS = ['dress', 'tee'];
-export const supLook = (raw = {}) => ({ outfit: OUTFITS.includes(raw.outfit) ? raw.outfit : 'dress', cam: CAMERAS.includes(raw.cam) ? raw.cam : 'slr' });
+// Her look: outfit 'dress' (the default) or 'tee' (a white T-shirt and light blue jeans), and her camera: 'digital'
+// (the default, a small mirrorless one) or 'film' (a classic film SLR).
+export const OUTFITS = ['dress', 'tee'], CAMERAS = ['digital', 'film'];
+export const supLook = (raw = {}) => ({ outfit: OUTFITS.includes(raw?.outfit) ? raw.outfit : 'dress', cam: CAMERAS.includes(raw?.cam) ? raw.cam : 'digital' });
 const cache = new Map();
 export function supporter(frame = 'rest', raw) {
   const look = supLook(raw), key = [frame, look.outfit, look.cam].join();
@@ -156,8 +159,9 @@ export function supporter(frame = 'rest', raw) {
 }
 
 // The camera flash for the 'snap' frame: a bright pixel star at the flash and a soft burst of light round it.
-export function supporterFlash() {
-  const x = 26, y = 12.5, px = (a, b, w, h, o = 1) => `<rect x="${a}" y="${b}" width="${w}" height="${h}" fill="#fff" opacity="${o}"/>`;
+// The digital camera's flash is at its lens; the film camera's is a flashgun on top.
+export function supporterFlash(raw) {
+  const film = supLook(raw).cam === 'film', x = film ? 22.5 : 26, y = film ? 8.5 : 12.5, px = (a, b, w, h, o = 1) => `<rect x="${a}" y="${b}" width="${w}" height="${h}" fill="#fff" opacity="${o}"/>`;
   return `<g class="sup-flash"><g transform="${TF}"><circle cx="${x}" cy="${y}" r="4.2" fill="#fff8d8" opacity=".3"/><circle cx="${x}" cy="${y}" r="2.6" fill="#fff" opacity=".5"/>`
     + `<g shape-rendering="crispEdges">${px(x - .5, y - 4.5, 1, 9)}${px(x - 4.5, y - .5, 9, 1)}${px(x - 1.5, y - 1.5, 3, 3)}${px(x - 3.5, y - 3.5, 1, 1, .7)}${px(x + 2.5, y - 3.5, 1, 1, .7)}${px(x - 3.5, y + 2.5, 1, 1, .7)}${px(x + 2.5, y + 2.5, 1, 1, .7)}</g></g></g>`;
 }

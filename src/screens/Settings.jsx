@@ -290,9 +290,8 @@ function RebCard() {
       <button data-s="split" aria-pressed={on} onClick={() => pick(true)}>Split</button></div></div>;
 }
 
-// Our supporter on the Home photo: her outfit and her camera, the same for everyone who opens the site.
-const OUTFIT_OPTS = [['dress', 'Dress'], ['tee', 'T-shirt and jeans']];
-const CAM_OPTS = [['slr', 'Silver SLR'], ['range', 'Rangefinder'], ['black', 'Black SLR'], ['brown', 'Brown leather'], ['digital', 'Digital']];
+// Our supporter on the Home photo: her outfit and camera, the same for everyone who opens the site.
+const OUTFIT_OPTS = [['dress', 'Dress'], ['tee', 'T-shirt and jeans']], CAM_OPTS = [['digital', 'Digital camera'], ['film', 'Film camera']];
 const supFig = look => <svg viewBox="8 2 84 102" aria-hidden="true" dangerouslySetInnerHTML={{ __html: supporter('rest', look) }} />;
 function SupporterCard({ onErr }) {
   const s = useStore(), look = supLook(s.supporter || {});
