@@ -101,12 +101,12 @@ function homeScene(cw, ch) {
 // frames: at rest with the camera, pumping a fist, and taking a photo with the flash going off.
 // She stands further back than the team, behind I. Hoang's left shoulder. On a phone the sides are cropped, so she
 // stands a little closer in.
-const SUP = { x: 212, phoneX: 232, feet: 242, w: 100 };
+const SUP = { x: 198, phoneX: 222, feet: 242, w: 100 };
 const SUP_FRAMES = ['rest', 'cheer', 'cheer2', 'snap'];
 function fan(cx, top, w, refl) {
   const svg = inner => `<svg x="${cx - w / 2}" y="${top}" width="${w}" height="${w * 1.04}" viewBox="0 0 100 104" overflow="visible">${inner}</svg>`;
   const look = DATA.supporter, frames = SUP_FRAMES.map(f => `<g class="sf sf-${f}">${supporter(f, look)}</g>`).join('');
-  const fig = `<g class="hsup alive" style="--hd:.7s;--bd:-2.1s">${svg(`${pxShadow(50, 103.5, 18, 104 / 34)}<g class="hsupt" role="button" aria-label="Our supporter, taking photos"><rect x="12" y="10" width="76" height="94" fill="transparent"/>${frames}${supporterFlash()}</g>`)}</g>`;
+  const fig = `<g class="hsup alive" style="--hd:.7s;--bd:-2.1s">${svg(`${pxShadow(50, 103.5, 18, 104 / 34)}<g class="hsupt" role="button" aria-label="Ash, taking photos"><rect x="12" y="10" width="76" height="94" fill="transparent"/>${frames}${supporterFlash()}</g>`)}</g>`;
   const fy = top + w * 1.035;
   return { fig, refl: refl ? `<g mask="url(#hrmask)" opacity="${refl}"><g transform="translate(0 ${(2 * fy).toFixed(1)}) scale(1 -1)">${svg(supporter('rest', look))}</g></g>` : '' };
 }
