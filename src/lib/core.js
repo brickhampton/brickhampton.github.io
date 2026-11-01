@@ -159,12 +159,13 @@ export function playerBadges(id, asOf) {
   if (l3.length === 3 && t3.tsa >= BT.autoA && t3.ts >= BT.auto) add('hot', 'Automatic', 'flame', 'hot', `${pctTxt(t3.ts)} true shooting over their last 3 games.`);
   if (best(x => x.pg('pts'))) add('pts', 'Bucket getter', 'ball', 'blue', `Most points a game in ${nm} (${f1(a.pg('pts'))}).`);
   if (best(x => x.pg('reb'))) add('reb', 'Glass cleaner', 'up', 'blue', `Most rebounds a game in ${nm} (${f1(a.pg('reb'))}).`);
+  // Crash out is shared when players tie (Geoff, 2026-11-01).
   // Offensive rebounds are only recorded in newer games, so only those games count, and a season without any gives no badge.
   const orAgg = x => { const l = sg.filter(g => g.rows[x] && g.rows[x].oreb !== undefined).map(g => g.rows[x].oreb); return { id: x, gp: l.length, pg: l.reduce((t, v) => t + v, 0) / (l.length || 1) }; };
   // Until the season has 3 games with OREB, a player needs every one of them.
   const orGames = sg.filter(g => Object.values(g.rows).some(r => r.oreb !== undefined)).length, orMin = Math.min(3, orGames);
   const oa = orAgg(id), oPeers = statPlayers().map(orAgg).filter(x => x.gp >= Math.min(orMin, oa.gp));
-  if (starter && orMin > 0 && oa.gp >= orMin && oa.pg > 0 && oPeers.length > 2 && oPeers.every(x => x.id === id || x.pg < oa.pg)) add('oreb', 'Crash out', 'demon', 'blue', `Most offensive rebounds a game in ${nm} (${f1(oa.pg)}).`);
+  if (starter && orMin > 0 && oa.gp >= orMin && oa.pg > 0 && oPeers.length > 2 && oPeers.every(x => x.id === id || x.pg <= oa.pg)) add('oreb', 'Crash out', 'demon', 'blue', `Most offensive rebounds a game in ${nm} (${f1(oa.pg)}).`);
   if (best(x => x.pg('ast'))) add('ast', 'Assistaholic', 'pass', 'blue', `Most assists a game in ${nm} (${f1(a.pg('ast'))}).`);
   const def = x => (x.s.stl + x.s.blk) / x.gp;
   if (starter && a.gp >= 3 && (def(a) >= 3 || best(def))) add('def', 'Clamps', 'shield', 'green', `${f1(def(a))} steals and blocks a game in ${nm}${best(def) ? ', the most on the team' : ''}.`);

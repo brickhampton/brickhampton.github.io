@@ -11,6 +11,7 @@ import { EditGame, AddGame } from './EditGame.jsx';
 import { AvatarSheet } from './AvatarSheet.jsx';
 import { randomLook } from '../lib/avatar.js';
 import { soundOn, setSound, sfx } from '../lib/sfx.js';
+import { rebSplit, setRebSplit } from '../lib/prefs.js';
 
 const Grip = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="9" cy="6" r="1.6" /><circle cx="15" cy="6" r="1.6" /><circle cx="9" cy="12" r="1.6" /><circle cx="15" cy="12" r="1.6" /><circle cx="9" cy="18" r="1.6" /><circle cx="15" cy="18" r="1.6" /></svg>;
 const UndoIc = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 14 4 9l5-5" /><path d="M4 9h10a6 6 0 0 1 0 12h-3" /></svg>;
@@ -213,6 +214,7 @@ function Admin() {
     <p className="hint top">Admin mode locks itself after 15 minutes without a tap. To change a game's details or box score, open the game and tap <b>Edit game</b>, or use the pencil in Results</p>
     {err && <p className="ferr" id="a-err">{err}</p>}
     <SoundCard />
+    <RebCard />
     <div className="adm-grid">
       <div className="sec"><h3>Seasons</h3><p className="hint">New games go into the current season, and Games and Stats open on it</p>
         <div className="card alist" id="a-seasons">{seasons}
@@ -274,12 +276,25 @@ function SoundCard() {
       <button data-s="off" aria-pressed={!on} onClick={() => pick(false)}>Off</button></div></div>;
 }
 
+// Box score rebounds as one REB column, or split into OREB and DREB. For this device only, like Sound.
+function RebCard() {
+  const [on, setOn] = useState(rebSplit());
+  const pick = v => { if (v === on) return; setRebSplit(v); setOn(v); sfx('select'); };
+  return <div className="card admin-lock sound-card"><div className="lock-ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M12 19V5M5 12l7-7 7 7" /></svg></div>
+    <div><h3>Rebounds in box scores</h3><p className="hint">Split shows offensive and defensive rebounds (OREB and DREB) instead of REB, in games that recorded them, on this device</p></div>
+    <div className={`tog${on ? ' r' : ''}`} id="reb-split" role="group" aria-label="Rebounds as total or split">
+      <button data-s="total" aria-pressed={!on} onClick={() => pick(false)}>Total</button>
+      <button data-s="split" aria-pressed={on} onClick={() => pick(true)}>Split</button></div></div>;
+}
+
 // Admin mode unlocks here with the PIN.
 export function Settings() {
   useStore();
   if (!isAdmin()) return <>
     <div className="ghead"><div><h1 className="page">Settings</h1></div></div>
     <SoundCard />
+    <RebCard />
     <div className="card admin-lock"><div className="lock-ic"><Lock /></div>
       <div><h3>Admin mode</h3><p className="hint">Record games, edit past games and box scores, set results, add seasons, and manage the roster and opponents</p></div>
       <button className="btn primary" id="unlock" onClick={() => openSheet(<PinSheet />)}>Unlock with PIN</button></div>
