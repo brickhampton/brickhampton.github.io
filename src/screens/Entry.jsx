@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { reload } from '../lib/store.js';
 import { P, calc, sumRows, perTxt, fmtDate, esc, lastNo } from '../lib/core.js';
+import { sfx } from '../lib/sfx.js';
 import { rec, change, countsFor, livePts, ACTIONS, A, saveGame, clearRecording } from '../lib/record.js';
 import { reduced } from '../lib/charts.js';
 import { go } from '../lib/nav.js';
@@ -186,12 +187,29 @@ function makeStage() {
       bl.animate([{ transform: 'none' }, { transform: `translateY(${drop}px)` }, { transform: 'none' }], { duration: BOUNCE, iterations: n, easing: 'cubic-bezier(.5,0,.5,1)' });
     }, delay);
   }
+  // Each play's sounds, timed to land with the animation: the swish as the ball drops through, the clank as it hits the rim.
+  // With reduced motion there's no animation, so just the main sound plays straight away.
+  function sounds(k, d2) {
+    const ft = [['dribble', 60 + BOUNCE / 2], ['dribble', 60 + BOUNCE * 1.5]];
+    const list = {
+      '2M': [['swish', D + d2], ['made2', D + d2 + 120]], '2X': [['clank', D + d2]],
+      '3M': [['swish', D + 460], ['made3', D + 580]], '3X': [['clank', D + 460], ['floor', D + 900]],
+      'FM': [...ft, ['swishSoft', FT_D + 320], ['madeFt', FT_D + 440]], 'FX': [...ft, ['clank', FT_D + 320], ['floor', FT_D + 760]],
+      'OR': [['clank', 0], ['grab', 300], ['hop', 380]], 'DR': [['clank', 0], ['grab', 300], ['pass', 400]],
+      'AS': [['pass', D], ['swish', D + 580], ['assist', D + 600]],
+      'ST': [['roll', 60], ['roll', 190], ['roll', 315], ['steal', 380]], 'BK': [['block', 280]],
+      'TO': [['dribble', D + 190], ['roll', D + 570], ['roll', D + 840], ['turnover', 300]],
+    }[k] || [];
+    if (reduced) { const main = list.find(([n]) => !['dribble', 'roll', 'floor'].includes(n)); if (main) sfx(main[0]); return; }
+    list.forEach(([n, ms]) => sfx(n, ms));
+  }
   function play(sel, k) {
     const x = k === '2M' || k === '2X' ? twoSpot() : k === '3M' || k === '3X' ? between(THREE_SPOT) : SPOT[k];
     placeActor(sel, false, x);
-    if (reduced) return;
     // The closer the 2, the flatter and quicker the shot.
     const h2 = Math.round(50 + (RX - x) * .14), d2 = Math.round(260 + (RX - x) * .45);
+    sounds(k, d2);
+    if (reduced) return;
     const pose = { '2M': ['shoot', 0, D + d2 + 20], '2X': ['shoot', 0, D + d2 + 20], '3M': ['shoot', 0, D + 480], '3X': ['shoot', 0, D + 480], 'FM': ['shoot', FT_D, 340], 'FX': ['shoot', FT_D, 340],
       'AS': ['pass2', D - 40, 520], 'ST': ['pass', 120, 260], 'BK': ['block1', 0, 860, true] }[k];
     if (k === 'FM' || k === 'FX') { actorPose('dribble', 0, FT_D + 40); dribbles(60); }
@@ -299,7 +317,7 @@ function EndGame() {
   const pick = r => { setResult(r); change(x => { x.result = r; }); };
   const save = async () => {
     setBusy(true); setErr('');
-    try { const id = await saveGame(); closeSheet(); go('game', { gameId: id, top: true }); }
+    try { const id = await saveGame(); sfx('save'); closeSheet(true); go('game', { gameId: id, top: true }); }
     catch (e) {
       setBusy(false);
       if (e.locked) { openSheet(<PinSheet why="Admin mode locked itself. Enter the PIN to save this game." onDone={() => openSheet(<EndGame />)} />); return; }
@@ -365,6 +383,7 @@ export function Entry() {
   if (!R) return null;
 
   const select = id => {
+    sfx(rec().sel === id ? 'close' : 'select');
     change(r => { r.sel = r.sel === id ? null : id; });
     stage.current?.placeActor(rec().sel, true);
     if (rec().sel) caption(P(id).name, 'On court', '', true); else caption('Ready', 'Select a player, then an action', '', true);
@@ -376,7 +395,7 @@ export function Entry() {
     rip.className = 'rip'; rip.style.left = (ev.clientX ? ev.clientX - r.left : r.width / 2) + 'px'; rip.style.top = (ev.clientY ? ev.clientY - r.top : r.height / 2) + 'px';
     btn.appendChild(rip); setTimeout(() => rip.remove(), 500);
     const sel = rec().sel;
-    if (!sel) { const pl = $('#plist'); pl.classList.remove('nudge'); void pl.offsetWidth; pl.classList.add('nudge'); caption('', 'Pick a player first', '', true); return; }
+    if (!sel) { sfx('pinBad'); const pl = $('#plist'); pl.classList.remove('nudge'); void pl.offsetWidth; pl.classList.add('nudge'); caption('', 'Pick a player first', '', true); return; }
     const a = A[k], e = { id: rec().seq + 1, pid: sel, a: k };
     change(x => { x.seq = e.id; x.events.push(e); });
     const row = $(`.prow[data-id="${sel}"]`);
@@ -392,6 +411,7 @@ export function Entry() {
   };
   const remove = (id, verb) => {
     const e = rec().events.find(x => x.id === id); if (!e) return;
+    sfx('undo');
     change(x => { x.events = x.events.filter(y => y.id !== id); });
     caption(P(e.pid).name, `${verb} ${A[e.a].label.toLowerCase()}`, '', true);
   };

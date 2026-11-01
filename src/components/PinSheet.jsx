@@ -3,6 +3,7 @@ import { unlock } from '../lib/admin.js';
 import { openSheet, closeSheet } from './Sheet.jsx';
 import { openRecord } from '../lib/record.js';
 import { X } from './icons.jsx';
+import { sfx } from '../lib/sfx.js';
 
 const until = t => new Date(t).toLocaleTimeString('en-AU', { hour: 'numeric', minute: '2-digit' });
 
@@ -22,8 +23,8 @@ export function PinSheet({ onDone, why = 'Unlocks Admin mode on this device.' })
     setBusy(true);
     const r = await unlock(next);
     setBusy(false);
-    if (r.ok) { closeSheet(); onDone?.(); return; }
-    setCode(''); shake();
+    if (r.ok) { sfx('pinOk'); closeSheet(true); onDone?.(); return; }
+    sfx('pinBad'); setCode(''); shake();
     setMsg(r.reason === 'locked' ? `Too many wrong tries. Try again after ${until(r.until)}.`
       : r.reason === 'wrong' ? `Wrong PIN. ${r.left} ${r.left === 1 ? 'try' : 'tries'} left before it locks for 15 minutes.`
         : r.reason === 'no_pin' ? 'No PIN has been set yet. Set one in the Supabase SQL editor first.'

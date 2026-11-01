@@ -10,6 +10,7 @@ import { SeasonPick, MoreBtn } from '../components/ui.jsx';
 import { EditGame, AddGame } from './EditGame.jsx';
 import { AvatarSheet } from './AvatarSheet.jsx';
 import { randomLook } from '../lib/avatar.js';
+import { soundOn, setSound, sfx } from '../lib/sfx.js';
 
 const Grip = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="9" cy="6" r="1.6" /><circle cx="15" cy="6" r="1.6" /><circle cx="9" cy="12" r="1.6" /><circle cx="15" cy="12" r="1.6" /><circle cx="9" cy="18" r="1.6" /><circle cx="15" cy="18" r="1.6" /></svg>;
 const UndoIc = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 14 4 9l5-5" /><path d="M4 9h10a6 6 0 0 1 0 12h-3" /></svg>;
@@ -211,6 +212,7 @@ function Admin() {
       <span className="admin-on"><Shield />Admin mode on</span><button className="btn ghost sm" id="lock" onClick={lock}><Lock size={16} />Lock</button></div>
     <p className="hint top">Admin mode locks itself after 15 minutes without a tap. To change a game's details or box score, open the game and tap <b>Edit game</b>, or use the pencil in Results</p>
     {err && <p className="ferr" id="a-err">{err}</p>}
+    <SoundCard />
     <div className="adm-grid">
       <div className="sec"><h3>Seasons</h3><p className="hint">New games go into the current season, and Games and Stats open on it</p>
         <div className="card alist" id="a-seasons">{seasons}
@@ -260,11 +262,24 @@ function exportCsv() {
   setTimeout(() => URL.revokeObjectURL(url), 2000);
 }
 
+// Sound effects on or off, for this device only. Anyone can change it, Admin mode or not.
+function SoundCard() {
+  const [on, setOn] = useState(soundOn());
+  const pick = v => { if (v === on) return; setSound(v); setOn(v); if (v) sfx('select'); };
+  return <div className="card admin-lock sound-card"><div className="lock-ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M11 5 6 9H3v6h3l5 4z" />{on ? <path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13" /> : <path d="m16 9 5 6m0-6-5 6" />}</svg></div>
+    <div><h3>Sound</h3><p className="hint">Sound effects for taps, players and recording, on this device. The silent switch on a phone or iPad mutes them too</p></div>
+    <div className={`tog${on ? '' : ' r'}`} id="sound" role="group" aria-label="Sound on or off">
+      <button data-s="on" aria-pressed={on} onClick={() => pick(true)}>On</button>
+      <button data-s="off" aria-pressed={!on} onClick={() => pick(false)}>Off</button></div></div>;
+}
+
 // Admin mode unlocks here with the PIN.
 export function Settings() {
   useStore();
   if (!isAdmin()) return <>
     <div className="ghead"><div><h1 className="page">Settings</h1></div></div>
+    <SoundCard />
     <div className="card admin-lock"><div className="lock-ic"><Lock /></div>
       <div><h3>Admin mode</h3><p className="hint">Record games, edit past games and box scores, set results, add seasons, and manage the roster and opponents</p></div>
       <button className="btn primary" id="unlock" onClick={() => openSheet(<PinSheet />)}>Unlock with PIN</button></div>
