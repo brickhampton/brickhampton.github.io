@@ -1,6 +1,6 @@
 // Pixel-art players in the team jersey, drawn from each player's look (saved in players.look).
 // A look is { v: 2, skin, hair, style, eyes, eyeY, brows, beard, glasses, height, weight, muscle, socks,
-// band, wrist, sleeve, stripe, shoe, shoeAcc, glassesC, shirt, hairFlip, wristFlip, sleeveFlip }: colours as hex, everything else an index into OPTS (0 is the default).
+// band, wrist, sleeve, stripe, sock, shoe, shoeAcc, glassesC, shirt, hairFlip, wristFlip, sleeveFlip }: colours as hex, everything else an index into OPTS (0 is the default).
 // Looks saved before the pixel style (no v) are converted, so every saved avatar still draws.
 
 const HEX = /^#[0-9a-f]{6}$/i;
@@ -19,6 +19,8 @@ export const SKINS = ['#f8dcc4', '#f4d1ad', '#f2c9a3', '#e9bd95', '#e0ac80', '#d
 export const HAIRS = ['#0f0c0c'];
 export const BANDS = ['#1b1b1b', '#eeeeee', '#2f55d4', '#8a8f98', '#c0392b'];
 export const SHOES = ['#f2f2f2', '#1b1b1b', '#2f55d4', '#8a8f98', '#c0392b'];
+// Socks: white by default (as every player had before sock colours), or black, blue, grey, red or any colour from the picker.
+export const SOCKS = SHOES;
 
 // Each option list: the label shown in the builder. Index 0 is the default.
 export const OPTS = {
@@ -60,7 +62,7 @@ function fromOld(p) {
 // A clean copy of a saved look with every part in range, so nothing odd from the database reaches the page.
 export function cleanLook(raw = {}) {
   const p = raw.v === 2 ? raw : fromOld(raw);
-  const out = { v: 2, skin: color(p.skin, SKINS[2]), hair: color(p.hair, HAIRS[0]), shoe: color(p.shoe, SHOES[0]) };
+  const out = { v: 2, skin: color(p.skin, SKINS[2]), hair: color(p.hair, HAIRS[0]), shoe: color(p.shoe, SHOES[0]), sock: color(p.sock, SOCKS[0]) };
   for (const k of NUMS) out[k] = pick(p[k], OPTS[k]);
   for (const k of COLOURS) out[k] = HEX.test(p[k] || '') ? p[k] : null;
   if (p.band === true) out.band = BANDS[2];
@@ -78,6 +80,7 @@ export function lookOf(p) {
   for (const k of NUMS) if (c[k]) out[k] = c[k];
   for (const k of COLOURS) if (c[k]) out[k] = c[k];
   if (c.shoe !== SHOES[0]) out.shoe = c.shoe;
+  if (c.sock !== SOCKS[0]) out.sock = c.sock;
   return out;
 }
 
@@ -89,7 +92,7 @@ export function randomLook() {
     v: 2, skin: any(SKINS), hair: Math.random() < .85 ? HAIRS[0] : any(['#2e2e33', '#24170f']), style: any(CHOICES.style), hairFlip: r(2),
     eyes: maybe(.3, 'eyes'), brows: maybe(.4, 'brows'), beard: Math.random() < .3 ? any(CHOICES.beard) : 0, glasses: Math.random() < .2 ? 1 + r(2) : 0,
     height: r(6), weight: maybe(.4, 'weight'), socks: maybe(.3, 'socks'), shoeType: r(3),
-    band: some(.2, BANDS), wrist: some(.25, BANDS), stripe: some(.2, BANDS), shoe: any(SHOES), shoeAcc: some(.5, SHOES),
+    band: some(.2, BANDS), wrist: some(.25, BANDS), stripe: some(.2, BANDS), sock: Math.random() < .2 ? any(SOCKS) : SOCKS[0], shoe: any(SHOES), shoeAcc: some(.5, SHOES),
   });
 }
 
@@ -153,7 +156,7 @@ function sprite(c, num, pose) {
   const torsoH = 8 + Math.floor(tall / 2), shortsY = ty + torsoH, legY = shortsY + 4, legSkin = 1 + Math.ceil(tall / 2);
   // ---- legs, socks, shoes
   const L1 = bx + 1, L2 = bx + bw - 3, sockH = [2, 1 + legSkin, 1][c.socks];
-  [L1, L2].forEach(L => { r(L, legY, 2, legSkin + 2, S); r(L, legY + legSkin + 2 - sockH, 2, sockH, T); if (c.stripe) r(L, legY + legSkin + 2 - sockH, 2, 1, c.stripe); });
+  [L1, L2].forEach(L => { r(L, legY, 2, legSkin + 2, S); r(L, legY + legSkin + 2 - sockH, 2, sockH, c.sock || T); if (c.stripe) r(L, legY + legSkin + 2 - sockH, 2, 1, c.stripe); });
   // Shoes in two colours. Classic: a flash on the side. High-top: up over the ankle with a coloured collar. Runner: the classic shape on a coloured sole.
   const sy = legY + legSkin + 2, shoe = c.shoe, light = parseInt(shoe.slice(1, 3), 16) > 200, st = c.shoeType;
   const acc = c.shoeAcc || (light ? '#c9ccd2' : st === 2 ? '#f2f2f2' : mix(shoe, -.3));
