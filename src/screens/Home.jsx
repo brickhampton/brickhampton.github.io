@@ -83,9 +83,14 @@ function homeScene(cw, ch) {
   const team = `${inward(back, bx).map(([id, i]) => fig(id, bx(i), BT + STAGGER[i % 6], BW)).join('')}
     ${inward(front, fx).map(([id, i]) => fig(id, fx(i), FT + (i === Math.floor(front.length / 2) ? 10 : 0) + STAGGER[(i + 3) % 6], FW)).join('')}`;
   const box = `x="${vx.toFixed(1)}" y="${vy.toFixed(1)}" width="${vw.toFixed(1)}" height="${vh.toFixed(1)}"`;
-  return `<svg class="hscene" viewBox="${vx.toFixed(1)} ${vy.toFixed(1)} ${vw.toFixed(1)} ${vh.toFixed(1)}" role="img" aria-label="Team photo: ${ids.map(id => esc(P(id).name)).join(', ')} with the trophy">
-    <defs>${S.defs}<linearGradient id="hrgrad" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#fff"/><stop offset=".4" stop-color="#fff" stop-opacity="0"/></linearGradient><mask id="hrmask" maskContentUnits="objectBoundingBox"><rect width="1" height="1" fill="url(#hrgrad)"/></mask></defs>
-    ${S.under}
+  // Three layers: the arena, the skylights, and the team. The skylights slide across on their own layer, so the
+  // device just moves it along rather than redrawing the whole scene every frame. That layer is wider than the
+  // screen by the distance they slide (240), so they don't come in with a cut edge.
+  const vbox = `${vx.toFixed(1)} ${vy.toFixed(1)} ${vw.toFixed(1)} ${vh.toFixed(1)}`, RS = 240, rw = vw + 2 * RS;
+  const rays = `<svg class="hscene hrays" aria-hidden="true" viewBox="${(vx - RS).toFixed(1)} ${vy.toFixed(1)} ${rw.toFixed(1)} ${vh.toFixed(1)}" style="left:${(-RS / vw * 100).toFixed(3)}%;width:${(rw / vw * 100).toFixed(3)}%;--rs:${(RS / rw * 100).toFixed(3)}%">${S.rays}</svg>`;
+  return `<svg class="hscene" aria-hidden="true" viewBox="${vbox}"><defs>${S.defs}</defs>${S.under}</svg>${rays}
+  <svg class="hscene" viewBox="${vbox}" role="img" aria-label="Team photo: ${ids.map(id => esc(P(id).name)).join(', ')} with the trophy">
+    <defs><linearGradient id="hrgrad" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#fff"/><stop offset=".4" stop-color="#fff" stop-opacity="0"/></linearGradient><mask id="hrmask" maskContentUnits="objectBoundingBox"><rect width="1" height="1" fill="url(#hrgrad)"/></mask></defs>
     <g${A < 1 ? ' transform="translate(400 300) scale(1.3) translate(-400 -300)"' : ''}>${sup.refl}${refl.join('')}</g>
     <g>${pieces.slice(0, half).join('')}</g>
     <g${A < 1 ? ' transform="translate(400 300) scale(1.3) translate(-400 -300)"' : ''}>
