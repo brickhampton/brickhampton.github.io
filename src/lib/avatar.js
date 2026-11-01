@@ -155,7 +155,8 @@ function sprite(c, num, pose) {
   const hx = 8, hy = 3 + (3 - tall), ty = hy + 11, bx = hx - Math.ceil(wide / 2), bw = 10 + wide;
   const torsoH = 8 + Math.floor(tall / 2), shortsY = ty + torsoH, legY = shortsY + 4, legSkin = 1 + Math.ceil(tall / 2);
   // ---- legs, socks, shoes
-  const L1 = bx + 1, L2 = bx + bw - 3, sockH = [2, 1 + legSkin, 1][c.socks];
+  // High socks stop a pixel lower on Shandy, so they don't climb as far up the longer leg.
+  const L1 = bx + 1, L2 = bx + bw - 3, sockH = [2, 1 + legSkin - (tall === 5 ? 1 : 0), 1][c.socks];
   [L1, L2].forEach(L => { r(L, legY, 2, legSkin + 2, S); r(L, legY + legSkin + 2 - sockH, 2, sockH, c.sock || T); if (c.stripe) r(L, legY + legSkin + 2 - sockH, 2, 1, c.stripe); });
   // Shoes in two colours. Classic: a flash on the side. High-top: up over the ankle with a coloured collar. Runner: the classic shape on a coloured sole.
   const sy = legY + legSkin + 2, shoe = c.shoe, light = parseInt(shoe.slice(1, 3), 16) > 200, st = c.shoeType;
