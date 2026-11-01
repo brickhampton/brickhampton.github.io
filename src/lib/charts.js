@@ -4,10 +4,10 @@ import { P, calc, sumRows, ratio, perTxt, pctTxt, f1, esc, seasonList, seasonNam
 import { figure } from '../components/Avatar.jsx';
 
 export const reduced = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
-// Comparison charts colour by slot, in the team palette: royal blue, white, then cool accents (never orange or yellow).
+// Comparison charts colour by slot, in the team palette: royal blue, light grey, then cool accents (never orange or yellow).
 // Head to head and Season vs season draw the right-hand side in light grey.
 export const SC_B = '#c9cbd1';
-export const SLOT_COL = ['#4f7cff', '#eeeeee', '#3fb8c4', '#9b8cff', '#6fd6a0', '#f08fb8', '#ff8080'];
+export const SLOT_COL = ['#4f7cff', SC_B, '#3fb8c4', '#9b8cff', '#6fd6a0', '#f08fb8', '#ff8080'];
 
 export const GT_STATS = { pts: 'PTS', reb: 'REB', ast: 'AST', stl: 'STL', to: 'TO', ts: 'TS%' };
 // Everything else a game records, behind the More chip.
