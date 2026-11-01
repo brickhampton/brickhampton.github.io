@@ -168,6 +168,10 @@ export function playerBadges(id, asOf, noTie) {
   if (l3.length === 3 && l3.every(s => s.per >= BT.lock)) add('heater', 'LOCKED IN', 'zap', 'hot', `${BT.lock}+ PER in each of their last 3 games.`);
   if (l3.length === 3 && t3.tsa >= BT.autoA && t3.ts >= BT.auto) add('hot', 'Automatic', 'flame', 'hot', `${pctTxt(t3.ts)} true shooting over their last 3 games.`);
   if (best(x => x.pg('pts'))) add('pts', 'Bucket getter', 'ball', 'blue', `Most points a game in ${nm} (${f1(a.pg('pts'))}).`);
+  // BAM!: the most points in one game this season, among the starters who played in it.
+  const bamOf = x => Math.max(...sg.filter(g => g.rows[x]).map(g => calc(g.rows[x]).pts)), bamPeers = statPlayers().filter(x => sg.some(g => g.rows[x])).map(x => ({ id: x, v: bamOf(x) }));
+  const bam = bamOf(id);
+  if (starter && bam > 0 && bamPeers.length > 2 && lead(bamPeers, { id, v: bam }, x => x.v)) add('bam', 'BAM!', 'boom', 'hot', `Most points in a game in ${nm} (${bam}).`);
   if (best(x => x.pg('reb'))) add('reb', 'Glass cleaner', 'up', 'blue', `Most rebounds a game in ${nm} (${f1(a.pg('reb'))}).`);
   // Offensive rebounds are only recorded in newer games, so only those games count, and a season without any gives no badge.
   const orAgg = x => { const l = sg.filter(g => g.rows[x] && g.rows[x].oreb !== undefined).map(g => g.rows[x].oreb); return { id: x, gp: l.length, pg: l.reduce((t, v) => t + v, 0) / (l.length || 1) }; };
