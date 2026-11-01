@@ -1071,7 +1071,7 @@ a.vbtn:active,button.vbtn:active{transform:scale(.94)}
 /* Home: the team photo fills the first screen of Games and fades away as you scroll into the list */
 .ghero{position:relative;overflow:hidden;margin-left:calc(-1 * max(20px,env(safe-area-inset-left,0px)));margin-right:calc(-1 * max(20px,env(safe-area-inset-right,0px)))}
 .hstage{position:absolute;inset:0;transform-origin:50% 40%;will-change:opacity,transform;-webkit-mask-image:linear-gradient(#000 88%,transparent);mask-image:linear-gradient(#000 88%,transparent)}
-.hscene{display:block;width:100%;height:100%}
+.hscene{display:block;position:absolute;top:0;left:0;width:100%;height:100%}
 /* Enough room below the photo to scroll it fully away, even with a short list. */
 .ghero + .wrap{min-height:100%;box-sizing:border-box}
 .hp{animation:hpBob 3.2s steps(4,jump-none) var(--hd) infinite}
@@ -1133,9 +1133,10 @@ a.vbtn:active,button.vbtn:active{transform:scale(.94)}
 /* Phone flashes going off now and then in the crowd behind the team. */
 .hflash{opacity:0;animation:hflash var(--fd) steps(1,end) var(--fl) infinite}
 @keyframes hflash{0%,96%{opacity:0}97%,99%{opacity:.85}}
-/* Home skylights: hidden most of the time; about once a minute they drift in, sweep across and fade. */
-.hsweep{opacity:0;animation:hsweep 60s ease-in-out -38s infinite}
-@keyframes hsweep{0%,86%{opacity:0;transform:translateX(-240px)}90%{opacity:1}96%{opacity:1}100%{opacity:0;transform:translateX(240px)}}
+/* Home skylights: hidden most of the time; about once a minute they drift in, sweep across and fade. They're their own
+   layer that only moves and fades, so the device never has to redraw them (or anything under them) while they play. */
+.hrays{pointer-events:none;opacity:0;will-change:transform,opacity;animation:hsweep 60s ease-in-out -38s infinite}
+@keyframes hsweep{0%,86%{opacity:0;transform:translateX(calc(-1 * var(--rs)))}90%{opacity:1}96%{opacity:1}100%{opacity:0;transform:translateX(var(--rs))}}
 /* Admin > Supporter: her outfit and camera choices, drawn like the avatar builder's options. */
 .sup-card{display:flex;flex-direction:column;gap:8px}
 .sup-card .sup-opts{grid-template-columns:repeat(auto-fill,minmax(96px,120px));margin-bottom:8px}
