@@ -55,7 +55,14 @@ export const CELEBRATIONS = [
   { pose: 'down', behind: 'behind', label: 'Ball round the back' },
   { pose: 'ball', label: 'Ball under the arm' },
 ];
-export const randomCelebration = not => { const l = CELEBRATIONS.filter(c => c !== not); return l[Math.floor(Math.random() * l.length)]; };
+// After a loss there's no celebrating: no smile, no confetti, just standing there, ball at the side or in front, or none.
+export const CALM = [
+  { pose: 'down', calm: true, label: 'Standing still' },
+  { pose: 'dribble', calm: true, label: 'Ball at the side' },
+  { pose: 'ball', calm: true, label: 'Ball in front' },
+];
+export const posesFor = g => g.result === 'L' ? CALM : CELEBRATIONS;
+export const randomCelebration = (not, g) => { const l = (g ? posesFor(g) : CELEBRATIONS).filter(c => c !== not); return l[Math.floor(Math.random() * l.length)]; };
 
 // Box score columns: the same as the Game page, with each made-attempted pair and its % sharing one cell.
 const COLS = [
@@ -66,7 +73,8 @@ const COLS = [
   { k: 'ts', l: 'TS%', ts: 1 },
 ];
 
-export async function drawShareCard(g, games, cel = randomCelebration()) {
+export async function drawShareCard(g, games, cel = randomCelebration(null, g)) {
+  if (!posesFor(g).includes(cel)) cel = randomCelebration(null, g);
   await Promise.all([font(400, 20), font(500, 20), font(600, 20), font(700, 20), font(400, 20, MONO), font(500, 20, MONO)].map(f => document.fonts.load(f).catch(() => {})));
   const rows = Object.entries(g.rows).map(([id, c]) => ({ id, s: calc(c), num: numIn(g, id) ?? P(id).num })), t = sumRows(Object.values(g.rows));
   const potg = playerOfGame(g, games), star = P(potg.id), feat = teamFeat(g, games);
@@ -97,12 +105,12 @@ export async function drawShareCard(g, games, cel = randomCelebration()) {
   // 1.22 px to a unit puts the player at about 250 px tall, standing on the centre circle on the left.
   const K = 1.22, vw = W / K, vh = HERO / K, vx = 130 - 250 / K, vy = 226 + 52 - vh;
   const look = { ...star, num: numIn(g, potg.id) ?? star.num };
-  const fig = smiling(figure(look, { stage: true, pose: cel.pose }));
+  const fig = (cel.calm ? plain : smiling)(figure(look, { stage: true, pose: cel.pose }));
   const spot = `<defs><radialGradient id="sp" cx="130" cy="120" r="130" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#fff" stop-opacity=".14"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
     <linearGradient id="beam" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".1"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient></defs>
     <path d="M105 ${vy.toFixed(1)}L155 ${vy.toFixed(1)}L220 226L40 226Z" fill="url(#beam)"/><circle cx="130" cy="120" r="130" fill="url(#sp)"/>`;
   const player = `<g transform="translate(31.2 20.8) scale(1.976)">${cel.ball ? raisedBall(look) : ''}${cel.behind ? trickExtras(look, 'behind') : ''}${fig}${cel.trick ? trickExtras(look, cel.trick) : ''}</g>`;
-  const hero = `${playerCourt()}${spot}${confetti(130, 120, 1 + Math.floor(Math.random() * 9999))}${player}`;
+  const hero = `${playerCourt()}${spot}${cel.calm ? '' : confetti(130, 120, 1 + Math.floor(Math.random() * 9999))}${player}`;
   const heroIm = await svgImage(hero, `${vx.toFixed(1)} ${vy.toFixed(1)} ${vw.toFixed(1)} ${vh.toFixed(1)}`, W * SCALE, HERO * SCALE);
   ctx.imageSmoothingEnabled = false; ctx.drawImage(heroIm, 0, HEAD, W, HERO); ctx.imageSmoothingEnabled = true;
   // Blend the arena into the page: fade it out at the top, the left, the bottom, and under the words on the right.
