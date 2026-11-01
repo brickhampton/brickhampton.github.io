@@ -144,7 +144,7 @@ export function teamFeat(g, games) {
 // Player badges for their latest season and recent games. Nothing about stat totals.
 // asOf looks at things as they stood at the end of that season.
 // Badge thresholds: round numbers this team can reach (see player-badges.md).
-const BT = { lock: 15, auto: .5, autoA: 15, up: 3, stl: 2, blk: 1, snipe: 3, eff: .5, effA: 20, p3: .35, p3A: 15, ft: .7, ftA: 10, steady: 10, rise: 3, sak: 3 };
+const BT = { lock: 15, auto: .6, autoA: 10, up: 3, stl: 2, blk: 1, snipe: 3, eff: .5, effA: 20, p3: .35, p3A: 15, ft: .7, ftA: 10, steady: 10, rise: 3, sak: 3 };
 export function playerBadges(id, asOf) {
   const order = seasonList().map(x => x.code), games = asOf ? allGames().filter(g => order.indexOf(g.season) >= order.indexOf(asOf)) : allGames(), mine = games.filter(g => g.rows[id]);
   if (!mine.length || (asOf && !mine.some(g => g.season === asOf))) return [];
