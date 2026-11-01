@@ -52,10 +52,15 @@ export const clearRecording = () => { R = null; try { localStorage.removeItem(KE
 export const setupPlayers = () => [...R.order.map(P).filter(Boolean), ...R.todaySubs.map(P).filter(Boolean)];
 export const syncPlaying = () => { R.playing = setupPlayers().map(p => p.id).filter(id => R.playing.includes(id)); };
 
-export function addSub(name, rawNum) {
+// A brand-new sub. They join the subs list (saved with the game) but not today's game until picked.
+export function newSub(name, rawNum) {
   const p = { id: 'p' + Date.now().toString(36), name, num: /^\d{1,2}$/.test(rawNum) ? String(parseInt(rawNum, 10)) : '0', guest: true, ...randomLook() };
   S.subs = [...S.subs, p];
-  change(r => { r.newSubs.push(p); r.todaySubs.push(p.id); r.playing.push(p.id); syncPlaying(); });
+  change(r => { r.newSubs.push(p); });
+  return p;
+}
+export function addSubs(ids) {
+  change(r => { for (const id of ids) if (!r.todaySubs.includes(id)) { r.todaySubs.push(id); r.playing.push(id); } syncPlaying(); });
 }
 // Subs added for this game also live in the browser until it's saved, so they survive a reload.
 export function restoreSubs() {

@@ -5,6 +5,7 @@ import { go } from '../lib/nav.js';
 import { drawRadar, drawTrend, P_STATS, P_MORE, SLOT_COL, SC_B, reduced } from '../lib/charts.js';
 import { Avatar, figure } from '../components/Avatar.jsx';
 import { pxShadow, BALL, BALL_C } from '../lib/avatar.js';
+import { playerCourt, COURT_VIEW } from '../lib/playerCourt.js';
 import { Back, BIC, MedalGold } from '../components/icons.jsx';
 import { Chart, SeasonPick, StatChips, MoreBtn, EmptyState, PerPill } from '../components/ui.jsx';
 import { ShootBar } from './Game.jsx';
@@ -97,6 +98,22 @@ const U = 104 / 34, LOOSE = BALL.map(([o, w], j) => `<rect x="${((o - 3.5) * U).
 function PStage({ p, num, mood }) {
   const [step, setStep] = useState(null), timer = useRef(0), busy = useRef(false), last = useRef(''), taps = useRef({ n: 0, at: 0 });
   const m = useRef(mood); m.current = mood;
+  // The arena runs past the page's content to the screen's edges and fades out just before them on both sides.
+  const court = useRef(null);
+  useLayoutEffect(() => {
+    const el = court.current, scr = el?.closest('.screen');
+    if (!el || !scr) return;
+    const fit = () => {
+      const s = scr.getBoundingClientRect(), r = el.getBoundingClientRect();
+      if (!s.width || !r.width) return;
+      // Sideways it fades out at the screen's edges; downwards, at the bottom of the player's header.
+      const L = s.left - r.left, R = s.right - r.left, F = Math.min(160, s.width * .2), B = el.closest('.phero').getBoundingClientRect().bottom - r.top;
+      el.style.webkitMaskImage = el.style.maskImage = `linear-gradient(90deg,transparent ${L}px,#000 ${L + F}px,#000 ${R - F}px,transparent ${R}px),linear-gradient(#000 ${B - 70}px,transparent ${B}px)`;
+      el.style.webkitMaskComposite = 'source-in'; el.style.maskComposite = 'intersect';
+    };
+    const ro = new ResizeObserver(fit); ro.observe(scr); ro.observe(el); fit();
+    return () => ro.disconnect();
+  }, []);
   const run = (k, extra = '', loud = false) => {
     clearTimeout(timer.current); last.current = k; busy.current = true;
     const steps = TRICKS[k](m.current);
@@ -133,6 +150,7 @@ function PStage({ p, num, mood }) {
   };
   const fx = step?.fx;
   return <button className={`pstage alive${step ? ' ' + step.cls : ''}`} id="p-stage" aria-label="Wave hello" onPointerDown={tap} onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), tap())}>
+    <svg className="pcourt" ref={court} viewBox={COURT_VIEW} aria-hidden="true" dangerouslySetInnerHTML={{ __html: COURT }} />
     <span className="pglow" />
     <svg className="pfig" viewBox="0 0 100 104" aria-hidden="true" dangerouslySetInnerHTML={{ __html: pxShadow(50, 103.5, 22, 104 / 34) }} />
     <span className="phop" key={step?.n || 0}><svg className="pfig" viewBox="0 0 100 104" aria-hidden="true" dangerouslySetInnerHTML={{ __html: figure({ ...p, num }, { stage: true, pose: step?.pose || undefined }) }} /></span>
@@ -140,6 +158,8 @@ function PStage({ p, num, mood }) {
     {fx ? <span key={'f' + step.n} className={`pfloat ${fx.tone || 'brag'}`} aria-hidden="true">{fx.badge ? <>{BIC[fx.badge.icon]}{fx.badge.name}</> : fx.text}</span> : null}
   </button>;
 }
+
+const COURT = playerCourt();
 
 export function Player() {
   const games = allGames();

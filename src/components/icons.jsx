@@ -10,6 +10,9 @@ export const ChevDown = p => <Line size={16} sw={2.2} {...p}><path d="m6 9 6 6 6
 export const ChevUp = p => <Line size={16} sw={2.2} {...p}><path d="m6 15 6-6 6 6" /></Line>;
 export const SmallChev = () => <Line size={12} sw={2.6} className="chev"><path d="m6 9 6 6 6-6" /></Line>;
 export const Pencil = p => <Line {...p}><path d="M12 20h9" /><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" /></Line>;
+export const ShareIcon = p => <Line size={16} sw={2.2} {...p}><path d="M12 15V3M7 8l5-5 5 5" /><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7" /></Line>;
+export const Download = p => <Line size={20} sw={2.2} {...p}><path d="M12 4v11M7 10l5 5 5-5" /><path d="M5 20h14" /></Line>;
+export const Dice = p => <Line size={20} sw={2} {...p}><rect x="4" y="4" width="16" height="16" rx="3.5" /><circle cx="8.5" cy="8.5" r="1.1" fill="currentColor" stroke="none" /><circle cx="15.5" cy="8.5" r="1.1" fill="currentColor" stroke="none" /><circle cx="12" cy="12" r="1.1" fill="currentColor" stroke="none" /><circle cx="8.5" cy="15.5" r="1.1" fill="currentColor" stroke="none" /><circle cx="15.5" cy="15.5" r="1.1" fill="currentColor" stroke="none" /></Line>;
 export const X = p => <Line sw={2.2} {...p}><path d="M6 6l12 12M18 6 6 18" /></Line>;
 export const Lock = ({ size = 22 }) => <Line size={size}><rect x="4" y="11" width="16" height="10" rx="2" /><path d="M8 11V7a4 4 0 0 1 8 0v4" /></Line>;
 export const Shield = () => <Line size={14} sw={2.4}><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6Z" /><path d="m9 12 2 2 4-4" /></Line>;

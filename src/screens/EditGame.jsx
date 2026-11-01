@@ -83,3 +83,53 @@ function DeleteGame({ id }) {
       <button className="btn danger" id="dg-ok" disabled={busy} onClick={() => run(() => adminEdit('delete_game', { p_id: id }), () => { if (S.screen === 'game') go('games', { gSeason: g.season }); })}><Trash />Delete game</button></div>
   </>;
 }
+
+const isSunday = iso => new Date(iso + 'T12:00:00').getDay() === 0;
+const addDays = (iso, n) => { const d = new Date(iso + 'T12:00:00'); d.setDate(d.getDate() + n); return d.toISOString().slice(0, 10); };
+// The most recent Sunday on or before a date.
+const sundayOnOrBefore = iso => addDays(iso, -new Date(iso + 'T12:00:00').getDay());
+
+// Add a game that has no stats: details only. It shows in Games as "No stats recorded" until Edit game adds a box score.
+export function AddGame({ season }) {
+  const nos = S.games.filter(x => x.season === season).map(x => x.no);
+  // The first missing game number in the season, otherwise the next one.
+  let no = 1; while (nos.includes(no)) no++;
+  const before = S.games.filter(x => x.season === season && x.no < no).sort((a, b) => b.no - a.no)[0];
+  const today = sundayOnOrBefore(todayIso());
+  const date = before ? (addDays(before.date, 7) < today ? addDays(before.date, 7) : today) : today;
+  const [d, setD] = useState({ season, no, date, opp: '', result: 'U', oppPts: '' });
+  const { err, setErr, busy, run } = useSave();
+  // The season's teams: its opponent list in order, then any other team it played.
+  const teamsIn = code => [...new Set([...(S.opps[code] || []), ...S.games.filter(x => x.season === code).map(x => x.opp).sort()])];
+  const teams = teamsIn(d.season);
+  const patch = p => { setD(x => ({ ...x, ...p, ...(p.season && !teamsIn(p.season).includes(x.opp) ? { opp: '' } : {}) })); setErr(''); };
+
+  const save = () => {
+    const opp = d.opp.trim(), pts = String(d.oppPts).trim();
+    if (S.games.some(x => x.season === d.season && x.no === d.no)) return setErr(`${d.season} Game ${d.no} already exists. Pick another game number.`);
+    if (!d.date || d.date > todayIso()) return setErr('The date can\'t be in the future.');
+    if (!isSunday(d.date)) return setErr('Games are always on a Sunday.');
+    if (!opp) return setErr('Pick the opponent.');
+    if (pts && !/^\d{1,3}$/.test(pts)) return setErr('The opponent score should be a number, or left blank.');
+    run(() => adminEdit('add_game', { p_game: { season: d.season, no: d.no, date: d.date, opp, result: d.result, opp_pts: pts } }));
+  };
+
+  return <>
+    <button className="xbtn" id="ag-x" type="button" aria-label="Close" onClick={closeSheet}><X width="16" height="16" /></button>
+    <h2>Add a game</h2><p className="sheet-sub">For a game nobody kept stats for: no players or box score. It shows in Games as "No stats recorded" and its result counts in the season record. You can add a box score later with Edit game.</p>
+    <div className="eg-grid">
+      <div className="field"><label htmlFor="ag-season">Season</label><select id="ag-season" value={d.season} onChange={e => patch({ season: e.target.value })}>{seasonList().map(({ code }) => <option key={code}>{code}</option>)}</select></div>
+      <div className="field"><label id="ag-l-no">Game</label><div className="stepper" role="group" aria-labelledby="ag-l-no">
+        <button type="button" id="ag-down" aria-label="Previous game number" disabled={d.no <= 1} onClick={() => patch({ no: Math.max(1, d.no - 1) })}><ChevDown width="18" height="18" /></button>
+        <output id="ag-no" className="num">{d.no}</output>
+        <button type="button" id="ag-up" aria-label="Next game number" disabled={d.no >= 40} onClick={() => patch({ no: Math.min(40, d.no + 1) })}><ChevUp width="18" height="18" /></button></div></div>
+      <div className="field"><label htmlFor="ag-date">Date</label><input id="ag-date" type="date" value={d.date} max={todayIso()} onChange={e => patch({ date: e.target.value })} /></div>
+      <div className="field"><label htmlFor="ag-opp">Opponent</label><select id="ag-opp" value={d.opp} onChange={e => patch({ opp: e.target.value })}>
+        <option value="" disabled>Pick a team</option>{teams.map(o => <option key={o} value={o}>{o}</option>)}</select></div>
+      <div className="field res"><label>Result</label><div className="rseg big" id="ag-res">{['W', 'L', 'D', 'U'].map(x => <button key={x} type="button" data-r={x} aria-pressed={d.result === x} onClick={() => patch({ result: x })}>{x === 'U' ? 'Unknown' : RES[x]}</button>)}</div></div>
+      <div className="field"><label htmlFor="ag-opp-pts">Opponent score</label><input id="ag-opp-pts" inputMode="numeric" value={d.oppPts} placeholder="Optional" onChange={e => patch({ oppPts: e.target.value })} /></div>
+    </div>
+    {err && <p className="ferr" id="ag-err">{err}</p>}
+    <div className="actions end-actions"><span className="grow" /><button className="btn ghost" id="ag-cancel" onClick={closeSheet}>Cancel</button><button className="btn primary" id="ag-save" disabled={busy} onClick={save}>Add game</button></div>
+  </>;
+}

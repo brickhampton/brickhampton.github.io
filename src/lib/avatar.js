@@ -33,14 +33,14 @@ export const OPTS = {
   eyeY: ['Default', 'Higher', 'Lower'],
   brows: ['None', 'Thin', 'Thick', 'Angled', 'Raised'],
   beard: ['None', 'Stubble', 'Moustache', 'Goatee', 'Chinstrap', 'Beard'],
-  glasses: ['None', 'Square', 'Round', 'Shades', 'Sport'],
+  glasses: ['None', 'Square', 'Round', 'Shades', 'Sport', 'Half frame'],
   socks: ['Crew', 'High', 'Low'],
   shoeType: ['Classic', 'High-top', 'Runner'],
 };
 // What the builder offers, in order. Parts left out (moustache, goatee, shades, sport glasses) still draw for old looks.
 export const CHOICES = {
   style: [0, 14, 5, 15, 7, 16, 17, 18, 19, 3, 4, 6, 8, 1, 2, 9, 10, 11, 12, 13],
-  beard: [0, 1, 4, 5], glasses: [0, 1, 2], height: [4, 1, 0, 2, 3, 5],
+  beard: [0, 1, 4, 5], glasses: [0, 1, 2, 5], height: [4, 1, 0, 2, 3, 5],
 };
 const NUMS = ['hairFlip', 'wristFlip', 'sleeveFlip', 'height', 'weight', 'muscle', 'style', 'eyes', 'eyeY', 'brows', 'beard', 'glasses', 'socks', 'shoeType'];
 const COLOURS = ['shirt', 'band', 'wrist', 'sleeve', 'stripe', 'shoeAcc', 'glassesC'];
@@ -66,7 +66,7 @@ export function cleanLook(raw = {}) {
   if (p.band === true) out.band = BANDS[2];
   // Moustache and goatee became stubble; shades and sport glasses became the rectangle frames.
   if (out.beard === 2 || out.beard === 3) out.beard = 1;
-  if (out.glasses > 2) out.glasses = 1;
+  if (out.glasses === 3 || out.glasses === 4) out.glasses = 1;
   // Muscle is no longer a choice in the builder, so every player is drawn with the standard arms.
   out.muscle = 0;
   return out;
@@ -245,12 +245,13 @@ function sprite(c, num, pose) {
   HAIR[c.style].forEach(([y, x, pat]) => [...pat].forEach((ch, i) => { if (pal[ch]) r(hx + hf(x + i), hy + y, 1, 1, pal[ch]); }));
   if (c.style === 2) r(hx + 3, hy + 1, 2, 1, mix(S, -.35));
   // glasses: two thin 4 x 4 frames round the eyes with clear lenses, a bridge and an arm back to the ear.
-  // Rectangle frames, or round ones with the corners cut.
+  // Rectangle frames, round ones with the corners cut, or half frames with no top rim.
   if (c.glasses) {
     const G = c.glassesC || '#3b3946';
     [hx + 1, hx + 6].forEach(x => {
       const o = c.glasses === 2 ? 1 : 0;
-      r(x + o, ey - 1, 4 - 2 * o, 1, G); r(x + o, ey + 2, 4 - 2 * o, 1, G); r(x, ey, 1, 2, G); r(x + 3, ey, 1, 2, G);
+      if (c.glasses !== 5) r(x + o, ey - 1, 4 - 2 * o, 1, G);
+      r(x + o, ey + 2, 4 - 2 * o, 1, G); r(x, ey, 1, 2, G); r(x + 3, ey, 1, 2, G);
     });
     r(hx + 5, ey, 1, 1, G); r(hx, ey, 1, 1, G);
     // The frames sit over the eyes, as they did before the eyes had their own grid.
@@ -278,10 +279,9 @@ function sprite(c, num, pose) {
     r(fx, hy + 4, 4 + aw, 3, S); r(fx + 1, hy + 2, 1, 2, S);
     ball(fx + 1, hy - 1, r);
   } else if (pose === 'pass2') {
-    // Both arms thrust out level toward the teammate, hands together at the end.
-    r(fx - 1, ty + 1, 7, 2, S); r(fx - 1, ty + 2, 7, 1, S2);
-    r(bx + 2, ty + 4, fx + 6 - bx - 2, 2, SB); r(bx + 2, ty + 5, fx + 6 - bx - 2, 1, S2);
-    r(fx + 6, ty, 2, 7, S);
+    // Both arms push out toward the teammate, not quite at full stretch: the top one further, the lower one bent in short.
+    r(fx - 1, ty + 1, 5, 2, S); r(fx - 1, ty + 2, 5, 1, S2); r(fx + 4, ty, 2, 4, S);
+    r(bx + 2, ty + 4, fx + 1 - bx - 2, 2, SB); r(bx + 2, ty + 5, fx + 1 - bx - 2, 1, S2); r(fx + 1, ty + 3, 2, 4, S);
   } else if (pose === 'pass') {
     // Arm thrust out level, as on a pass or a reach for a steal.
     r(fx - 1, ty + 1, 7, 2 + aw, S); r(fx + 6, ty, 2, 4 + aw, S); r(fx - 1, ty + 2 + aw, 7, 1, S2);
@@ -365,6 +365,27 @@ export function raisedTrophy(raw) {
   return `<g class="av-trophy" transform="translate(50 0) scale(${(104 / FEET).toFixed(4)}) translate(-13 0)" shape-rendering="crispEdges">`
     + px(l + 1, t, w - 2, 4, G) + px(l + w - 3, t, 2, 4, G2) + px(l + 2, t, 1, 2, '#fff2c4') + px(l, t + 1, 1, 1, G) + px(l + w - 1, t + 1, 1, 1, G)
     + px(l + 2, t + 4, w - 4, 1, G) + px(m - 1, t + 5, 2, 1, G2) + px(m - 2, t + 6, 4, 1, G) + px(l - 1, t + 7, w + 2, 1, '#4a3418') + '</g>';
+}
+
+// A ball held up over the head, to go with the 'catch' pose (both hands up): drawn behind the hands, between them.
+export function raisedBall(raw) {
+  const c = cleanLook(raw), tall = TALL[c.height], aw = c.muscle > 1 ? 1 : 0;
+  const hy = 3 + (3 - tall), bx = 8 - Math.ceil(c.weight / 2), fx = bx + 10 + c.weight, ax = bx - 2 - aw;
+  const l = ax + 3 + aw, w = fx - 1 - l, m = l + Math.floor(w / 2), t = hy - 8;
+  return `<g class="av-ballup" transform="translate(50 0) scale(${(104 / FEET).toFixed(4)}) translate(-13 0)" shape-rendering="crispEdges">`
+    + BALL.map(([o, bw], j) => `<rect x="${m - 3 + o}" y="${t + j}" width="${bw}" height="1" fill="${BALL_C}"/>`).join('') + '</g>';
+}
+
+// Extras for the share image's ball tricks, in the sprite's pixels. 'spin': motion marks round the ball spinning on a
+// finger. 'behind': the ball coming round the player's back (drawn behind the body), with a streak where it has been.
+export function trickExtras(raw, kind) {
+  const c = cleanLook(raw), tall = TALL[c.height], hy = 3 + (3 - tall), ty = hy + 11, bx = 8 - Math.ceil(c.weight / 2), fx = bx + 10 + c.weight;
+  const px = (x, y, w, h, col, o = 1) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${col}" opacity="${o}"/>`;
+  let out = '';
+  if (kind === 'spin') out = px(fx - 4, hy - 2, 1, 2, '#fff', .7) + px(fx - 5, hy, 1, 1, '#fff', .45) + px(fx + 6, hy - 1, 1, 2, '#fff', .7) + px(fx + 7, hy - 3, 1, 1, '#fff', .45)
+    + px(fx - 1, hy - 5, 3, 1, '#fff', .55);
+  if (kind === 'behind') { BALL.forEach(([o, w], j) => { out += px(bx - 7 + o, ty + 6 + j, w, 1, BALL_C); }); out += px(bx - 10, ty + 7, 2, 1, '#fff', .6) + px(bx - 12, ty + 9, 3, 1, '#fff', .45) + px(bx - 10, ty + 11, 2, 1, '#fff', .6); }
+  return `<g class="av-trick" transform="translate(50 0) scale(${(104 / FEET).toFixed(4)}) translate(-13 0)" shape-rendering="crispEdges">${out}</g>`;
 }
 
 const cache = new Map();

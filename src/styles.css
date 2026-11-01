@@ -120,8 +120,10 @@ h1.page{font-size:40px;font-weight:500;letter-spacing:-.04em;margin:0;line-heigh
 @keyframes fanBob{50%{transform:translateY(-1px)}}
 @keyframes fanHop{50%{transform:translateY(-3px)}}
 @keyframes clap{0%{opacity:1}50%{opacity:0}}
-.actor .body.leap .av-fig{animation:leap .7s cubic-bezier(.3,.8,.4,1)}
-@keyframes leap{40%{transform:translateY(-34px)}100%{transform:none}}
+.actor .body.leap .av-fig{animation:leap .8s cubic-bezier(.3,.8,.4,1)}
+@keyframes leap{40%{transform:translateY(-58px)}100%{transform:none}}
+.actor .body.hop .av-fig{animation:hop .8s cubic-bezier(.3,.8,.4,1)}
+@keyframes hop{40%{transform:translateY(-30px)}100%{transform:none}}
 @keyframes idleBob{50%{transform:translateY(-3px)}}
 .celebrate .av-fig{animation:jump .5s var(--ease-out)}
 .slump .av-head{animation:slump .55s ease-out}
@@ -173,9 +175,9 @@ td.t-poor{color:var(--neg)}
 .grow-row .d b{white-space:nowrap}
 .grow-row .o{display:flex;align-items:center;gap:10px;min-width:0;font-size:17px;font-weight:500}
 .grow-row .o .opp{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.grow-row .tp{display:grid;grid-template-columns:34px minmax(0,1fr) 56px;align-items:center;gap:10px;min-width:0;font-size:14px;color:var(--stone)}
+.grow-row .tp{display:grid;grid-template-columns:34px minmax(0,5em) 56px;justify-content:start;align-items:center;gap:10px;min-width:0;font-size:14px;color:var(--stone)}
 .grow-row .tp > span:nth-child(2){overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.grow-row .tp .per{justify-self:end}
+.grow-row .tp .per{justify-self:start}
 .grow-row .tp .av-wrap{width:34px;height:34px}
 .grow-row .pts{font-size:28px;font-weight:500;letter-spacing:-.03em;text-align:right}
 .grow-row .chev{color:var(--granite)}
@@ -183,6 +185,17 @@ td.t-poor{color:var(--neg)}
 /* ---------- Game summary ---------- */
 .summary{display:flex;flex-direction:column;gap:30px;padding-block:20px 48px}
 .gnav{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+/* Page nav: soft filled pills with no outline; Previous and Next share one split pill */
+.gnav .btn{height:40px;border-radius:999px;padding:0 16px}
+.gnav .btn.ghost,.gnav .pager{background:#1f1c1b;box-shadow:inset 0 1px 0 rgba(255,255,255,.05)}
+.gnav .btn.ghost{padding:0 16px 0 12px;gap:6px}
+.gnav .btn.ghost:not(:disabled):hover{background:#292524}
+.gnav .pager{display:inline-flex;align-items:center;height:40px;border-radius:999px;flex:none}
+.gnav .pager .btn{background:none;box-shadow:none}
+.gnav .pager .btn:not(:disabled):hover{background:rgba(255,255,255,.06)}
+.gnav .pager #g-prev{padding:0 14px 0 12px}
+.gnav .pager #g-next{padding:0 12px 0 14px}
+.gnav .pager i{width:1px;height:18px;background:#3a3533;flex:none}
 .jersey{position:relative;padding:6px 0 24px;display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:32px;align-items:end;border-bottom:1px solid var(--lift2)}
 .jersey::after{content:"";position:absolute;left:0;bottom:-1px;width:80px;height:2px;background:var(--royal)}
 .jersey .team{font-size:15px;font-weight:500;color:var(--granite);margin-bottom:10px}
@@ -462,8 +475,9 @@ tr.tot td{font-weight:600;border-top:1px solid var(--stroke)}
   .appbar .wordmark{font-size:18px}
   .nl{display:none}
   #new-game{width:36px;padding:0;justify-content:center}
-  .gnav .btn{padding:0 14px}
-  #g-prev,#g-next{width:44px;padding:0;justify-content:center}
+  .game-nav{flex-wrap:nowrap;gap:6px}
+  .game-nav .btn{flex:none}
+  .gnav .pager #g-prev,.gnav .pager #g-next{width:44px;padding:0;justify-content:center}
   .jersey .badge{justify-self:start}
   .entry .bar{gap:8px;min-height:0;padding-block:8px;flex-wrap:nowrap}
   .entry .wordmark{display:none}
@@ -546,13 +560,17 @@ tr.tot td{font-weight:600;border-top:1px solid var(--stroke)}
 .p-strip button:hover{opacity:.9}
 .p-strip button[aria-current="true"]{opacity:1;box-shadow:0 0 0 2px var(--royal)}
 .p-strip .av-wrap{width:38px;height:38px}
-.phero{position:relative;display:grid;grid-template-columns:auto minmax(0,1fr);gap:36px;align-items:center;padding:8px 0 28px;border-bottom:1px solid var(--lift2);overflow:hidden}
+.phero{position:relative;display:grid;grid-template-columns:auto minmax(0,1fr);gap:36px;align-items:center;padding:8px 0 28px;border-bottom:1px solid var(--lift2);clip-path:inset(0 -100vw)}
+/* The arena reaches the screen's edges, so the player screen never scrolls sideways. */
+#s-player{overflow-x:hidden}
 .phero::after{content:"";position:absolute;left:0;bottom:-1px;width:80px;height:2px;background:var(--royal)}
-.pnum{position:absolute;right:-10px;top:50%;transform:translateY(-54%);font-size:clamp(160px,26vw,300px);font-weight:700;letter-spacing:-.07em;line-height:1;color:transparent;
+.pnum{position:absolute;right:-10px;clip-path:inset(0 10px 0 0);top:50%;transform:translateY(-54%);font-size:clamp(160px,26vw,300px);font-weight:700;letter-spacing:-.07em;line-height:1;color:transparent;
   -webkit-text-stroke:1.5px rgba(79,124,255,.22);pointer-events:none;font-variant-numeric:tabular-nums}
 .pstage{position:relative;width:clamp(180px,24vw,260px);aspect-ratio:1;display:block;padding:0;border-radius:50%}
 .pfig{position:absolute;left:12%;top:8%;width:76%;height:auto;overflow:visible}
 .pstage .av-fig{animation:idleBob .9s steps(2,jump-none) infinite}
+/* The arena behind the player, much wider than the stage and cut off by the hero. */
+.pcourt{position:absolute;left:-269.23%;top:0;width:769.23%;height:auto;pointer-events:none}
 /* A soft white spotlight from above, with a pool of light at the player's feet. */
 .pglow{position:absolute;inset:-75% -10% 0;filter:blur(4px);background:radial-gradient(ellipse 34% 6% at 50% 93%,rgba(255,255,255,.35),transparent)}
 .pglow::before{content:"";position:absolute;inset:0;background:linear-gradient(rgba(255,255,255,.05),rgba(255,255,255,.24));clip-path:polygon(44% 0,56% 0,84% 93%,16% 93%);-webkit-mask:linear-gradient(transparent 30%,#000 80%);mask:linear-gradient(transparent 30%,#000 80%)}
@@ -610,6 +628,14 @@ tr.tot td{font-weight:600;border-top:1px solid var(--stroke)}
 @keyframes enter{from{opacity:0;transform:translateY(16px) scale(.92)}}
 @keyframes hop{0%{transform:none}30%{transform:translateY(-18px) rotate(-4deg)}60%{transform:translateY(2px) rotate(2deg)}100%{transform:none}}
 .pid{position:relative;display:flex;flex-direction:column;gap:10px;min-width:0}
+/* Beside the stage, the name ends just above the arena's rail (57.7-61.5% of the stage's height) and the badges start
+   just below it. */
+@media (min-width:701px){
+  .pid{align-self:stretch;display:grid;grid-template-rows:57% auto 1fr;gap:0}
+  .pid .pname{align-self:end}
+  .pid .pbadges{margin-top:18px}
+  .pid .pbdesc{margin-top:10px}
+}
 .pid .team{font-size:15px;font-weight:500;color:var(--granite)}
 .pname{font-size:56px;display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
 .pno{font-size:22px;font-weight:500;letter-spacing:-.01em;color:var(--granite)}
@@ -692,7 +718,7 @@ table.plog tbody tr:hover td:first-child{background:var(--lift)}
   .pjn{justify-content:center}
   .pname{font-size:40px;justify-content:center}
   .pno{font-size:18px}
-  .pnum{right:-4px;top:-14px;transform:none;font-size:150px}
+  .pnum{right:-4px;top:-14px;transform:none;font-size:150px;clip-path:inset(0 4px 0 0)}
   .pcareer{grid-template-columns:repeat(5,minmax(0,1fr));width:100%;gap:8px}
   .pcareer b{font-size:22px}
   .pcareer span{font-size:11px}
@@ -714,6 +740,12 @@ table.plog tbody tr:hover td:first-child{background:var(--lift)}
   .recs.one{grid-template-columns:1fr}
   .phead .tog{width:100%}
   .gnav .p-strip{order:3;width:100%}
+}
+/* Small phones: the game page buttons still fit on one row */
+@media (max-width:380px){
+  .game-nav{gap:4px}
+  .game-nav>.btn{padding:0 12px 0 10px;gap:5px;font-size:15px}
+  .gnav .pager #g-prev,.gnav .pager #g-next{width:40px}
 }
 
 @media (max-height:520px) and (min-width:701px){
@@ -961,7 +993,7 @@ button:hover .lid,button:focus-visible .lid,button:active .lid{transform:transla
 @media (prefers-reduced-motion:reduce){.ea-ball,.ea-shadow,.sk{animation:none!important}}
 
 .stage .toast svg{position:static;inset:auto;width:15px;height:15px;flex:none}
-@media (max-width:700px){.grow-row .tp{grid-template-columns:34px minmax(0,1fr) auto;gap:8px}}
+@media (max-width:700px){.grow-row .tp{grid-template-columns:34px minmax(0,5em) auto;gap:8px}}
 @media (max-width:700px) and (max-height:760px){.stage{height:clamp(100px,19vh,210px)}}
 /* v23: top performances with tags, team achievement, badges, season picker */
 .leaders{grid-template-columns:repeat(3,minmax(0,1fr))}
@@ -1120,3 +1152,62 @@ button:hover .lid,button:focus-visible .lid,button:active .lid{transform:transla
 @keyframes hTurn{20%,80%{transform:translateX(var(--tx,-1.5px)) rotate(var(--tr,-4deg))}}
 .hpt.t-turn .av-eyes{animation:blink 5s var(--bd,0s) infinite, eyesOff var(--sl,13s) var(--sd,0s) infinite, hTurnEyes 1.8s steps(1)}
 @keyframes hTurnEyes{0%,15%{translate:0}20%,80%{translate:var(--te,-3px) 0}85%,100%{translate:0}}
+
+/* Add subs sheet: past subs as soft cards, with search and a New sub pill */
+.btn.pill{border-radius:999px;height:42px;padding:0 18px;background:var(--lift2);box-shadow:inset 0 1px 0 rgba(255,255,255,.05)}
+.btn.pill:not(:disabled):hover{background:#302b29}
+.btn.primary.pill{background:var(--bone);color:var(--canvas)}
+.btn.pill .pplus{font-size:20px;line-height:1;margin-top:-2px;color:var(--stone)}
+.panel.subs{width:min(840px,100%);display:flex;flex-direction:column}
+.subpick{display:flex;flex-direction:column;min-height:0}
+.subtools{display:flex;gap:10px;align-items:center;margin-bottom:14px}
+.subsearch{flex:1;min-width:0;display:flex;align-items:center;gap:8px;height:42px;padding:0 16px;border-radius:999px;background:var(--canvas);box-shadow:inset 0 0 0 1px var(--lift2);color:var(--granite)}
+.subsearch input{flex:1;min-width:0;border:0;background:none;outline:none;font-size:16px;color:var(--bone)}
+.newsub{background:var(--lift2);border-radius:16px;padding:14px;margin-bottom:14px;animation:rise .25s var(--ease-out)}
+.newsub-h{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;margin-bottom:10px}
+.newsub-h b{font-weight:500}.newsub-h span{color:var(--granite);font-size:13px}
+.newsub-row{display:flex;gap:8px;flex-wrap:wrap}
+.newsub-row input{flex:2 1 160px;min-width:0;height:42px;border-radius:999px;border:0;box-shadow:inset 0 0 0 1px var(--stroke);background:var(--lift);padding:0 16px;font-size:16px;outline:none}
+.newsub-row input.nnum{flex:1 1 120px}
+.newsub-row .btn.pill:not(.primary){background:var(--lift)}
+.subgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px;overflow:auto;max-height:52vh;padding:2px;margin:-2px}
+.subcard{position:relative;display:flex;align-items:center;gap:12px;padding:8px 44px 8px 8px;border-radius:14px;background:var(--lift2);text-align:left;min-width:0;transition:background .2s,box-shadow .2s,transform .15s var(--ease-out)}
+.subcard:active{transform:scale(.97)}
+.subcard .av-wrap{width:52px;height:52px;flex:none;border-radius:50%;background:#2f2a28;overflow:hidden}
+.subcard .sc-t{display:flex;flex-direction:column;gap:2px;min-width:0}
+.subcard .nm{font-weight:500;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.subcard .meta{font-family:var(--mono);font-size:11.5px;color:var(--granite);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.subcard .meta.new{color:#9db4ff}
+.subcard .tick{position:absolute;right:12px;top:50%;margin-top:-13px;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;box-shadow:inset 0 0 0 1.5px var(--mid);color:transparent;transition:background .2s,transform .2s var(--ease-out)}
+.subcard[aria-pressed="true"]{background:rgba(57,105,230,.18);box-shadow:inset 0 0 0 1.5px rgba(120,150,255,.6)}
+.subcard[aria-pressed="true"] .tick{background:var(--bone);color:var(--canvas);box-shadow:none}
+.subcard.in{opacity:.5;box-shadow:none;background:var(--lift2)}
+.subcard.in .tick{background:var(--mid);color:var(--bone)}
+.subnone{grid-column:1/-1;color:var(--granite);padding:14px 4px}
+.subnone button{color:#9db4ff;text-decoration:underline;text-underline-offset:3px}
+.panel .subacts{margin-top:16px}
+@media (max-width:560px){
+  .subgrid{grid-template-columns:1fr;max-height:none}
+  .panel.subs{padding:20px 16px 16px}
+  .subtools .btn.pill{padding:0 14px}
+  .subacts .btn.pill{flex:1;justify-content:center}
+  .newsub-row .btn.pill{flex:1;justify-content:center}
+}
+
+/* Box score share image */
+.sec-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+.sec-head h3{margin:0}
+.share-btn{height:38px;padding:0 14px;border-radius:999px;font-size:14px}
+.panel.share-panel{width:min(620px,100%)}
+.share-img{margin:14px 0 18px;border-radius:12px;overflow:hidden;background:#101010;box-shadow:inset 0 0 0 1px var(--lift2)}
+.share-img img{display:block;width:100%;height:auto}
+.share-wait{aspect-ratio:1080/1600;background:linear-gradient(100deg,var(--lift) 30%,var(--lift2) 50%,var(--lift) 70%);background-size:250% 100%;animation:shine 1.4s linear infinite}
+.panel a.btn{text-decoration:none}
+.share-top{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.share-top h2{margin:0}
+.share-acts{display:flex;align-items:center;gap:10px}
+.share-acts .grow{flex:1}
+.iconbtn.share-ic{width:48px;height:48px;border-radius:999px;color:var(--bone);background:var(--lift2);border-color:var(--stroke)}
+.iconbtn.share-ic.primary{background:var(--bone);color:var(--canvas);border-color:var(--bone)}
+.iconbtn.share-ic:disabled{opacity:.4}
+.share-top .iconbtn.share-ic{width:40px;height:40px;background:none}
