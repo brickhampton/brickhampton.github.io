@@ -1136,6 +1136,26 @@ a.vbtn:active,button.vbtn:active{transform:scale(.94)}
 /* Home skylights: hidden most of the time; about once a minute they drift in, sweep across and fade. */
 .hsweep{opacity:0;animation:hsweep 60s ease-in-out -38s infinite}
 @keyframes hsweep{0%,86%{opacity:0;transform:translateX(-240px)}90%{opacity:1}96%{opacity:1}100%{opacity:0;transform:translateX(240px)}}
+/* Admin > Supporter: her outfit and camera choices, drawn like the avatar builder's options. */
+.sup-card{display:flex;flex-direction:column;gap:8px}
+.sup-card .sup-opts{grid-template-columns:repeat(auto-fill,minmax(96px,120px));margin-bottom:8px}
+.sup-card .avb-opt svg{aspect-ratio:84/102}
+/* Our supporter on Home: every 16 seconds she pumps her fist a few times, then lifts her camera and takes a photo
+   (the flash pops). Tapping her takes a photo straight away. */
+.hsup{animation:hpBob 3.2s steps(4,jump-none) var(--hd) infinite}
+.hsupt{cursor:pointer;-webkit-tap-highlight-color:transparent}
+.hsupt :is(.sf,.sup-flash){visibility:hidden;animation:var(--sa) 16s steps(1,end) infinite}
+.hsupt .sf-rest{--sa:sRest}.hsupt .sf-cheer{--sa:sCheer}.hsupt .sf-cheer2{--sa:sCheer2}.hsupt .sf-snap{--sa:sSnap}.hsupt .sup-flash{--sa:sFlash}
+@keyframes sRest{0%,29%{visibility:visible}30%,47%{visibility:hidden}48%,63%{visibility:visible}64%,77%{visibility:hidden}78%,100%{visibility:visible}}
+@keyframes sCheer{0%,29%{visibility:hidden}30%,32%{visibility:visible}33%,35%{visibility:hidden}36%,38%{visibility:visible}39%,41%{visibility:hidden}42%,46%{visibility:visible}47%,100%{visibility:hidden}}
+@keyframes sCheer2{0%,32%{visibility:hidden}33%,35%{visibility:visible}36%,38%{visibility:hidden}39%,41%{visibility:visible}42%,100%{visibility:hidden}}
+@keyframes sSnap{0%,63%{visibility:hidden}64%,77%{visibility:visible}78%,100%{visibility:hidden}}
+@keyframes sFlash{0%,69%{visibility:hidden}70%,71%{visibility:visible}72%,100%{visibility:hidden}}
+.hsupt.t-snap :is(.sf,.sup-flash){animation:none;visibility:hidden}
+.hsupt.t-snap .sf-snap{visibility:visible}
+.hsupt.t-snap .sup-flash{animation:sTapFlash 1.3s steps(1,end)}
+@keyframes sTapFlash{0%,34%{visibility:hidden}35%,46%{visibility:visible}47%,100%{visibility:hidden}}
+@media (prefers-reduced-motion:reduce){.hsupt :is(.sf,.sup-flash){animation:none}.hsupt .sf-rest{visibility:visible}}
 /* Tapping a player on Home: a smile and a quick bob on every tap, then one of a few reactions after a single tap: a hop, a squash and stretch, a dance, a look round, or a fist pump with either arm or both. */
 .hpt{cursor:pointer;transform-box:fill-box;transform-origin:50% 100%;-webkit-tap-highlight-color:transparent}
 .hpt:focus{outline:none}

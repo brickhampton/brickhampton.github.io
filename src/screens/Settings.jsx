@@ -12,6 +12,7 @@ import { AvatarSheet } from './AvatarSheet.jsx';
 import { randomLook } from '../lib/avatar.js';
 import { soundOn, setSound, sfx } from '../lib/sfx.js';
 import { rebSplit, setRebSplit } from '../lib/prefs.js';
+import { supporter, supLook } from '../lib/supporter.js';
 
 const Grip = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="9" cy="6" r="1.6" /><circle cx="15" cy="6" r="1.6" /><circle cx="9" cy="12" r="1.6" /><circle cx="15" cy="12" r="1.6" /><circle cx="9" cy="18" r="1.6" /><circle cx="15" cy="18" r="1.6" /></svg>;
 const UndoIc = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 14 4 9l5-5" /><path d="M4 9h10a6 6 0 0 1 0 12h-3" /></svg>;
@@ -244,6 +245,7 @@ function Admin() {
           <div className="dlist" id="a-opps-oth" ref={oth}>{shownOthers.map(orow)}{!others.length && <div className="hempty">Drag a team here to take it out of this season.</div>}</div>
           {others.length > 5 && <div className="arow amore"><MoreBtn data-amore="opps" open={open.opps} n={others.length} noun="teams" onClick={() => setOpen(o => ({ ...o, opps: !o.opps }))} /></div>}
           <div className="arow"><button className="btn sm" id="a-add-team" onClick={() => openSheet(<TeamSheet existing={Object.keys(oc)} />)}>+ Add team</button></div></div></div>
+      <SupporterCard onErr={setErr} />
       <div className="sec wide"><h3>Backup and PIN</h3><div className="card btnrow"><button className="btn" id="a-csv" onClick={exportCsv}>Download all stats (CSV)</button>
         <button className="btn ghost" id="a-pin" onClick={() => openSheet(<ChangePin />)}>Change PIN</button></div></div>
     </div>
@@ -286,6 +288,23 @@ function RebCard() {
     <div className={`tog${on ? ' r' : ''}`} id="reb-split" role="group" aria-label="Rebounds as total or split">
       <button data-s="total" aria-pressed={!on} onClick={() => pick(false)}>Total</button>
       <button data-s="split" aria-pressed={on} onClick={() => pick(true)}>Split</button></div></div>;
+}
+
+// Our supporter on the Home photo: her outfit, the same for everyone who opens the site.
+const OUTFIT_OPTS = [['dress', 'Dress'], ['tee', 'T-shirt and jeans']];
+const supFig = look => <svg viewBox="8 2 84 102" aria-hidden="true" dangerouslySetInnerHTML={{ __html: supporter('rest', look) }} />;
+function SupporterCard({ onErr }) {
+  const s = useStore(), look = supLook(s.supporter || {});
+  const save = async next => {
+    if (next.outfit === look.outfit) return;
+    sfx('select'); onErr('');
+    try { await adminEdit('set_supporter', { p_look: next }); }
+    catch (e) { onErr(/set_supporter/.test(e.message) ? 'Run 10-supporter.sql in Supabase first, then try again.' : errText(e)); }
+  };
+  return <div className="sec wide"><h3>Supporter</h3><p className="hint">What she wears on the Home photo</p>
+    <div className="card sup-card" id="a-sup">
+      <div className="avb-opts sup-opts">{OUTFIT_OPTS.map(([k, label]) => <button key={k} className="avb-opt body" data-outfit={k} role="radio" aria-checked={look.outfit === k} onClick={() => save({ ...look, outfit: k })}>{supFig({ ...look, outfit: k })}<span>{label}</span></button>)}</div>
+    </div></div>;
 }
 
 // Admin mode unlocks here with the PIN.
