@@ -80,3 +80,6 @@ export const BallArt = () => (
   <svg className="estate-art" viewBox="0 0 120 84" aria-hidden="true"><ellipse className="ea-shadow" cx="60" cy="76" rx="20" ry="4" fill="#000" opacity=".35" />
     <g className="ea-ball"><circle cx="60" cy="40" r="22" fill="#ee6018" /><path d="M38 40h44M60 18v44M44.5 24.5q11 15.5 0 31M75.5 24.5q-11 15.5 0 31" stroke="#2a1206" strokeWidth="2" fill="none" /></g></svg>
 );
+// Game video: a play button in a rounded screen, and the same screen struck through when there's no recording.
+export const VideoPlay = p => <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" {...p}><rect x="2" y="5" width="20" height="14" rx="4.5" fill="#e8402f" /><path d="M10 9.2v5.6l4.8-2.8Z" fill="#fff" /></svg>;
+export const VideoOff = p => <Line size={20} sw={2} {...p}><path d="M8.5 5H17.5A4.5 4.5 0 0 1 22 9.5v5a4.5 4.5 0 0 1-1.2 3.1M15.5 19h-9A4.5 4.5 0 0 1 2 14.5v-5A4.5 4.5 0 0 1 4 5.8" /><path d="m3 3 18 18" /></Line>;

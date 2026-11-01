@@ -10,6 +10,7 @@ Run these once, in order, in the Supabase dashboard: **SQL Editor → New query*
 6. `06-avatars.sql`: saving avatars from the avatar builder, and the starters' first looks. Safe to run again.
 7. `07-pixel-avatars.sql`: the starters' pixel avatars (leaves any avatar already changed in the builder alone). Safe to run again.
 8. `08-add-game.sql`: adding a game with no stats from Admin → Results. Safe to run again.
+9. `09-game-video.sql`: a YouTube video link for each game, added in Admin mode from the game page. Safe to run again.
 
 How it's protected:
 
