@@ -255,7 +255,7 @@ export function Player() {
     </div>
 
     <div className="phero">
-      <div className="pnum" aria-hidden="true">{num}</div>
+      <div className="pnum-clip" aria-hidden="true"><div className="pnum">{num}</div></div>
       <PStage p={p} num={num} mood={mood} />
       <div className="pid"><h1 className="page pname">{p.name}<span className="pno num">#{num}</span></h1><Badges id={id} key={id} /></div>
     </div>
