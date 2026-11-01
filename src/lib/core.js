@@ -145,13 +145,23 @@ export function teamFeat(g, games) {
 // asOf looks at things as they stood at the end of that season.
 // Badge thresholds: round numbers this team can reach (see player-badges.md).
 const BT = { lock: 15, auto: .6, autoA: 10, stl: 2, blk: 1, snipe: 3, eff: .5, effA: 20, p3: .35, p3A: 15, ft: .7, ftA: 10, steady: 10, rise: 3.5, sak: 3 };
-export function playerBadges(id, asOf, noCrash) {
+export function playerBadges(id, asOf, noTie) {
   const order = seasonList().map(x => x.code), games = asOf ? allGames().filter(g => order.indexOf(g.season) >= order.indexOf(asOf)) : allGames(), mine = games.filter(g => g.rows[id]);
   if (!mine.length || (asOf && !mine.some(g => g.season === asOf))) return [];
   const season = asOf || (mine.some(g => g.season === S.current) ? S.current : mine[mine.length - 1].season), nm = season;
   const sg = games.filter(g => g.season === season), a = playerAgg(sg, id), starter = isStarter(id);
   const peers = statPlayers().map(x => playerAgg(sg, x)).filter(x => x && x.gp >= Math.min(3, a.gp));
-  const best = (f, low) => starter && peers.length > 2 && a.gp >= 3 && peers.every(x => x.id === id || (low ? f(x) > f(a) : f(x) < f(a)));
+  // Team-best badges: nobody can beat them. On a tie it goes to the tied player with the fewest other badges,
+  // or to all of them if they have the same number (Geoff, 2026-11-01). noTie counts badges without breaking ties.
+  const lead = (list, me, f, low) => {
+    if (list.some(x => x.id !== id && (low ? f(x) < f(me) : f(x) > f(me)))) return false;
+    const tied = [...new Set([id, ...list.filter(x => f(x) === f(me)).map(x => x.id)])];
+    if (tied.length === 1) return true;
+    if (noTie) return false;
+    const n = tied.map(x => playerBadges(x, season, true).length);
+    return n[0] === Math.min(...n);
+  };
+  const best = (f, low) => starter && peers.length > 2 && a.gp >= 3 && lead(peers, a, f, low);
   const lines = mine.map(g => calc(g.rows[id])), last = n => lines.slice(-n), out = [];
   const add = (key, name, icon, tone, desc) => out.push({ key, name, icon, tone, desc });
   const l3 = last(3), t3 = sumRows(l3), l5 = last(5);
@@ -159,17 +169,12 @@ export function playerBadges(id, asOf, noCrash) {
   if (l3.length === 3 && t3.tsa >= BT.autoA && t3.ts >= BT.auto) add('hot', 'Automatic', 'flame', 'hot', `${pctTxt(t3.ts)} true shooting over their last 3 games.`);
   if (best(x => x.pg('pts'))) add('pts', 'Bucket getter', 'ball', 'blue', `Most points a game in ${nm} (${f1(a.pg('pts'))}).`);
   if (best(x => x.pg('reb'))) add('reb', 'Glass cleaner', 'up', 'blue', `Most rebounds a game in ${nm} (${f1(a.pg('reb'))}).`);
-  // Crash out goes to the outright leader. On a tie it goes to the tied starter with the fewest other badges,
-  // and if that ties too, the first of them in jersey order (Geoff, 2026-11-01).
   // Offensive rebounds are only recorded in newer games, so only those games count, and a season without any gives no badge.
   const orAgg = x => { const l = sg.filter(g => g.rows[x] && g.rows[x].oreb !== undefined).map(g => g.rows[x].oreb); return { id: x, gp: l.length, pg: l.reduce((t, v) => t + v, 0) / (l.length || 1) }; };
   // Until the season has 3 games with OREB, a player needs every one of them.
   const orGames = sg.filter(g => Object.values(g.rows).some(r => r.oreb !== undefined)).length, orMin = Math.min(3, orGames);
   const oa = orAgg(id), oPeers = statPlayers().map(orAgg).filter(x => x.gp >= Math.min(orMin, oa.gp));
-  const crashTop = !noCrash && starter && orMin > 0 && oa.gp >= orMin && oa.pg > 0 && oPeers.length > 2 && oPeers.every(x => x.id === id || x.pg <= oa.pg);
-  const crashTied = crashTop && oPeers.filter(x => x.pg === oa.pg && isStarter(x.id) && x.gp >= orMin).map(x => x.id);
-  const crashWin = crashTied && (crashTied.length === 1 ? id : crashTied.map(x => [x, playerBadges(x, season, true).length]).reduce((a, b) => b[1] < a[1] ? b : a)[0]);
-  if (crashWin === id) add('oreb', 'Crash out', 'demon', 'blue', `Most offensive rebounds a game in ${nm} (${f1(oa.pg)}).`);
+  if (starter && orMin > 0 && oa.gp >= orMin && oa.pg > 0 && oPeers.length > 2 && lead(oPeers, oa, x => x.pg)) add('oreb', 'Crash out', 'demon', 'blue', `Most offensive rebounds a game in ${nm} (${f1(oa.pg)}).`);
   if (best(x => x.pg('ast'))) add('ast', 'Assistaholic', 'pass', 'blue', `Most assists a game in ${nm} (${f1(a.pg('ast'))}).`);
   const def = x => (x.s.stl + x.s.blk) / x.gp;
   if (starter && a.gp >= 3 && (def(a) >= 3 || best(def))) add('def', 'Clamps', 'shield', 'green', `${f1(def(a))} steals and blocks a game in ${nm}${best(def) ? ', the most on the team' : ''}.`);
