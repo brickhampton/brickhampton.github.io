@@ -17,14 +17,15 @@ const player = p => ({ id: p.id, name: p.name, num: p.role === 'starter' ? +p.nu
 
 // Shapes the rest of the app uses:
 //   roster: starters in jersey order, subs: everyone else,
-//   games: [{id, season, no, date, opp, result, oppPts, recorded, rows: {playerId: counts}, nums: {playerId: sub number}}],
+//   games: [{id, season, no, date, opp, result, oppPts, recorded, video, rows: {playerId: counts}, nums: {playerId: sub number}}],
 //   seasons: season codes newest first, current: the current season, opps: {season: [opponents in list order]}.
 export async function loadData() {
   const [seasons, players, opps, games] = await Promise.all([
     db.from('seasons').select('code, sort, is_current').order('sort', { ascending: false }),
     db.from('players').select('id, name, num, role, look, created_at').order('created_at').order('id'),
     db.from('season_opponents').select('season, name, pos').order('season').order('pos'),
-    db.from('games').select('id, season, no, date, opp, result, opp_pts, recorded, lines(*)').order('season').order('no'),
+    // '*' so the site keeps working before 09-game-video.sql adds the video column.
+    db.from('games').select('*, lines(*)').order('season').order('no'),
   ]);
   const err = [seasons, players, opps, games].find(r => r.error)?.error;
   if (err) throw new Error(err.message);
@@ -37,7 +38,7 @@ export async function loadData() {
     games: games.data.map(g => {
       const lines = g.lines.slice().sort((a, b) => a.pos - b.pos);
       return {
-        id: g.id, season: g.season, no: g.no, date: g.date, opp: g.opp, result: g.result, oppPts: g.opp_pts, recorded: g.recorded,
+        id: g.id, season: g.season, no: g.no, date: g.date, opp: g.opp, result: g.result, oppPts: g.opp_pts, recorded: g.recorded, video: g.video || null,
         rows: Object.fromEntries(lines.map(l => [l.player_id, {
           ...Object.fromEntries(COUNTS.map(k => [k, l[k]])),
           ...(l.reb === null ? { oreb: l.oreb, dreb: l.dreb } : { reb: l.reb }),

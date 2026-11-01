@@ -80,3 +80,6 @@ export const BallArt = () => (
   <svg className="estate-art" viewBox="0 0 120 84" aria-hidden="true"><ellipse className="ea-shadow" cx="60" cy="76" rx="20" ry="4" fill="#000" opacity=".35" />
     <g className="ea-ball"><circle cx="60" cy="40" r="22" fill="#ee6018" /><path d="M38 40h44M60 18v44M44.5 24.5q11 15.5 0 31M75.5 24.5q-11 15.5 0 31" stroke="#2a1206" strokeWidth="2" fill="none" /></g></svg>
 );
+// Game video: a plain play arrow. VideoOff marks a game with no link, shown only in Admin mode.
+export const VideoPlay = p => <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true" {...p}><path d="M7 4.5v15c0 .8.9 1.3 1.6.8l11-7.5a1 1 0 0 0 0-1.6l-11-7.5C7.9 3.2 7 3.7 7 4.5Z" fill="currentColor" /></svg>;
+export const VideoOff = p => <Line size={20} sw={2} {...p}><path d="M8.5 5H17.5A4.5 4.5 0 0 1 22 9.5v5a4.5 4.5 0 0 1-1.2 3.1M15.5 19h-9A4.5 4.5 0 0 1 2 14.5v-5A4.5 4.5 0 0 1 4 5.8" /><path d="m3 3 18 18" /></Line>;

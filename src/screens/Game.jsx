@@ -4,7 +4,8 @@ import { go } from '../lib/nav.js';
 import { drawGameTrend, GT_STATS, moreFor } from '../lib/charts.js';
 import { Avatar } from '../components/Avatar.jsx';
 import { BoxScore } from '../components/BoxScore.jsx';
-import { Back, Fwd, BIC, Pencil, ShareIcon } from '../components/icons.jsx';
+import { Back, Fwd, BIC, Pencil, ShareIcon, VideoPlay, VideoOff } from '../components/icons.jsx';
+import { VideoSheet } from '../components/VideoSheet.jsx';
 import { isAdmin } from '../lib/admin.js';
 import { openSheet } from '../components/Sheet.jsx';
 import { EditGame } from './EditGame.jsx';
@@ -38,6 +39,16 @@ function CmpTile({ label, val, base, lowerBetter, pctMode }) {
   // TS% moves by a tenth of a point; the game's own TS% stays a whole number.
   const txt = pctMode ? (d >= 0 ? '+' : '−') + (Math.abs(d) * 100).toFixed(1) + '%' : (d >= 0 ? '+' : '−') + f1(Math.abs(d));
   return <div><span>{label}</span><b className="num">{pctMode ? pctTxt(val) : val}</b><em className={flat ? 'flat' : good ? 'up' : 'down'}>{flat ? '=' : good ? '▲' : '▼'} {txt}</em></div>;
+}
+
+// The game's YouTube recording. Hidden when there isn't one, except in Admin mode, where it opens the link editor.
+function VideoBtn({ g }) {
+  const admin = isAdmin();
+  const edit = () => openSheet(<VideoSheet id={g.id} />);
+  if (g.video && !admin) return <a className="vbtn" id="g-video" href={g.video} target="_blank" rel="noopener noreferrer" aria-label="Watch the game video" title="Watch the game video"><span>VOD</span><VideoPlay /></a>;
+  if (g.video) return <button className="vbtn admin" id="g-video" onClick={edit} aria-label="Game video (edit link)" title="Game video"><span>VOD</span><VideoPlay /><i className="vpen"><Pencil width="9" height="9" /></i></button>;
+  if (admin) return <button className="vbtn none admin" id="g-video" onClick={edit} aria-label="Add a video link" title="Add a video link"><VideoOff /><i className="vpen"><Pencil width="9" height="9" /></i></button>;
+  return null;
 }
 
 export function Game() {
@@ -79,7 +90,7 @@ export function Game() {
     <div className="jersey">
       <div><div className="team">Brickhampton</div><div className="big num">{t.pts}<small>points</small></div></div>
       <div className="who"><span className="vs">vs {g.opp}</span><span className="when">{g.season}, Game {g.no}, {fmtDate(g.date)}{g.oppPts != null ? ` · Final score ${t.pts}–${g.oppPts}` : ''}</span></div>
-      <div className="jres">{feat ? <span className={`tfeat ${feat[0]}`}>{BIC[feat[1]]}{feat[2]}</span> : null}<span className={`badge ${g.result}`}>{RES[g.result]}</span></div>
+      <div className="jres"><VideoBtn g={g} />{feat ? <span className={`tfeat ${feat[0]}`}>{BIC[feat[1]]}{feat[2]}</span> : null}<span className={`badge ${g.result}`}>{RES[g.result]}</span></div>
     </div>
     <div className="sec"><h3>Top performances</h3><div className="leaders">
       <Leader rows={rows} g={g} games={games} k="per" label="Best PER" fmt={v => perTxt(v)} />

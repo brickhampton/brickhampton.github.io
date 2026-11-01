@@ -1010,6 +1010,13 @@ button:hover .lid,button:focus-visible .lid,button:active .lid{transform:transla
 .mtag.high{color:#f4d37c;background:rgba(233,185,73,.15)}
 .mtag.season{color:#c7d4ff;background:rgba(47,85,212,.2)}
 .jres{display:flex;flex-direction:column;align-items:flex-end;gap:10px}
+/* Game video: a soft pill that opens the YouTube recording, muted when there isn't one */
+.vbtn{text-decoration:none;position:relative;flex:none;display:inline-flex;align-items:center;justify-content:center;gap:1px;min-width:52px;padding:0 12px 0 14px;box-sizing:border-box;font-size:14px;font-weight:600;letter-spacing:.04em;height:32px;border-radius:999px;background:#1f1c1b;box-shadow:inset 0 1px 0 rgba(255,255,255,.05);color:var(--bone);transition:background .2s, transform .15s var(--ease-out)}
+a.vbtn:hover,button.vbtn:hover{background:#292524}
+a.vbtn:active,button.vbtn:active{transform:scale(.94)}
+.vbtn.none{background:none;box-shadow:inset 0 0 0 1px var(--lift2);color:var(--mid);cursor:default}
+.vbtn.none.admin{cursor:pointer;color:var(--granite)}
+.vbtn .vpen{position:absolute;top:-4px;right:-4px;width:17px;height:17px;border-radius:999px;background:var(--royal);color:#fff;display:grid;place-items:center;box-shadow:0 0 0 2px var(--canvas)}
 .tfeat{display:inline-flex;align-items:center;gap:7px;height:32px;padding:0 13px 0 10px;border-radius:999px;font-size:14px;font-weight:500;white-space:nowrap;animation:tileIn .45s var(--ease-out) .15s both}
 .tfeat.gold{color:#f4d37c;background:rgba(233,185,73,.13);box-shadow:inset 0 0 0 1px rgba(233,185,73,.35)}
 .tfeat.streak{color:#f6b47c;background:rgba(238,140,60,.13);box-shadow:inset 0 0 0 1px rgba(238,140,60,.35)}
@@ -1045,7 +1052,9 @@ button:hover .lid,button:focus-visible .lid,button:active .lid{transform:transla
   .lead-card .mtag.sm{height:20px;padding:0 7px 0 6px;font-size:10px;gap:3px}
   .lead-card .mtag.sm svg{width:10px;height:10px}
   .jres{flex-direction:row;justify-content:space-between;align-items:center;width:100%}
-  .jres .badge{order:-1}
+  .jres .badge{order:-1;margin-right:auto}
+  .jres{gap:8px}
+  .vbtn{order:1}
   .tfeat{height:30px;font-size:13px}
   .pbadges{justify-content:center}
   .pbdesc{text-align:center}
