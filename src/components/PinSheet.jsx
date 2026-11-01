@@ -7,7 +7,7 @@ import { sfx } from '../lib/sfx.js';
 
 const until = t => new Date(t).toLocaleTimeString('en-AU', { hour: 'numeric', minute: '2-digit' });
 
-// Four-digit keypad. The database checks the PIN and locks for 15 minutes after five wrong tries.
+// Four-digit keypad. The database checks the PIN and locks for 15 minutes after three wrong tries.
 export function PinSheet({ onDone, why = 'Unlocks Admin mode on this device.' }) {
   const [code, setCode] = useState('');
   const [msg, setMsg] = useState(why);

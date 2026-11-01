@@ -11,11 +11,13 @@ Run these once, in order, in the Supabase dashboard: **SQL Editor → New query*
 7. `07-pixel-avatars.sql`: the starters' pixel avatars (leaves any avatar already changed in the builder alone). Safe to run again.
 8. `08-add-game.sql`: adding a game with no stats from Admin → Results. Safe to run again.
 9. `09-game-video.sql`: a YouTube video link for each game, added in Admin mode from the game page. Safe to run again.
+10. `10-supporter.sql`: our supporter's outfit on the Home photo, chosen in Admin mode. Safe to run again.
+11. `11-pin-tries.sql`: the PIN locks after three wrong tries instead of five. Safe to run again.
 
 How it's protected:
 
 - The website uses the publishable key, which can only read the stats.
 - Every change (recording a game, Admin edits) goes through database functions that need an Admin session. Only the PIN opens one.
 - Each change also saves a copy of the stats from just before it, so Undo in Change history can put them back (the last 40 are kept).
-- The PIN is stored as a bcrypt hash in a private schema the website can't read. Five wrong tries lock it for 15 minutes, and Admin locks itself after 15 minutes without a tap.
+- The PIN is stored as a bcrypt hash in a private schema the website can't read. Three wrong tries lock it for 15 minutes, and Admin locks itself after 15 minutes without a tap.
 - `02-history.sql` is generated from `src/data/seed.js` by `node scripts/make-seed-sql.mjs`.
