@@ -784,6 +784,8 @@ button:hover .lid,button:focus-visible .lid,button:active .lid{transform:transla
 .admin-lock{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:16px;align-items:center;padding:22px}
 .admin-lock h3{margin:0 0 4px;font-size:20px;font-weight:500}
 .admin-lock .hint{margin:0}
+.sound-card{margin-bottom:16px}
+.sound-card .tog{align-self:center}
 .lock-ic{width:52px;height:52px;border-radius:14px;background:var(--lift2);display:grid;place-items:center;color:var(--stone)}
 .adm-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:26px 24px;align-items:start}
 .adm-grid .wide{grid-column:1 / -1}
@@ -846,6 +848,7 @@ button:hover .lid,button:focus-visible .lid,button:active .lid{transform:transla
   .eg-grid{grid-template-columns:1fr 1fr}
   .admin-lock{grid-template-columns:auto minmax(0,1fr)}
   .admin-lock .btn{grid-column:1 / -1}
+  .sound-card .tog{grid-column:1 / -1;justify-self:start}
   .arow .nm em{display:none}
   .rrow{display:grid;grid-template-columns:auto minmax(0,1fr) auto;grid-template-areas:"g nm meta" "seg seg edit";gap:8px 10px}
   .rrow .g{grid-area:g} .rrow .nm{grid-area:nm} .rrow .meta{grid-area:meta} .rrow .rseg{grid-area:seg} .rrow .iconbtn{grid-area:edit}

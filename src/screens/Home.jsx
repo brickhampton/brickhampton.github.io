@@ -4,6 +4,7 @@ import { reduced } from '../lib/charts.js';
 import { figure, pxShadow, raisedTrophy } from '../lib/avatar.js';
 import { ChevDown } from '../components/icons.jsx';
 import { stage } from '../lib/homeStage.js';
+import { sfx } from '../lib/sfx.js';
 
 const TROPHY = `<svg x="345" y="262" width="110" height="122" preserveAspectRatio="xMidYMax meet" viewBox="0 0 24 24" aria-hidden="true"><defs><linearGradient id="ht-g" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#ffe08a"/><stop offset=".55" stop-color="#e9b949"/><stop offset="1" stop-color="#b9821f"/></linearGradient></defs>
   <path d="M17 4h3v2.5a3.5 3.5 0 0 1-3.6 3.5M7 4H4v2.5A3.5 3.5 0 0 0 7.6 10" fill="none" stroke="#d9a63a" stroke-width="2" stroke-linecap="round"/>
@@ -98,9 +99,13 @@ const GEN = ['t-hop', 't-squash', 't-dance', 't-look'], FREE = ['t-fist', 't-fis
 const IDLE = ['t-look', 't-nod', 't-turn'];
 const REACTS = [...GEN, ...FREE, ...IDLE, 't-raise', 't-dribble', 't-twirl'], RAPID = 320;
 const LONG = { 't-dribble': 1600, 't-dance': 1500, 't-look': 1900, 't-turn': 1900 };
+// The sounds a tapped player's reaction makes (idle moves stay silent). The ball hits the floor halfway through each dribble.
+const TAP_SFX = { 't-dribble': [['dribble', 250], ['dribble', 750], ['dribble', 1250]], 't-raise': [['trophy', 0]], 't-twirl': [['trick', 0]],
+  't-hop': [['hop', 0]], 't-dance': [['trick', 0]], 't-squash': [['boing', 0]], 't-fist': [['cheer', 0]], 't-fistL': [['cheer', 0]], 't-fist2': [['cheer', 0]] };
 const restart = (el, cls) => { el.classList.remove(cls); void el.getBoundingClientRect(); el.classList.add(cls); };
 function onTap(e, taps) {
   const g = e.target.closest?.('.hpt'); if (!g) return;
+  sfx('boing');
   const id = g.dataset.id, t = taps[id] ||= { n: 0, at: 0, wait: 0, end: 0, last: '' }, now = performance.now();
   t.n = now - t.at < RAPID * 1.4 ? t.n + 1 : 1; t.at = now;
   clearTimeout(t.wait); clearTimeout(t.end);
@@ -112,6 +117,7 @@ function onTap(e, taps) {
     const own = (g.dataset.own || '').split(' ').filter(Boolean);
     const ks = [...GEN, ...(g.classList.contains('can-fist') ? FREE : []), ...own, ...own].filter(k => k !== t.last);
     const k = t.last = ks[Math.floor(Math.random() * ks.length)];
+    TAP_SFX[k]?.forEach(([n, ms]) => sfx(n, ms));
     g.classList.remove('t-bob'); if (k === 't-look') g.classList.remove('t-smile'); restart(g, k); done(LONG[k] || 1300);
   }, RAPID);
 }

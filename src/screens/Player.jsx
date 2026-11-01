@@ -9,6 +9,7 @@ import { Back, BIC, MedalGold } from '../components/icons.jsx';
 import { Chart, SeasonPick, StatChips, MoreBtn, EmptyState, PerPill } from '../components/ui.jsx';
 import { ShootBar } from './Game.jsx';
 import { H2HRows } from './Stats.jsx';
+import { sfx } from '../lib/sfx.js';
 
 // One stat box. When Averages/Totals changes what it shows, it flips over to its new face.
 function StatTile({ face, delay }) {
@@ -87,18 +88,23 @@ const TRICKS = {
   look: () => [['look', '', 1900]],
   quick: () => Array.from({ length: 5 }, () => ['qbounce', '', 300]),
 };
+// The sounds of a trick that follows a tap (idle tricks stay silent): the ball hits the floor halfway through each bounce.
+const STEP_SFX = { bounce: [['dribble', 250]], qbounce: [['dribble', 150]], spin: [['trick', 0]], hop: [['hop', 0]], dance: [['trick', 0]],
+  cheer: [['cheer', 0]], brag: [['trophy', 0]], squash: [['boing', 0]], fumble: [['floor', 200]] };
 const IDLE = ['dribble', 'cross', 'quick', 'dribble', 'cross', 'quick', 'look'], IDLE_ONLY = ['quick', 'look'], RAPID = 320;
 // The ball on its own, for when it leaves the player's hands: centred on (0, 0) in the stage's units.
 const U = 104 / 34, LOOSE = BALL.map(([o, w], j) => `<rect x="${((o - 3.5) * U).toFixed(2)}" y="${((j - 3) * U).toFixed(2)}" width="${(w * U).toFixed(2)}" height="${U.toFixed(2)}" fill="${BALL_C}"/>`).join('');
 function PStage({ p, num, mood }) {
   const [step, setStep] = useState(null), timer = useRef(0), busy = useRef(false), last = useRef(''), taps = useRef({ n: 0, at: 0 });
   const m = useRef(mood); m.current = mood;
-  const run = (k, extra = '') => {
+  const run = (k, extra = '', loud = false) => {
     clearTimeout(timer.current); last.current = k; busy.current = true;
     const steps = TRICKS[k](m.current);
     const next = i => {
       if (i === steps.length) { setStep(null); busy.current = false; return; }
-      const [cls, pose, ms, fx] = steps[i]; setStep({ cls: cls + extra, pose, fx, n: Date.now() + i });
+      const [cls, pose, ms, fx] = steps[i];
+      if (loud) STEP_SFX[cls]?.forEach(([n, at]) => sfx(n, at));
+      setStep({ cls: cls + extra, pose, fx, n: Date.now() + i });
       timer.current = setTimeout(() => next(i + 1), ms);
     };
     next(0);
@@ -113,6 +119,7 @@ function PStage({ p, num, mood }) {
   }, []);
   // Every tap smiles and bobs; rapid taps keep bobbing, and a single tap is followed by a random trick.
   const tap = () => {
+    sfx('blip');
     const t = taps.current, now = performance.now();
     t.n = now - t.at < RAPID * 1.4 ? t.n + 1 : 1; t.at = now;
     clearTimeout(timer.current); busy.current = true;
@@ -121,7 +128,7 @@ function PStage({ p, num, mood }) {
     timer.current = setTimeout(() => {
       if (t.n > 1 || reduced) { timer.current = setTimeout(() => { setStep(null); busy.current = false; }, 400); return; }
       const ks = Object.keys(TRICKS).filter(x => x !== last.current && !IDLE_ONLY.includes(x) && (x !== 'badge' || m.current.badges.length) && (x !== 'mood' || m.current.per));
-      run(ks[Math.floor(Math.random() * ks.length)], smile);
+      run(ks[Math.floor(Math.random() * ks.length)], smile, true);
     }, RAPID);
   };
   const fx = step?.fx;
