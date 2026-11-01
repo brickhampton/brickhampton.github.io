@@ -45,8 +45,8 @@ function CmpTile({ label, val, base, lowerBetter, pctMode }) {
 function VideoBtn({ g }) {
   const admin = isAdmin();
   const edit = () => openSheet(<VideoSheet id={g.id} />);
-  if (g.video && !admin) return <a className="vbtn" id="g-video" href={g.video} target="_blank" rel="noopener noreferrer" aria-label="Watch the game video" title="Watch the game video"><VideoPlay /></a>;
-  if (g.video) return <button className="vbtn admin" id="g-video" onClick={edit} aria-label="Game video (edit link)" title="Game video"><VideoPlay /><i className="vpen"><Pencil width="9" height="9" /></i></button>;
+  if (g.video && !admin) return <a className="vbtn" id="g-video" href={g.video} target="_blank" rel="noopener noreferrer" aria-label="Watch the game video" title="Watch the game video"><VideoPlay /><span>VOD</span></a>;
+  if (g.video) return <button className="vbtn admin" id="g-video" onClick={edit} aria-label="Game video (edit link)" title="Game video"><VideoPlay /><span>VOD</span><i className="vpen"><Pencil width="9" height="9" /></i></button>;
   if (admin) return <button className="vbtn none admin" id="g-video" onClick={edit} aria-label="Add a video link" title="Add a video link"><VideoOff /><i className="vpen"><Pencil width="9" height="9" /></i></button>;
   return null;
 }
