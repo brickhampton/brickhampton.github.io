@@ -99,7 +99,7 @@ begin
   if not found then raise exception 'Admin mode is locked' using errcode = '28000'; end if;
 end $$;
 
--- Unlock with the PIN. Five wrong tries lock it for 15 minutes; after that, each wrong try locks it again.
+-- Unlock with the PIN. Three wrong tries lock it for 15 minutes; after that, each wrong try locks it again.
 create or replace function public.admin_unlock(p_pin text) returns json
 language plpgsql security definer set search_path = '' as $$
 declare a private.admin; t uuid;
@@ -115,10 +115,10 @@ begin
     return json_build_object('ok', true, 'token', t);
   end if;
   update private.admin set failed = failed + 1,
-    locked_until = case when failed + 1 >= 5 then now() + interval '15 minutes' end
+    locked_until = case when failed + 1 >= 3 then now() + interval '15 minutes' end
   where id = 1 returning * into a;
   return json_build_object('ok', false, 'reason', case when a.locked_until is not null then 'locked' else 'wrong' end,
-    'left', greatest(0, 5 - a.failed), 'until', a.locked_until);
+    'left', greatest(0, 3 - a.failed), 'until', a.locked_until);
 end $$;
 
 -- Keeps the session alive while Admin is being used, and says whether it still is.
