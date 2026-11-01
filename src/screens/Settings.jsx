@@ -301,7 +301,7 @@ function SupporterCard({ onErr }) {
     try { await adminEdit('set_supporter', { p_look: next }); }
     catch (e) { onErr(/set_supporter/.test(e.message) ? 'Run 10-supporter.sql in Supabase first, then try again.' : errText(e)); }
   };
-  return <div className="sec wide"><h3>Supporter</h3><p className="hint">What she wears on the Home photo</p>
+  return <div className="sec wide"><h3>Ash</h3><p className="hint">What she wears on the Home photo</p>
     <div className="card sup-card" id="a-sup">
       <div className="avb-opts sup-opts">{OUTFIT_OPTS.map(([k, label]) => <button key={k} className="avb-opt body" data-outfit={k} role="radio" aria-checked={look.outfit === k} onClick={() => save({ ...look, outfit: k })}>{supFig({ ...look, outfit: k })}<span>{label}</span></button>)}</div>
     </div></div>;

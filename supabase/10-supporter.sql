@@ -1,4 +1,4 @@
--- Our supporter on the Home photo: her outfit, chosen in Admin mode (Settings > Supporter).
+-- Our supporter on the Home photo: her outfit, chosen in Admin mode (Settings > Ash).
 -- Until this runs she wears the dress. Safe to run again.
 
 create table if not exists public.site (
