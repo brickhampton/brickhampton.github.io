@@ -8,7 +8,7 @@ import { Chart, SeasonPick, EmptyState, setSort } from '../components/ui.jsx';
 
 const RCOLS = [['per', 'PER'], ['pts', 'PTS'], ['reb', 'REB'], ['ast', 'AST'], ['stl', 'STL'], ['blk', 'BLK'], ['to', 'TO'], ['fg', 'FG%'], ['m3', '3FG%'], ['ft', 'FT%'], ['ts', 'TS%'], ['gp', 'GP']];
 export const aggVal = (a, k) => k === 'ts' ? a.s.ts : k === 'fg' ? ratio(a.s.fgm, a.s.fga) : k === 'm3' ? ratio(a.s.m3, a.s.a3) : k === 'ft' ? ratio(a.s.ftm, a.s.fta) : k === 'gp' ? a.gp : a.pg(k);
-// Shooting columns: made and attempted keys, so Totals can show them as made/attempts (2/8).
+// Shooting columns: made and attempted keys, so Totals can show them as made-attempts (2-8).
 const SHOTS = { fg: ['fgm', 'fga'], m3: ['m3', 'a3'], ft: ['ftm', 'fta'] };
 // Totals sort counting stats by their sums and shooting columns by shots made, like the box score.
 const totVal = (a, k) => k === 'ts' ? a.s.ts : k === 'gp' ? a.gp : SHOTS[k] ? a.s[SHOTS[k][0]] : a.s[k];
@@ -33,7 +33,7 @@ function Rankings({ aggs, team, tot }) {
       const pct = aggVal(a, k);
       if (!tot || k === 'ts') return <td key={k} className={tier(k, pct) || undefined}>{pctTxt(pct)}</td>;
       const [m, at] = SHOTS[k];
-      return <td key={k} className={tier(k, pct, a.s[at]) || undefined}>{a.s[m]}/{a.s[at]}</td>;
+      return <td key={k} className={tier(k, pct, a.s[at]) || undefined}>{a.s[m]}-{a.s[at]}</td>;
     }
     const all = aggs.map(x => val(x, k)), top = !isTeam && (k === 'to' ? v === Math.min(...all) : v === Math.max(...all));
     return <td key={k}><span className={`n${top && aggs.length > 1 ? ' hi' : ''}`}>{tot ? v : f1(v)}</span></td>;
