@@ -110,10 +110,24 @@ function fan(cx, top, w, refl) {
   const fy = top + w * 1.035;
   return { fig, refl: refl ? `<g mask="url(#hrmask)" opacity="${refl}"><g transform="translate(0 ${(2 * fy).toFixed(1)}) scale(1 -1)">${svg(supporter('rest', look))}</g></g>` : '' };
 }
-// Tapping her: she takes a photo straight away.
+// Tapping her: she smiles, then takes a photo, pumps her fist, jumps for joy, dances, or waves (never the same twice
+// running). Now and then, on her own, she smiles, waves, looks round or gives a little hop.
+const SUP_TAP = ['t-snap', 't-cheer', 't-yay', 't-dance', 't-wave'], SUP_IDLE = ['t-smile', 't-wave', 't-look', 't-hop'];
+const SUP_MS = { 't-snap': 1300, 't-cheer': 1400, 't-yay': 1300, 't-dance': 1600, 't-wave': 1600, 't-smile': 1800, 't-look': 1900, 't-hop': 800 };
+const SUP_SFX = { 't-snap': [['shutter', 450]], 't-cheer': [['cheer', 0]], 't-yay': [['hop', 0], ['hop', 650]], 't-dance': [['trick', 0]], 't-wave': [['blip', 0]] };
+let supLast = '', supEnd = 0;
+function supDo(g, k, sound) {
+  clearTimeout(supEnd); g.classList.remove(...SUP_TAP, ...SUP_IDLE);
+  if (sound) SUP_SFX[k]?.forEach(([n, ms]) => sfx(n, ms));
+  restart(g, k); supEnd = setTimeout(() => g.classList.remove(k), SUP_MS[k]);
+}
 function onSup(g) {
-  if (g.classList.contains('t-snap')) return;
-  sfx('shutter'); restart(g, 't-snap'); setTimeout(() => g.classList.remove('t-snap'), 1300);
+  const ks = SUP_TAP.filter(k => k !== supLast), k = supLast = ks[Math.floor(Math.random() * ks.length)];
+  supDo(g, reduced ? 't-smile' : k, true);
+}
+function idleSup(root) {
+  const g = root.querySelector('.hsupt'); if (!g || [...g.classList].some(c => c.startsWith('t-'))) return;
+  supDo(g, SUP_IDLE[Math.floor(Math.random() * SUP_IDLE.length)], false);
 }
 
 // Tapping a player: they smile and give a little bob straight away. Tap again quickly and they bob with every tap;
@@ -184,7 +198,7 @@ export function Home() {
   useEffect(() => {
     if (reduced) return;
     let t = 0;
-    const next = () => { t = setTimeout(() => { if (ref.current && !document.hidden) idleOne(ref.current, taps.current); next(); }, 2000 + Math.random() * 2500); };
+    const next = () => { t = setTimeout(() => { if (ref.current && !document.hidden) { if (Math.random() < .2) idleSup(ref.current); else idleOne(ref.current, taps.current); } next(); }, 2000 + Math.random() * 2500); };
     next();
     return () => clearTimeout(t);
   }, []);

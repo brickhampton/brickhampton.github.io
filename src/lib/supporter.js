@@ -18,7 +18,7 @@ function grid() { return Array.from({ length: H + TOPM }, () => Array(W).fill(nu
 
 function draw(frame, look) {
   const tee = look.outfit === 'tee';
-  const g = grid(), ge = grid();
+  const g = grid(), ge = grid(), gs = grid();
   let t = g;
   const r = (x, y, w = 1, h = 1, col) => { for (let j = y; j < y + h; j++) for (let i = x; i < x + w; i++) if (j >= -TOPM && j < H && i >= 0 && i < W) t[j + TOPM][i] = col; };
   const hx = 8, hy = 6, ty = hy + 11;
@@ -70,6 +70,10 @@ function draw(frame, look) {
   t = ge;
   if (frame === 'snap') r(hx + 2, hy + 7, 2, 1, K);
   else { r(hx + 3, hy + 6, 1, 2, K); r(hx + 7, hy + 6, 1, 2, K); }
+  // Smiling eyes, shown now and then (and when she reacts), like the players': little upside-down Vs.
+  t = gs;
+  if (frame === 'snap') r(hx + 2, hy + 7, 2, 1, K);
+  else [hx + 3, hx + 7].forEach(x => { r(x, hy + 6, 1, 1, K); r(x - 1, hy + 7, 1, 1, K); r(x + 1, hy + 7, 1, 1, K); });
   t = g;
   // ---- long hair: a crown, straight wispy bangs to just above the eyes, falling well past the shoulders at the back
   const HSP = [
@@ -93,7 +97,7 @@ function draw(frame, look) {
     if (tee) { r(16, ty + 1, 1, 1, TEE); r(16, ty + 2, 2, 1, TEE); }
     film(r, 14, ty + 1); r(22, ty + 4, 1, 3, SKIN);
   }
-  return { g, ge };
+  return { g, ge, gs };
 }
 
 // A classic film SLR, front on: a chrome top with the prism hump, a knob and a button either side, a black body and a
@@ -131,8 +135,10 @@ const cache = new Map();
 export function supporter(frame = 'rest', raw) {
   const look = supLook(raw), key = frame + look.outfit;
   if (cache.has(key)) return cache.get(key);
-  const { g, ge } = draw(frame, look);
-  const svg = `<g class="av-fig" shape-rendering="crispEdges"><g transform="${TF}">${paths(g)}</g><g class="av-eyes"><g transform="${TF}">${paths(ge)}</g></g></g>`;
+  const { g, ge, gs } = draw(frame, look);
+  // The eyes and the smiling eyes are their own groups, so the blink and smile animations the players use work on her too.
+  const svg = `<g class="av-fig" shape-rendering="crispEdges"><g transform="${TF}">${paths(g)}</g><g class="av-eyes"><g transform="${TF}">${paths(ge)}</g></g>`
+    + `<g class="av-smile"><g transform="${TF}">${paths(gs)}</g></g></g>`;
   cache.set(key, svg);
   return svg;
 }
