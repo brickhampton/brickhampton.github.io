@@ -144,7 +144,7 @@ export function teamFeat(g, games) {
 // Player badges for their latest season and recent games. Nothing about stat totals.
 // asOf looks at things as they stood at the end of that season.
 // Badge thresholds: round numbers this team can reach (see player-badges.md).
-const BT = { lock: 15, auto: .6, autoA: 15, up: 5, stl: 2, blk: 1, snipe: 3, eff: .5, effA: 20, p3: .35, p3A: 15, ft: .7, ftA: 10, steady: 10, rise: 3.5, sak: 3 };
+const BT = { lock: 15, auto: .5, autoA: 15, up: 3, stl: 2, blk: 1, snipe: 3, eff: .5, effA: 20, p3: .35, p3A: 15, ft: .7, ftA: 10, steady: 10, rise: 3, sak: 3 };
 export function playerBadges(id, asOf) {
   const order = seasonList().map(x => x.code), games = asOf ? allGames().filter(g => order.indexOf(g.season) >= order.indexOf(asOf)) : allGames(), mine = games.filter(g => g.rows[id]);
   if (!mine.length || (asOf && !mine.some(g => g.season === asOf))) return [];
@@ -164,10 +164,10 @@ export function playerBadges(id, asOf) {
   // Offensive rebounds are only recorded in newer games, so only those games count, and a season without any gives no badge.
   const orAgg = x => { const l = sg.filter(g => g.rows[x] && g.rows[x].oreb !== undefined).map(g => g.rows[x].oreb); return { id: x, gp: l.length, pg: l.reduce((t, v) => t + v, 0) / (l.length || 1) }; };
   const oa = orAgg(id), oPeers = statPlayers().map(orAgg).filter(x => x.gp >= Math.min(3, oa.gp));
-  if (starter && oa.gp >= 3 && oa.pg > 0 && oPeers.length > 2 && oPeers.every(x => x.id === id || x.pg < oa.pg)) add('oreb', 'Crash out', 'crash', 'blue', `Most offensive rebounds a game in ${nm} (${f1(oa.pg)}).`);
+  if (starter && oa.gp >= 3 && oa.pg > 0 && oPeers.length > 2 && oPeers.every(x => x.id === id || x.pg < oa.pg)) add('oreb', 'Crash out', 'demon', 'blue', `Most offensive rebounds a game in ${nm} (${f1(oa.pg)}).`);
   if (best(x => x.pg('ast'))) add('ast', 'Assistaholic', 'pass', 'blue', `Most assists a game in ${nm} (${f1(a.pg('ast'))}).`);
   const def = x => (x.s.stl + x.s.blk) / x.gp;
-  if (starter && a.gp >= 3 && (def(a) >= 3 || best(def))) add('def', 'Lockdown', 'shield', 'green', `${f1(def(a))} steals and blocks a game in ${nm}${best(def) ? ', the most on the team' : ''}.`);
+  if (starter && a.gp >= 3 && (def(a) >= 3 || best(def))) add('def', 'Clamps', 'shield', 'green', `${f1(def(a))} steals and blocks a game in ${nm}${best(def) ? ', the most on the team' : ''}.`);
   const hasDef = out.some(b => b.key === 'def');
   if (!hasDef && a.gp >= 3 && a.pg('stl') >= BT.stl) add('stl', 'Cookiesss', 'cookie', 'green', `${f1(a.pg('stl'))} steals a game in ${nm}.`);
   if (!hasDef && a.gp >= 3 && a.pg('blk') >= BT.blk) add('blk', 'Not in my house!', 'shield', 'green', `${f1(a.pg('blk'))} blocks a game in ${nm}.`);
@@ -183,7 +183,10 @@ export function playerBadges(id, asOf) {
   const sak = sg.filter(g => g.rows[id]).map(g => calc(g.rows[id])).filter(s => s.pts >= 1 && s.reb >= 1 && s.ast >= 1 && s.stl >= 1).length;
   if (sak >= BT.sak) add('sak', 'Swiss army knife', 'knife', 'blue', `${sak} games in ${nm} with at least a point, a rebound, an assist and a steal.`);
   if (best(x => x.pg('to'), true) && a.gp >= 5) add('safe', 'Safe hands', 'lock', 'green', `Fewest turnovers a game in ${nm} (${f1(a.pg('to'))}).`);
-  if (l5.length === 5 && l5.every(s => s.per >= BT.steady)) add('steady', 'Mr Consistent', 'check', 'grey', `${BT.steady}+ PER in each of their last 5 games.`);
+  if (best(x => x.pg('to')) && a.gp >= 5) add('butter', 'Butter fingers', 'butter', 'hot', `Most turnovers a game in ${nm} (${f1(a.pg('to'))}).`);
+  if (best(x => x.pg('tsa'), true)) add('unselfish', 'Unselfish', 'pass', 'blue', `Fewest shot attempts a game in ${nm} (${f1(a.pg('tsa'))} true shooting attempts).`);
+  if (best(x => x.pg('tsa'))) add('chuck', 'Possession ends here', 'ball', 'hot', `Most shot attempts a game in ${nm} (${f1(a.pg('tsa'))} true shooting attempts).`);
+  if (l5.length === 5 && l5.every(s => s.per >= BT.steady)) add('steady', 'Mr Consistent', 'check', 'green', `${BT.steady}+ PER in each of their last 5 games.`);
   if (sg.length >= 5 && a.gp === sg.length) add('ever', 'Ol\' reliable', 'iron', 'grey', `Played all ${sg.length} games in ${nm}.`);
   return asOf ? out : out.slice(0, 6);
 }
