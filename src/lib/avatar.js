@@ -103,7 +103,7 @@ export function randomLook() {
 const W = 30, H = 36, FEET = 34, TOPM = 6;
 const DIG = { 0: ['111', '101', '101', '101', '111'], 1: ['01', '11', '01', '01', '01'], 2: ['111', '001', '111', '100', '111'], 3: ['111', '001', '011', '001', '111'], 4: ['101', '101', '111', '001', '001'], 5: ['111', '100', '111', '001', '111'], 6: ['111', '100', '111', '101', '111'], 7: ['111', '001', '010', '010', '010'], 8: ['111', '101', '111', '101', '111'], 9: ['111', '101', '111', '001', '111'] };
 // Hair as spans on the head grid (x 0-9, nose at 10, back of the head at x 0): [y, x, pattern].
-// H hair, D shade, B buzzed (hair over skin), '.' leave alone. In the same order as OPTS.style.
+// H hair, D shade, B buzzed (hair over skin), X clear (a gap between spikes where the head would show), '.' leave alone. In the same order as OPTS.style.
 const TOP = [[0, 2, 'HHHHHH'], [1, 1, 'HHHHHHHH'], [2, 0, 'HHHHHHHHHH']];
 const HAIR = [
   [...TOP, [3, 0, 'HHD......H'], [4, 0, 'HD'], [5, 0, 'H']],
@@ -136,8 +136,8 @@ const HAIR = [
   [[-1, 2, 'HHHHHH'], [0, 1, 'HHHHHHHH'], [1, 0, 'HHHHHHDHHH'], [2, -1, 'HHHHHHD.DHHH'], [3, -1, 'HHHHHD...DHH'], [4, -1, 'HHHD.....DH'], [5, -1, 'HD']],
   // Soft messy: messy with the spikes on top flattened into a low, uneven crown
   [[-1, 2, 'H.HHHH'], [0, 0, 'HHHHHHHHHH'], [1, -1, 'HHHHHHHHHHH'], [2, -1, 'HHHHHHHHHHH'], [3, 0, 'HHH.HH.HHH'], [4, 0, 'HH...H...H'], [5, 0, 'H']],
-  // Short messy: messy with shorter spikes on top
-  [[-1, 1, 'H.HH.H.H'], [0, 0, 'HHHHHHHHHH'], [1, -1, 'HHHHHHHHHHH'], [2, -1, 'HHHHHHHHHHH'], [3, 0, 'HHH.HH.HHH'], [4, 0, 'HH...H...H'], [5, 0, 'H']],
+  // Short messy: the messy outline a row lower, with the gaps between the spikes cut out of the head
+  [[-1, 2, 'H..H'], [0, 1, 'HHXHHHXH'], [1, 0, 'HHHHHHHHHH'], [2, -1, 'HHHHHHHHHHH'], [3, 0, 'HHH.HH.HHH'], [4, 0, 'HH...H...H'], [5, 0, 'H']],
 ];
 // Very tall has an extra pixel of jersey; Shandy adds a pixel of leg on top.
 const TALL = [1, 0, 2, 4, -1, 5], EYE_ROW = [6, 5, 7];
@@ -252,7 +252,7 @@ function sprite(c, num, pose) {
   const pal = { H: HR, D: mix(HR, .25), B: blend(S, HR, .8) };
   // Flipped hair is mirrored across the head, so a style swept one way sweeps the other.
   const hf = c.hairFlip ? (x => 9 - x) : (x => x);
-  HAIR[c.style].forEach(([y, x, pat]) => [...pat].forEach((ch, i) => { if (pal[ch]) r(hx + hf(x + i), hy + y, 1, 1, pal[ch]); }));
+  HAIR[c.style].forEach(([y, x, pat]) => [...pat].forEach((ch, i) => { if (pal[ch] || ch === 'X') r(hx + hf(x + i), hy + y, 1, 1, pal[ch] || null); }));
   if (c.style === 2) r(hx + 3, hy + 1, 2, 1, mix(S, -.35));
   // glasses: two thin 4 x 4 frames round the eyes with clear lenses, a bridge and an arm back to the ear.
   // Rectangle frames, round ones with the corners cut, or half frames with no top rim.
