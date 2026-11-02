@@ -505,9 +505,9 @@ export function Entry() {
         <button className="undo" id="undo" disabled={!R.events.length} onClick={undo}><UndoIcon />Undo</button>
         <div className="log" id="log">{log.length ? log.map((e, i) => (
           <button key={e.id} className={`chip${i === 0 ? ' new' : ''}${confirm === e.id ? ' confirm' : ''}`} data-id={e.id}
-            onClick={() => { if (confirm === e.id) { setConfirm(null); remove(e.id, 'Deleted'); } else setConfirm(e.id); }}>
-            {confirm === e.id ? <>Delete <b>{P(e.pid).name} {A[e.a].label}</b>?</> : <><b>{P(e.pid).name}</b>{A[e.a].label}</>}</button>))
-          : <span className="empty">Actions you record show up here. Tap one to delete it.</span>}</div>
+            onClick={ev => { if (confirm === e.id) { setConfirm(null); if (ev.target.closest('.del')) remove(e.id, 'Deleted'); } else setConfirm(e.id); }}>
+            {confirm === e.id ? <><span className="del">Delete</span><b>{P(e.pid).name} {A[e.a].label}</b></> : <><b>{P(e.pid).name}</b>{A[e.a].label}</>}</button>))
+          : <span className="empty">Actions you record show up here. Tap one, then Delete, to remove it.</span>}</div>
       </div>
     </div>
   );
