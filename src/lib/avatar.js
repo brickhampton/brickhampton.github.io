@@ -30,7 +30,7 @@ export const OPTS = {
   weight: ['Average', 'Broad', 'Heavy'],
   muscle: ['Toned', 'Athletic', 'Muscular'],
   style: ['Short', 'Buzz', 'Bald', 'Fringe', 'Swept', 'Curtains', 'Messy', 'Two-block', 'Spiky', 'Mohawk', 'Afro', 'Bun', 'Long', 'Cornrows',
-    'Middle part', 'Bed hair', 'Comma', 'Side part', 'Bowl', 'Wolf cut', 'Short curtains', 'Short middle part', 'Tidy bed hair', 'Soft messy'],
+    'Middle part', 'Bed hair', 'Comma', 'Side part', 'Bowl', 'Wolf cut', 'Down perm', 'Soft messy', 'Short messy'],
   eyes: ['Dots', 'Big', 'Shine', 'Small', 'Happy', 'Sleepy'],
   eyeY: ['Default', 'Higher', 'Lower'],
   brows: ['None', 'Thin', 'Thick', 'Angled', 'Raised'],
@@ -41,7 +41,7 @@ export const OPTS = {
 };
 // What the builder offers, in order. Parts left out (moustache, goatee, shades, sport glasses) still draw for old looks.
 export const CHOICES = {
-  style: [0, 14, 21, 5, 20, 15, 22, 7, 16, 17, 18, 19, 3, 4, 6, 23, 8, 1, 2, 9, 10, 11, 12, 13],
+  style: [0, 14, 5, 20, 15, 7, 16, 17, 18, 19, 3, 4, 6, 22, 21, 8, 1, 2, 9, 10, 11, 12, 13],
   beard: [0, 1, 4, 5], glasses: [0, 1, 2, 5], height: [4, 1, 0, 2, 3, 5],
 };
 const NUMS = ['hairFlip', 'wristFlip', 'sleeveFlip', 'height', 'weight', 'muscle', 'style', 'eyes', 'eyeY', 'brows', 'beard', 'glasses', 'socks', 'shoeType'];
@@ -120,10 +120,10 @@ const HAIR = [
   [[-3, 0, 'HHH'], [-2, -1, 'HHHH'], [-1, 0, 'DD'], ...TOP, [3, 0, 'HHD......H'], [4, 0, 'HD'], [5, 0, 'H']],
   [[-1, 2, 'HHHHHH'], [0, 1, 'HHHHHHHH'], [1, 0, 'HHHHHHHHHH'], [2, -1, 'HHHHHHHHHHH'], [3, -1, 'HHHH....HHH'], [4, -1, 'HHH.....HD'], [5, -1, 'HHH'], [6, -1, 'HHH'], [7, -1, 'HHH'], [8, -1, 'HHD'], [9, -1, 'HD'], [10, -1, 'HD'], [11, -1, 'D']],
   [[0, 2, 'HHHHHH'], [1, 1, 'BBBBBBBB'], [2, 0, 'HHHHHHHHHH'], [3, 0, 'BB.......B']],
-  // Middle part: full, parted in the middle, falling to the cheeks at the sides
-  [[-2, 2, 'HHHHHH'], [-1, 0, 'HHHHHHHHHH'], [0, -1, 'HHHHHHHHHHHH'], [1, -1, 'HHHHHHDHHHHH'], [2, -1, 'HHHHHHD.DHHH'], [3, -1, 'HHHHHD...DHH'], [4, -1, 'HHHHD.....DH'], [5, -1, 'HHHD.......H'], [6, -1, 'HHH'], [7, -1, 'HHH'], [8, -1, 'HD'], [9, -1, 'D']],
+  // Middle part: full, parted in the middle, falling to just past the cheek on the long side
+  [[-2, 2, 'HHHHHH'], [-1, 0, 'HHHHHHHHHH'], [0, -1, 'HHHHHHHHHHHH'], [1, -1, 'HHHHHHDHHHHH'], [2, -1, 'HHHHHHD.DHHH'], [3, -1, 'HHHHHD...DHH'], [4, -1, 'HHHHD.....DH'], [5, -1, 'HHHD.......H'], [6, -1, 'HHD'], [7, -1, 'D']],
   // Bed hair: medium length, tufts every which way
-  [[-3, 2, 'H...H'], [-2, 1, 'HH.HHH.H'], [-1, 0, 'HHHHHHHHHH'], [0, -1, 'HHHHHHHHHHHH'], [1, -2, 'HHHHHHHHHHHHH'], [2, -2, 'HHHHHHHHHHHHH'], [3, -1, 'HHHHH.HH.HHH'], [4, -1, 'HHH.H...H.H'], [5, -2, 'HHH.......H'], [6, -1, 'HH'], [7, -2, 'H.H']],
+  [[-3, 2, 'H...H'], [-2, 1, 'HH.HHH.H'], [-1, 0, 'HHHHHHHHHH'], [0, -1, 'HHHHHHHHHHHH'], [1, -2, 'HHHHHHHHHHHHH'], [2, -2, 'HHHHHHHHHHHHH'], [3, -1, 'HHHHH.HH.HHH'], [4, -1, 'HHH.H.....H'], [5, -2, 'HHH'], [6, -1, 'HH'], [7, -2, 'H.H']],
   // Comma: short sides, the fringe swept down and curled under at the front
   [[-1, 2, 'HHHHHH'], [0, 1, 'HHHHHHHH'], [1, 0, 'BHHHHHHHHHH'], [2, 0, 'BBHHHHHHHHH'], [3, 0, 'BB....HHHHH'], [4, 0, 'B......HHH'], [5, 0, 'B.....HH.H']],
   // Side part: parted on the back side, combed over with a little lift at the front
@@ -132,14 +132,12 @@ const HAIR = [
   [[-2, 2, 'HHHHHH'], [-1, 1, 'HHHHHHHH'], [0, 0, 'HHHHHHHHHH'], [1, -1, 'HHHHHHHHHHHH'], [2, -1, 'HHHHHHHHHHHH'], [3, -1, 'HHHHHHHHHHHH'], [4, -1, 'HHHHHHHHHHHD'], [5, -1, 'HHD'], [6, -1, 'HD']],
   // Wolf cut: shaggy layers, longer and choppy at the back
   [[-2, 1, 'H.HHHH.H'], [-1, 0, 'HHHHHHHHHH'], [0, -1, 'HHHHHHHHHHHH'], [1, -2, 'HHHHHHHHHHHHH'], [2, -2, 'HHHHHHHHHHHHH'], [3, -2, 'HHHHHH.HH.HHH'], [4, -2, 'HHHH.H.....H'], [5, -2, 'HHH'], [6, -2, 'HHH'], [7, -2, 'HH'], [8, -2, 'H.H'], [9, -1, 'H']],
-  // Short curtains: curtains with the long (back) side cut two rows shorter
+  // Down perm: curtains with the long (back) side cut two rows shorter
   [[-1, 2, 'HHHHHH'], [0, 1, 'HHHHHHHH'], [1, 0, 'HHHHHHDHHH'], [2, -1, 'HHHHHHD.DHHH'], [3, -1, 'HHHHHD...DHH'], [4, -1, 'HHHD.....DH'], [5, -1, 'HD']],
-  // Short middle part: the middle part with the long side stopping two rows higher
-  [[-2, 2, 'HHHHHH'], [-1, 0, 'HHHHHHHHHH'], [0, -1, 'HHHHHHHHHHHH'], [1, -1, 'HHHHHHDHHHHH'], [2, -1, 'HHHHHHD.DHHH'], [3, -1, 'HHHHHD...DHH'], [4, -1, 'HHHHD.....DH'], [5, -1, 'HHHD.......H'], [6, -1, 'HHD'], [7, -1, 'D']],
-  // Tidy bed hair: bed hair without the two stray pixels on the forehead
-  [[-3, 2, 'H...H'], [-2, 1, 'HH.HHH.H'], [-1, 0, 'HHHHHHHHHH'], [0, -1, 'HHHHHHHHHHHH'], [1, -2, 'HHHHHHHHHHHHH'], [2, -2, 'HHHHHHHHHHHHH'], [3, -1, 'HHHHH.HH.HHH'], [4, -1, 'HHH.H.....H'], [5, -2, 'HHH'], [6, -1, 'HH'], [7, -2, 'H.H']],
   // Soft messy: messy with the spikes on top flattened into a low, uneven crown
   [[-1, 2, 'H.HHHH'], [0, 0, 'HHHHHHHHHH'], [1, -1, 'HHHHHHHHHHH'], [2, -1, 'HHHHHHHHHHH'], [3, 0, 'HHH.HH.HHH'], [4, 0, 'HH...H...H'], [5, 0, 'H']],
+  // Short messy: messy with shorter spikes on top
+  [[-1, 1, 'H.HH.H.H'], [0, 0, 'HHHHHHHHHH'], [1, -1, 'HHHHHHHHHHH'], [2, -1, 'HHHHHHHHHHH'], [3, 0, 'HHH.HH.HHH'], [4, 0, 'HH...H...H'], [5, 0, 'H']],
 ];
 // Very tall has an extra pixel of jersey; Shandy adds a pixel of leg on top.
 const TALL = [1, 0, 2, 4, -1, 5], EYE_ROW = [6, 5, 7];
