@@ -136,8 +136,8 @@ const HAIR = [
   [[-1, 2, 'HHHHHH'], [0, 1, 'HHHHHHHH'], [1, 0, 'HHHHHHDHHH'], [2, -1, 'HHHHHHD.DHHH'], [3, -1, 'HHHHHD...DHH'], [4, -1, 'HHHD.....DH'], [5, -1, 'HD']],
   // Soft messy: messy with the spikes on top flattened into a low, uneven crown
   [[-1, 2, 'H.HHHH'], [0, 0, 'HHHHHHHHHH'], [1, -1, 'HHHHHHHHHHH'], [2, -1, 'HHHHHHHHHHH'], [3, 0, 'HHH.HH.HHH'], [4, 0, 'HH...H...H'], [5, 0, 'H']],
-  // Short messy: messy with shorter spikes on top
-  [[-1, 1, 'H.HH.H.H'], [0, 0, 'HHHHHHHHHH'], [1, -1, 'HHHHHHHHHHH'], [2, -1, 'HHHHHHHHHHH'], [3, 0, 'HHH.HH.HHH'], [4, 0, 'HH...H...H'], [5, 0, 'H']],
+  // Short messy: the messy outline with the top spikes cut down to one small tip
+  [[-2, 4, 'H'], [-1, 1, 'HH.HHH.H'], [0, 0, 'HHHHHHHHHH'], [1, -1, 'HHHHHHHHHHH'], [2, -1, 'HHHHHHHHHHH'], [3, 0, 'HHH.HH.HHH'], [4, 0, 'HH...H...H'], [5, 0, 'H']],
 ];
 // Very tall has an extra pixel of jersey; Shandy adds a pixel of leg on top.
 const TALL = [1, 0, 2, 4, -1, 5], EYE_ROW = [6, 5, 7];
