@@ -9,9 +9,11 @@ import { Chart, SeasonPick, EmptyState, setSort } from '../components/ui.jsx';
 const RCOLS = [['per', 'PER'], ['pts', 'PTS'], ['reb', 'REB'], ['ast', 'AST'], ['stl', 'STL'], ['blk', 'BLK'], ['to', 'TO'], ['fg', 'FG%'], ['m3', '3FG%'], ['ft', 'FT%'], ['ts', 'TS%'], ['gp', 'GP']];
 export const aggVal = (a, k) => k === 'ts' ? a.s.ts : k === 'fg' ? ratio(a.s.fgm, a.s.fga) : k === 'm3' ? ratio(a.s.m3, a.s.a3) : k === 'ft' ? ratio(a.s.ftm, a.s.fta) : k === 'gp' ? a.gp : a.pg(k);
 // Shooting columns: made and attempted keys, so Totals can show them as made-attempts (2-8).
-const SHOTS = { fg: ['fgm', 'fga'], m3: ['m3', 'a3'], ft: ['ftm', 'fta'] };
+// TS has no real "made" count, so it uses PTS / 2 over TSA, both rounded to whole numbers.
+const SHOTS = { fg: ['fgm', 'fga'], m3: ['m3', 'a3'], ft: ['ftm', 'fta'], ts: ['tsm', 'tsa'] };
+const shot = (a, k, i) => k === 'ts' ? Math.round(i ? a.s.tsa : a.s.pts / 2) : a.s[SHOTS[k][i]];
 // Totals sort counting stats by their sums and shooting columns by shots made, like the box score.
-const totVal = (a, k) => k === 'ts' ? a.s.ts : k === 'gp' ? a.gp : SHOTS[k] ? a.s[SHOTS[k][0]] : a.s[k];
+const totVal = (a, k) => k === 'gp' ? a.gp : SHOTS[k] ? shot(a, k, 0) : a.s[k];
 
 function Rankings({ aggs, team, tot }) {
   const val = tot ? totVal : aggVal;
@@ -29,11 +31,12 @@ function Rankings({ aggs, team, tot }) {
       const rank = aggs.filter(x => val(x, 'per') > v).length;
       return <td key={k} className="c"><span className={`per ${rank === 0 ? 'p-great' : rank <= 3 ? 'p-good' : 'p-mid'}`}>{perTxt(v, !tot)}</span></td>;
     }
-    if (SHOTS[k] || k === 'ts') {
+    if (SHOTS[k]) {
       const pct = aggVal(a, k);
-      if (!tot || k === 'ts') return <td key={k} className={tier(k, pct) || undefined}>{pctTxt(pct)}</td>;
-      const [m, at] = SHOTS[k];
-      return <td key={k} className={tier(k, pct, a.s[at]) || undefined}>{a.s[m]}-{a.s[at]}</td>;
+      // Averages show attempts a game under the %, e.g. 3.6 A.
+      if (!tot) return <td key={k} className={tier(k, pct) || undefined}>{pctTxt(pct)}<span className="sp att">{f1(a.pg(SHOTS[k][1]))} A</span></td>;
+      const at = shot(a, k, 1);
+      return <td key={k} className={tier(k, pct, at) || undefined}>{shot(a, k, 0)}-{at}<span className="sp">{pctTxt(pct)}</span></td>;
     }
     const all = aggs.map(x => val(x, k)), top = !isTeam && (k === 'to' ? v === Math.min(...all) : v === Math.max(...all));
     return <td key={k}><span className={`n${top && aggs.length > 1 ? ' hi' : ''}`}>{tot ? v : f1(v)}</span></td>;
