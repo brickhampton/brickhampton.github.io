@@ -11,8 +11,6 @@ export const aggVal = (a, k) => k === 'ts' ? a.s.ts : k === 'fg' ? ratio(a.s.fgm
 // Shooting columns: made and attempted keys, so Totals can show them as made-attempts (2-8).
 // TS has no real "made" count, so it uses PTS / 2 over TSA, both rounded to whole numbers.
 const SHOTS = { fg: ['fgm', 'fga'], m3: ['m3', 'a3'], ft: ['ftm', 'fta'], ts: ['tsm', 'tsa'] };
-// Averages show attempts a game under the %, e.g. 3.6 FGA (the space keeps 2.3 3FGA readable).
-const ATT = { fg: 'FGA', m3: '3FGA', ft: 'FTA', ts: 'TSA' };
 const shot = (a, k, i) => k === 'ts' ? Math.round(i ? a.s.tsa : a.s.pts / 2) : a.s[SHOTS[k][i]];
 // Totals sort counting stats by their sums and shooting columns by shots made, like the box score.
 const totVal = (a, k) => k === 'gp' ? a.gp : SHOTS[k] ? shot(a, k, 0) : a.s[k];
@@ -35,7 +33,8 @@ function Rankings({ aggs, team, tot }) {
     }
     if (SHOTS[k]) {
       const pct = aggVal(a, k);
-      if (!tot) return <td key={k} className={tier(k, pct) || undefined}>{pctTxt(pct)}<span className="sp att">{f1(a.pg(SHOTS[k][1]))} {ATT[k]}</span></td>;
+      // Averages show attempts a game under the %, e.g. 3.6 A.
+      if (!tot) return <td key={k} className={tier(k, pct) || undefined}>{pctTxt(pct)}<span className="sp att">{f1(a.pg(SHOTS[k][1]))} A</span></td>;
       const at = shot(a, k, 1);
       return <td key={k} className={tier(k, pct, at) || undefined}>{shot(a, k, 0)}-{at}<span className="sp">{pctTxt(pct)}</span></td>;
     }
