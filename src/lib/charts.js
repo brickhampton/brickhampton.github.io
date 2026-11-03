@@ -15,7 +15,7 @@ export const GT_MORE = { blk: 'BLK', oreb: 'OREB', dreb: 'DREB', per: 'PER', fgm
 const GT_PCT = new Set(['ts', 'fg', 'p2', 'p3', 'ft']);
 const splitSeason = list => list.every(g => Object.values(g.rows).every(r => r.oreb !== undefined));
 export const moreFor = list => Object.entries(GT_MORE).filter(([k]) => (k !== 'oreb' && k !== 'dreb') || splitSeason(list));
-export const STATS = { per: 'PER', pts: 'Points', reb: 'Rebounds', ast: 'Assists', stl: 'Steals', ts: 'TS%' };
+export const STATS = { per: 'PER', pts: 'Points', reb: 'Rebounds', ast: 'Assists', stl: 'Steals', to: 'Turnovers', ts: 'TS%', p2: '2FG%', p3: '3FG%', ft: 'FT%' };
 export const P_STATS = { per: 'PER', pts: 'PTS', reb: 'REB', ast: 'AST', stl: 'STL', blk: 'BLK', to: 'TO', ts: 'TS%' };
 // Everything else a player's box score line records, behind the More chip.
 export const P_MORE = Object.fromEntries(Object.entries(GT_MORE).filter(([k]) => !['blk', 'oreb', 'dreb', 'per'].includes(k)));
@@ -118,16 +118,18 @@ export function drawTrend(wrap, games, { k, ids, season, single: one = false }) 
   let xs, getV; const isPct = GT_PCT.has(k);
   if (season === 'ALL') {
     xs = seasonList().reverse().map(s => ({ label: s.code, games: games.filter(g => g.season === s.code) })).filter(x => x.games.length);
-    getV = (x, id) => { const a = playerAgg(x.games, id); return a ? (isPct ? lineVal(a.s, k) ?? 0 : a.pg(k)) : null; };
+    getV = (x, id) => { const a = playerAgg(x.games, id); return a ? (isPct ? lineVal(a.s, k) ?? NaN : a.pg(k)) : null; };
   } else {
     xs = games.filter(g => g.season === season).map(g => ({ label: 'G' + g.no, g }));
-    getV = (x, id) => { const c = x.g.rows[id]; if (!c) return null; return lineVal(calc(c), k) ?? 0; };
+    getV = (x, id) => { const c = x.g.rows[id]; if (!c) return null; return lineVal(calc(c), k) ?? (isPct ? NaN : 0); };
   }
   // A single player's all-time view starts at their first season.
   if (one && season === 'ALL') xs = xs.filter(x => getV(x, ids[0]) !== null);
   if (!ids.length) { wrap.innerHTML = '<p class="hint">Pick at least one player above.</p>'; return; }
+  // null = did not play; NaN = played but took no shots of this kind (shooting % only).
   const series = ids.map(id => ({ id, vals: xs.map(x => getV(x, id)) }));
-  const all = series.flatMap(s => s.vals).filter(v => v !== null);
+  const real = v => v !== null && !Number.isNaN(v);
+  const all = series.flatMap(s => s.vals).filter(real);
   const W = Math.max(320, Math.round(wrap.clientWidth) || 800), narrow = W < 560, H = narrow ? 240 : 280, ml = narrow ? 24 : 36, mr = one ? 14 : narrow ? 52 : 70, mt = 14, mb = 30;
   const lo = Math.min(0, ...all); let hi = isPct ? 1 : niceMax(Math.max(...all, 1));
   const loN = lo < 0 ? -niceMax(-lo) : 0;
@@ -146,22 +148,24 @@ export function drawTrend(wrap, games, { k, ids, season, single: one = false }) 
   const ends = [];
   series.forEach(s => {
     const c = one ? statCol(k, SLOT_COL[0]) : SLOT_COL[ids.indexOf(s.id)];
-    if (s.vals.every(v => v === null)) return;
+    if (!s.vals.some(real)) return;
     // DNP counts as zero so the whole line is one smooth curve. Stretches touching a DNP are faint and dashed.
-    const pts = s.vals.map((v, i) => [x(i), y(v ?? 0)]), cs = smoothSegs(pts);
-    const solidAt = i => s.vals[i] !== null && s.vals[i + 1] !== null;
+    // A game with no attempts (shooting %) has no point: the line bridges it, faint and dashed.
+    const on = s.vals.map((v, i) => Number.isNaN(v) ? -1 : i).filter(i => i >= 0);
+    const pts = on.map(i => [x(i), y(s.vals[i] ?? 0)]), cs = smoothSegs(pts);
+    const solidAt = j => on[j + 1] === on[j] + 1 && s.vals[on[j]] !== null && s.vals[on[j + 1]] !== null;
     let solid = '', dashed = '';
-    cs.forEach((cmd, i) => { const piece = `M${pts[i][0].toFixed(1)} ${pts[i][1].toFixed(1)}${cmd}`; if (solidAt(i)) solid += piece; else dashed += piece; });
+    cs.forEach((cmd, j) => { const piece = `M${pts[j][0].toFixed(1)} ${pts[j][1].toFixed(1)}${cmd}`; if (solidAt(j)) solid += piece; else dashed += piece; });
     if (dashed) svg += `<path d="${dashed}" fill="none" stroke="${c}" stroke-width="1.6" stroke-dasharray="3 5" stroke-linecap="round" opacity=".45"/>`;
     if (one) {
-      const real = s.vals.filter(v => v !== null), avg = real.reduce((a, v) => a + v, 0) / real.length, full = smooth(pts);
+      const rv = s.vals.filter(real), avg = rv.reduce((a, v) => a + v, 0) / rv.length, full = smooth(pts);
       svg += `<defs><linearGradient id="parea" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="${c}" stop-opacity=".28"/><stop offset="1" stop-color="${c}" stop-opacity="0"/></linearGradient></defs>`;
       svg += `<path d="${full} L${pts[pts.length - 1][0].toFixed(1)} ${y(Math.max(loN, 0))} L${pts[0][0].toFixed(1)} ${y(Math.max(loN, 0))}Z" fill="url(#parea)" class="parea"/>`;
       svg += `<line x1="${ml}" x2="${W - mr}" y1="${y(avg)}" y2="${y(avg)}" stroke="#b8b3b0" stroke-dasharray="4 4" opacity=".6"/><rect x="${ml + 4}" y="${y(avg) - 21}" width="${(String(fmt(avg)).length + 4) * 7 + 12}" height="17" rx="8.5" fill="#272321"/><text x="${ml + 10}" y="${y(avg) - 9}" font-size="11" fill="#eeeeee" font-family="Geist Mono, monospace">AVG ${fmt(avg)}</text>`;
     }
     if (solid) svg += `<path d="${solid}" fill="none" stroke="${c}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" class="tline"/>`;
-    s.vals.forEach((v, i) => { if (v !== null) svg += `<circle cx="${x(i)}" cy="${y(v)}" r="${one ? 4.5 : 4}" fill="${c}" stroke="#1d1a18" stroke-width="2"/>`; });
-    const li = s.vals.map((v, i) => v === null ? -1 : i).filter(i => i >= 0).pop();
+    s.vals.forEach((v, i) => { if (real(v)) svg += `<circle cx="${x(i)}" cy="${y(v)}" r="${one ? 4.5 : 4}" fill="${c}" stroke="#1d1a18" stroke-width="2"/>`; });
+    const li = s.vals.map((v, i) => real(v) ? i : -1).filter(i => i >= 0).pop();
     if (li !== undefined && !one) ends.push({ id: s.id, c, yy: y(s.vals[li]), xx: x(li) });
   });
   ends.sort((a, b) => a.yy - b.yy); const gap = narrow ? 13 : 14; for (let i = 1; i < ends.length; i++) if (ends[i].yy - ends[i - 1].yy < gap) ends[i].yy = ends[i - 1].yy + gap;
@@ -177,7 +181,7 @@ export function drawTrend(wrap, games, { k, ids, season, single: one = false }) 
     xh.setAttribute('x1', x(i)); xh.setAttribute('x2', x(i)); xh.setAttribute('opacity', 1);
     const opp = xs[i].g ? ` vs ${esc(xs[i].g.opp)}` : '';
     showTip(wrap, `<div class="tt">${xs[i].g ? 'Game ' + xs[i].g.no : xs[i].label}${opp}</div>` +
-      series.map(s => `<div class="tr"><span><i style="background:${one ? statCol(k, SLOT_COL[0]) : SLOT_COL[ids.indexOf(s.id)]}"></i>${one ? ({ ...P_STATS, ...P_MORE })[k] || k : esc(P(s.id).name)}</span><b class="num">${s.vals[i] === null ? 'DNP' : fmt(s.vals[i])}</b></div>`).join(''),
+      series.map(s => `<div class="tr"><span><i style="background:${one ? statCol(k, SLOT_COL[0]) : SLOT_COL[ids.indexOf(s.id)]}"></i>${one ? ({ ...P_STATS, ...P_MORE })[k] || k : esc(P(s.id).name)}</span><b class="num">${s.vals[i] === null ? 'DNP' : Number.isNaN(s.vals[i]) ? 'No attempts' : fmt(s.vals[i])}</b></div>`).join(''),
       x(i) * r.width / W, (ev.clientY - r.top));
   };
   const hit = wrap.querySelector('.hit');
