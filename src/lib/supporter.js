@@ -91,7 +91,7 @@ function draw(frame, look) {
   if (frame === 'snap') {
     r(16, ty, 2, 2, SKIN); r(19, hy + 9, 2, ty - hy - 8, SKIN); r(20, hy + 10, 1, ty - hy - 9, SKIN2);
     if (tee) r(16, ty, 2, 2, TEE);
-    film(r, 13, hy + 3); r(21, hy + 6, 1, 3, SKIN);
+    film(r, 13, hy + 4); r(21, hy + 7, 1, 3, SKIN);
   } else {
     [[1, 0, 1], [2, 0, 2], [3, 0, 2]].forEach(([j, dx, w]) => r(16 + dx, ty + j, w, 1, SKIN));
     if (tee) { r(16, ty + 1, 1, 1, TEE); r(16, ty + 2, 2, 1, TEE); }
@@ -145,7 +145,7 @@ export function supporter(frame = 'rest', raw) {
 
 // The camera flash for the 'snap' frame, from the top of the camera: a bright pixel star and a soft burst of light.
 export function supporterFlash() {
-  const x = 22.5, y = 8.5, px = (a, b, w, h, o = 1) => `<rect x="${a}" y="${b}" width="${w}" height="${h}" fill="#fff" opacity="${o}"/>`;
+  const x = 22.5, y = 9.5, px = (a, b, w, h, o = 1) => `<rect x="${a}" y="${b}" width="${w}" height="${h}" fill="#fff" opacity="${o}"/>`;
   return `<g class="sup-flash"><g transform="${TF}"><circle cx="${x}" cy="${y}" r="4.2" fill="#fff8d8" opacity=".3"/><circle cx="${x}" cy="${y}" r="2.6" fill="#fff" opacity=".5"/>`
     + `<g shape-rendering="crispEdges">${px(x - .5, y - 4.5, 1, 9)}${px(x - 4.5, y - .5, 9, 1)}${px(x - 1.5, y - 1.5, 3, 3)}${px(x - 3.5, y - 3.5, 1, 1, .7)}${px(x + 2.5, y - 3.5, 1, 1, .7)}${px(x - 3.5, y + 2.5, 1, 1, .7)}${px(x + 2.5, y + 2.5, 1, 1, .7)}</g></g></g>`;
 }
