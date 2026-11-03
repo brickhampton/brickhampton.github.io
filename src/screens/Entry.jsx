@@ -197,7 +197,7 @@ function makeStage() {
       '3M': [['swish', D + 460], ['made3', D + 580]], '3X': [['clank', D + 460], ['floor', D + 900]],
       'FM': [...ft, ['swishSoft', FT_D + 320], ['madeFt', FT_D + 440]], 'FX': [...ft, ['clank', FT_D + 320], ['floor', FT_D + 760]],
       'OR': [['clank', 280], ['hop', 380], ['grab', 560]], 'DR': [['clank', 0], ['grab', 300], ['pass', 400]],
-      'AS': [['pass', D], ['swish', D + 580], ['assist', D + 600]],
+      'AS': [['passWoosh', D], ['swish', D + 580], ['assist', D + 600]],
       'ST': [['roll', 60], ['roll', 190], ['roll', 315], ['steal', 380]], 'BK': [['block', 280]],
       'TO': [['dribble', D + 190], ['roll', D + 570], ['roll', D + 840], ['turnover', 300]],
     }[k] || [];
