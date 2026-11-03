@@ -212,18 +212,18 @@ function Admin() {
   return <>
     <div className="ghead"><div><h1 className="page">Settings</h1></div><span className="grow" />
       <span className="admin-on"><Shield />Admin mode on</span><button className="btn ghost sm" id="lock" onClick={lock}><Lock size={16} />Lock</button></div>
-    <p className="hint top">Admin mode locks itself after 15 minutes without a tap. To change a game's details or box score, open the game and tap <b>Edit game</b>, or use the pencil in Results</p>
+    <p className="hint top">Locks after 15 minutes idle. To edit a game, tap <b>Edit game</b> on it, or the pencil in Results</p>
     {err && <p className="ferr" id="a-err">{err}</p>}
     <SoundCard />
     <RebCard />
     <div className="adm-grid">
-      <div className="sec"><h3>Seasons</h3><p className="hint">New games go into the current season, and Games and Stats open on it</p>
+      <div className="sec"><h3>Seasons</h3><p className="hint">New games go here, and Games and Stats open on it</p>
         <div className="card alist" id="a-seasons">{seasons}
           <div className="arow"><button className="btn sm" id="a-add-season" onClick={() => edit('add_season', {})}>+ Add {nextSeasonCode()} ({seasonName(nextSeasonCode())})</button></div></div></div>
       <div className="sec"><h3>Change history</h3><p className="hint">Every Admin edit, newest first</p>
         <div className="card" id="a-hist">{h.length ? <ul className="hist">{h.map((x, i) => <li key={i}><span>{x.text}</span><em>{ago(x.at)}</em></li>)}</ul> : <div className="hempty">No changes yet.</div>}
           <div className="btnrow"><button className="btn ghost sm" id="a-undo" disabled={!h.length} onClick={() => edit('undo_last', {})}><UndoIc />Undo last change</button></div></div></div>
-      <div className="sec wide"><h3>Results</h3><p className="hint">Tap W, L or D for each game. The dash means unknown. Games nobody kept stats for can be added at the bottom</p>
+      <div className="sec wide"><h3>Results</h3><p className="hint">Tap W, L or D. Dash means unknown. Add no-stats games at the bottom</p>
         <div className="card"><SeasonPick id="a-res-chips" value={aRes} seasons={s.seasons} all={null} onPick={v => set({ aRes: v })} />
           <div className="alist" id="a-results">{rs.length ? rs.map(g => (
             <div className="arow rrow" key={g.id}><span className="g">Game {g.no}</span><span className="nm">vs {g.opp}<em>{fmtDate(g.date, { day: 'numeric', month: 'long' })}</em></span>
@@ -233,12 +233,12 @@ function Admin() {
               <button className="iconbtn sm" data-edit={g.id} aria-label={`Edit Game ${g.no}`} onClick={() => openSheet(<EditGame id={g.id} />, { wide: true })}><Pencil width="16" height="16" /></button></div>))
             : <div className="hempty">No {aRes} games yet.</div>}
             <div className="arow"><button className="btn sm" id="a-add-game" onClick={() => openSheet(<AddGame season={aRes} />, { wide: true })}>+ Add a game</button></div></div></div></div>
-      <div className="sec"><h3>Roster</h3><p className="hint">Starters show on Who played and in Stats. Subs only appear in the games they played. Tap an avatar to change it. Renaming a player to an existing player's name merges them</p>
+      <div className="sec"><h3>Roster</h3><p className="hint">Tap an avatar to change it. Renaming to an existing player merges them</p>
         <div className="card alist" id="a-roster"><div className="sub-h">Starters</div>{s.roster.map(p => prow(p, 'starter'))}
           <div className="sub-h">Subs</div>{(open.subs ? subs : subs.slice(0, 5)).map(p => prow(p, 'sub'))}
           {subs.length > 5 && <div className="arow amore"><MoreBtn data-amore="subs" open={open.subs} n={subs.length} noun="subs" onClick={() => setOpen(o => ({ ...o, subs: !o.subs }))} /></div>}
           <div className="arow"><button className="btn sm" id="a-add-player" onClick={() => openSheet(<PlayerSheet id={null} />)}>+ Add player</button></div></div></div>
-      <div className="sec"><h3>Opponents</h3><p className="hint">This season's teams come first, in the order they appear when you record a game. Drag to reorder, or drag between sections to add or remove a team from this season. Renaming to an existing team merges them</p>
+      <div className="sec"><h3>Opponents</h3><p className="hint">Drag to reorder, or between sections to add or remove from this season. Renaming to an existing team merges them</p>
         <div className="card alist" id="a-opps"><div className="sub-h">This season ({s.current})</div>
           <div className="dlist" id="a-opps-cur" ref={cur}>{curTeams.map(orow)}{!curTeams.length && <div className="hempty">No teams in {s.current} yet. Drag one up here or add a team.</div>}</div>
           <div className="sub-h">Other teams</div>
@@ -272,7 +272,7 @@ function SoundCard() {
   const pick = v => { if (v === on) return; setSound(v); setOn(v); if (v) sfx('select'); };
   return <div className="card admin-lock sound-card"><div className="lock-ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
     <path d="M11 5 6 9H3v6h3l5 4z" />{on ? <path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13" /> : <path d="m16 9 5 6m0-6-5 6" />}</svg></div>
-    <div><h3>Sound</h3><p className="hint">Sound effects for taps, players and recording, on this device. The silent switch on a phone or iPad mutes them too</p></div>
+    <div><h3>Sound</h3><p className="hint">Sound effects for taps, players, and recording, on this device</p></div>
     <div className={`tog${on ? '' : ' r'}`} id="sound" role="group" aria-label="Sound on or off">
       <button data-s="on" aria-pressed={on} onClick={() => pick(true)}>On</button>
       <button data-s="off" aria-pressed={!on} onClick={() => pick(false)}>Off</button></div></div>;
@@ -284,7 +284,7 @@ function RebCard() {
   const pick = v => { if (v === on) return; setRebSplit(v); setOn(v); sfx('select'); };
   return <div className="card admin-lock sound-card"><div className="lock-ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
     <path d="M12 19V5M5 12l7-7 7 7" /></svg></div>
-    <div><h3>Rebounds in box scores</h3><p className="hint">Split shows offensive and defensive rebounds (OREB and DREB) instead of REB, in games that recorded them, on this device</p></div>
+    <div><h3>Rebounds in box scores</h3><p className="hint">Show total REB or OREB/DREB split, in games that recorded them, on this device</p></div>
     <div className={`tog${on ? ' r' : ''}`} id="reb-split" role="group" aria-label="Rebounds as total or split">
       <button data-s="total" aria-pressed={!on} onClick={() => pick(false)}>Total</button>
       <button data-s="split" aria-pressed={on} onClick={() => pick(true)}>Split</button></div></div>;
@@ -315,7 +315,7 @@ export function Settings() {
     <SoundCard />
     <RebCard />
     <div className="card admin-lock"><div className="lock-ic"><Lock /></div>
-      <div><h3>Admin mode</h3><p className="hint">Record games, edit past games and box scores, set results, add seasons, and manage the roster and opponents</p></div>
+      <div><h3>Admin mode</h3><p className="hint">Record games, edit past games, players and opponents</p></div>
       <button className="btn primary" id="unlock" onClick={() => openSheet(<PinSheet />)}>Unlock with PIN</button></div>
   </>;
   return <Admin />;
