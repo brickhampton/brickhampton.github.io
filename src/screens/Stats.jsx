@@ -35,7 +35,7 @@ function Rankings({ aggs, team, tot }) {
       const pct = aggVal(a, k);
       if (!tot) return <td key={k} className={tier(k, pct) || undefined}>{pctTxt(pct)}</td>;
       const at = shot(a, k, 1);
-      return <td key={k} className={tier(k, pct, at) || undefined}>{shot(a, k, 0)}-{at}</td>;
+      return <td key={k} className={tier(k, pct, at) || undefined}>{shot(a, k, 0)}-{at}<span className="sp">{pctTxt(pct)}</span></td>;
     }
     const all = aggs.map(x => val(x, k)), top = !isTeam && (k === 'to' ? v === Math.min(...all) : v === Math.max(...all));
     return <td key={k}><span className={`n${top && aggs.length > 1 ? ' hi' : ''}`}>{tot ? v : f1(v)}</span></td>;
