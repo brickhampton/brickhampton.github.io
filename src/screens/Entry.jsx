@@ -29,6 +29,7 @@ const BOUNCE = 190, FT_D = 60 + 2 * BOUNCE + 60;
 const THREE_SPOT = [88, 138];
 const TWO = [[180, 352], [420, 520]];
 const between = ([a, b]) => Math.round(a + Math.random() * (b - a));
+let blockN = 0; // blocks alternate: one hand, then both hands, then one hand...
 const twoSpot = () => between(TWO[Math.random() < .5 ? 0 : 1]);
 // The ball and hoop are drawn in the same flat pixel style as the players (3 screen units to a pixel).
 const PX = 3, BALL_D = BALL.map(([o, w], j) => `M${o} ${j}h${w}v1h${-w}z`).join('');
@@ -195,7 +196,7 @@ function makeStage() {
       '2M': [['swish', D + d2], ['made2', D + d2 + 120]], '2X': [['clank', D + d2]],
       '3M': [['swish', D + 460], ['made3', D + 580]], '3X': [['clank', D + 460], ['floor', D + 900]],
       'FM': [...ft, ['swishSoft', FT_D + 320], ['madeFt', FT_D + 440]], 'FX': [...ft, ['clank', FT_D + 320], ['floor', FT_D + 760]],
-      'OR': [['clank', 0], ['grab', 300], ['hop', 380]], 'DR': [['clank', 0], ['grab', 300], ['pass', 400]],
+      'OR': [['clank', 280], ['hop', 380], ['grab', 560]], 'DR': [['clank', 0], ['grab', 300], ['pass', 400]],
       'AS': [['pass', D], ['swish', D + 580], ['assist', D + 600]],
       'ST': [['roll', 60], ['roll', 190], ['roll', 315], ['steal', 380]], 'BK': [['block', 280]],
       'TO': [['dribble', D + 190], ['roll', D + 570], ['roll', D + 840], ['turnover', 300]],
@@ -210,8 +211,9 @@ function makeStage() {
     const h2 = Math.round(50 + (RX - x) * .14), d2 = Math.round(260 + (RX - x) * .45);
     sounds(k, d2);
     if (reduced) return;
+    const twoHand = k === 'BK' && blockN++ % 2 === 1;
     const pose = { '2M': ['shoot', 0, D + d2 + 20], '2X': ['shoot', 0, D + d2 + 20], '3M': ['shoot', 0, D + 480], '3X': ['shoot', 0, D + 480], 'FM': ['shoot', FT_D, 340], 'FX': ['shoot', FT_D, 340],
-      'AS': ['pass2', D - 40, 520], 'ST': ['pass', 120, 260], 'BK': ['block1', 0, 860, true] }[k];
+      'AS': ['pass2', D - 40, 520], 'ST': ['pass', 120, 260], 'BK': [twoHand ? 'block' : 'block1', 0, 860, true] }[k];
     if (k === 'FM' || k === 'FX') { actorPose('dribble', 0, FT_D + 40); dribbles(60); }
     if (pose) actorPose(...pose);
     const cheers = { '2M': [D + d2, 'most'], '3M': [D + 460, 'big'], 'FM': [FT_D + 320, 'clap'], 'AS': [D + 580, 'hype'], 'ST': [420, 'hype'], 'BK': [280, 'hype'], 'OR': [300, 'clap'], 'DR': [300, 'clap'] }[k];
@@ -227,10 +229,12 @@ function makeStage() {
         const b = ball(), sel0 = sel, mine = () => actor?.dataset.id === sel0;
         placeActor(sel, true, 370); placeActor(sel, false, 455, 300); strides(300);
         setTimeout(() => { if (mine()) { actorPose('catch', 0, 1300); leap(0, 'hop'); placeActor(sel0, false, 490, 800); } }, 300);
-        setTimeout(shake, 300);
-        // Off the rim into both hands at the top of the jump; the ball is drawn into the figure so it comes down with them.
+        setTimeout(shake, 280);
+        // The miss comes in from the left and clanks off the front of the rim, then pops up high and drops into both
+        // hands at the top of the jump; the ball is then drawn into the figure so it comes down with them.
         const hold = () => holdBall(actorX + 2, HAND_Y - 24);
-        then(fly(b, arc(RX - 14, RY, 472, HAND_Y - 46, 24, 10, -160), 300, 'ease-in', 320), () => {
+        b.style.visibility = 'hidden'; setTimeout(() => { b.style.visibility = ''; }, 140);
+        then(fly(b, [...arc(RX - 60, RY - 6, RX - 14, RY, 8, 4, 120).slice(0, -1), ...arc(RX - 14, RY, 472, HAND_Y - 46, 22, 8, -200, 120)], 420, 'linear', 140), () => {
           b.remove(); if (!mine()) return; hold();
           actorPose('catch', 520, 250, true, hold); actorPose('catch', 770, 380, false, hold);
         });
@@ -271,10 +275,11 @@ function makeStage() {
         setTimeout(() => { if (actor?.dataset.id === sel0) placeActor(sel0, false, x); }, 1200);
         setTimeout(() => pop('Cookiesss', x, 40, '#eeeeee', 18), 400); break;
       }
-      case 'BK': { // an opponent's shot goes up and the player swats it
+      case 'BK': { // an opponent's shot goes up and the player swats it, one-handed and two-handed in turn
         // The player turns to face the shooter (on the left), that hand goes up and the player gets well off the floor; the ball meets it at the top of the jump.
         // They take off a little to the right of their spot and drift left toward the shooter through the jump.
-        const b = ball(), top = HAND_Y - 66, hx = SPOT.BK + 2; leap(0);
+        // On a two-handed block the ball meets the middle of both hands instead of the one raised hand.
+        const b = ball(), top = HAND_Y - 66, hx = SPOT.BK + (twoHand ? 15 : 2); leap(0);
         placeActor(sel, true, SPOT.BK + 30); placeActor(sel, false, SPOT.BK - 15, 800);
         then(fly(b, arc(300, FLOOR - 30, hx, top, 50, 8, 180), 300, 'ease-out'), () => {
           burst(hx, top, '#eeeeee');
