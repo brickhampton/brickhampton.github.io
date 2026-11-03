@@ -66,7 +66,8 @@ function noise({ t = 0, d = 0.2, f = 2000, to, q = 1, v = 0.3, kind = 'bandpass'
 
 const N = { G4: 392, A4: 440, Bb4: 466.16, C5: 523.25, D5: 587.33, E5: 659.25, G5: 783.99, A5: 880, B5: 987.77, C6: 1046.5, E6: 1318.5 };
 const arp = (notes, t = 0, step = 0.07, d = 0.14, v = 0.28) => notes.forEach((f, i) => tone({ f, t: t + i * step, d, v }));
-const swish = (t = 0, v = 0.04) => noise({ t, d: 0.32, f: 7000, to: 1500, q: 0.8, v, swell: true });
+// Pitched low (2000 -> 450 Hz), Geoff picked option C from the preview.
+const swish = (t = 0, v = 0.04) => noise({ t, d: 0.32, f: 2000, to: 450, q: 0.8, v, swell: true });
 const thud = (t = 0, v = 0.5) => { tone({ f: 150, to: 55, t, d: 0.14, v }); noise({ t, d: 0.05, f: 400, v: v * 0.4, kind: 'lowpass' }); };
 const clank = (t = 0) => { [523, 741, 1109, 1567].forEach((f, i) => tone({ f, t, d: 0.28 - i * 0.04, type: 'triangle', v: 0.12 })); noise({ t, d: 0.06, f: 3000, v: 0.2 }); };
 
