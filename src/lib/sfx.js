@@ -64,6 +64,21 @@ function noise({ t = 0, d = 0.2, f = 2000, to, q = 1, v = 0.3, kind = 'bandpass'
   s.start(now, Math.random()); s.stop(now + d + 0.05);
 }
 
+// A woosh: noise whose filter sweeps up to a peak and back down while the level swells and fades.
+function woosh({ t = 0, d = 0.35, f0, f1, f2, q = 1, v = 0.3, pk = 0.45 }) {
+  if (!nbuf) noise({ d: 0.01, v: 0.0001 });
+  const now = ctx.currentTime + t, s = ctx.createBufferSource(), fl = ctx.createBiquadFilter(), g = ctx.createGain();
+  s.buffer = nbuf; fl.type = 'bandpass'; fl.Q.value = q;
+  fl.frequency.setValueAtTime(f0, now);
+  fl.frequency.exponentialRampToValueAtTime(f1, now + d * pk);
+  fl.frequency.exponentialRampToValueAtTime(f2, now + d);
+  g.gain.setValueAtTime(0.0001, now);
+  g.gain.exponentialRampToValueAtTime(v, now + d * pk);
+  g.gain.exponentialRampToValueAtTime(0.0001, now + d);
+  s.connect(fl); fl.connect(g); g.connect(out);
+  s.start(now, Math.random()); s.stop(now + d + 0.05);
+}
+
 const N = { G4: 392, A4: 440, Bb4: 466.16, C5: 523.25, D5: 587.33, E5: 659.25, G5: 783.99, A5: 880, B5: 987.77, C6: 1046.5, E6: 1318.5 };
 const arp = (notes, t = 0, step = 0.07, d = 0.14, v = 0.28) => notes.forEach((f, i) => tone({ f, t: t + i * step, d, v }));
 // Pitched low (2000 -> 450 Hz), Geoff picked option C from the preview.
@@ -103,9 +118,12 @@ const SOUNDS = {
   hop: () => tone({ f: 300, to: 620, d: 0.12, v: 0.2 }),
   grab: () => { thud(0, 0.4); tone({ f: N.A5, t: 0.08, d: 0.08, v: 0.15 }); },
   pass: () => noise({ d: 0.18, f: 900, to: 4000, q: 2, v: 0.25 }),
+  // The assist pass: a soft woosh (option 1 from the preview, at 75% of its level).
+  passWoosh: () => woosh({ d: 0.35, f0: 500, f1: 1500, f2: 600, v: 0.225 }),
   assist: () => { tone({ f: N.C6, d: 0.07, v: 0.16 }); tone({ f: N.E6, t: 0.06, d: 0.12, v: 0.16 }); },
   steal: () => { tone({ f: 400, to: 1800, d: 0.12, v: 0.22 }); noise({ d: 0.1, f: 2500, to: 6000, q: 2, v: 0.18 }); tone({ f: N.G5, t: 0.13, d: 0.1, v: 0.16 }); },
-  block: () => { noise({ d: 0.12, f: 1200, q: 0.7, v: 0.55 }); tone({ f: 180, to: 60, d: 0.22, v: 0.4 }); },
+  // Just the low thud: Geoff dropped the noisy smack.
+  block: () => tone({ f: 180, to: 60, d: 0.22, v: 0.4 }),
   turnover: () => { tone({ f: N.Bb4, d: 0.18, v: 0.2, type: 'triangle' }); tone({ f: N.A4, t: 0.2, d: 0.18, v: 0.2, type: 'triangle' }); tone({ f: 415.3, to: 370, t: 0.4, d: 0.45, v: 0.2, type: 'triangle', vib: 9 }); },
   roll: () => thud(0, 0.25),
 };
