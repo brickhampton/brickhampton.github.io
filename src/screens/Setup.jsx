@@ -185,7 +185,7 @@ export function Setup() {
     <div className="wrap setup">
       <div>
         <h1 className="page">Who played today?</h1>
-        <p className="lede">Every starter is starred. Tap anyone who missed the game to take them out. Add subs picks from past subs or adds a new one, for this game only. Hold a starter and drag them to change the order they appear in.</p>
+        <p className="lede">Tap anyone who missed the game to take them out. Add past subs or a new one, for this game only.</p>
       </div>
       <div className="fields">
         <div className="field"><label htmlFor="f-season">Season</label>
