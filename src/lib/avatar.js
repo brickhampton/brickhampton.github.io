@@ -298,11 +298,6 @@ function sprite(c, num, pose) {
   } else if (pose === 'fist' || pose === 'fist2') {
     r(fx - 1, ty, 2, 3, S); r(fx, hy + 2, 2 + aw, ty - hy - 1, S); r(fx + 1 + aw, hy + 2, 1, ty - hy - 1, S2);
     r(fx - 1, hy - 2, 4 + aw, 4, S); r(fx, hy - 1, 2, 1, S2); r(fx + 2 + aw, hy - 2, 1, 4, S2);
-  } else if (pose === 'peace') {
-    // A peace sign beside the face: forearm up, a fist at eye height with the index and middle finger up in a V.
-    r(fx - 1, ty, 2, 3, S); r(fx + 1, hy + 4, 2 + aw, ty - hy - 3, S); r(fx + 2 + aw, hy + 4, 1, ty - hy - 3, S2);
-    r(fx, hy + 1, 4 + aw, 3, S); r(fx + 2, hy + 1, 2 + aw, 1, S2); r(fx, hy + 2, 1, 1, S2);
-    r(fx + 1, hy - 1, 1, 2, S); r(fx + 2, hy - 1, 1, 2, S); r(fx, hy - 3, 1, 2, S); r(fx + 3, hy - 3, 1, 2, S);
   } else if (pose === 'toast' || pose === 'sip') {
     // A glass of champagne: held out at chest height ('toast'), or lifted to the mouth ('sip').
     const GL = '#f4d37c', RIM = '#ffffff', STEM = '#dfe3ea';
@@ -418,7 +413,7 @@ export function trickExtras(raw, kind) {
 const cache = new Map();
 // SVG markup for a player. Round avatars (the default) show the head and the top of the jersey in a 100 × 100 box.
 // opts.stage draws the whole player at their height, feet on the bottom of a 100 × 104 box: the court, the Home
-// photo, the player page and the builder. opts.pose: 'fist', 'fistL' (the other arm), 'fist2' (both), 'ball', 'trophy', 'shoot', 'catch', 'block', 'block1', 'pass', 'pass2', 'dribbleL', 'spin', 'peace', 'toast', 'sip' (champagne), 'lowball' (arms down, the ball behind the back), 'down' (arms down), or palming the ball (the default, as in the reference).
+// photo, the player page and the builder. opts.pose: 'fist', 'fistL' (the other arm), 'fist2' (both), 'ball', 'trophy', 'shoot', 'catch', 'block', 'block1', 'pass', 'pass2', 'dribbleL', 'spin', 'toast', 'sip' (champagne), 'lowball' (arms down, the ball behind the back), 'down' (arms down), or palming the ball (the default, as in the reference).
 export function figure(raw, opts = {}) {
   const c = cleanLook(raw), key = JSON.stringify([c, raw.num, !!opts.stage, opts.pose || '']);
   if (cache.has(key)) return cache.get(key);

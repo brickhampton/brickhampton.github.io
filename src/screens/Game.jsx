@@ -11,6 +11,9 @@ import { openSheet } from '../components/Sheet.jsx';
 import { EditGame } from './EditGame.jsx';
 import { ShareSheet } from '../components/ShareSheet.jsx';
 import { PotgSection } from '../components/PotgSection.jsx';
+
+// Preview only: ?ppos=top puts Player of the game above Top performances.
+const POTG_TOP = typeof location !== 'undefined' && new URLSearchParams(location.search).get('ppos') === 'top';
 import { Chart, StatChips } from '../components/ui.jsx';
 
 export function ShootBar({ k, label, m, a, v }) {
@@ -93,6 +96,7 @@ export function Game() {
       <div className="who"><span className="vs">vs {g.opp}</span><span className="when">{g.season}, Game {g.no}, {fmtDate(g.date)}{g.oppPts != null ? ` · Final score ${t.pts}–${g.oppPts}` : ''}</span></div>
       <div className="jres"><VideoBtn g={g} />{feat ? <span className={`tfeat ${feat[0]}`}>{BIC[feat[1]]}{feat[2]}</span> : null}<span className={`badge ${g.result}`}>{RES[g.result]}</span></div>
     </div>
+    {POTG_TOP && rows.length ? <PotgSection key={g.id} g={g} games={games} /> : null}
     <div className="sec"><h3>Top performances</h3><div className="leaders">
       <Leader rows={rows} g={g} games={games} k="per" label="Best PER" fmt={v => perTxt(v)} />
       <Leader rows={rows} g={g} games={games} k="pts" label="Most points" />
@@ -113,6 +117,6 @@ export function Game() {
     <div className="sec"><h3>{g.season} game by game</h3>
       <div className="card" id="gtrend-card"><div className="ctrl"><StatChips id="gt-stat" main={GT_STATS} more={more} value={stat} onPick={k => set({ gtStat: k })} /></div>
         <Chart id="gtrend" draw={w => drawGameTrend(w, g, games, stat)} deps={[g, games, stat]} /></div></div>
-    {rows.length ? <PotgSection key={g.id} g={g} games={games} /> : null}
+    {!POTG_TOP && rows.length ? <PotgSection key={g.id} g={g} games={games} /> : null}
   </>;
 }

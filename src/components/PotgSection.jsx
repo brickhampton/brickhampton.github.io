@@ -14,7 +14,6 @@ const bob = (pose, n, extra) => Array.from({ length: n }, (_, i) => [pose, 0, i 
 const TRICKS = {
   // A glass of champagne: held out, a sip, held out again.
   champagne: [...bob('toast', 4), ['sip', 0, 0, 0], ['sip', 0, 0, 0], ['sip', 0, 0, 0], ['sip', 0, 0, 0], ['sip', 0, 0, 0], ...bob('toast', 4)],
-  peace: [['down', 0, 0, 0], ...bob('peace', 8), ['down', 0, 0, 0]],
   spin: [['down', 0, 0, 0], ...Array.from({ length: 12 }, (_, i) => ['spin', 0, 0, 0, i % 2 ? 'spin' : null]), ['down', 0, 0, 0]],
   // Sunglasses on, a cool bob, sunglasses off.
   shades: bob('down', 12, 'shades'),
