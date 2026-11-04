@@ -558,6 +558,9 @@ tr.tot td{font-weight:600;border-top:1px solid var(--stroke)}
 .player{display:flex;flex-direction:column;gap:34px;padding-block:20px 56px}
 [data-scr="games"] [data-av],[data-scr="game"] [data-av],[data-scr="stats"] [data-av]{cursor:pointer;transition:box-shadow .15s}
 [data-scr="games"] [data-av]:hover,[data-scr="game"] [data-av]:hover,[data-scr="stats"] [data-av]:hover{box-shadow:0 0 0 2px var(--royal)}
+/* Subs without their own page (Additional player pages off) aren't tappable. */
+[data-av][data-nopage]{cursor:default}
+[data-av][data-nopage]:hover{box-shadow:none !important}
 .p-strip{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;max-width:100%;padding:3px}
 .p-strip::-webkit-scrollbar{display:none}
 .p-strip button{border-radius:50%;padding:0;flex:none;opacity:.55;transition:opacity .15s, transform .15s}

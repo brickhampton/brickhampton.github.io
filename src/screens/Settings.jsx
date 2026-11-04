@@ -217,6 +217,7 @@ function Admin() {
     <SoundCard />
     <RebCard />
     <ShotCard />
+    <SubPagesCard onErr={setErr} />
     <div className="adm-grid">
       <div className="sec"><h3>Seasons</h3><p className="hint">New games go here, and Games and Stats open on it</p>
         <div className="card alist" id="a-seasons">{seasons}
@@ -301,6 +302,23 @@ function ShotCard() {
     <div className={`tog${on ? ' r' : ''}`} id="shot-detail" role="group" aria-label="Shooting stats compact or detailed">
       <button data-s="compact" aria-pressed={!on} onClick={() => pick(false)}>Compact</button>
       <button data-s="detailed" aria-pressed={on} onClick={() => pick(true)}>Detailed</button></div></div>;
+}
+
+// Additional player pages: pages for subs, for everyone who opens the site. Admin mode only, off by default.
+function SubPagesCard({ onErr }) {
+  const s = useStore(), on = !!s.subPages;
+  const pick = async v => {
+    if (v === on) return;
+    sfx('select'); onErr('');
+    try { await adminEdit('set_sub_pages', { p_on: v }); }
+    catch (e) { onErr(/set_sub_pages/.test(e.message) ? 'Run 12-sub-pages.sql in Supabase first, then try again.' : errText(e)); }
+  };
+  return <div className="card admin-lock sound-card"><div className="lock-ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <circle cx="9" cy="8" r="3.5" /><path d="M2.5 20a6.5 6.5 0 0 1 13 0" /><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M18 14.2a6.5 6.5 0 0 1 3.5 5.8" /></svg></div>
+    <div><h3>Additional player pages</h3><p className="hint">Player pages for subs, for everyone who opens the site</p></div>
+    <div className={`tog${on ? '' : ' r'}`} id="sub-pages" role="group" aria-label="Additional player pages on or off">
+      <button data-s="on" aria-pressed={on} onClick={() => pick(true)}>On</button>
+      <button data-s="off" aria-pressed={!on} onClick={() => pick(false)}>Off</button></div></div>;
 }
 
 // Our supporter on the Home photo: her outfit, the same for everyone who opens the site.

@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { S, set } from '../lib/store.js';
-import { allGames, seasonList, seasonName, statPlayers, isStarter, playerAgg, calc, ratio, pctTxt, perTxt, tier, f1, ORD, P, numIn, buildTags, playerBadges } from '../lib/core.js';
+import { allGames, seasonList, seasonName, statPlayers, isStarter, playerAgg, calc, ratio, pctTxt, perTxt, tier, f1, ORD, P, hasPage, numIn, buildTags, playerBadges } from '../lib/core.js';
 import { shotDetail } from '../lib/prefs.js';
 import { go } from '../lib/nav.js';
 import { drawRadar, drawTrend, P_STATS, P_MORE, SLOT_COL, SC_B, reduced } from '../lib/charts.js';
@@ -202,7 +202,7 @@ const COURT = playerCourt();
 
 export function Player() {
   const games = allGames();
-  const id = S.playerId && P(S.playerId) ? S.playerId : statPlayers()[0], p = P(id);
+  const id = S.playerId && hasPage(S.playerId) ? S.playerId : statPlayers()[0], p = P(id);
   const mine = games.filter(g => g.rows[id]);
   const backTo = () => S.pFrom === 'game' && S.gameId ? go('game') : go(S.pFrom && S.pFrom !== 'player' ? S.pFrom : 'stats');
   if (!mine.length) return <>
@@ -231,7 +231,7 @@ export function Player() {
 
   // The player on the stage celebrates when their latest game's PER beat their own average for that season.
   const lastG = mine[mine.length - 1], lastPer = calc(lastG.rows[id]).per, seasonAvg = playerAgg(games.filter(g => g.season === lastG.season), id).pg('per');
-  const mood = { per: lastPer > seasonAvg ? perTxt(lastPer, true) : '', badges: starter ? playerBadges(id) : [] };
+  const mood = { per: lastPer > seasonAvg ? perTxt(lastPer, true) : '', badges: playerBadges(id) };
 
   // Stat tiles
   const n1 = (v, tot) => tot ? v : f1(v);
@@ -326,13 +326,13 @@ export function Player() {
       <span className="grow" />
       <div className="p-strip" role="list" aria-label="Players">{strip.map(x => (
         <button key={x} role="listitem" data-pl={x} aria-current={x === id} aria-label={P(x).name} onClick={() => x !== id && go('player', { playerId: x, pScope: S.pScope })}><Avatar id={x} /></button>))}
-        <button role="listitem" className="p-subs" id="p-subs" aria-current={!starter} aria-label={starter ? 'Subs' : `Subs (now showing ${p.name})`} title="Subs" onClick={() => openSubs(id)}>{starter ? <Dots /> : <Avatar id={id} />}</button></div>
+        {S.subPages && <button role="listitem" className="p-subs" id="p-subs" aria-current={!starter} aria-label={starter ? 'Subs' : `Subs (now showing ${p.name})`} title="Subs" onClick={() => openSubs(id)}>{starter ? <Dots /> : <Avatar id={id} />}</button>}</div>
     </div>
 
     <div className="phero">
       <div className="pnum-clip" aria-hidden="true"><div className="pnum">{num}</div></div>
       <PStage p={p} num={num} mood={mood} />
-      <div className="pid"><h1 className="page pname">{p.name}<span className="pno num">#{num}</span></h1>{starter ? <Badges id={id} key={id} /> : <p className="psub"><span className="subtag">Sub</span><span className="num">{mine.length} game{mine.length > 1 ? 's' : ''}</span><span>Last played {lastG.season} Game {lastG.no}</span></p>}</div>
+      <div className="pid"><h1 className="page pname">{p.name}<span className="pno num">#{num}</span></h1>{starter ? null : <p className="psub"><span className="subtag">Sub</span><span className="num">{mine.length} game{mine.length > 1 ? 's' : ''}</span><span>Last played {lastG.season} Game {lastG.no}</span></p>}<Badges id={id} key={id} /></div>
     </div>
 
     {starter && last5.length ? <div className="sec"><h3>Recent form</h3>

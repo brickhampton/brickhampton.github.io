@@ -13,6 +13,7 @@ Run these once, in order, in the Supabase dashboard: **SQL Editor → New query*
 9. `09-game-video.sql`: a YouTube video link for each game, added in Admin mode from the game page. Safe to run again.
 10. `10-supporter.sql`: our supporter's outfit on the Home photo, chosen in Admin mode. Safe to run again.
 11. `11-pin-tries.sql`: the PIN locks after three wrong tries instead of five. Safe to run again.
+12. `12-sub-pages.sql`: the Additional player pages switch in Admin mode (pages for subs). Safe to run again.
 
 How it's protected:
 
