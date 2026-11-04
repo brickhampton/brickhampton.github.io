@@ -249,7 +249,7 @@ function rooftop() {
 }
 
 // 13. Arcade game: a starfield scrolling down, 1UP and HIGH SCORE at the top, a neon grid floor, coins popping out,
-// and a basketball chomping after ghost bricks across the back.
+// and little space shooters sweeping about in the back, firing.
 function arcade() {
   let s = rect(X0, Y0, W, Y1 - Y0, '#05050c');
   s += text('1UP', 50, 78, 2, '#ff4f6a') + text('2026', 50, 90, 2, '#fff') + text('HI SCORE', 210 - textW('HI SCORE', 2), 78, 2, '#ff4f6a') + text('99999', 210 - textW('99999', 2), 90, 2, '#fff');
@@ -264,19 +264,11 @@ function arcade() {
     const x = i < 3 ? 40 + i * 12 : 196 + (i - 3) * 12;
     coins += `<g transform="translate(${x} 196)"><g class="pg-coin" style="animation-delay:${(-rnd() * 2.4).toFixed(2)}s">${rect(-3, -8, 6, 8, '#e9b949')}${rect(-1, -7, 2, 6, '#fff2b0')}</g></g>`;
   }
-  // A chase across the back: a chomping basketball after three little ghost bricks, along a line of dots.
-  const ly = 114;
-  for (let x = X0 + 4; x < X1; x += 9) s += rect(x, ly - 1, 2, 2, '#ffe14f', ' opacity=".6"');
-  const B = '#f07a2a', SEAM = '#3a1c0c';
-  let ball = '';
-  [[2, 6], [1, 8], [0, 10], [0, 10], [0, 10], [0, 10], [1, 8], [2, 6]].forEach(([o, w], j) => ball += rect(o * 1.5 - 7.5, (j - 4) * 1.5, w * 1.5, 1.5, B));
-  ball += rect(-7.5, -.75, 15, 1, SEAM, ' opacity=".7"') + rect(-.75, -6, 1, 12, SEAM, ' opacity=".7"');
-  // The mouth: a wedge cut out on the leading side, open and shut.
-  const mouth = `<path class="pg-chomp" d="M0 0L8 -5L8 5Z" fill="#05050c"/>` + rect(-3, -4.5, 1.5, 1.5, '#05050c');
-  const ghost = (x, c) => `<g transform="translate(${x} 0)">${rect(-5, -6, 10, 2, c)}${rect(-6, -4, 12, 9, c)}${rect(-6, 5, 3, 2, c)}${rect(-1.5, 5, 3, 2, c)}${rect(3, 5, 3, 2, c)}`
-    + `${rect(-6, -1, 12, .8, '#05050c', ' opacity=".35"')}${rect(-6, 2.4, 12, .8, '#05050c', ' opacity=".35"')}${rect(-.4, -4, .8, 3, '#05050c', ' opacity=".35"')}`
-    + `${rect(-4, -3, 3, 3, '#fff')}${rect(1, -3, 3, 3, '#fff')}${rect(-2.5, -2, 1.5, 1.5, '#2f55d4')}${rect(2.5, -2, 1.5, 1.5, '#2f55d4')}</g>`;
-  const chase = `<g transform="translate(${X0 - 70} ${ly})"><g class="pg-chase" style="--run:${W + 140}px">${ball}${mouth}${ghost(22, '#c0392b')}${ghost(38, '#b5462e')}${ghost(54, '#d0583a')}</g></g>`;
+  // Little space shooters in the back: each one sweeps side to side and fires bolts upward.
+  const ship = (c, w) => rect(-1, -6, 2, 2, '#ffffff') + rect(-2, -4, 4, 3, c) + rect(-5, -1, 10, 3, c) + rect(-6, 1, 2, 3, w) + rect(4, 1, 2, 3, w) + rect(-1.5, 2, 3, 2, '#4fe3ff') + rect(-1, 4, 2, 1.5, '#ffb44f', ' class="pg-twinkle"');
+  const bolts = dl => [0, 1, 2].map(i => rect(-.6, -10, 1.2, 4, '#ffe14f', ` class="pg-bolt" style="animation-delay:${(dl - i * .45).toFixed(2)}s"`)).join('');
+  const chase = [[X0 + W * .26, 128, '#2f55d4', '#9fb4ff', 0, 4.2, 26], [X0 + W * .5, 116, '#c0392b', '#ff8080', -1.3, 5.4, -34], [X0 + W * .76, 140, '#8a5bff', '#cfc0ff', -2.6, 3.6, 22]]
+    .map(([x, y, c, w, dl, dur, sw]) => `<g transform="translate(${x.toFixed(1)} ${y}) scale(1.5)"><g class="pg-ship" style="--sw:${sw}px;animation-duration:${dur}s;animation-delay:${dl}s">${bolts(dl)}${ship(c, w)}</g></g>`).join('');
   return { svg: s + chase, party: stars + coins, feet: 226, view: V, k: K };
 }
 
