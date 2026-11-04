@@ -248,7 +248,8 @@ function rooftop() {
   return { svg: s + fence, party: birds + fall(10, 5, ['#f4d37c', '#ffffff'], {}), feet: 226, view: V, k: K };
 }
 
-// 13. Arcade game: a starfield scrolling down, 1UP and HIGH SCORE at the top, a neon grid floor, coins popping out.
+// 13. Arcade game: a starfield scrolling down, 1UP and HIGH SCORE at the top, a neon grid floor, coins popping out,
+// and a basketball chomping after ghost bricks across the back.
 function arcade() {
   let s = rect(X0, Y0, W, Y1 - Y0, '#05050c');
   s += text('1UP', 50, 78, 2, '#ff4f6a') + text('2026', 50, 90, 2, '#fff') + text('HI SCORE', 210 - textW('HI SCORE', 2), 78, 2, '#ff4f6a') + text('99999', 210 - textW('99999', 2), 90, 2, '#fff');
@@ -263,7 +264,20 @@ function arcade() {
     const x = i < 3 ? 40 + i * 12 : 196 + (i - 3) * 12;
     coins += `<g transform="translate(${x} 196)"><g class="pg-coin" style="animation-delay:${(-rnd() * 2.4).toFixed(2)}s">${rect(-3, -8, 6, 8, '#e9b949')}${rect(-1, -7, 2, 6, '#fff2b0')}</g></g>`;
   }
-  return { svg: s, party: stars + coins, feet: 226, view: V, k: K };
+  // A chase across the back: a chomping basketball after three little ghost bricks, along a line of dots.
+  const ly = 114;
+  for (let x = X0 + 4; x < X1; x += 9) s += rect(x, ly - 1, 2, 2, '#ffe14f', ' opacity=".6"');
+  const B = '#f07a2a', SEAM = '#3a1c0c';
+  let ball = '';
+  [[2, 6], [1, 8], [0, 10], [0, 10], [0, 10], [0, 10], [1, 8], [2, 6]].forEach(([o, w], j) => ball += rect(o * 1.5 - 7.5, (j - 4) * 1.5, w * 1.5, 1.5, B));
+  ball += rect(-7.5, -.75, 15, 1, SEAM, ' opacity=".7"') + rect(-.75, -6, 1, 12, SEAM, ' opacity=".7"');
+  // The mouth: a wedge cut out on the leading side, open and shut.
+  const mouth = `<path class="pg-chomp" d="M0 0L8 -5L8 5Z" fill="#05050c"/>` + rect(-3, -4.5, 1.5, 1.5, '#05050c');
+  const ghost = (x, c) => `<g transform="translate(${x} 0)">${rect(-5, -6, 10, 2, c)}${rect(-6, -4, 12, 9, c)}${rect(-6, 5, 3, 2, c)}${rect(-1.5, 5, 3, 2, c)}${rect(3, 5, 3, 2, c)}`
+    + `${rect(-6, -1, 12, .8, '#05050c', ' opacity=".35"')}${rect(-6, 2.4, 12, .8, '#05050c', ' opacity=".35"')}${rect(-.4, -4, .8, 3, '#05050c', ' opacity=".35"')}`
+    + `${rect(-4, -3, 3, 3, '#fff')}${rect(1, -3, 3, 3, '#fff')}${rect(-2.5, -2, 1.5, 1.5, '#2f55d4')}${rect(2.5, -2, 1.5, 1.5, '#2f55d4')}</g>`;
+  const chase = `<g transform="translate(${X0 - 70} ${ly})"><g class="pg-chase" style="--run:${W + 140}px">${ball}${mouth}${ghost(22, '#c0392b')}${ghost(38, '#b5462e')}${ghost(54, '#d0583a')}</g></g>`;
+  return { svg: s + chase, party: stars + coins, feet: 226, view: V, k: K };
 }
 
 // 14. Space: standing on the moon, the Earth rising behind, stars twinkling and a little rocket drifting by.

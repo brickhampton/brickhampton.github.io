@@ -195,6 +195,11 @@ function sprite(c, num, pose) {
     if (BW) r(ax, top + 3, 2 + aw, 2, BW);
   } else if (pose === 'pass2') {
     // A two-handed pass: the free arm is drawn reaching across the jersey with the other one, below.
+  } else if (pose === 'shrug') {
+    // A shrug: the elbow at the side, the forearm out and the palm turned up, mirroring the front arm.
+    const m = (dx, y, w, h, col) => r(bx - dx - w, y, w, h, col);
+    m(-1, ty, 2, 5, SB); m(0, ty + 4, 4 + aw, 2, SB); m(3 + aw, ty + 2, 2, 3, SB); m(3 + aw, ty + 5, 3, 1, S2);
+    if (BS) m(-1, ty, 2, 2, BS);
   } else if (pose === 'dribbleL') {
     // The ball crossed over to the free hand: that hand palms it, mirroring the usual dribble.
     ball(Math.max(bx - 5, 3), ty + 8, r);
@@ -292,6 +297,10 @@ function sprite(c, num, pose) {
     // Both arms push out toward the teammate, not quite at full stretch: the top one further, the lower one bent in short.
     r(fx - 1, ty + 1, 5, 2, S); r(fx - 1, ty + 2, 5, 1, S2); r(fx + 4, ty, 2, 4, S);
     r(bx + 2, ty + 4, fx + 1 - bx - 2, 2, SB); r(bx + 2, ty + 5, fx + 1 - bx - 2, 1, S2); r(fx + 1, ty + 3, 2, 4, S);
+  } else if (pose === 'shrug') {
+    // A shrug: elbows in, forearms out to the sides and palms up, the ball left on the floor by the feet.
+    ball(fx + 6, sy - 3, r);
+    r(fx - 1, ty, 2, 5, S); r(fx, ty + 4, 4 + aw, 2, S); r(fx + 3 + aw, ty + 2, 2, 3, S); r(fx + 3 + aw, ty + 5, 3, 1, S2);
   } else if (pose === 'pass') {
     // Arm thrust out level, as on a pass or a reach for a steal.
     r(fx - 1, ty + 1, 7, 2 + aw, S); r(fx + 6, ty, 2, 4 + aw, S); r(fx - 1, ty + 2 + aw, 7, 1, S2);
