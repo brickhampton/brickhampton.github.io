@@ -248,30 +248,6 @@ function rooftop() {
   return { svg: s + fence, party: birds + fall(10, 5, ['#f4d37c', '#ffffff'], {}), feet: 226, view: V, k: K };
 }
 
-// 12. Concert stage: a lighting rig, coloured beams sweeping, speaker stacks, and smoke across the floor.
-function concert() {
-  let s = `<defs>${grad('cs-w', [[0, '#06060a'], [1, '#141020']])}${grad('cs-b', [[0, '#fff', .35], [1, '#fff', 0]])}</defs>` + rect(X0, Y0, W, Y1 - Y0, 'url(#cs-w)');
-  s += rect(X0, 76, W, 4, '#3a3e4a');
-  const cols = ['#ff4fd8', '#4fe3ff', '#ffe14f', '#8a5bff'];
-  [44, 92, 168, 216].forEach((x, i) => { s += rect(x - 4, 80, 8, 7, '#2a2e3a') + rect(x - 3, 86, 6, 2, cols[i]); });
-  s += rect(X0, 206, W, Y1 - 206, '#1a1622') + rect(X0, 206, W, 2, '#2e2838');
-  // Speaker stacks on both sides.
-  const stack = x => { let t = ''; for (let j = 0; j < 3; j++) t += rect(x, 150 + j * 19, 26, 18, '#111216') + rect(x + 5, 153 + j * 19, 12, 12, '#24262e') + rect(x + 9, 157 + j * 19, 4, 4, '#3a3d48') + rect(x + 20, 154 + j * 19, 3, 3, '#24262e'); return t; };
-  s += stack(26) + stack(208);
-  // Beams from the rig, swinging slowly.
-  const beams = [44, 92, 168, 216].map((x, i) => `<g transform="translate(${x} 88)"><g class="pg-sweep" style="animation-delay:${-i * .7}s;--sw:${i % 2 ? -14 : 14}deg"><path d="M-3 0L3 0L22 120L-22 120Z" fill="${cols[i]}" opacity=".16"/></g></g>`).join('');
-  // Smoke: soft blocks drifting along the floor.
-  const rnd = seeded(8); let smoke = '';
-  for (let i = 0; i < 9; i++) smoke += rect((X0 + rnd() * W).toFixed(1), (204 + rnd() * 26).toFixed(1), (24 + rnd() * 20).toFixed(1), (6 + rnd() * 6).toFixed(1), '#c9c2d8', ` class="pg-smoke" opacity=".1" style="animation-delay:${(-rnd() * 8).toFixed(2)}s"`);
-  // Strobes: three white lamps on the rig between the coloured ones, flashing beams down onto the stage out of step,
-  // and now and then the whole stage flashes.
-  const lamps = [[68, 0], [130, -.37], [192, -.71]];
-  s += lamps.map(([x]) => rect(x - 4, 80, 8, 6, '#2a2e3a') + rect(x - 3, 85, 6, 2, '#ffffff')).join('');
-  const strobe = lamps.map(([x, dl], i) => `<path class="pg-strobe" d="M${x - 3} 87L${x + 3} 87L${x + 15 + (1 - i) * 9} 236L${x - 15 + (1 - i) * 9} 236Z" fill="#fff" style="animation-delay:${dl}s;animation-duration:${(1.1 + i * .23).toFixed(2)}s"/>`).join('')
-    + rect(X0, Y0, W, Y1 - Y0, '#fff', ' class="pg-strobe all"');
-  return { svg: s, party: beams + smoke + strobe, feet: 226, view: V, k: K };
-}
-
 // 13. Arcade game: a starfield scrolling down, 1UP and HIGH SCORE at the top, a neon grid floor, coins popping out.
 function arcade() {
   let s = rect(X0, Y0, W, Y1 - Y0, '#05050c');
@@ -290,23 +266,7 @@ function arcade() {
   return { svg: s, party: stars + coins, feet: 226, view: V, k: K };
 }
 
-// 14. Snow globe: the player inside a glass dome on a wooden base, snow drifting down inside.
-function snowglobe() {
-  const cx = 130, cy = 168, R = 74, baseY = 232;
-  let s = `<defs>${grad('sg-w', [[0, '#0b0e18'], [1, '#161b2c']])}<radialGradient id="sg-g" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#cfe0ff" stop-opacity=".16"/><stop offset=".7" stop-color="#4f7cff" stop-opacity=".08"/><stop offset="1" stop-color="#9fb4ff" stop-opacity=".2"/></radialGradient><clipPath id="sg-c"><circle cx="${cx}" cy="${cy}" r="${R}"/></clipPath></defs>`;
-  s += rect(X0, Y0, W, Y1 - Y0, 'url(#sg-w)');
-  // Inside the glass: a snowy mound under the player and the tinted glass.
-  s += `<g clip-path="url(#sg-c)">${rect(cx - R, cy - R, R * 2, R * 2, 'url(#sg-g)')}<ellipse cx="${cx}" cy="${baseY - 2}" rx="${R}" ry="14" fill="#eef3ff"/><ellipse cx="${cx}" cy="${baseY - 4}" rx="${R - 10}" ry="8" fill="#ffffff"/></g>`;
-  // The glass rim in chunky pixels, with a glint on the upper left.
-  for (let a = 0; a < Math.PI * 2; a += .085) { const x = cx + Math.cos(a) * R, y = cy + Math.sin(a) * R; if (y < baseY - 4) s += rect((x - 1.5).toFixed(1), (y - 1.5).toFixed(1), 3, 3, '#cfe0ff', ' opacity=".55"'); }
-  for (let a = 3.5; a < 4.4; a += .12) s += rect((cx + Math.cos(a) * (R - 9)).toFixed(1), (cy + Math.sin(a) * (R - 9)).toFixed(1), 3, 3, '#ffffff', ' opacity=".7"');
-  // The wooden base.
-  s += rect(cx - R + 6, baseY - 4, (R - 6) * 2, 6, '#7a4a26') + rect(cx - R - 2, baseY + 2, (R + 2) * 2, 14, '#5c3519') + rect(cx - R - 2, baseY + 2, (R + 2) * 2, 2, '#8a5a32') + rect(cx - 16, baseY + 6, 32, 6, '#e9b949', ' opacity=".8"');
-  const snow = fall(36, 71, ['#ffffff', '#eef3ff'], { x0: cx - R + 10, x1: cx + R - 10, y0: cy - R + 8, w: [1.6, 2.6], h: [1.6, 2.6], dur: [4, 7] });
-  return { svg: s, party: `<g clip-path="url(#sg-c)">${snow}</g>`, feet: 226, view: V, k: K };
-}
-
-// 15. Space: standing on the moon, the Earth rising behind, stars twinkling and a little rocket drifting by.
+// 14. Space: standing on the moon, the Earth rising behind, stars twinkling and a little rocket drifting by.
 function space() {
   const rnd = seeded(83), ground = 208;
   let s = `<defs>${grad('sp-s', [[0, '#02030a'], [1, '#0c1026']])}</defs>` + rect(X0, Y0, W, Y1 - Y0, 'url(#sp-s)');
@@ -329,53 +289,7 @@ function space() {
   return { svg: s + earth + moon, party: stars + rocket, feet: 226, view: V, k: K };
 }
 
-// 16. Street mural: a brick wall painted with a big ball and hoop, a pair of sneakers hanging off the power line, a boombox.
-function mural() {
-  const ground = 212;
-  let s = rect(X0, Y0, W, ground - Y0, '#4a2a24');
-  // Bricks.
-  for (let y = Y0, r = 0; y < ground; y += 7, r++) { s += rect(X0, y + 6, W, 1, '#2e1916', ' opacity=".8"'); for (let x = X0 - (r % 2) * 7; x < X1; x += 14) s += rect(x, y, 1, 6, '#2e1916', ' opacity=".7"'); }
-  s += `<defs>${grad('mu-sh', [[0, '#000', .45], [.4, '#000', 0], [1, '#000', .5]])}</defs>`;
-  // The mural: a big orange ball on the left, a backboard and hoop on the right, a splash of royal blue behind.
-  s += `<ellipse cx="130" cy="140" rx="96" ry="52" fill="#2f55d4" opacity=".55"/>`;
-  const bx = 70, by = 128, br = 26;
-  for (let i = -br; i < br; i += PIX) for (let j = -br; j < br; j += PIX) { if ((i + PIX / 2) ** 2 + (j + PIX / 2) ** 2 > br * br) continue; const seam = Math.abs(i + PIX / 2) < 2 || Math.abs(j + PIX / 2) < 2 || Math.abs(Math.hypot(i - br * .9, j) - br * .75) < 2.2; s += rect(bx + i, by + j, PIX, PIX, seam ? '#3a1c0c' : '#f07a2a'); }
-  s += rect(168, 96, 52, 36, '#f2f2f2') + rect(184, 110, 20, 14, 'none', ' stroke="#e74c3c" stroke-width="2.4"') + rect(186, 132, 16, 3, '#e74c3c');
-  for (let i = 0; i < 4; i++) s += rect(187 + i * 4, 135, 1.4, 12, '#f2f2f2', ' opacity=".8"');
-  s += text('BRICK', bx - textW('BRICK', 2.2) / 2, by + br + 8, 2.2, '#e9b949');
-  s += rect(X0, Y0, W, ground - Y0, 'url(#mu-sh)');
-  // Pavement and kerb.
-  s += rect(X0, ground, W, Y1 - ground, '#3a3d46') + rect(X0, ground, W, 3, '#5a5e6a');
-  for (let x = X0; x < X1; x += 30) s += rect(x, ground + 3, 1.2, Y1 - ground, '#2a2d34');
-  // The power line with sneakers hanging off it, swinging.
-  s += `<path d="M${X0} 92Q130 108 ${X1} 94" fill="none" stroke="#111" stroke-width="1.4"/>`;
-  const shoes = `<g class="pg-swing" style="transform-origin:150px 103px">${rect(149.4, 103, 1, 10, '#ddd')}${rect(145, 113, 8, 6, '#ffffff')}${rect(145, 118, 9, 2, '#e74c3c')}${rect(151, 103, 1, 16, '#ddd')}${rect(150, 119, 8, 6, '#ffffff')}${rect(150, 124, 9, 2, '#e74c3c')}</g>`;
-  // A boombox on the pavement.
-  const xb = 196, yb = 216;
-  s += rect(xb, yb, 28, 16, '#2a2e3a') + rect(xb + 5, yb - 4, 18, 2, '#8a93a6') + rect(xb + 12, yb + 3, 4, 3, '#4fe3ff', ' opacity=".7"');
-  const spk = x => `<g transform="translate(${x} ${yb + 9})"><g class="pg-pulse">${rect(-3.5, -3.5, 7, 7, '#111')}${rect(-1.2, -1.2, 2.4, 2.4, '#555')}</g></g>`;
-  return { svg: s, party: shoes + spk(xb + 6) + spk(xb + 22), feet: 226, view: V, k: K };
-}
-
-// 17. Victory parade bus: on the open top deck of a bus, flags waving at the corners, the city behind and streamers falling.
-function bus() {
-  const deck = 226;
-  let s = `<defs>${grad('bs-s', [[0, '#0f1530'], [.7, '#33407a'], [1, '#6a5a8a']])}</defs>` + rect(X0, Y0, W, Y1 - Y0, 'url(#bs-s)');
-  const rnd = seeded(91); let x = X0;
-  while (x < X1) { const w = 12 + Math.round(rnd() * 3) * PIX, h = 30 + Math.round(rnd() * 14) * PIX; s += rect(x, 200 - h, w, h, '#141a38'); for (let wy = 200 - h + 5; wy < 196; wy += 9) for (let wx = x + 3; wx < x + w - 3; wx += 6) if (rnd() < .4) s += rect(wx, wy, 2.5, 3, '#f4d37c', ' opacity=".5"'); x += w + 2; }
-  // The bus: a royal-blue top deck with a rail, the gold stripe, the lower body below the view.
-  const bx0 = Math.max(X0, 20), bx1 = Math.min(X1, 240);
-  s += rect(bx0, 192, bx1 - bx0, 3, '#e9b949') + [...Array(Math.floor((bx1 - bx0) / 14) + 1)].map((_, i) => rect(bx0 + i * 14, 192, 2, 26, '#e9b949')).join('') + rect(bx0, 206, bx1 - bx0, 2, '#e9b949', ' opacity=".8"');
-  s += rect(bx0, deck - 8, bx1 - bx0, 8, '#1c2b66') + rect(bx0, deck, bx1 - bx0, Y1 - deck, '#2f55d4') + rect(bx0, deck, bx1 - bx0, 3, '#4f7cff') + rect(bx0, deck + 10, bx1 - bx0, 4, '#e9b949');
-  s += rect(bx0 + 14, 196, 44, 10, '#c0392b') + text('CHAMPS', bx0 + 36 - textW('CHAMPS', 1.4) / 2, 197.5, 1.4, '#ffffff') + rect(bx1 - 58, 196, 44, 10, '#c0392b') + text('CHAMPS', bx1 - 36 - textW('CHAMPS', 1.4) / 2, 197.5, 1.4, '#ffffff');
-  // Flags on poles at both ends, waving.
-  const flag = (px, dir, c, dl) => rect(px, 118, 2, 100, '#cfd3db') + `<g class="pg-flag" style="transform-origin:${px + (dir > 0 ? 2 : 0)}px 120px;animation-delay:${dl}s">${rect(dir > 0 ? px + 2 : px - 26, 120, 26, 16, c)}${rect(dir > 0 ? px + 2 : px - 26, 126, 26, 4, '#ffffff')}</g>`;
-  const flags = flag(bx0 + 8, 1, '#2f55d4', 0) + flag(bx1 - 10, -1, '#e9b949', -.5);
-  const tape = fall(30, 37, ['#ffffff', '#f4d37c', '#4f7cff', '#ff8080'], { w: [1.5, 2.5], h: [4, 6], dur: [3.5, 6] });
-  return { svg: s, party: flags + tape, feet: deck, view: V, k: K };
-}
-
-// 18. Neon city rooftop at night: a big flickering MVP sign, rain falling, and the ground shining with its reflection.
+// 15. Neon city rooftop at night: a big flickering MVP sign, rain falling, and the ground shining with its reflection.
 function neon() {
   const ground = 204;
   let s = `<defs>${grad('ne-s', [[0, '#05060e'], [1, '#141030']])}${grad('ne-g', [[0, '#1a1630'], [1, '#0a0912']])}</defs>` + rect(X0, Y0, W, ground - Y0, 'url(#ne-s)');
@@ -398,7 +312,7 @@ function neon() {
   return { svg: s + refl, party: sign + rain, feet: 226, view: V, k: K };
 }
 
-export const BACKDROPS = { podium, disco, fireworks, magazine, redcarpet, parade, jumbotron, beach, rooftop, concert, arcade, snowglobe, space, mural, bus, neon };
+export const BACKDROPS = { podium, disco, fireworks, magazine, redcarpet, parade, jumbotron, beach, rooftop, arcade, space, neon };
 export const BACKDROP_KEYS = Object.keys(BACKDROPS);
 const built = new Map();
 // Built once per backdrop (and per player for the jumbotron, which shows them on the screen).
