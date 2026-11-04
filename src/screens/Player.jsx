@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { S, set } from '../lib/store.js';
 import { allGames, seasonList, seasonName, statPlayers, isStarter, playerAgg, calc, ratio, pctTxt, perTxt, tier, f1, ORD, P, numIn, buildTags, playerBadges } from '../lib/core.js';
+import { shotDetail } from '../lib/prefs.js';
 import { go } from '../lib/nav.js';
 import { drawRadar, drawTrend, P_STATS, P_MORE, SLOT_COL, SC_B, reduced } from '../lib/charts.js';
 import { Avatar, figure } from '../components/Avatar.jsx';
@@ -196,7 +197,15 @@ export function Player() {
 
   // Stat tiles
   const n1 = (v, tot) => tot ? v : f1(v);
-  const tiles = [
+  const detail = shotDetail();
+  const tiles = detail ? [
+    // Detailed shooting (Settings): made, attempts and % tiles, three to a row on iPhone. Attempts aren't ranked.
+    ['per', 'PER', (v, tot) => perTxt(v, !tot)], ['pts', 'Points', n1], ['reb', 'Rebounds', n1], ['ast', 'Assists', n1],
+    ['stl', 'Steals', n1], ['blk', 'Blocks', n1], ['to', 'Turnovers', n1, true], ['ts', 'TS%', pctTxt], ['gp', 'Games', v => v],
+    ['fgm', 'FGM', n1], ['fga', 'FGA', n1, false, true], ['fg', 'FG%', pctTxt],
+    ['m3', '3FGM', n1], ['a3', '3FGA', n1, false, true], ['p3', '3FG%', pctTxt],
+    ['ftm', 'FTM', n1], ['fta', 'FTA', n1, false, true], ['ft', 'FT%', pctTxt],
+  ] : [
     ['per', 'PER', (v, tot) => perTxt(v, !tot)], ['pts', 'Points', n1], ['reb', 'Rebounds', n1], ['ast', 'Assists', n1],
     ['stl', 'Steals', n1], ['blk', 'Blocks', n1], ['to', 'Turnovers', n1, true],
     ['fg', 'FG%', pctTxt], ['p3', '3FG%', pctTxt], ['ft', 'FT%', pctTxt], ['ts', 'TS%', pctTxt], ['gp', 'Games', v => v],
@@ -206,16 +215,16 @@ export function Player() {
   const SHOT = { fg: ['fgm', 'fga'], p3: ['m3', 'a3'], ft: ['ftm', 'fta'], ts: [null, 'tsa'] };
   const made = k => k === 'ts' ? Math.round(a.s.pts / 2) : a.s[SHOT[k][0]];
   const att = k => k === 'ts' ? Math.round(a.s.tsa) : a.s[SHOT[k][1]];
-  const faceFor = tot => tiles.map(([k, l, fmt, low]) => {
-    const v = val(a, k, tot), r = k === 'gp' ? 0 : rankOf(k, low, tot), sh = SHOT[k];
-    // All time Totals show shooting as just the %, like Averages without the attempts line.
-    const dash = sh && tot && scope !== 'ALL';
+  const faceFor = tot => tiles.map(([k, l, fmt, low, noRank]) => {
+    const v = val(a, k, tot), r = k === 'gp' || noRank ? 0 : rankOf(k, low, tot), sh = SHOT[k];
+    // All time Totals show shooting as just the %, like Averages without the attempts line. Detailed shows just the % too.
+    const dash = sh && tot && scope !== 'ALL' && !detail;
     const band = sh ? tier(k === 'p3' ? 'm3' : k, v, dash ? att(k) : undefined) : '';
     const tcls = k === 'per' ? (v >= 0 ? ' pos' : ' neg') : sh ? ' ' + band : '';
     const txt = dash ? `${made(k)}-${att(k)}` : v === null ? '–' : fmt(v, tot);
-    const sub = !sh || (tot && !dash) ? null : dash ? <span className={`ps num ${band}`}>{pctTxt(v)}</span> : <span className="ps num att">{f1(a.pg(sh[1]))} A</span>;
+    const sub = !sh || detail || (tot && !dash) ? null : dash ? <span className={`ps num ${band}`}>{pctTxt(v)}</span> : <span className="ps num att">{f1(a.pg(sh[1]))} A</span>;
     return {
-      key: `${txt}|${r}|${dash ? 't' : ''}${sh && !tot ? 'a' : ''}`, lead: r === 1,
+      key: `${txt}|${r}|${dash ? 't' : ''}${sh && !tot && !detail ? 'a' : ''}`, lead: r === 1,
       body: <><span className="l">{dash ? l.slice(0, -1) : l}</span><b className={`num${tcls}${txt.length > 5 ? ' long' : ''}`}>{txt}</b>{sub}<span className="r">{r === 1 ? 'Team best' : r ? ORD(r) : '\u00a0'}</span></>,
     };
   });
