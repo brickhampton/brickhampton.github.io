@@ -21,11 +21,13 @@ const TRICKS = {
   behind: [['dribble', 0, 0, 0], ['dribble', 0, 1, 0], ['lowball', 0, 0, 0], ['dribbleL', 0, 0, 0], ['dribbleL', 0, 1, 0], ['lowball', 0, 0, 0], ['dribble', 0, 0, 0], ['dribble', 0, 1, 0]],
 };
 const TRICK_KEYS = Object.keys(TRICKS);
-// After a loss, low-key tricks only and no smile: a few bounces of the ball, the ball behind the back, a look left and right.
+// After a loss, low-key tricks only and no smile: a few bounces of the ball, the ball behind the back, a look left and right, a shrug.
 // 'bounce' and 'look' are classes on the stage that animate the ball and the eyes (see .potg-stage .pk-*).
 TRICKS.bounce = Array.from({ length: 10 }, () => ['dribble', 0, 0, 0, 'bounce']);
 TRICKS.look = Array.from({ length: 6 }, () => ['dribble', 0, 0, 0, 'look']);
-const CALM_KEYS = ['bounce', 'behind', 'look'];
+// A shrug: palms up for a moment, the ball left at his feet.
+TRICKS.shrug = Array.from({ length: 6 }, () => ['shrug', 0, 0, 0]);
+const CALM_KEYS = ['bounce', 'behind', 'look', 'shrug'];
 const CLASS_EXTRAS = new Set(['bounce', 'look']);
 // After a loss there's no celebrating: just nodding along with the ball, no smile, no confetti.
 const NOD = [['dribble', 0, 0, 0], ['dribble', 0, 1, 0]];
