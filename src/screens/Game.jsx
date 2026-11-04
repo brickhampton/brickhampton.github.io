@@ -10,6 +10,7 @@ import { isAdmin } from '../lib/admin.js';
 import { openSheet } from '../components/Sheet.jsx';
 import { EditGame } from './EditGame.jsx';
 import { ShareSheet } from '../components/ShareSheet.jsx';
+import { PotgSection } from '../components/PotgSection.jsx';
 import { Chart, StatChips } from '../components/ui.jsx';
 
 export function ShootBar({ k, label, m, a, v }) {
@@ -112,5 +113,6 @@ export function Game() {
     <div className="sec"><h3>{g.season} game by game</h3>
       <div className="card" id="gtrend-card"><div className="ctrl"><StatChips id="gt-stat" main={GT_STATS} more={more} value={stat} onPick={k => set({ gtStat: k })} /></div>
         <Chart id="gtrend" draw={w => drawGameTrend(w, g, games, stat)} deps={[g, games, stat]} /></div></div>
+    {rows.length ? <PotgSection key={g.id} g={g} games={games} /> : null}
   </>;
 }
