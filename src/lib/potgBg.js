@@ -159,25 +159,6 @@ function redcarpet() {
   return { svg: wall + floor + posts, party: flashes([[36, 120], [58, 164], [222, 112], [200, 150], [44, 90], [228, 176]], 7), feet: 226, view: V, k: K };
 }
 
-// 7. Locker room: lockers, a bench, towels thrown up, and a cooler of sports drink tipped over the player's head.
-function locker() {
-  let wall = rect(X0, Y0, W, 204 - Y0, '#151a24');
-  for (let x = X0; x < X1; x += 22) {
-    wall += rect(x + 1, 82, 20, 116, '#24324a') + rect(x + 1, 82, 20, 2, '#33476a') + rect(x + 20, 84, 1, 114, '#1a2436');
-    for (let v = 0; v < 3; v++) wall += rect(x + 6, 90 + v * 4, 10, 1.5, '#121a28');
-    wall += rect(x + 16, 136, 2, 7, '#8a93a6');
-  }
-  const floor = rect(X0, 198, W, Y1 - 198, '#1e232c') + rect(X0, 212, W, 6, '#6b4a2e') + rect(X0, 212, W, 1.5, '#8a6440') + rect(X0, 218, W, 3, '#3a2a1c', ' opacity=".6"');
-  for (let x = X0; x < X1; x += 16) wall += rect(x, 224, 1, Y1 - 224, '#171b22');
-  // The cooler, tipped above the player's head, with the drink pouring down.
-  const cooler = `<g transform="translate(150 86) rotate(118)">${rect(-12, -10, 24, 20, '#ee6018')}${rect(-12, -10, 24, 4, '#f4f4f4')}${rect(-4, 10, 8, 3, '#f4f4f4')}</g>`;
-  const pour = fall(26, 13, ['#ffb347', '#ff9a2b', '#ffd27a'], { x0: 104, x1: 158, w: [2, 3], h: [3, 6], cls: 'pg-pour', dur: [.7, 1.2] });
-  // Towels flipping up on the sides.
-  const rnd = seeded(3); let towels = '';
-  for (const [x, y] of [[44, 150], [212, 140], [60, 120], [196, 112]]) towels += `<g transform="translate(${x} ${y})"><g class="pg-towel" style="animation-delay:${(-rnd() * 2).toFixed(2)}s">${rect(-8, -3, 16, 6, '#f2f2f2')}${rect(-8, 1, 16, 1.5, '#2f55d4')}</g></g>`;
-  return { svg: wall + floor, party: cooler + pour + towels, feet: 226, view: V, k: K };
-}
-
 // 8. Parade: a street between buildings, streamers across the top, balloons, and ticker tape coming down.
 function parade() {
   let s = `<defs>${grad('pr-s', [[0, '#0c1020'], [1, '#1e2a4a']])}</defs>` + rect(X0, Y0, W, Y1 - Y0, 'url(#pr-s)');
@@ -296,29 +277,7 @@ function arcade() {
   return { svg: s, party: stars + coins, feet: 226, view: V, k: K };
 }
 
-// 14. Trophy room: wood panels, shelves of trophies, banners, and a gold ball on a stand, all glinting now and then.
-function trophyroom() {
-  let s = rect(X0, Y0, W, Y1 - Y0, '#1c130d');
-  for (let x = X0; x < X1; x += 20) s += rect(x, Y0, 1.5, 132, '#140d08');
-  s += rect(X0, 202, W, Y1 - 202, '#2a1c12') + rect(X0, 202, W, 2.5, '#4a3220');
-  // Banners hanging from the top.
-  for (const [x, c] of [[70, '#2f55d4'], [100, '#c0392b'], [160, '#c0392b'], [190, '#2f55d4']]) s += rect(x - 8, 72, 16, 26, c) + `<path d="M${x - 8} 98L${x} 104L${x + 8} 98Z" fill="${c}"/>` + rect(x - 3, 80, 6, 6, '#e9b949', ' opacity=".8"');
-  // Shelves with trophies on both sides.
-  const cup = (x, y, z = 1) => rect(x - 4 * z, y - 12 * z, 8 * z, 6 * z, '#e9b949') + rect(x - 6 * z, y - 12 * z, 2 * z, 3 * z, '#e9b949') + rect(x + 4 * z, y - 12 * z, 2 * z, 3 * z, '#e9b949') + rect(x - 1 * z, y - 6 * z, 2 * z, 3 * z, '#c9962a') + rect(x - 3 * z, y - 3 * z, 6 * z, 3 * z, '#6b4a2e') + rect(x - 2.5 * z, y - 11 * z, 1.5 * z, 3 * z, '#fff2b0');
-  for (const [x0, x1] of [[X0 + 4, 76], [184, X1 - 4]]) for (const y of [142, 182]) {
-    s += rect(x0, y, x1 - x0, 3, '#6b4a2e') + rect(x0, y + 3, x1 - x0, 1.5, '#3a2618');
-    for (let x = x0 + 9, i = 0; x < x1 - 5; x += 16, i++) s += cup(x, y, i % 2 ? .8 : 1);
-  }
-  // The gold ball on a plinth, front right.
-  s += rect(196, 222, 20, 26, '#3a2618') + rect(194, 220, 24, 3, '#6b4a2e');
-  for (const [dy, w] of [[-14, 6], [-12, 10], [-10, 12], [-8, 12], [-6, 12], [-4, 10], [-2, 6]]) s += rect(206 - w / 2, 220 + dy, w, 2, '#e9b949');
-  s += rect(202, 207, 2, 2, '#fff2b0');
-  const rnd = seeded(71); let glints = '';
-  for (const [x, y] of [[33, 131], [65, 131], [201, 171], [233, 131], [49, 171], [205, 205]]) glints += `<g transform="translate(${x} ${y})"><g class="pg-flash" style="animation-delay:${(-rnd() * 3).toFixed(2)}s;animation-duration:3.6s">${rect(-.75, -3, 1.5, 6, '#fff')}${rect(-3, -.75, 6, 1.5, '#fff')}</g></g>`;
-  return { svg: s, party: glints, feet: 226, view: V, k: K };
-}
-
-export const BACKDROPS = { podium, disco, fireworks, magazine, redcarpet, locker, parade, jumbotron, beach, rooftop, concert, arcade, trophyroom };
+export const BACKDROPS = { podium, disco, fireworks, magazine, redcarpet, parade, jumbotron, beach, rooftop, concert, arcade };
 export const BACKDROP_KEYS = Object.keys(BACKDROPS);
 const built = new Map();
 // Built once per backdrop (and per player for the jumbotron, which shows them on the screen).

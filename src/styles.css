@@ -1334,13 +1334,9 @@ a.vbtn:active,button.vbtn:active{transform:scale(.94)}
 @keyframes pgGlint{0%{opacity:1}50%{opacity:0}}
 .pg-burst{opacity:0;animation:pgBurst 3.2s steps(12) infinite}
 @keyframes pgBurst{0%{transform:scale(.1);opacity:1}35%{transform:scale(1);opacity:1}60%{transform:scale(1.15) translateY(3px);opacity:0}100%{opacity:0}}
-/* Camera flashes and trophy glints pop and fade. */
+/* Camera flashes pop and fade. */
 .pg-flash{opacity:0;animation:pgFlash 3s steps(1) infinite}
 @keyframes pgFlash{0%{opacity:1;transform:scale(1)}4%{opacity:.6;transform:scale(.6)}8%{opacity:0}}
-.pg-pour{animation:pgPour 1s linear infinite}
-@keyframes pgPour{0%{transform:translateY(30px);opacity:0}15%{opacity:.9}100%{transform:translateY(150px);opacity:0}}
-.pg-towel{animation:pgTowel 2.2s steps(10) infinite}
-@keyframes pgTowel{0%{transform:translateY(20px) rotate(0)}50%{transform:translateY(-24px) rotate(180deg)}100%{transform:translateY(20px) rotate(360deg)}}
 .pg-bob{animation:pgBob 2.4s steps(4) infinite}
 @keyframes pgBob{50%{transform:translateY(-4px)}}
 .pg-twinkle{animation:pgTwinkle 1.6s steps(1) infinite}
