@@ -1343,6 +1343,16 @@ a.vbtn:active,button.vbtn:active{transform:scale(.94)}
 @keyframes pgStrobeAll{0%{opacity:.1}3%{opacity:0}}
 /* The beach crab scuttles a few steps one way, pauses, and back. */
 .pg-crab{animation:pgCrab 4s steps(1) infinite}
+.pg-rocket{animation:pgRocket 9s linear infinite}
+@keyframes pgRocket{0%{transform:translate(0,0)}100%{transform:translate(380px,-90px)}}
+.pg-swing{animation:pgSwing 2.4s ease-in-out infinite alternate}
+@keyframes pgSwing{0%{transform:rotate(-8deg)}100%{transform:rotate(8deg)}}
+.pg-flag{animation:pgFlag .8s steps(2) infinite alternate}
+@keyframes pgFlag{0%{transform:skewY(-6deg) scaleX(.94)}100%{transform:skewY(5deg) scaleX(1)}}
+.pg-rain{animation:pgRain .7s linear infinite}
+@keyframes pgRain{0%{transform:translate(0,0);opacity:.7}100%{transform:translate(-14px,190px);opacity:.7}}
+.pg-neon{animation:pgNeon 5s steps(1) infinite}
+@keyframes pgNeon{0%,100%{opacity:1}61%{opacity:.35}63%{opacity:1}66%{opacity:.2}68%{opacity:1}}
 @keyframes pgCrab{0%,40%,100%{transform:translateX(0)}8%{transform:translateX(2px)}16%{transform:translateX(4px)}24%,32%{transform:translateX(6px)}48%{transform:translateX(4px)}56%{transform:translateX(2px)}}
 @keyframes pgGlint{0%{opacity:1}50%{opacity:0}}
 .pg-burst{opacity:0;animation:pgBurst 3.2s steps(12) infinite}
