@@ -223,9 +223,13 @@ function beach() {
   const bx = 52, by = 214;
   s += rect(bx, by, 32, 18, '#2a2e3a') + rect(bx + 6, by - 5, 20, 2, '#8a93a6') + rect(bx + 6, by - 5, 2, 5, '#8a93a6') + rect(bx + 24, by - 5, 2, 5, '#8a93a6') + rect(bx + 13, by + 3, 6, 4, '#4fe3ff', ' opacity=".7"');
   const spk = x => `<g transform="translate(${x} ${by + 10})"><g class="pg-pulse">${rect(-4, -4, 8, 8, '#111')}${rect(-1.5, -1.5, 3, 3, '#555')}</g></g>`;
-  // The beach ball bouncing on the right.
-  const ball = `<g class="pg-bounce">${rect(196, 210, 14, 14, '#fff')}${rect(196, 210, 5, 14, '#e74c3c')}${rect(205, 210, 5, 14, '#2f55d4')}${rect(198, 208, 10, 2, '#fff')}${rect(198, 224, 10, 2, '#f4d37c')}</g>`;
-  return { svg: s, party: spk(bx + 6) + spk(bx + 26) + ball, feet: 226, view: V, k: K };
+  // A little red crab on the sand to the right, claws up, scuttling side to side.
+  const cx = 190, cy = 226, P = 2.2, O = '#e0322a', D = '#a5201c';
+  const CRAB = ['.O.......O.', 'OO.......OO', '.O..o.o..O.', '..O.k.k.O..', '...OOOOO...', '..OOOOOOO..', '.DOOOOOOOD.', '..D.D.D.D..'];
+  let crab = '';
+  CRAB.forEach((row, j) => [...row].forEach((c, i) => { const f = { O, D, o: '#ffffff', k: '#111' }[c]; if (f) crab += rect((cx + (i - 5.5) * P).toFixed(1), (cy + (j - 8) * P).toFixed(1), P, P, f); }));
+  s += `<ellipse cx="${cx}" cy="${cy + .6}" rx="11" ry="1.6" fill="#8a6a3c" opacity=".45"/><g class="pg-crab">${crab}</g>`;
+  return { svg: s, party: spk(bx + 6) + spk(bx + 26), feet: 226, view: V, k: K };
 }
 
 // 11. Rooftop court at sunset: sky from orange to purple, the city behind a chain-link fence, the court underfoot.
@@ -259,7 +263,13 @@ function concert() {
   // Smoke: soft blocks drifting along the floor.
   const rnd = seeded(8); let smoke = '';
   for (let i = 0; i < 9; i++) smoke += rect((X0 + rnd() * W).toFixed(1), (204 + rnd() * 26).toFixed(1), (24 + rnd() * 20).toFixed(1), (6 + rnd() * 6).toFixed(1), '#c9c2d8', ` class="pg-smoke" opacity=".1" style="animation-delay:${(-rnd() * 8).toFixed(2)}s"`);
-  return { svg: s, party: beams + smoke, feet: 226, view: V, k: K };
+  // Strobes: three white lamps on the rig between the coloured ones, flashing beams down onto the stage out of step,
+  // and now and then the whole stage flashes.
+  const lamps = [[68, 0], [130, -.37], [192, -.71]];
+  s += lamps.map(([x]) => rect(x - 4, 80, 8, 6, '#2a2e3a') + rect(x - 3, 85, 6, 2, '#ffffff')).join('');
+  const strobe = lamps.map(([x, dl], i) => `<path class="pg-strobe" d="M${x - 3} 87L${x + 3} 87L${x + 15 + (1 - i) * 9} 236L${x - 15 + (1 - i) * 9} 236Z" fill="#fff" style="animation-delay:${dl}s;animation-duration:${(1.1 + i * .23).toFixed(2)}s"/>`).join('')
+    + rect(X0, Y0, W, Y1 - Y0, '#fff', ' class="pg-strobe all"');
+  return { svg: s, party: beams + smoke + strobe, feet: 226, view: V, k: K };
 }
 
 // 13. Arcade game: a starfield scrolling down, 1UP and HIGH SCORE at the top, a neon grid floor, coins popping out.
