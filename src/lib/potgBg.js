@@ -5,7 +5,10 @@ import { playerCourt } from './playerCourt.js';
 import { crowd } from './homeBg.js';
 import { figure } from './avatar.js';
 
-const X0 = 20, Y0 = 70, X1 = 240, Y1 = 256, W = X1 - X0, H = Y1 - Y0;
+const Y0 = 70, Y1 = 256;
+// Both side edges move out for the wide stage (iPad and computer), the player staying in the middle at 130.
+let X0 = 20, X1 = 240, W = X1 - X0;
+const WIDE = 190;
 const rect = (x, y, w, h, fill, extra = '') => `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${fill}"${extra}/>`;
 const seeded = seed => { let s = seed; return () => (s = (s * 16807) % 2147483647) / 2147483647; };
 const PIX = 3.4;
@@ -281,9 +284,16 @@ export const BACKDROPS = { podium, disco, fireworks, magazine, redcarpet, parade
 export const BACKDROP_KEYS = Object.keys(BACKDROPS);
 const built = new Map();
 // Built once per backdrop (and per player for the jumbotron, which shows them on the screen).
-export function backdrop(k, look) {
-  const key = k === 'jumbotron' ? k + JSON.stringify(look) : k;
-  if (!built.has(key)) built.set(key, (BACKDROPS[k] || arena)(look));
+export function backdrop(k, look, wide) {
+  const key = (k === 'jumbotron' ? k + JSON.stringify(look) : k) + (wide ? ':wide' : '');
+  if (!built.has(key)) {
+    if (wide) { X0 = 130 - WIDE; X1 = 130 + WIDE; W = X1 - X0; }
+    const b = (BACKDROPS[k] || arena)(look);
+    X0 = 20; X1 = 240; W = X1 - X0;
+    // The wide view keeps the same top and bottom, and reaches out the same distance either side of the player.
+    if (wide) { const [, y, , h] = b.view.split(' ').map(Number); b.view = `${130 - WIDE + 6} ${y} ${2 * (WIDE - 6)} ${h}`; }
+    built.set(key, b);
+  }
   return built.get(key);
 }
 // A different backdrop from last time, each time a Game page opens.
