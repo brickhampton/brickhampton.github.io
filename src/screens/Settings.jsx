@@ -298,7 +298,7 @@ function ShotCard() {
   const pick = v => { if (v === on) return; setShotDetail(v); setOn(v); sfx('select'); };
   return <div className="card admin-lock sound-card"><div className="lock-ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
     <circle cx="12" cy="12" r="9" /><circle cx="12" cy="12" r="5" /><circle cx="12" cy="12" r="1" /></svg></div>
-    <div><h3>Compact shooting stats</h3><p className="hint">Show combined shooting stats or full shooting stats (made, attempts, and shot %)</p></div>
+    <div><h3>Compact shooting stats</h3><p className="hint">Show combined shooting stats or full shooting stats (made, attempts, and shot %), on this device</p></div>
     <div className={`tog${on ? ' r' : ''}`} id="shot-detail" role="group" aria-label="Shooting stats compact or detailed">
       <button data-s="compact" aria-pressed={!on} onClick={() => pick(false)}>Compact</button>
       <button data-s="detailed" aria-pressed={on} onClick={() => pick(true)}>Detailed</button></div></div>;
