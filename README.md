@@ -9,6 +9,7 @@ Live at **https://brickhampton.github.io**. Anyone with the link can view; editi
 - Pages have their own addresses (`#/game/S26-5`, `#/player/lim`, `#/stats`), so a game or player can be shared as a link.
 - Data: Supabase (free tier). Setup is in `supabase/README.md`. Anyone can read; every change goes through database functions that need an Admin session opened with the PIN.
 - `.github/workflows/keep-awake.yml` reads one row every three days so the free project never pauses.
+- `.github/workflows/backup.yml` saves all team data every night to the `backups` branch (`scripts/backup.mjs`), keeping two weeks. Each dated folder has a `restore.sql` to paste into the Supabase SQL editor; the branch README has the steps.
 - Each browser keeps a copy of the last data it loaded, so the site opens instantly and still shows the stats on a bad connection.
 
 ## Stats
