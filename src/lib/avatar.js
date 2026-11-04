@@ -3,6 +3,7 @@
 // band, wrist, sleeve, stripe, sock, shoe, shoeAcc, glassesC, shirt, hairFlip, wristFlip, sleeveFlip }: colours as hex, everything else an index into OPTS (0 is the default).
 // Looks saved before the pixel style (no v) are converted, so every saved avatar still draws.
 
+const SHRUG_V = typeof location !== 'undefined' ? +new URLSearchParams(location.search).get('pshrug') || 0 : 0;
 const HEX = /^#[0-9a-f]{6}$/i;
 const color = (v, d) => HEX.test(v || '') ? v : d;
 const pick = (v, list) => Number.isInteger(v) && v >= 0 && v < list.length ? v : 0;
@@ -185,6 +186,16 @@ function sprite(c, num, pose) {
     if (BS) side(ARM.slice(0, 5), BS, mirror);
     if (BW) side([[6, -3, 3], [7, -3, 3]], BW, mirror);
   };
+  // The shrug's open hand at the end of the forearm, drawn by R(dx from the body's edge, y, w, h, colour).
+  // Preview only: ?pshrug=1-4 tries flatter palms.
+  const shrugHand = (R, col) => {
+    const v = SHRUG_V;
+    if (v === 0) { R(3 + aw, ty + 3, 2, 2, col); R(3 + aw, ty + 5, 3, 1, S2); }
+    else if (v === 1) { R(4 + aw, ty + 4, 3, 1, col); R(4 + aw, ty + 5, 3, 1, S2); }
+    else if (v === 2) { R(4 + aw, ty + 4, 3, 1, col); }
+    else if (v === 3) { R(4 + aw, ty + 4, 3, 1, col); R(4 + aw, ty + 5, 3, 1, S2); R(6 + aw, ty + 3, 1, 1, col); }
+    else { R(3 + aw, ty + 3, 4, 1, col); R(3 + aw, ty + 4, 4, 1, S2); }
+  };
   rec = c.shirt ? [] : null;
   // Shooting, catching a rebound and blocking put the free arm up too.
   const up = pose === 'shoot' || pose === 'catch' || pose === 'block';
@@ -198,7 +209,7 @@ function sprite(c, num, pose) {
   } else if (pose === 'shrug') {
     // A shrug: the elbow at the side, the forearm out and the palm turned up, mirroring the front arm.
     const m = (dx, y, w, h, col) => r(bx - dx - w, y, w, h, col);
-    m(-1, ty, 2, 5, SB); m(0, ty + 4, 4 + aw, 2, SB); m(3 + aw, ty + 3, 2, 2, SB); m(3 + aw, ty + 5, 3, 1, S2);
+    m(-1, ty, 2, 5, SB); m(0, ty + 4, 4 + aw, 2, SB); shrugHand(m, SB);
     if (BS) m(-1, ty, 2, 2, BS);
   } else if (pose === 'dribbleL') {
     // The ball crossed over to the free hand: that hand palms it, mirroring the usual dribble.
@@ -300,7 +311,7 @@ function sprite(c, num, pose) {
   } else if (pose === 'shrug') {
     // A shrug: elbows in, forearms out to the sides and palms up, the ball left on the floor by the feet.
     ball(fx + 6, sy - 3, r);
-    r(fx - 1, ty, 2, 5, S); r(fx, ty + 4, 4 + aw, 2, S); r(fx + 3 + aw, ty + 3, 2, 2, S); r(fx + 3 + aw, ty + 5, 3, 1, S2);
+    r(fx - 1, ty, 2, 5, S); r(fx, ty + 4, 4 + aw, 2, S); shrugHand((dx, y, w, h, col) => r(fx + dx, y, w, h, col), S);
   } else if (pose === 'pass') {
     // Arm thrust out level, as on a pass or a reach for a steal.
     r(fx - 1, ty + 1, 7, 2 + aw, S); r(fx + 6, ty, 2, 4 + aw, S); r(fx - 1, ty + 2 + aw, 7, 1, S2);
