@@ -12,6 +12,44 @@ import { Chart, SeasonPick, StatChips, MoreBtn, EmptyState, PerPill } from '../c
 import { ShootBar } from './Game.jsx';
 import { H2HRows } from './Stats.jsx';
 import { sfx } from '../lib/sfx.js';
+import { openSheet, closeSheet } from '../components/Sheet.jsx';
+import { X } from '../components/icons.jsx';
+
+// Subs who have played, latest game first, with how many games they've played.
+function subsPlayed() {
+  const order = seasonList().map(x => x.code), h = {};
+  for (const g of allGames()) for (const pid of Object.keys(g.rows)) if (!isStarter(pid) && P(pid)) {
+    const e = h[pid] ||= { id: pid, n: 0, last: g }; e.n++;
+    const k = x => (order.length - order.indexOf(x.season)) * 1000 + x.no;
+    if (k(g) > k(e.last)) e.last = g;
+  }
+  const k = x => (order.length - order.indexOf(x.last.season)) * 1000 + x.last.no;
+  return Object.values(h).sort((a, b) => k(b) - k(a) || P(a.id).name.localeCompare(P(b.id).name));
+}
+const Search = () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>;
+const Dots = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="2.2" /><circle cx="12" cy="12" r="2.2" /><circle cx="19" cy="12" r="2.2" /></svg>;
+
+// The subs list from the player picker: tap a sub to open their page.
+function SubList({ current }) {
+  const [q, setQ] = useState('');
+  const list = subsPlayed(), t = q.trim().toLowerCase();
+  const shown = list.filter(x => !t || P(x.id).name.toLowerCase().includes(t));
+  const pick = pid => { closeSheet(true); if (pid !== current) go('player', { playerId: pid, pScope: null }); };
+  return <div className="subpick">
+    <button className="xbtn" type="button" aria-label="Close" onClick={closeSheet}><X width="18" height="18" /></button>
+    <h2>Subs</h2><p className="sheet-sub">Everyone who has subbed in, latest first.</p>
+    {list.length > 6 ? <div className="subtools"><label className="subsearch"><Search /><input placeholder="Search subs" autoComplete="off" value={q} onChange={e => setQ(e.target.value)} /></label></div> : null}
+    <div className="subgrid">
+      {shown.map(({ id: pid, n, last }) => <button key={pid} type="button" className="subcard go" aria-current={pid === current} onClick={() => pick(pid)}>
+        <Avatar id={pid} /><span className="sc-t"><span className="nm">{P(pid).name}</span><span className="meta">{n} game{n > 1 ? 's' : ''} · {last.season} G{last.no}</span></span>
+        <span className="chev" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="m9 6 6 6-6 6" /></svg></span>
+      </button>)}
+      {!shown.length && <div className="subnone">{list.length ? `No subs called “${q.trim()}”.` : 'No subs have played yet.'}</div>}
+    </div>
+  </div>;
+}
+const openSubs = current => openSheet(<SubList current={current} />, { cls: 'subs' });
+
 
 // One stat box. When Averages/Totals changes what it shows, it flips over to its new face.
 function StatTile({ face, delay }) {
@@ -174,7 +212,7 @@ export function Player() {
   </>;
   const seasonsPlayed = seasonList().map(s => s.code).filter(c => mine.some(g => g.season === c));
   let scope = S.pScope;
-  if (!scope || (scope !== 'ALL' && !seasonsPlayed.includes(scope))) scope = seasonsPlayed.includes(S.current) ? S.current : 'ALL';
+  if (!scope || (scope !== 'ALL' && !seasonsPlayed.includes(scope))) scope = isStarter(id) && seasonsPlayed.includes(S.current) ? S.current : 'ALL'; // subs open on All time: they play few games a season
   const inScope = scope === 'ALL' ? games : games.filter(g => g.season === scope);
   const list = inScope.filter(g => g.rows[id]);
   const totals = !!S.pTotals, starter = isStarter(id);
@@ -193,7 +231,7 @@ export function Player() {
 
   // The player on the stage celebrates when their latest game's PER beat their own average for that season.
   const lastG = mine[mine.length - 1], lastPer = calc(lastG.rows[id]).per, seasonAvg = playerAgg(games.filter(g => g.season === lastG.season), id).pg('per');
-  const mood = { per: lastPer > seasonAvg ? perTxt(lastPer, true) : '', badges: playerBadges(id) };
+  const mood = { per: lastPer > seasonAvg ? perTxt(lastPer, true) : '', badges: starter ? playerBadges(id) : [] };
 
   // Stat tiles
   const n1 = (v, tot) => tot ? v : f1(v);
@@ -266,21 +304,38 @@ export function Player() {
   const openGame = gid => go('game', { gameId: gid });
   const pStat = S.pStat in P_STATS || S.pStat in P_MORE ? S.pStat : 'per';
 
+  const shootSec = <div className="sec"><h3>Shooting</h3>
+        <div className="card pshoot">
+          <div className="mixh"><span>Where the points come from</span><b className="num">{a.s.pts} PTS</b></div>
+          <div className="mix">{mix.map(([l, v, c]) => v ? <span key={l} style={{ flex: v, background: c }} title={`${l} ${v} points`} /> : null)}</div>
+          <div className="legend">{mix.map(([l, v, c]) => <span key={l}><i style={{ background: c }} />{l} <b className="num">{Math.round(v / pt * 100)}%</b></span>)}</div>
+          <div className="shoot two-col">
+            <ShootBar k="m2" label="2FG" m={`${a.s.m2} of ${a.s.a2}`} a={a.s.a2} v={ratio(a.s.m2, a.s.a2)} />
+            <ShootBar k="m3" label="3FG" m={`${a.s.m3} of ${a.s.a3}`} a={a.s.a3} v={ratio(a.s.m3, a.s.a3)} />
+            <ShootBar k="ft" label="FT" m={`${a.s.ftm} of ${a.s.fta}`} a={a.s.fta} v={ratio(a.s.ftm, a.s.fta)} />
+            <ShootBar k="ts" label="TS%" m={`${a.s.tsa.toFixed(1)} TSA`} a={a.s.tsa} v={a.s.ts} />
+          </div>
+        </div></div>;
+  const highsSec = <div className="sec"><h3 className="h-ico">{scope === 'ALL' ? 'Career highs' : scope + ' highs'}<MedalGold /></h3><div className="recs one" id="p-highs">
+        {highs.map(({ k, l, b }) => <button key={k} className="rec" data-g={b.g.id} onClick={() => openGame(b.g.id)}><span className="rk">{P_STATS[k] || (k === 'm3' ? '3PM' : 'FTM')}</span><span><div className="rl">{l}</div><div className="rg">vs {b.g.opp}, {b.g.season} Game {b.g.no}</div></span><b className={`num${k === 'per' && b.s.per > 0 ? ' great' : ''}`}>{k === 'per' ? perTxt(b.s.per) : b.s[k]}</b></button>)}
+      </div></div>;
+
   return <>
     <div className="gnav">
       <button className="btn ghost" id="p-back" onClick={backTo}><Back />Back</button>
       <span className="grow" />
-      <div className="p-strip" role="list" aria-label="Starters">{strip.map(x => (
-        <button key={x} role="listitem" data-pl={x} aria-current={x === id} aria-label={P(x).name} onClick={() => x !== id && go('player', { playerId: x, pScope: S.pScope })}><Avatar id={x} /></button>))}</div>
+      <div className="p-strip" role="list" aria-label="Players">{strip.map(x => (
+        <button key={x} role="listitem" data-pl={x} aria-current={x === id} aria-label={P(x).name} onClick={() => x !== id && go('player', { playerId: x, pScope: S.pScope })}><Avatar id={x} /></button>))}
+        <button role="listitem" className="p-subs" id="p-subs" aria-current={!starter} aria-label={starter ? 'Subs' : `Subs (now showing ${p.name})`} title="Subs" onClick={() => openSubs(id)}>{starter ? <Dots /> : <Avatar id={id} />}</button></div>
     </div>
 
     <div className="phero">
       <div className="pnum-clip" aria-hidden="true"><div className="pnum">{num}</div></div>
       <PStage p={p} num={num} mood={mood} />
-      <div className="pid"><h1 className="page pname">{p.name}<span className="pno num">#{num}</span></h1><Badges id={id} key={id} /></div>
+      <div className="pid"><h1 className="page pname">{p.name}<span className="pno num">#{num}</span></h1>{starter ? <Badges id={id} key={id} /> : <p className="psub"><span className="subtag">Sub</span><span className="num">{mine.length} game{mine.length > 1 ? 's' : ''}</span><span>Last played {lastG.season} Game {lastG.no}</span></p>}</div>
     </div>
 
-    {last5.length ? <div className="sec"><h3>Recent form</h3>
+    {starter && last5.length ? <div className="sec"><h3>Recent form</h3>
       <div className="form">{last5.slice().reverse().map(g => {
         const s = calc(g.rows[id]);
         return <button key={g.id} className="fchip" data-g={g.id} title={`${g.opp}, ${g.season} Game ${g.no}`} onClick={() => openGame(g.id)}><span className="fo">{g.opp}<em>{g.season} Game {g.no}</em></span><PerPill v={s.per} /><span className="fs num">{s.pts} PTS<i> · {s.reb} REB · {s.ast} AST</i></span></button>;
@@ -298,23 +353,12 @@ export function Player() {
       <div className="ptiles">{faces.map((f, i) => <StatTile key={`${id}|${scope}|${tiles[i][0]}`} face={f} delay={delays[i]} />)}</div>
     </div>
 
-    <div className="two">
+    {starter ? <><div className="two">
       <div className="sec"><h3>Skill shape</h3>
         <div className="card"><div className="ctrl"><div className="legend rleg"><span><i style={{ background: '#4f7cff' }} />{p.name}</span><span><i className="dash" />{pcmp === 'team' ? 'Team average' : P(pcmp).name}</span></div>
           <span className="grow" /><select id="p-cmp" aria-label="Compare with" value={pcmp} onChange={e => set({ pCmp: e.target.value })}><option value="team">vs team average</option>{peers.filter(x => x.id !== id).map(x => <option key={x.id} value={x.id}>vs {P(x.id).name}</option>)}</select></div>
           <Chart id="p-radar" draw={w => drawRadar(w, a, peers, pcmp)} deps={[id, scope, pcmp, games]} /></div></div>
-      <div className="sec"><h3>Shooting</h3>
-        <div className="card pshoot">
-          <div className="mixh"><span>Where the points come from</span><b className="num">{a.s.pts} PTS</b></div>
-          <div className="mix">{mix.map(([l, v, c]) => v ? <span key={l} style={{ flex: v, background: c }} title={`${l} ${v} points`} /> : null)}</div>
-          <div className="legend">{mix.map(([l, v, c]) => <span key={l}><i style={{ background: c }} />{l} <b className="num">{Math.round(v / pt * 100)}%</b></span>)}</div>
-          <div className="shoot two-col">
-            <ShootBar k="m2" label="2FG" m={`${a.s.m2} of ${a.s.a2}`} a={a.s.a2} v={ratio(a.s.m2, a.s.a2)} />
-            <ShootBar k="m3" label="3FG" m={`${a.s.m3} of ${a.s.a3}`} a={a.s.a3} v={ratio(a.s.m3, a.s.a3)} />
-            <ShootBar k="ft" label="FT" m={`${a.s.ftm} of ${a.s.fta}`} a={a.s.fta} v={ratio(a.s.ftm, a.s.fta)} />
-            <ShootBar k="ts" label="TS%" m={`${a.s.tsa.toFixed(1)} TSA`} a={a.s.tsa} v={a.s.ts} />
-          </div>
-        </div></div>
+      {shootSec}
     </div>
 
     <div className="sec"><h3>{scope === 'ALL' ? 'Season by season' : 'Season performance'}</h3>
@@ -323,10 +367,8 @@ export function Player() {
 
     <div className="two">
       <div className="sec"><h3>Season vs season</h3><SeasonCmp id={id} seasonsPlayed={seasonsPlayed} /></div>
-      <div className="sec"><h3 className="h-ico">{scope === 'ALL' ? 'Career highs' : scope + ' highs'}<MedalGold /></h3><div className="recs one" id="p-highs">
-        {highs.map(({ k, l, b }) => <button key={k} className="rec" data-g={b.g.id} onClick={() => openGame(b.g.id)}><span className="rk">{P_STATS[k] || (k === 'm3' ? '3PM' : 'FTM')}</span><span><div className="rl">{l}</div><div className="rg">vs {b.g.opp}, {b.g.season} Game {b.g.no}</div></span><b className={`num${k === 'per' && b.s.per > 0 ? ' great' : ''}`}>{k === 'per' ? perTxt(b.s.per) : b.s[k]}</b></button>)}
-      </div></div>
-    </div>
+      {highsSec}
+    </div></> : <div className="two">{shootSec}{highsSec}</div>}
 
     <div className="sec"><h3>Game log</h3>
       <div className="tbl-wrap"><table className="plog"><thead><tr><th>Game</th><th className="c">Result</th><th className="c">PER</th><th>PTS</th><th>REB</th><th>AST</th><th>STL</th><th>BLK</th><th>TO</th><th>FG</th><th>3FG</th><th>FT</th><th>TS%</th></tr></thead><tbody>
