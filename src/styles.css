@@ -1336,13 +1336,14 @@ a.vbtn:active,button.vbtn:active{transform:scale(.94)}
 .pg-speck{animation:pgSpeck 6s steps(30) infinite}
 @keyframes pgSpeck{0%{transform:translate(0,0)}50%{transform:translate(18px,4px)}100%{transform:translate(0,0)}}
 .pg-glint{animation:pgGlint 1.2s steps(1) infinite}
-/* Disco strobes: a beam flashes for a moment and goes dark; the whole room flashes faintly every few seconds. */
-.pg-strobe{opacity:0;animation:pgStrobe 1.1s steps(1) infinite}
-.pg-strobe.all{animation:pgStrobeAll 3.7s steps(1) infinite}
-@keyframes pgStrobe{0%{opacity:.5}10%{opacity:0}}
-@keyframes pgStrobeAll{0%{opacity:.1}3%{opacity:0}}
 /* The beach crab scuttles a few steps one way, pauses, and back. */
 .pg-crab{animation:pgCrab 4s steps(1) infinite}
+.pg-rocket{animation:pgRocket 9s linear infinite}
+@keyframes pgRocket{0%{transform:translate(0,0)}100%{transform:translate(380px,-90px)}}
+.pg-rain{animation:pgRain .7s linear infinite}
+@keyframes pgRain{0%{transform:translate(0,0);opacity:.7}100%{transform:translate(-14px,190px);opacity:.7}}
+.pg-neon{animation:pgNeon 5s steps(1) infinite}
+@keyframes pgNeon{0%,100%{opacity:1}61%{opacity:.35}63%{opacity:1}66%{opacity:.2}68%{opacity:1}}
 @keyframes pgCrab{0%,40%,100%{transform:translateX(0)}8%{transform:translateX(2px)}16%{transform:translateX(4px)}24%,32%{transform:translateX(6px)}48%{transform:translateX(4px)}56%{transform:translateX(2px)}}
 @keyframes pgGlint{0%{opacity:1}50%{opacity:0}}
 .pg-burst{opacity:0;animation:pgBurst 3.2s steps(12) infinite}
@@ -1360,10 +1361,6 @@ a.vbtn:active,button.vbtn:active{transform:scale(.94)}
 @keyframes pgPulse{0%{transform:scale(1)}50%{transform:scale(1.25)}}
 .pg-birds{animation:pgBirds 14s linear infinite}
 @keyframes pgBirds{0%{transform:translateX(-60px)}100%{transform:translateX(220px)}}
-.pg-sweep{animation:pgSweep 3.6s ease-in-out infinite alternate}
-@keyframes pgSweep{0%{transform:rotate(var(--sw))}100%{transform:rotate(calc(var(--sw) * -1))}}
-.pg-smoke{animation:pgSmoke 8s linear infinite}
-@keyframes pgSmoke{0%{transform:translateX(-30px);opacity:0}20%{opacity:.12}80%{opacity:.12}100%{transform:translateX(30px);opacity:0}}
 .pg-star{animation:pgStar 2s linear infinite}
 @keyframes pgStar{0%{transform:translateY(0)}100%{transform:translateY(190px)}}
 .pg-coin{opacity:0;animation:pgCoin 2.4s steps(16) infinite}

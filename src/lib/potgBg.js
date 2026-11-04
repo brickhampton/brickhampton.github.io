@@ -115,7 +115,7 @@ function fireworks() {
 const FONT = {
   A: '010101111101101', B: '110101110101110', C: '011100100100011', E: '111100110100111', G: '011100101101011', H: '101101111101101', I: '111010010010111',
   K: '101101110101101', L: '100100100100111', M: '101111111101101', N: '110101101101101', O: '010101101101010', P: '111101111100100', R: '110101110101101',
-  S: '011100010001110', T: '111010010010010', U: '101101101101111', W: '101101111111101', Y: '101101010010010', '!': '010010010000010', ' ': '000000000000000',
+  S: '011100010001110', T: '111010010010010', U: '101101101101111', V: '101101101101010', W: '101101111111101', Y: '101101010010010', '!': '010010010000010', ' ': '000000000000000',
   0: '111101101101111', 1: '010110010010111', 2: '111001111100111', 3: '111001011001111', 4: '101101111001001', 5: '111100111001111', 6: '111100111101111', 7: '111001001010010', 8: '111101111101111', 9: '111101111001111',
 };
 const text = (str, x, y, p, fill, extra = '') => `<g${extra}>` + [...String(str)].map((ch, k) => [...(FONT[ch] || FONT[' '])].map((c, i) => c === '1' ? rect((x + k * 4 * p + (i % 3) * p).toFixed(2), (y + Math.floor(i / 3) * p).toFixed(2), p, p, fill) : '').join('')).join('') + '</g>';
@@ -248,30 +248,6 @@ function rooftop() {
   return { svg: s + fence, party: birds + fall(10, 5, ['#f4d37c', '#ffffff'], {}), feet: 226, view: V, k: K };
 }
 
-// 12. Concert stage: a lighting rig, coloured beams sweeping, speaker stacks, and smoke across the floor.
-function concert() {
-  let s = `<defs>${grad('cs-w', [[0, '#06060a'], [1, '#141020']])}${grad('cs-b', [[0, '#fff', .35], [1, '#fff', 0]])}</defs>` + rect(X0, Y0, W, Y1 - Y0, 'url(#cs-w)');
-  s += rect(X0, 76, W, 4, '#3a3e4a');
-  const cols = ['#ff4fd8', '#4fe3ff', '#ffe14f', '#8a5bff'];
-  [44, 92, 168, 216].forEach((x, i) => { s += rect(x - 4, 80, 8, 7, '#2a2e3a') + rect(x - 3, 86, 6, 2, cols[i]); });
-  s += rect(X0, 206, W, Y1 - 206, '#1a1622') + rect(X0, 206, W, 2, '#2e2838');
-  // Speaker stacks on both sides.
-  const stack = x => { let t = ''; for (let j = 0; j < 3; j++) t += rect(x, 150 + j * 19, 26, 18, '#111216') + rect(x + 5, 153 + j * 19, 12, 12, '#24262e') + rect(x + 9, 157 + j * 19, 4, 4, '#3a3d48') + rect(x + 20, 154 + j * 19, 3, 3, '#24262e'); return t; };
-  s += stack(26) + stack(208);
-  // Beams from the rig, swinging slowly.
-  const beams = [44, 92, 168, 216].map((x, i) => `<g transform="translate(${x} 88)"><g class="pg-sweep" style="animation-delay:${-i * .7}s;--sw:${i % 2 ? -14 : 14}deg"><path d="M-3 0L3 0L22 120L-22 120Z" fill="${cols[i]}" opacity=".16"/></g></g>`).join('');
-  // Smoke: soft blocks drifting along the floor.
-  const rnd = seeded(8); let smoke = '';
-  for (let i = 0; i < 9; i++) smoke += rect((X0 + rnd() * W).toFixed(1), (204 + rnd() * 26).toFixed(1), (24 + rnd() * 20).toFixed(1), (6 + rnd() * 6).toFixed(1), '#c9c2d8', ` class="pg-smoke" opacity=".1" style="animation-delay:${(-rnd() * 8).toFixed(2)}s"`);
-  // Strobes: three white lamps on the rig between the coloured ones, flashing beams down onto the stage out of step,
-  // and now and then the whole stage flashes.
-  const lamps = [[68, 0], [130, -.37], [192, -.71]];
-  s += lamps.map(([x]) => rect(x - 4, 80, 8, 6, '#2a2e3a') + rect(x - 3, 85, 6, 2, '#ffffff')).join('');
-  const strobe = lamps.map(([x, dl], i) => `<path class="pg-strobe" d="M${x - 3} 87L${x + 3} 87L${x + 15 + (1 - i) * 9} 236L${x - 15 + (1 - i) * 9} 236Z" fill="#fff" style="animation-delay:${dl}s;animation-duration:${(1.1 + i * .23).toFixed(2)}s"/>`).join('')
-    + rect(X0, Y0, W, Y1 - Y0, '#fff', ' class="pg-strobe all"');
-  return { svg: s, party: beams + smoke + strobe, feet: 226, view: V, k: K };
-}
-
 // 13. Arcade game: a starfield scrolling down, 1UP and HIGH SCORE at the top, a neon grid floor, coins popping out.
 function arcade() {
   let s = rect(X0, Y0, W, Y1 - Y0, '#05050c');
@@ -290,7 +266,53 @@ function arcade() {
   return { svg: s, party: stars + coins, feet: 226, view: V, k: K };
 }
 
-export const BACKDROPS = { podium, disco, fireworks, magazine, redcarpet, parade, jumbotron, beach, rooftop, concert, arcade };
+// 14. Space: standing on the moon, the Earth rising behind, stars twinkling and a little rocket drifting by.
+function space() {
+  const rnd = seeded(83), ground = 208;
+  let s = `<defs>${grad('sp-s', [[0, '#02030a'], [1, '#0c1026']])}</defs>` + rect(X0, Y0, W, Y1 - Y0, 'url(#sp-s)');
+  let stars = '';
+  for (let i = 0; i < 46; i++) stars += rect((X0 + rnd() * W).toFixed(1), (Y0 + rnd() * 130).toFixed(1), 1.6, 1.6, '#fff', ` class="${i % 3 ? '' : 'pg-twinkle'}" opacity="${(.35 + rnd() * .6).toFixed(2)}" style="animation-delay:${(-rnd() * 2).toFixed(2)}s"`);
+  // The Earth: a pixel disc of sea with green land and a thin glow.
+  const ex = 196, ey = 104, er = 20;
+  let earth = `<circle cx="${ex}" cy="${ey}" r="${er + 3}" fill="#4f7cff" opacity=".18"/>`;
+  for (let i = -er; i < er; i += PIX) for (let j = -er; j < er; j += PIX) {
+    const d = (i + PIX / 2) ** 2 + (j + PIX / 2) ** 2; if (d > er * er) continue;
+    const land = Math.sin(i * .21 + 1) + Math.cos(j * .26 - .5) > 1.1, night = i + j > 14;
+    earth += rect(ex + i, ey + j, PIX, PIX, land ? (night ? '#1c5a30' : '#3a9a55') : (night ? '#1b3a8a' : '#2f6ad4'));
+  }
+  // The moon's surface: grey, with craters.
+  let moon = rect(X0, ground, W, Y1 - ground, '#6d7080') + rect(X0, ground, W, 3, '#8d909e');
+  for (const [x, y, w] of [[40, 222, 22], [92, 240, 16], [176, 232, 26], [214, 216, 14], [X0 + 6, 236, 18], [X1 - 30, 244, 20]]) moon += `<ellipse cx="${x}" cy="${y}" rx="${w / 2}" ry="${w / 6}" fill="#55586a"/><ellipse cx="${x}" cy="${y - 1}" rx="${w / 2 - 2}" ry="${w / 6 - 1}" fill="#4a4d5e"/>`;
+  // A small flag planted beside the player.
+  moon += rect(176, 176, 1.6, 34, '#cfd3db') + rect(177.6, 176, 18, 11, '#2f55d4') + rect(177.6, 176, 18, 2.5, '#e9b949');
+  const rocket = `<g class="pg-rocket"><g transform="translate(${X0 + 10} 128) rotate(-20)">${rect(0, 0, 14, 6, '#e8e8ee')}${rect(14, 1, 4, 4, '#e74c3c')}${rect(3, 1.5, 3, 3, '#4fe3ff')}${rect(-3, -1, 3, 2, '#e74c3c')}${rect(-3, 5, 3, 2, '#e74c3c')}${rect(-7, 1.5, 5, 3, '#f4b24a', ' class="pg-twinkle"')}</g></g>`;
+  return { svg: s + earth + moon, party: stars + rocket, feet: 226, view: V, k: K };
+}
+
+// 15. Neon city rooftop at night: a big flickering MVP sign, rain falling, and the ground shining with its reflection.
+function neon() {
+  const ground = 204;
+  let s = `<defs>${grad('ne-s', [[0, '#05060e'], [1, '#141030']])}${grad('ne-g', [[0, '#1a1630'], [1, '#0a0912']])}</defs>` + rect(X0, Y0, W, ground - Y0, 'url(#ne-s)');
+  // Blurred city lights far off.
+  const rnd = seeded(13), cols = ['#ff4fd8', '#4fe3ff', '#ffe14f', '#8a5bff'];
+  for (let i = 0; i < 40; i++) { const z = 3 + rnd() * 5; s += `<circle cx="${(X0 + rnd() * W).toFixed(1)}" cy="${(150 + rnd() * 50).toFixed(1)}" r="${z.toFixed(1)}" fill="${cols[i % 4]}" opacity="${(.08 + rnd() * .12).toFixed(2)}"/>`; }
+  // The sign on its frame, glowing.
+  // The M is five pixels wide (the 3 × 5 font's M reads as an H); V and P come from the font.
+  const NP = 7, mw = 5 * NP, tw = mw + NP + textW('VP', NP), tx = 130 - tw / 2, ty = 92;
+  const M = ['10001', '11011', '10101', '10001', '10001'];
+  const word = (x, y, p, fill, extra = '') => `<g${extra}>${M.flatMap((row, j) => [...row].map((c, i) => c === '1' ? rect(x + i * p, y + j * p, p, p, fill) : '')).join('')}</g>` + text('VP', x + 6 * p, y, p, fill, extra);
+  s += rect(tx - 8, ty - 6, tw + 16, 50, '#14121e') + rect(tx - 8, ty - 6, tw + 16, 50, 'none', ' stroke="#2a2638" stroke-width="2"');
+  s += rect(tx + 4, ty + 44, 2, ground - ty - 44, '#2a2638') + rect(tx + tw - 6, ty + 44, 2, ground - ty - 44, '#2a2638');
+  const sign = `<g class="pg-neon">${word(tx - 1.5, ty - 1.5, NP + .6, '#ff4fd8', ' opacity=".25"')}${word(tx, ty, NP, '#ff7ae4')}</g>`;
+  // The wet ground: dark, with the sign reflected in streaks.
+  s += rect(X0, ground, W, Y1 - ground, 'url(#ne-g)') + rect(X0, ground, W, 1.5, '#ff4fd8', ' opacity=".35"');
+  let refl = '';
+  for (let i = 0; i < 9; i++) refl += rect(tx + i * tw / 9, ground + 6 + (i % 3) * 4, tw / 12, 18 + (i % 2) * 10, '#ff4fd8', ' opacity=".12"');
+  const rain = fall(40, 101, ['#9fb4ff', '#cfe0ff'], { w: [.7, 1], h: [7, 11], cls: 'pg-rain', dur: [.5, .9], y0: Y0 - 10 });
+  return { svg: s + refl, party: sign + rain, feet: 226, view: V, k: K };
+}
+
+export const BACKDROPS = { podium, disco, fireworks, magazine, redcarpet, parade, jumbotron, beach, rooftop, arcade, space, neon };
 export const BACKDROP_KEYS = Object.keys(BACKDROPS);
 const built = new Map();
 // Built once per backdrop (and per player for the jumbotron, which shows them on the screen).
