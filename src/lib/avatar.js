@@ -299,9 +299,10 @@ function sprite(c, num, pose) {
     r(fx - 1, ty, 2, 3, S); r(fx, hy + 2, 2 + aw, ty - hy - 1, S); r(fx + 1 + aw, hy + 2, 1, ty - hy - 1, S2);
     r(fx - 1, hy - 2, 4 + aw, 4, S); r(fx, hy - 1, 2, 1, S2); r(fx + 2 + aw, hy - 2, 1, 4, S2);
   } else if (pose === 'peace') {
-    // A peace sign beside the face: forearm up, hand at eye height, two fingers apart.
-    r(fx - 1, ty, 2, 3, S); r(fx, hy + 4, 2 + aw, ty - hy - 3, S); r(fx + 1 + aw, hy + 4, 1, ty - hy - 3, S2);
-    r(fx - 1, hy + 1, 4 + aw, 3, S); r(fx - 1, hy - 2, 1, 3, S); r(fx + 2 + aw, hy - 2, 1, 3, S); r(fx, hy + 2, 2, 1, S2);
+    // A peace sign beside the face: forearm up, a fist at eye height with the index and middle finger up in a V.
+    r(fx - 1, ty, 2, 3, S); r(fx + 1, hy + 4, 2 + aw, ty - hy - 3, S); r(fx + 2 + aw, hy + 4, 1, ty - hy - 3, S2);
+    r(fx, hy + 1, 4 + aw, 3, S); r(fx + 2, hy + 1, 2 + aw, 1, S2); r(fx, hy + 2, 1, 1, S2);
+    r(fx + 1, hy - 1, 1, 2, S); r(fx + 2, hy - 1, 1, 2, S); r(fx, hy - 3, 1, 2, S); r(fx + 3, hy - 3, 1, 2, S);
   } else if (pose === 'toast' || pose === 'sip') {
     // A glass of champagne: held out at chest height ('toast'), or lifted to the mouth ('sip').
     const GL = '#f4d37c', RIM = '#ffffff', STEM = '#dfe3ea';
