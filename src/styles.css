@@ -1341,11 +1341,11 @@ a.vbtn:active,button.vbtn:active{transform:scale(.94)}
 .pg-glint{animation:pgGlint 1.2s steps(1) infinite}
 /* The beach crab scuttles a few steps one way, pauses, and back. */
 .pg-crab{animation:pgCrab 4s steps(1) infinite}
-/* Arcade: the chase runs right across the back, the ball's mouth snapping open and shut. */
-.pg-chase{animation:pgChase 8s steps(80) infinite}
-@keyframes pgChase{0%{transform:translateX(0)}100%{transform:translateX(var(--run))}}
-.pg-chomp{animation:pgChomp .3s steps(1) infinite}
-@keyframes pgChomp{50%{transform:scaleY(.15)}}
+/* Arcade: the space shooters sweep side to side, bolts flying up from them and fading. */
+.pg-ship{animation:pgShip 4s ease-in-out infinite alternate}
+@keyframes pgShip{0%{transform:translateX(calc(var(--sw) * -1))}100%{transform:translateX(var(--sw))}}
+.pg-bolt{opacity:0;animation:pgBolt 1.35s linear infinite}
+@keyframes pgBolt{0%{transform:translateY(0);opacity:1}60%{transform:translateY(-44px);opacity:1}61%,100%{opacity:0}}
 .pg-rocket{animation:pgRocket 9s linear infinite}
 @keyframes pgRocket{0%{transform:translate(0,0)}100%{transform:translate(380px,-90px)}}
 .pg-rain{animation:pgRain .7s linear infinite}
