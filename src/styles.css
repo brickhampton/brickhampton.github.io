@@ -1325,6 +1325,8 @@ a.vbtn:active,button.vbtn:active{transform:scale(.94)}
   .potg-line b{font-size:22px}
   .potg-line span{font-size:10px}
   .potg-why{font-size:13px;margin-top:8px}
+  .potg-right .potg-txt{text-align:right}
+  .potg-right .potg-name,.potg-right .potg-line{justify-content:flex-end}
 }
 /* Backdrop bits: champagne spray, disco tiles and specks, fireworks. */
 .pg-drop{animation:pgDrop 1.4s cubic-bezier(.2,.6,.4,1) infinite}
