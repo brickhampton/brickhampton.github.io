@@ -85,7 +85,7 @@ function draw(frame, look) {
   const pal = { H: HAIR, D: HAIR2, L: HAIRL };
   HSP.forEach(([y, x, s]) => [...s].forEach((ch, i) => { if (pal[ch]) r(hx + x + i, hy + y, 1, 1, pal[ch]); }));
   // A strand falling forward over her front shoulder.
-  r(hx + 8, hy + 9, 1, 3, HAIR);
+  r(hx + 8, hy + 11, 1, 1, HAIR); r(hx + 9, hy + 10, 1, 4, HAIR); r(hx + 9, hy + 13, 1, 1, HAIR2);
   // ---- front arm and her film camera. It faces out of the picture, so she holds it square on: at her chest, or up in
   // front of her face.
   if (frame === 'snap') {
