@@ -1296,8 +1296,8 @@ a.vbtn:active,button.vbtn:active{transform:scale(.94)}
 .share-top .iconbtn.share-ic{width:40px;height:40px;background:none}
 
 /* Player of the game, at the foot of the Game page: the player dancing in a little arena, their line and why. */
-.potg-row{display:flex;align-items:center;gap:8px}
-.potg-stage{flex:none;display:block;padding:0;border:0;background:none;width:clamp(150px,30vw,250px);cursor:pointer;-webkit-mask:linear-gradient(90deg,transparent,#000 14%,#000 86%,transparent),linear-gradient(transparent,#000 12%,#000 82%,transparent);-webkit-mask-composite:source-in;mask:linear-gradient(90deg,transparent,#000 14%,#000 86%,transparent) intersect,linear-gradient(transparent,#000 12%,#000 82%,transparent)}
+.potg-row{display:flex;align-items:center;gap:24px}
+.potg-stage{flex:none;display:block;padding:0;border:0;background:none;width:clamp(200px,34vw,300px);cursor:pointer;-webkit-mask:linear-gradient(90deg,transparent,#000 14%,#000 86%,transparent),linear-gradient(transparent,#000 12%,#000 82%,transparent);-webkit-mask-composite:source-in;mask:linear-gradient(90deg,transparent,#000 14%,#000 86%,transparent) intersect,linear-gradient(transparent,#000 12%,#000 82%,transparent)}
 .potg-stage>*{pointer-events:none}
 .potg-stage svg{display:block;width:100%;height:auto;overflow:hidden}
 .potg-stage .av-fig{animation:none}
@@ -1316,8 +1316,8 @@ a.vbtn:active,button.vbtn:active{transform:scale(.94)}
 .potg-line span{font-family:var(--mono);font-size:11px;color:var(--granite)}
 .potg-why{margin:10px 0 0;font-size:14px;line-height:1.4;color:var(--stone)}
 @media (max-width:560px){
-  .potg-row{gap:2px;margin-left:-12px}
-  .potg-stage{width:132px}
+  .potg-row{gap:14px;margin-left:-10px}
+  .potg-stage{width:47vw;max-width:210px}
   .potg-kick{font-size:10px;letter-spacing:.16em}
   .potg-name{font-size:21px;gap:4px 8px;margin-bottom:10px}
   .potg-per{font-size:12px;padding:3px 7px}

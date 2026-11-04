@@ -7,16 +7,16 @@ import { playerOfGame, potgShort } from '../lib/potg.js';
 
 // The dance, one frame a beat-and-a-half: [pose, body x, body y, head x], in sprite pixels.
 // Fist pumps side to side, a shoulder shimmy (the body shakes, the head stays put), hands-up hops, then a head-nod groove.
-const PUMPS = [['fist', 0, -1, 0], ['fist', 0, 0, 0], ['fistL', 0, -1, 0], ['fistL', 0, 0, 0]];
-const SHIMMY = [1, -1, 1, -1, 1, -1, 1, -1].map(x => ['down', x, 0, -x]);
-const HOP = [['down', 0, 1, 0], ['fist2', 0, -2, 0], ['fist2', 0, -3, 0], ['fist2', 0, -2, 0], ['fist2', 0, 0, 0], ['fist2', 0, 0, 0]];
-const GROOVE = [['down', 0, 0, -1], ['down', 0, 1, -1], ['down', 0, 0, 0], ['down', 0, 1, 1], ['down', 0, 0, 1], ['down', 0, 1, 0], ['down', 0, 0, 0], ['down', 0, 1, 0]];
-const DANCE = [...PUMPS, ...PUMPS, ...SHIMMY, ...HOP, ...HOP, ...GROOVE];
+// Idle is an easy groove with the arms down: bob on the beat, nod side to side, then sway a step each way.
+const NODS = [['down', 0, 0, 0], ['down', 0, 1, 0], ['down', 0, 0, -1], ['down', 0, 1, -1], ['down', 0, 0, 0], ['down', 0, 1, 0], ['down', 0, 0, 1], ['down', 0, 1, 1]];
+const SWAY = [['down', -1, 0, 0], ['down', -1, 1, 0], ['down', 0, 0, 0], ['down', 0, 1, 0], ['down', 1, 0, 0], ['down', 1, 1, 0], ['down', 0, 0, 0], ['down', 0, 1, 0]];
+const DANCE = [...NODS, ...SWAY];
 // After a loss there's no celebrating: just nodding along with the ball, no smile, no confetti.
 const NOD = [['dribble', 0, 0, 0], ['dribble', 0, 1, 0], ['dribble', 0, 0, -1], ['dribble', 0, 1, -1], ['dribble', 0, 0, 0], ['dribble', 0, 1, 0], ['dribble', 0, 0, 1], ['dribble', 0, 1, 1]];
 // A tap: jump with both fists up, pump each arm, jump again.
 const CELEBRATE = [['fist2', 0, 0, 0], ['fist2', 0, -3, 0], ['fist2', 0, -6, 0], ['fist2', 0, -7, 0], ['fist2', 0, -5, 0], ['fist2', 0, -2, 0], ['down', 0, 1, 0],
   ['fist', 0, -1, 0], ['fist', 0, 0, 0], ['fistL', 0, -1, 0], ['fistL', 0, 0, 0], ['catch', 0, 1, 0], ['catch', 0, -4, 0], ['catch', 0, -6, 0], ['catch', 0, -4, 0], ['catch', 0, 0, 0]];
+// The clock ticks every 160 ms for a tap's celebration; the idle groove moves every 2 ticks, the after-a-loss nod every 3.
 const BEAT = 160, U = 104 / 34;
 // A burst of confetti from the player's middle, for a tap.
 const POP = (() => {
@@ -41,7 +41,7 @@ export function PotgSection({ g, games }) {
     const t = setInterval(() => {
       setN(x => x + 1);
       if (cel.current) { cel.current.i++; if (cel.current.i >= CELEBRATE.length) { cel.current = null; setGrin(false); } }
-    }, calm ? BEAT * 2 : BEAT);
+    }, BEAT);
     return () => clearInterval(t);
   }, [calm, reduced]);
   // Now and then, a smile while dancing (not after a loss).
@@ -59,7 +59,7 @@ export function PotgSection({ g, games }) {
   const tap = () => { sfx('cheer'); if (reduced) { setGrin(true); setTimeout(() => setGrin(false), 1500); return; } cel.current = { i: 0 }; setGrin(true); setParty(x => x + 1); };
   // Glasses wearers keep their normal eyes (smiling eyes read oddly behind the frames).
   const smile = grin && !cleanLook(look).glasses;
-  const [pose, dx, dy, hx] = cel.current ? CELEBRATE[cel.current.i] : reduced ? [calm ? 'dribble' : 'fist2', 0, 0, 0] : steps[n % steps.length];
+  const [pose, dx, dy, hx] = cel.current ? CELEBRATE[cel.current.i] : reduced ? [calm ? 'dribble' : 'fist2', 0, 0, 0] : steps[Math.floor(n / (calm ? 3 : 2)) % steps.length];
   const s = potg.s;
   const line = [['pts', 'PTS'], ['reb', 'REB'], ['ast', 'AST'], ['stl', 'STL'], ['blk', 'BLK']].filter(([k], i) => i < 3 || s[k] > 0);
   return (
