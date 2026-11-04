@@ -334,7 +334,7 @@ export function Player() {
     <div className="phero">
       <div className="pnum-clip" aria-hidden="true"><div className="pnum">{num}</div></div>
       <div className="pstage-wrap"><PStage p={p} num={num} mood={mood} />
-        {isAdmin() && <button className="pedit" id="p-edit-avatar" aria-label={`Edit ${p.name}'s avatar`} title="Edit avatar" onClick={() => openSheet(<AvatarSheet id={id} />, { wide: true })}><Pencil width="18" height="18" /></button>}</div>
+        {isAdmin() && <button className="pedit" id="p-edit-avatar" aria-label={`Edit ${p.name}'s avatar`} title="Edit avatar" onClick={() => openSheet(<AvatarSheet id={id} />, { wide: true })}><Pencil width="22" height="22" /></button>}</div>
       <div className="pid"><h1 className="page pname">{p.name}<span className="pno num">#{num}</span></h1>{starter ? null : <p className="psub"><span className="num">{mine.length} game{mine.length > 1 ? 's' : ''}</span><span>Last played {lastG.season} Game {lastG.no}</span></p>}<Badges id={id} key={id} /></div>
     </div>
 
