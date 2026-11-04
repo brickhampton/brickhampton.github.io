@@ -78,7 +78,7 @@ function draw(frame, look) {
   // ---- long hair: a crown, straight wispy bangs to just above the eyes, falling well past the shoulders at the back
   const HSP = [
     [-1, 2, 'HHHHHH'], [0, 0, 'HHHHHHHHHH'], [1, -1, 'HHHHHHHHHHHL'], [2, -1, 'HHHHLHHHHHHH'], [3, -1, 'HHHHHHHHHHHH'],
-    [4, -1, 'HHHHH.H.HH.H'], [5, -2, 'HHHH.......H'], [6, -2, 'HHHD'], [7, -2, 'HHHD'], [8, -2, 'HHHD'], [9, -2, 'HHHD'],
+    [4, -1, 'HHHHH.H.HH.H'], [5, -2, 'HHHH.......HH'], [6, -2, 'HHHD'], [7, -2, 'HHHD'], [8, -2, 'HHHD'], [9, -2, 'HHHD'],
     [10, -2, 'HHHD'], [11, -2, 'HHHHD'], [12, -2, 'HHHHD'], [13, -2, 'HHHHD'], [14, -2, 'HHHD'], [15, -2, 'HHHD'],
     [16, -2, 'HDHD'], [17, -1, 'HD'],
   ];
