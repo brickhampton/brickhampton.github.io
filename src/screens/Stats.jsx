@@ -16,11 +16,11 @@ const shot = (a, k, i) => k === 'ts' ? Math.round(i ? a.s.tsa : a.s.pts / 2) : a
 // Totals sort counting stats by their sums and shooting columns by shots made, like the box score.
 const totVal = (a, k) => k === 'gp' ? a.gp : SHOTS[k] ? shot(a, k, 0) : a.s[k];
 
-// Detailed shooting (Settings): made and attempts columns to the left of each plain % column.
+// Detailed shooting (Settings): each plain % column, then its made and attempts columns.
 // TSM is the TS numerator, PTS / 2, so TSM / TSA = TS%.
 const CNT = { fgm: 'fgm', fga: 'fga', m3m: 'm3', a3: 'a3', ftm: 'ftm', fta: 'fta', tsm: 'tsm', tsa: 'tsa' };
-const DCOLS = RCOLS.flatMap(c => c[0] === 'fg' ? [['fgm', 'FGM'], ['fga', 'FGA'], c] : c[0] === 'm3' ? [['m3m', '3FGM'], ['a3', '3FGA'], c]
-  : c[0] === 'ft' ? [['ftm', 'FTM'], ['fta', 'FTA'], c] : c[0] === 'ts' ? [['tsm', 'TS'], ['tsa', 'TSA'], c] : [c]);
+const DCOLS = RCOLS.flatMap(c => c[0] === 'fg' ? [c, ['fgm', 'FGM'], ['fga', 'FGA']] : c[0] === 'm3' ? [c, ['m3m', '3FGM'], ['a3', '3FGA']]
+  : c[0] === 'ft' ? [c, ['ftm', 'FTM'], ['fta', 'FTA']] : c[0] === 'ts' ? [c, ['tsm', 'TS'], ['tsa', 'TSA']] : [c]);
 
 // pctOnly: All time Totals show shooting as just the % (made-attempts get too big).
 function Rankings({ aggs, team, tot, pctOnly }) {
