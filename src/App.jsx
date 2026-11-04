@@ -67,7 +67,8 @@ function swipeTo(scr, dir) {
   if (scr === 'game') { const games = allGames(), i = games.findIndex(g => g.id === S.gameId); target = games[i + dir] ? () => go('game', { gameId: games[i + dir].id, slide: dir }) : null; }
   else {
     const strip = statPlayers().filter(x => allGames().some(g => g.rows[x])), i = strip.indexOf(S.playerId);
-    if (strip.length > 1) { const nx = strip[(i + dir + strip.length) % strip.length]; target = () => go('player', { playerId: nx, pScope: S.pScope, slide: dir }); }
+    // A sub's page doesn't swipe: subs aren't in the starters' order.
+    if (strip.length > 1 && i >= 0) { const nx = strip[(i + dir + strip.length) % strip.length]; target = () => go('player', { playerId: nx, pScope: S.pScope, slide: dir }); }
   }
   if (!target) { if (!reduced) inner.animate([{ transform: 'none' }, { transform: `translateX(${-dir * 18}px)` }, { transform: 'none' }], { duration: 300, easing: 'cubic-bezier(.2,.8,.2,1)' }); return; }
   if (reduced) return target();

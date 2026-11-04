@@ -24,6 +24,8 @@ export const P = id => S.roster.find(p => p.id === id) || S.subs.find(p => p.id 
 export const isStarter = id => S.roster.some(p => p.id === id);
 // The Stats page covers the starting players only. Subs still count in team totals.
 export const statPlayers = () => S.roster.map(p => p.id);
+// Subs only get their own player page while Admin mode's Additional player pages is on.
+export const hasPage = id => !!P(id) && (isStarter(id) || !!S.subPages);
 
 // A sub's number for one game: 0, then 00, then a random number no starter wears.
 const subNumCache = new WeakMap();
@@ -181,7 +183,8 @@ export function playerBadges(id, asOf, noTie) {
   if (starter && orMin > 0 && oa.gp >= orMin && oa.pg > 0 && oPeers.length > 2 && lead(oPeers, oa, x => x.pg)) add('oreb', 'Crash out', 'bull', 'blue', `Most offensive rebounds a game in ${nm} (${f1(oa.pg)}).`);
   if (best(x => x.pg('ast'))) add('ast', 'Assistaholic', 'pass', 'blue', `Most assists a game in ${nm} (${f1(a.pg('ast'))}).`);
   const def = x => (x.s.stl + x.s.blk) / x.gp;
-  if (starter && a.gp >= 3 && (def(a) >= 3 || best(def))) add('def', 'Clamps', 'shield', 'green', `${f1(def(a))} steals and blocks a game in ${nm}${best(def) ? ', the most on the team' : ''}.`);
+  // Subs can earn the 3+ a game version: it doesn't compare them with anyone.
+  if (a.gp >= 3 && (def(a) >= 3 || best(def))) add('def', 'Clamps', 'shield', 'green', `${f1(def(a))} steals and blocks a game in ${nm}${best(def) ? ', the most on the team' : ''}.`);
   const hasDef = out.some(b => b.key === 'def');
   if (!hasDef && a.gp >= 3 && a.pg('stl') >= BT.stl) add('stl', 'Cookiesss', 'cookie', 'green', `${f1(a.pg('stl'))} steals a game in ${nm}.`);
   if (!hasDef && a.gp >= 3 && a.pg('blk') >= BT.blk) add('blk', 'Not in my house!', 'shield', 'green', `${f1(a.pg('blk'))} blocks a game in ${nm}.`);

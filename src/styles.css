@@ -558,12 +558,20 @@ tr.tot td{font-weight:600;border-top:1px solid var(--stroke)}
 .player{display:flex;flex-direction:column;gap:34px;padding-block:20px 56px}
 [data-scr="games"] [data-av],[data-scr="game"] [data-av],[data-scr="stats"] [data-av]{cursor:pointer;transition:box-shadow .15s}
 [data-scr="games"] [data-av]:hover,[data-scr="game"] [data-av]:hover,[data-scr="stats"] [data-av]:hover{box-shadow:0 0 0 2px var(--royal)}
+/* Subs without their own page (Additional player pages off) aren't tappable. */
+[data-av][data-nopage]{cursor:default}
+[data-av][data-nopage]:hover{box-shadow:none !important}
 .p-strip{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;max-width:100%;padding:3px}
 .p-strip::-webkit-scrollbar{display:none}
 .p-strip button{border-radius:50%;padding:0;flex:none;opacity:.55;transition:opacity .15s, transform .15s}
 .p-strip button:hover{opacity:.9}
 .p-strip button[aria-current="true"]{opacity:1;box-shadow:0 0 0 2px var(--royal)}
 .p-strip .av-wrap{width:38px;height:38px}
+.p-strip .p-subs{width:38px;height:38px;display:grid;place-items:center;background:var(--lift2);color:var(--bone)}
+.p-strip .p-subs[aria-current="true"]{background:none}
+/* A sub's page: their games and last game, above any badges. */
+.psub{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;margin-top:12px;color:var(--granite);font-size:14px}
+.psub .num{color:var(--bone)}
 .phero{position:relative;display:grid;grid-template-columns:auto minmax(0,1fr);gap:36px;align-items:center;padding:8px 0 28px;border-bottom:1px solid var(--lift2);clip-path:inset(-80px -100vw 0)}
 /* The header lets the stage's pop-ups (PER, badges) and spotlight rise above it, but keeps the big number inside. */
 .pnum-clip{position:absolute;inset:0;overflow:hidden;pointer-events:none}
@@ -1252,6 +1260,9 @@ a.vbtn:active,button.vbtn:active{transform:scale(.94)}
 .subcard[aria-pressed="true"] .tick{background:var(--bone);color:var(--canvas);box-shadow:none}
 .subcard.in{opacity:.5;box-shadow:none;background:var(--lift2)}
 .subcard.in .tick{background:var(--mid);color:var(--bone)}
+.subcard.go .chev{position:absolute;right:14px;top:50%;margin-top:-8px;color:var(--granite)}
+.subcard.go:hover{background:#2f2a28}
+.subcard.go[aria-current="true"]{box-shadow:inset 0 0 0 1.5px rgba(120,150,255,.6)}
 .subnone{grid-column:1/-1;color:var(--granite);padding:14px 4px}
 .subnone button{color:#9db4ff;text-decoration:underline;text-underline-offset:3px}
 .panel .subacts{margin-top:16px}

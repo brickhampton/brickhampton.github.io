@@ -1,6 +1,6 @@
 import { S, set } from './store.js';
 import { rec } from './record.js';
-import { P, allGames, statPlayers } from './core.js';
+import { P, allGames, statPlayers, hasPage } from './core.js';
 
 // Screens keep their scroll position, so switching tabs or going back never jumps to the top.
 export const POS_SCREENS = ['games', 'game', 'stats', 'player'];
@@ -21,7 +21,7 @@ export function go(screen, opts = {}) {
 }
 
 export function openPlayer(id) {
-  if (!P(id)) return;
+  if (!hasPage(id)) return;
   const from = S.screen === 'player' ? S.pFrom : S.screen;
   go('player', { playerId: id, pFrom: from || 'stats', pScope: null });
 }
@@ -30,7 +30,7 @@ export function openPlayer(id) {
 export function fromHash(opts = {}) {
   const [, scr, id] = (location.hash.replace(/^#\/?/, '/').split('/'));
   if (scr === 'game' && id && allGames().some(g => g.id === id)) return go('game', { gameId: id, ...opts });
-  if (scr === 'player' && id && P(id)) return go('player', { playerId: id, pFrom: S.pFrom || 'stats', ...opts });
+  if (scr === 'player' && id && hasPage(id)) return go('player', { playerId: id, pFrom: S.pFrom || 'stats', ...opts });
   if (scr === 'stats' || scr === 'settings') return go(scr, opts);
   // A game being recorded is kept on this device, so a reload goes straight back to it.
   if ((scr === 'setup' || scr === 'entry') && rec()) return go(scr === 'entry' && !rec().nums ? 'setup' : scr, opts);
@@ -46,6 +46,6 @@ export function peekHash() {
 
 export const openTab = tab => {
   if (tab === 'games') return go(S.gamesSub === 'game' && S.gameId && allGames().some(g => g.id === S.gameId) ? 'game' : 'games');
-  if (tab === 'player') return S.playerId && P(S.playerId) ? go('player', { pFrom: S.screen }) : openPlayer(statPlayers()[0]);
+  if (tab === 'player') return S.playerId && hasPage(S.playerId) ? go('player', { pFrom: S.screen }) : openPlayer(statPlayers()[0]);
   go(tab);
 };

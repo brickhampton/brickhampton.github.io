@@ -34,6 +34,8 @@ export async function loadData() {
   const data = {
     seasons: seasons.data.map(s => s.code),
     supporter: site.data?.find(r => r.key === 'supporter')?.value || null,
+    // Additional player pages (12-sub-pages.sql): subs get their own pages. Off until Admin turns it on.
+    subPages: site.data?.find(r => r.key === 'sub_pages')?.value === true,
     current: seasons.data.find(s => s.is_current)?.code || seasons.data[0]?.code,
     roster: players.data.filter(p => p.role === 'starter').map(player).sort((a, b) => a.num - b.num),
     subs: players.data.filter(p => p.role === 'sub').map(player),
