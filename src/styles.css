@@ -1306,6 +1306,9 @@ a.vbtn:active,button.vbtn:active{transform:scale(.94)}
 .potg-stage .av-head{transform:translate(var(--hx,0px),0)}
 .potg-stage .smiling .av-smile{animation:none;opacity:1}
 .potg-stage .smiling .av-eyes{animation:none;opacity:0}
+/* After a loss: bouncing the ball, and looking left and right. */
+.potg-stage .pk-bounce .av-ball{animation:pxDribble .64s cubic-bezier(.5,0,.5,1) infinite}
+.potg-stage .pk-look .av-eyes{animation:pLook 1.9s steps(1)}
 .pg-conf{animation:pgFall 4s steps(24) infinite}
 @keyframes pgFall{0%{transform:translateY(0);opacity:0}10%{opacity:.9}80%{opacity:.8}100%{transform:translateY(130px);opacity:0}}
 .potg-txt{min-width:0;flex:1}
@@ -1338,6 +1341,11 @@ a.vbtn:active,button.vbtn:active{transform:scale(.94)}
 .pg-glint{animation:pgGlint 1.2s steps(1) infinite}
 /* The beach crab scuttles a few steps one way, pauses, and back. */
 .pg-crab{animation:pgCrab 4s steps(1) infinite}
+/* Arcade: the chase runs right across the back, the ball's mouth snapping open and shut. */
+.pg-chase{animation:pgChase 8s steps(80) infinite}
+@keyframes pgChase{0%{transform:translateX(0)}100%{transform:translateX(var(--run))}}
+.pg-chomp{animation:pgChomp .3s steps(1) infinite}
+@keyframes pgChomp{50%{transform:scaleY(.15)}}
 .pg-rocket{animation:pgRocket 9s linear infinite}
 @keyframes pgRocket{0%{transform:translate(0,0)}100%{transform:translate(380px,-90px)}}
 .pg-rain{animation:pgRain .7s linear infinite}

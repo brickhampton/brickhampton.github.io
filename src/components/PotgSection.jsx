@@ -21,6 +21,12 @@ const TRICKS = {
   behind: [['dribble', 0, 0, 0], ['dribble', 0, 1, 0], ['lowball', 0, 0, 0], ['dribbleL', 0, 0, 0], ['dribbleL', 0, 1, 0], ['lowball', 0, 0, 0], ['dribble', 0, 0, 0], ['dribble', 0, 1, 0]],
 };
 const TRICK_KEYS = Object.keys(TRICKS);
+// After a loss, low-key tricks only and no smile: a few bounces of the ball, the ball behind the back, a look left and right.
+// 'bounce' and 'look' are classes on the stage that animate the ball and the eyes (see .potg-stage .pk-*).
+TRICKS.bounce = Array.from({ length: 10 }, () => ['dribble', 0, 0, 0, 'bounce']);
+TRICKS.look = Array.from({ length: 6 }, () => ['dribble', 0, 0, 0, 'look']);
+const CALM_KEYS = ['bounce', 'behind', 'look'];
+const CLASS_EXTRAS = new Set(['bounce', 'look']);
 // After a loss there's no celebrating: just nodding along with the ball, no smile, no confetti.
 const NOD = [['dribble', 0, 0, 0], ['dribble', 0, 1, 0]];
 // A tap: a double fist pump, jumping with both fists up, twice.
@@ -65,19 +71,20 @@ export function PotgSection({ g, games }) {
     }, BEAT);
     return () => clearInterval(t);
   }, [reduced]);
-  // Idle: every few seconds a trick, never the same one twice running; in between, now and then a smile.
+  // Idle: every few seconds a trick, never the same one twice running; in between, now and then a smile (not after a loss).
   useEffect(() => {
-    if (reduced || calm) return;
+    if (reduced) return;
+    const keys = calm ? CALM_KEYS : TRICK_KEYS;
     let t;
     const next = () => { t = setTimeout(() => {
       if (!play.current) {
-        if (Math.random() < .3) { setGrin(true); setTimeout(() => !play.current && setGrin(false), 1600); }
-        else { const ks = TRICK_KEYS.filter(k => k !== lastTrick.current), k = ks[Math.floor(Math.random() * ks.length)]; lastTrick.current = k; start(TRICKS[k], 2, true); }
+        if (!calm && Math.random() < .3) { setGrin(true); setTimeout(() => !play.current && setGrin(false), 1600); }
+        else { const ks = keys.filter(k => k !== lastTrick.current), k = ks[Math.floor(Math.random() * ks.length)]; lastTrick.current = k; start(TRICKS[k], 2, !calm); }
       }
       next();
     }, 3500 + Math.random() * 3500); };
-    const first = FIRST in TRICKS ? FIRST : TRICK_KEYS[Math.floor(Math.random() * TRICK_KEYS.length)];
-    t = setTimeout(() => { if (!play.current) { lastTrick.current = first; start(TRICKS[first], 2, true); } next(); }, FIRST ? 300 : 1500);
+    const first = keys.includes(FIRST) ? FIRST : keys[Math.floor(Math.random() * keys.length)];
+    t = setTimeout(() => { if (!play.current) { lastTrick.current = first; start(TRICKS[first], 2, !calm); } next(); }, FIRST ? 300 : 1500);
     return () => clearTimeout(t);
   }, [calm, reduced]);
   if (!p) return null;
@@ -96,11 +103,11 @@ export function PotgSection({ g, games }) {
     <div className="sec potg" id="g-potg">
       <div className="potg-row">
         <button className={`potg-stage${wide ? ' wide' : ''}`} onClick={tap} aria-label={`${p.name}, player of the game. Tap to celebrate`}>
-          <svg viewBox={bg.view} aria-hidden="true" className={`bg-${bgKey}${smile ? ' smiling' : ''}`}>
+          <svg viewBox={bg.view} aria-hidden="true" className={`bg-${bgKey}${smile ? ' smiling' : ''}${CLASS_EXTRAS.has(extra) ? ` pk-${extra}` : ''}`}>
             <g dangerouslySetInnerHTML={{ __html: bg.svg + (calm ? '' : bg.party) }} />
             <g transform={`translate(${fx} ${fy}) scale(${K})`}>
               <g dangerouslySetInnerHTML={{ __html: pxShadow(50, 103.5, 22, U) }} />
-              <g transform={`translate(${dx * U} ${dy * U})`} style={{ '--hx': `${hx * U}px` }} dangerouslySetInnerHTML={{ __html: figure(look, { stage: true, pose }) + (extra ? trickExtras(look, extra) : '') }} />
+              <g transform={`translate(${dx * U} ${dy * U})`} style={{ '--hx': `${hx * U}px` }} dangerouslySetInnerHTML={{ __html: figure(look, { stage: true, pose }) + (extra && !CLASS_EXTRAS.has(extra) ? trickExtras(look, extra) : '') }} />
             </g>
             {party ? <g key={party} transform={`translate(0 ${bg.feet - 226})`} dangerouslySetInnerHTML={{ __html: POP }} /> : null}
           </svg>
