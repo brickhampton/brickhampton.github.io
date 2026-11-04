@@ -1309,6 +1309,9 @@ a.vbtn:active,button.vbtn:active{transform:scale(.94)}
 /* After a loss: bouncing the ball, and looking left and right. */
 .potg-stage .pk-bounce .av-ball{animation:pxDribble .64s cubic-bezier(.5,0,.5,1) infinite}
 .potg-stage .pk-look .av-eyes{animation:pLook 1.9s steps(1)}
+/* The shrug tips the head down a pixel, eyes lowered a pixel more. */
+.potg-stage .pk-shrug .av-head{transform:translateY(3.06px)}
+.potg-stage .pk-shrug .av-eyes,.potg-stage .pk-shrug .av-smile{transform:translateY(3.06px)}
 .pg-conf{animation:pgFall 4s steps(24) infinite}
 @keyframes pgFall{0%{transform:translateY(0);opacity:0}10%{opacity:.9}80%{opacity:.8}100%{transform:translateY(130px);opacity:0}}
 .potg-txt{min-width:0;flex:1}
