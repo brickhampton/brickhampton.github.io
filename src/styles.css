@@ -1299,6 +1299,8 @@ a.vbtn:active,button.vbtn:active{transform:scale(.94)}
 .potg-row{display:flex;align-items:center;gap:24px}
 .potg-stage{flex:none;display:block;padding:0;border:0;background:none;width:clamp(200px,34vw,300px);cursor:pointer;-webkit-mask:linear-gradient(90deg,transparent,#000 14%,#000 86%,transparent),linear-gradient(transparent,#000 12%,#000 82%,transparent);-webkit-mask-composite:source-in;mask:linear-gradient(90deg,transparent,#000 14%,#000 86%,transparent) intersect,linear-gradient(transparent,#000 12%,#000 82%,transparent)}
 .potg-stage>*{pointer-events:none}
+/* iPad and computer: a wider scene with the teammates, so the player sits nearer the middle of the screen. */
+.potg-stage.wide{width:clamp(400px,54vw,600px);-webkit-mask:linear-gradient(90deg,transparent,#000 7%,#000 84%,transparent),linear-gradient(transparent,#000 12%,#000 82%,transparent);-webkit-mask-composite:source-in;mask:linear-gradient(90deg,transparent,#000 7%,#000 84%,transparent) intersect,linear-gradient(transparent,#000 12%,#000 82%,transparent)}
 .potg-stage svg{display:block;width:100%;height:auto;overflow:hidden}
 .potg-stage .av-fig{animation:none}
 .potg-stage .av-head{transform:translate(var(--hx,0px),0)}

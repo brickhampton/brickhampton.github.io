@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
-import { P, numIn, perTxt, perCls } from '../lib/core.js';
+import { P, numIn, perTxt, perCls, isStarter } from '../lib/core.js';
 import { sfx } from '../lib/sfx.js';
 import { figure, cleanLook, pxShadow, trickExtras } from '../lib/avatar.js';
-import { backdrop, randomBackdrop, BACKDROPS } from '../lib/potgBg.js';
+import { backdrop, randomBackdrop, BACKDROPS, WIDE_X0 } from '../lib/potgBg.js';
 import { playerOfGame, potgShort } from '../lib/potg.js';
 
 // The dance, one frame a beat-and-a-half: [pose, body x, body y, head x], in sprite pixels.
@@ -39,6 +39,20 @@ const POP = (() => {
 // Preview only: ?pbg=<name> fixes the backdrop (otherwise it's a random one each time); ?ptrick=<name> picks the first idle trick.
 const Q = typeof location !== 'undefined' ? new URLSearchParams(location.search) : new URLSearchParams(), FIXED = Q.get('pbg'), FIRST = Q.get('ptrick'), RIGHT = Q.get('palign') === 'right';
 
+// On iPad and computer the stage is wider, and the rest of the starters stand to the player's left, smaller, clapping.
+const WIDE_MQ = '(min-width: 701px)';
+const useWide = () => {
+  const mq = typeof matchMedia === 'function' ? matchMedia(WIDE_MQ) : null;
+  const [w, setW] = useState(() => !!mq?.matches);
+  useEffect(() => { if (!mq) return; const f = () => setW(mq.matches); mq.addEventListener('change', f); return () => mq.removeEventListener('change', f); }, []);
+  return w;
+};
+// Where the teammates stand: spread across the left of the stage, in two staggered rows when there are more than four.
+function teamSpots(n) {
+  const x0 = WIDE_X0 + 24, x1 = 46, step = n > 1 ? Math.min(34, (x1 - x0) / (n - 1)) : 0, mid = (x0 + x1) / 2, w = step * (n - 1);
+  return Array.from({ length: n }, (_, i) => ({ x: mid - w / 2 + i * step, back: n > 4 && i % 2 === 1 }));
+}
+
 export function PotgSection({ g, games, tile }) {
   const potg = playerOfGame(g, games), p = P(potg.id);
   const calm = g.result === 'L';
@@ -74,21 +88,34 @@ export function PotgSection({ g, games, tile }) {
   }, [calm, reduced]);
   if (!p) return null;
   const look = { ...p, num: numIn(g, potg.id) ?? p.num };
-  const bg = backdrop(bgKey, look), K = bg.k, fx = 130 - 50 * K, fy = bg.feet - 104 * K;
+  const wide = useWide();
+  const bg = backdrop(bgKey, look, wide), K = bg.k, fx = 130 - 50 * K, fy = bg.feet - 104 * K;
   // Tap to celebrate: a double fist pump with a jump, a pop of confetti and a cheer.
   const tap = () => { sfx('cheer'); if (reduced) { setGrin(true); setTimeout(() => setGrin(false), 1500); return; } start(CELEBRATE, 1, true); setParty(x => x + 1); };
   // Glasses wearers keep their normal eyes (smiling eyes read oddly behind the frames).
   const smile = grin && !cleanLook(look).glasses;
   const pl = play.current;
   const [pose, dx, dy, hx, extra] = pl ? pl.frames[pl.i] : reduced ? [calm ? 'dribble' : 'down', 0, 0, 0] : calm ? NOD[Math.floor(n / 3) % NOD.length] : BOB[Math.floor(n / 2) % BOB.length];
+  // The teammates: the other starters who played, clapping out of step with each other (faster, with a hop, while the player celebrates).
+  const cheering = !!pl && pl.frames === CELEBRATE;
+  const mates = wide ? Object.keys(g.rows || {}).filter(id => id !== potg.id && isStarter(id) && P(id)) : [];
+  const spots = teamSpots(mates.length), ground = bg.ground ?? bg.feet;
+  const team = mates.map((id, i) => {
+    const sp = spots[i], k = K * (sp.back ? .56 : .62), gy = ground - (sp.back ? 7 : 0);
+    const beat = reduced ? 0 : Math.floor(n / (cheering ? 1 : calm ? 4 : 2)) + i;
+    const open = beat % 2 === 1, hop = cheering && !reduced ? (beat % 4 < 2 ? -3 : 0) : 0;
+    return { id, back: sp.back, html: `<g transform="translate(${(sp.x - 50 * k).toFixed(1)} ${(gy - 104 * k).toFixed(1)}) scale(${k.toFixed(3)})">${pxShadow(50, 103.5, 22, U)}<g transform="translate(0 ${(hop + (open ? 0 : 1)) * U})">${figure({ ...P(id), num: numIn(g, id) ?? P(id).num }, { stage: true, pose: open ? 'clapo' : 'clap' })}</g></g>` };
+  });
+  const teamSvg = [...team.filter(t => t.back), ...team.filter(t => !t.back)].map(t => t.html).join('');
   const s = potg.s;
   const line = [['pts', 'PTS'], ['reb', 'REB'], ['ast', 'AST'], ['stl', 'STL'], ['blk', 'BLK']].filter(([k], i) => i < 3 || s[k] > 0);
   return (
     <div className={(tile ? 'potg lead-potg' : 'sec potg') + (RIGHT ? ' potg-right' : '')} id="g-potg">
       <div className="potg-row">
-        <button className="potg-stage" onClick={tap} aria-label={`${p.name}, player of the game. Tap to celebrate`}>
+        <button className={`potg-stage${wide ? ' wide' : ''}`} onClick={tap} aria-label={`${p.name}, player of the game. Tap to celebrate`}>
           <svg viewBox={bg.view} aria-hidden="true" className={`bg-${bgKey}${smile ? ' smiling' : ''}`}>
             <g dangerouslySetInnerHTML={{ __html: bg.svg + (calm ? '' : bg.party) }} />
+            {teamSvg ? <g className="potg-team" dangerouslySetInnerHTML={{ __html: teamSvg }} /> : null}
             <g transform={`translate(${fx} ${fy}) scale(${K})`}>
               <g dangerouslySetInnerHTML={{ __html: pxShadow(50, 103.5, 22, U) }} />
               <g transform={`translate(${dx * U} ${dy * U})`} style={{ '--hx': `${hx * U}px` }} dangerouslySetInnerHTML={{ __html: figure(look, { stage: true, pose }) + (extra ? trickExtras(look, extra) : '') }} />

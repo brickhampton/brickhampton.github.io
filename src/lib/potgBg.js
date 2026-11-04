@@ -5,7 +5,10 @@ import { playerCourt } from './playerCourt.js';
 import { crowd } from './homeBg.js';
 import { figure } from './avatar.js';
 
-const X0 = 20, Y0 = 70, X1 = 240, Y1 = 256, W = X1 - X0, H = Y1 - Y0;
+const Y0 = 70, X1 = 240, Y1 = 256;
+// The left edge moves out for the wide stage (iPad and computer), which has room for the teammates beside the player.
+let X0 = 20, W = X1 - X0;
+export const WIDE_X0 = -100;
 const rect = (x, y, w, h, fill, extra = '') => `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${fill}"${extra}/>`;
 const seeded = seed => { let s = seed; return () => (s = (s * 16807) % 2147483647) / 2147483647; };
 const PIX = 3.4;
@@ -53,7 +56,7 @@ function podium() {
     const dx = -(20 + rnd() * 80), dy = -(50 + rnd() * 60), z = 2.5 + Math.round(rnd() * 2), d = (1.1 + rnd() * .8).toFixed(2), dl = (-rnd() * 2).toFixed(2);
     spray += rect(0, 0, z, z, i % 3 ? '#fff4c9' : '#ffffff', ` class="pg-drop" style="--dx:${dx.toFixed(0)}px;--dy:${dy.toFixed(0)}px;animation-duration:${d}s;animation-delay:${dl}s"`);
   }
-  return { svg: wall + steps + flute(66) + flute(76) + bottle, party: `<g transform="translate(172 184)">${spray}</g>` + confetti(12, 3), feet, view: '24 70 212 182', k: .92 };
+  return { svg: wall + steps + flute(66) + flute(76) + bottle, party: `<g transform="translate(172 184)">${spray}</g>` + confetti(12, 3), feet, ground: 236, view: '24 70 212 182', k: .92 };
 }
 
 // 3. A disco: a mirror ball, coloured light specks drifting over the wall, and a floor of tiles that light up in turn.
@@ -281,9 +284,16 @@ export const BACKDROPS = { podium, disco, fireworks, magazine, redcarpet, parade
 export const BACKDROP_KEYS = Object.keys(BACKDROPS);
 const built = new Map();
 // Built once per backdrop (and per player for the jumbotron, which shows them on the screen).
-export function backdrop(k, look) {
-  const key = k === 'jumbotron' ? k + JSON.stringify(look) : k;
-  if (!built.has(key)) built.set(key, (BACKDROPS[k] || arena)(look));
+export function backdrop(k, look, wide) {
+  const key = (k === 'jumbotron' ? k + JSON.stringify(look) : k) + (wide ? ':wide' : '');
+  if (!built.has(key)) {
+    X0 = wide ? WIDE_X0 : 20; W = X1 - X0;
+    const b = (BACKDROPS[k] || arena)(look);
+    X0 = 20; W = X1 - X0;
+    // The wide view keeps the same top, bottom and right edge, and reaches further left.
+    if (wide) { const [x, y, w, h] = b.view.split(' ').map(Number); b.view = `${WIDE_X0 + 4} ${y} ${x + w - WIDE_X0 - 4} ${h}`; }
+    built.set(key, b);
+  }
   return built.get(key);
 }
 // A different backdrop from last time, each time a Game page opens.
