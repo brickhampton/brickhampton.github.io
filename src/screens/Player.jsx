@@ -185,7 +185,7 @@ export function Player() {
 
   // Team comparison set: starters with games in this scope (plus this player if a sub).
   const peers = [...new Set([...statPlayers(), id])].map(x => playerAgg(inScope, x)).filter(Boolean);
-  const val = (agg, k, tot) => k === 'gp' ? agg.gp : k === 'ts' ? agg.s.ts : k === 'fg' ? ratio(agg.s.fgm, agg.s.fga) : k === 'p3' ? ratio(agg.s.m3, agg.s.a3) : k === 'ft' ? ratio(agg.s.ftm, agg.s.fta) : tot ? agg.s[k] : agg.pg(k);
+  const val = (agg, k, tot) => k === 'tsm' ? (tot ? Math.round(agg.s.pts / 2) : agg.pg('pts') / 2) : k === 'tsa' && tot ? Math.round(agg.s.tsa) : k === 'gp' ? agg.gp : k === 'ts' ? agg.s.ts : k === 'fg' ? ratio(agg.s.fgm, agg.s.fga) : k === 'p3' ? ratio(agg.s.m3, agg.s.a3) : k === 'ft' ? ratio(agg.s.ftm, agg.s.fta) : tot ? agg.s[k] : agg.pg(k);
   const rankOf = (k, lowerBetter, tot) => {
     if (!starter || peers.length < 2) return 0; const v = val(a, k, tot); if (v === null) return 0;
     return 1 + peers.filter(x => x.id !== id && val(x, k, tot) !== null && (lowerBetter ? val(x, k, tot) < v : val(x, k, tot) > v)).length;
@@ -200,11 +200,14 @@ export function Player() {
   const detail = shotDetail();
   const tiles = detail ? [
     // Detailed shooting (Settings): made, attempts and % tiles, three to a row on iPhone. Attempts aren't ranked.
+    // TSM is the TS numerator (PTS / 2), so TSM / TSA = TS%. Turnovers and Games come last.
     ['per', 'PER', (v, tot) => perTxt(v, !tot)], ['pts', 'Points', n1], ['reb', 'Rebounds', n1], ['ast', 'Assists', n1],
-    ['stl', 'Steals', n1], ['blk', 'Blocks', n1], ['to', 'Turnovers', n1, true], ['ts', 'TS%', pctTxt], ['gp', 'Games', v => v],
+    ['stl', 'Steals', n1], ['blk', 'Blocks', n1],
     ['fgm', 'FGM', n1], ['fga', 'FGA', n1, false, true], ['fg', 'FG%', pctTxt],
     ['m3', '3FGM', n1], ['a3', '3FGA', n1, false, true], ['p3', '3FG%', pctTxt],
     ['ftm', 'FTM', n1], ['fta', 'FTA', n1, false, true], ['ft', 'FT%', pctTxt],
+    ['tsm', 'TSM', n1], ['tsa', 'TSA', n1, false, true], ['ts', 'TS%', pctTxt],
+    ['to', 'Turnovers', n1, true], ['gp', 'Games', v => v],
   ] : [
     ['per', 'PER', (v, tot) => perTxt(v, !tot)], ['pts', 'Points', n1], ['reb', 'Rebounds', n1], ['ast', 'Assists', n1],
     ['stl', 'Steals', n1], ['blk', 'Blocks', n1], ['to', 'Turnovers', n1, true],

@@ -17,16 +17,18 @@ const shot = (a, k, i) => k === 'ts' ? Math.round(i ? a.s.tsa : a.s.pts / 2) : a
 const totVal = (a, k) => k === 'gp' ? a.gp : SHOTS[k] ? shot(a, k, 0) : a.s[k];
 
 // Detailed shooting (Settings): made and attempts columns to the left of each plain % column.
-const CNT = { fgm: 'fgm', fga: 'fga', m3m: 'm3', a3: 'a3', ftm: 'ftm', fta: 'fta', tsa: 'tsa' };
+// TSM is the TS numerator, PTS / 2, so TSM / TSA = TS%.
+const CNT = { fgm: 'fgm', fga: 'fga', m3m: 'm3', a3: 'a3', ftm: 'ftm', fta: 'fta', tsm: 'tsm', tsa: 'tsa' };
 const ATTS = new Set(['fga', 'a3', 'fta', 'tsa']);
 const DCOLS = RCOLS.flatMap(c => c[0] === 'fg' ? [['fgm', 'FGM'], ['fga', 'FGA'], c] : c[0] === 'm3' ? [['m3m', '3FGM'], ['a3', '3FGA'], c]
-  : c[0] === 'ft' ? [['ftm', 'FTM'], ['fta', 'FTA'], c] : c[0] === 'ts' ? [['tsa', 'TSA'], c] : [c]);
+  : c[0] === 'ft' ? [['ftm', 'FTM'], ['fta', 'FTA'], c] : c[0] === 'ts' ? [['tsm', 'TSM'], ['tsa', 'TSA'], c] : [c]);
 
 // pctOnly: All time Totals show shooting as just the % (made-attempts get too big).
 function Rankings({ aggs, team, tot, pctOnly }) {
   const detail = shotDetail(), cols = detail ? DCOLS : RCOLS;
   const dash = tot && !pctOnly && !detail;
-  const val = (a, k) => CNT[k] ? (tot ? a.s[CNT[k]] : a.pg(CNT[k])) : tot ? (SHOTS[k] && !dash ? aggVal(a, k) : totVal(a, k)) : aggVal(a, k);
+  const cnt = (a, k) => k === 'tsm' ? (tot ? Math.round(a.s.pts / 2) : a.pg('pts') / 2) : k === 'tsa' && tot ? Math.round(a.s.tsa) : tot ? a.s[CNT[k]] : a.pg(CNT[k]);
+  const val = (a, k) => CNT[k] ? cnt(a, k) : tot ? (SHOTS[k] && !dash ? aggVal(a, k) : totVal(a, k)) : aggVal(a, k);
   const sk = S.rsort?.k, bestDir = (sk === 'name' || sk === 'to') ? 1 : -1, dir = S.rsort?.best ? bestDir : -bestDir;
   const sorted = !sk ? aggs : aggs.slice().sort((a, b) => {
     if (sk === 'name') return dir * P(a.id).name.localeCompare(P(b.id).name);
@@ -43,7 +45,7 @@ function Rankings({ aggs, team, tot, pctOnly }) {
     }
     if (CNT[k]) {
       const all = aggs.map(x => val(x, k)), top = !isTeam && !ATTS.has(k) && v === Math.max(...all);
-      return <td key={k}><span className={`n${top && aggs.length > 1 ? ' hi' : ''}`}>{tot && k !== 'tsa' ? v : f1(v)}</span></td>;
+      return <td key={k}><span className={`n${top && aggs.length > 1 ? ' hi' : ''}`}>{tot ? v : f1(v)}</span></td>;
     }
     if (SHOTS[k]) {
       const pct = aggVal(a, k);
