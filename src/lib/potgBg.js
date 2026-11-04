@@ -223,9 +223,15 @@ function beach() {
   const bx = 52, by = 214;
   s += rect(bx, by, 32, 18, '#2a2e3a') + rect(bx + 6, by - 5, 20, 2, '#8a93a6') + rect(bx + 6, by - 5, 2, 5, '#8a93a6') + rect(bx + 24, by - 5, 2, 5, '#8a93a6') + rect(bx + 13, by + 3, 6, 4, '#4fe3ff', ' opacity=".7"');
   const spk = x => `<g transform="translate(${x} ${by + 10})"><g class="pg-pulse">${rect(-4, -4, 8, 8, '#111')}${rect(-1.5, -1.5, 3, 3, '#555')}</g></g>`;
-  // The beach ball bouncing on the right.
-  const ball = `<g class="pg-bounce">${rect(196, 210, 14, 14, '#fff')}${rect(196, 210, 5, 14, '#e74c3c')}${rect(205, 210, 5, 14, '#2f55d4')}${rect(198, 208, 10, 2, '#fff')}${rect(198, 224, 10, 2, '#f4d37c')}</g>`;
-  return { svg: s, party: spk(bx + 6) + spk(bx + 26) + ball, feet: 226, view: V, k: K };
+  // A beach umbrella on the right: red and white stripes, a scalloped edge, the pole in the sand and its shade.
+  const ux = 192, uy = 146;
+  s += `<ellipse cx="${ux - 4}" cy="234" rx="26" ry="4" fill="#8a6a3c" opacity=".55"/>` + rect(ux - 1.2, uy + 4, 2.4, 234 - uy - 4, '#e8e2d0') + rect(ux + .6, uy + 4, .8, 234 - uy - 4, '#b9b2a0');
+  // The canopy is a dome of pixels, coloured in eight wedges fanning out from the top, so the stripes splay like a real umbrella.
+  const UP = 3.4, hws = [6, 13, 19, 23, 26, 28];
+  hws.forEach((hw, j) => { for (let x = -hw; x < hw; x += UP) { const t = (x + UP / 2) / hw; s += rect((ux + x).toFixed(1), (uy + j * UP).toFixed(1), Math.min(UP, hw - x).toFixed(1), UP, Math.floor((t + 1) * 4) % 2 ? '#ffffff' : '#e74c3c'); } });
+  for (let i = 0; i < 8; i++) s += rect((ux - 28 + i * 7 + 1).toFixed(1), uy + hws.length * UP, 5, 2.2, i % 2 ? '#ffffff' : '#e74c3c');
+  s += rect(ux - 1.5, uy - 3, 3, 3, '#e8e2d0');
+  return { svg: s, party: spk(bx + 6) + spk(bx + 26), feet: 226, view: V, k: K };
 }
 
 // 11. Rooftop court at sunset: sky from orange to purple, the city behind a chain-link fence, the court underfoot.
@@ -259,7 +265,13 @@ function concert() {
   // Smoke: soft blocks drifting along the floor.
   const rnd = seeded(8); let smoke = '';
   for (let i = 0; i < 9; i++) smoke += rect((X0 + rnd() * W).toFixed(1), (204 + rnd() * 26).toFixed(1), (24 + rnd() * 20).toFixed(1), (6 + rnd() * 6).toFixed(1), '#c9c2d8', ` class="pg-smoke" opacity=".1" style="animation-delay:${(-rnd() * 8).toFixed(2)}s"`);
-  return { svg: s, party: beams + smoke, feet: 226, view: V, k: K };
+  // Strobes: three white lamps on the rig between the coloured ones, flashing beams down onto the stage out of step,
+  // and now and then the whole stage flashes.
+  const lamps = [[68, 0], [130, -.37], [192, -.71]];
+  s += lamps.map(([x]) => rect(x - 4, 80, 8, 6, '#2a2e3a') + rect(x - 3, 85, 6, 2, '#ffffff')).join('');
+  const strobe = lamps.map(([x, dl], i) => `<path class="pg-strobe" d="M${x - 3} 87L${x + 3} 87L${x + 15 + (1 - i) * 9} 236L${x - 15 + (1 - i) * 9} 236Z" fill="#fff" style="animation-delay:${dl}s;animation-duration:${(1.1 + i * .23).toFixed(2)}s"/>`).join('')
+    + rect(X0, Y0, W, Y1 - Y0, '#fff', ' class="pg-strobe all"');
+  return { svg: s, party: beams + smoke + strobe, feet: 226, view: V, k: K };
 }
 
 // 13. Arcade game: a starfield scrolling down, 1UP and HIGH SCORE at the top, a neon grid floor, coins popping out.
