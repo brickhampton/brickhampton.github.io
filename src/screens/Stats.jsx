@@ -15,8 +15,10 @@ const shot = (a, k, i) => k === 'ts' ? Math.round(i ? a.s.tsa : a.s.pts / 2) : a
 // Totals sort counting stats by their sums and shooting columns by shots made, like the box score.
 const totVal = (a, k) => k === 'gp' ? a.gp : SHOTS[k] ? shot(a, k, 0) : a.s[k];
 
-function Rankings({ aggs, team, tot }) {
-  const val = tot ? totVal : aggVal;
+// pctOnly: All time Totals show shooting as just the % (made-attempts get too big).
+function Rankings({ aggs, team, tot, pctOnly }) {
+  const dash = tot && !pctOnly;
+  const val = tot ? (a, k) => SHOTS[k] && !dash ? aggVal(a, k) : totVal(a, k) : aggVal;
   const sk = S.rsort?.k, bestDir = (sk === 'name' || sk === 'to') ? 1 : -1, dir = S.rsort?.best ? bestDir : -bestDir;
   const sorted = !sk ? aggs : aggs.slice().sort((a, b) => {
     if (sk === 'name') return dir * P(a.id).name.localeCompare(P(b.id).name);
@@ -35,6 +37,7 @@ function Rankings({ aggs, team, tot }) {
       const pct = aggVal(a, k);
       // Averages show attempts a game under the %, e.g. 3.6 A.
       if (!tot) return <td key={k} className={tier(k, pct) || undefined}>{pctTxt(pct)}<span className="sp att">{f1(a.pg(SHOTS[k][1]))} A</span></td>;
+      if (!dash) return <td key={k} className={tier(k, pct) || undefined}>{pctTxt(pct)}</td>;
       const at = shot(a, k, 1);
       return <td key={k} className={tier(k, pct, at) || undefined}>{shot(a, k, 0)}-{at}<span className="sp">{pctTxt(pct)}</span></td>;
     }
@@ -46,7 +49,7 @@ function Rankings({ aggs, team, tot }) {
   return (
     <div className="tbl-wrap"><table id="rank">
       <thead><tr><th className="sortable" data-rk="name" aria-sort={aria('name')} onClick={() => setSort('rsort', 'name')}>Player{arrow('name')}</th>
-        {RCOLS.map(([k, l]) => <th key={k} className={`sortable${k === 'per' ? ' c' : ''}`} data-rk={k} aria-sort={aria(k)} onClick={() => setSort('rsort', k)}>{arrow(k)}{tot && SHOTS[k] ? l.slice(0, -1) : l}</th>)}</tr></thead>
+        {RCOLS.map(([k, l]) => <th key={k} className={`sortable${k === 'per' ? ' c' : ''}`} data-rk={k} aria-sort={aria(k)} onClick={() => setSort('rsort', k)}>{arrow(k)}{dash && SHOTS[k] ? l.slice(0, -1) : l}</th>)}</tr></thead>
       <tbody>{sorted.map(a => <tr key={a.id}><td className="pl"><div className="plc"><Avatar id={a.id} />{P(a.id).name}</div></td>{RCOLS.map(([k]) => cell(a, k))}</tr>)}
         {team ? <tr className="tot"><td className="pl"><div className="plc">Team</div></td>{RCOLS.map(([k]) => cell(team, k, true))}</tr> : null}</tbody>
     </table></div>
@@ -137,7 +140,7 @@ export function Stats() {
         <div className={`tog${totals ? ' r' : ''}`} id="s-mode" role="group" aria-label="Averages or totals">
           <button data-m="avg" aria-pressed={!totals} onClick={() => totals && set({ sTotals: false })}>Averages</button>
           <button data-m="tot" aria-pressed={totals} onClick={() => !totals && set({ sTotals: true })}>Totals</button></div></div>
-      <div id="rank-wrap"><Rankings aggs={aggs} team={team} tot={totals} /></div></div>
+      <div id="rank-wrap"><Rankings aggs={aggs} team={team} tot={totals} pctOnly={all} /></div></div>
 
     <div className="sec"><h3>{all ? 'Season by season' : 'Trend over the season'}</h3>
       <div className="card" id="trend-card"><div className="ctrl"><div className="chips" id="t-players">{pickable.map(id => (
