@@ -160,8 +160,8 @@ export function Stats() {
       <div className="card" id="trend-card"><div className="ctrl"><div className="chips" id="t-players">{pickable.map(id => (
         <button key={id} data-id={id} aria-pressed={trend.includes(id)} onClick={() => togglePlayer(id)}><span className="sw" style={{ background: trend.includes(id) ? SLOT_COL[trend.indexOf(id)] : 'var(--mid)' }} />{P(id).name}</button>))}</div>
         <span className="grow" /><label className="sr" htmlFor="t-stat" style={{ fontSize: 13, color: 'var(--granite)' }}>Stat</label>
-        <select id="t-stat" value={S.tStat} onChange={e => set({ tStat: e.target.value })}>{Object.entries(STATS).map(([k, l]) => <option key={k} value={k}>{l}</option>)}</select></div>
-        <Chart id="trend" draw={w => drawTrend(w, games, { k: S.tStat, ids: trend, season: S.sSeason })} deps={[games, S.tStat, trend.join(), S.sSeason]} /></div></div>
+        <select id="t-stat" value={S.tStat in STATS ? S.tStat : 'per'} onChange={e => set({ tStat: e.target.value })}>{Object.entries(STATS).map(([k, l]) => <option key={k} value={k}>{l}</option>)}</select></div>
+        <Chart id="trend" draw={w => drawTrend(w, games, { k: S.tStat in STATS ? S.tStat : 'per', ids: trend, season: S.sSeason })} deps={[games, S.tStat, trend.join(), S.sSeason]} /></div></div>
 
     <div className="sec"><h3>Volume and efficiency</h3><p className="hint">Shots per game against true shooting {all ? 'in all games' : 'in ' + S.sSeason}</p>
       <div className="card"><Chart id="scatter" draw={w => drawScatter(w, qual, openPlayer)} deps={[games, S.sSeason]} /></div></div>

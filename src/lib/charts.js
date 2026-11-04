@@ -15,7 +15,7 @@ export const GT_MORE = { blk: 'BLK', oreb: 'OREB', dreb: 'DREB', per: 'PER', fgm
 const GT_PCT = new Set(['ts', 'fg', 'p2', 'p3', 'ft']);
 const splitSeason = list => list.every(g => Object.values(g.rows).every(r => r.oreb !== undefined));
 export const moreFor = list => Object.entries(GT_MORE).filter(([k]) => (k !== 'oreb' && k !== 'dreb') || splitSeason(list));
-export const STATS = { per: 'PER', pts: 'Points', reb: 'Rebounds', ast: 'Assists', stl: 'Steals', to: 'Turnovers', ts: 'TS%', p2: '2FG%', p3: '3FG%', ft: 'FT%' };
+export const STATS = { per: 'PER', pts: 'Points', reb: 'Rebounds', ast: 'Assists', stl: 'Steals', blk: 'Blocks', to: 'Turnovers', ts: 'TS%', fg: 'FG%', fga: 'FGA', p3: '3FG%', ft: 'FT%' };
 export const P_STATS = { per: 'PER', pts: 'PTS', reb: 'REB', ast: 'AST', stl: 'STL', blk: 'BLK', to: 'TO', ts: 'TS%' };
 // Everything else a player's box score line records, behind the More chip.
 export const P_MORE = Object.fromEntries(Object.entries(GT_MORE).filter(([k]) => !['blk', 'oreb', 'dreb', 'per'].includes(k)));
