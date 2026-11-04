@@ -199,16 +199,22 @@ export function Player() {
   const tiles = [
     ['per', 'PER', (v, tot) => perTxt(v, !tot)], ['pts', 'Points', n1], ['reb', 'Rebounds', n1], ['ast', 'Assists', n1],
     ['stl', 'Steals', n1], ['blk', 'Blocks', n1], ['to', 'Turnovers', n1, true],
-    ['fg', 'FG%', pctTxt, false, `${a.s.fgm}/${a.s.fga}`], ['p3', '3FG%', pctTxt, false, `${a.s.m3}/${a.s.a3}`], ['ft', 'FT%', pctTxt, false, `${a.s.ftm}/${a.s.fta}`],
-    ['ts', 'TS%', pctTxt, false, `${a.s.tsa.toFixed(1)} TSA`], ['gp', 'Games', v => v],
+    ['fg', 'FG%', pctTxt], ['p3', '3FG%', pctTxt], ['ft', 'FT%', pctTxt], ['ts', 'TS%', pctTxt], ['gp', 'Games', v => v],
   ];
-  const faceFor = tot => tiles.map(([k, l, fmt, low, sub]) => {
-    const v = val(a, k, tot), r = k === 'gp' ? 0 : rankOf(k, low, tot);
-    const tcls = k === 'per' ? (v >= 0 ? ' pos' : ' neg') : ['fg', 'p3', 'ft', 'ts'].includes(k) ? ' ' + tier(k === 'p3' ? 'm3' : k, v) : '';
-    const txt = v === null ? '–' : fmt(v, tot);
+  // Shooting tiles, like the Stats table: Totals show made-attempts with the % underneath,
+  // Averages show the % with attempts a game underneath. TS uses PTS / 2 over TSA, rounded.
+  const SHOT = { fg: ['fgm', 'fga'], p3: ['m3', 'a3'], ft: ['ftm', 'fta'], ts: [null, 'tsa'] };
+  const made = k => k === 'ts' ? Math.round(a.s.pts / 2) : a.s[SHOT[k][0]];
+  const att = k => k === 'ts' ? Math.round(a.s.tsa) : a.s[SHOT[k][1]];
+  const faceFor = tot => tiles.map(([k, l, fmt, low]) => {
+    const v = val(a, k, tot), r = k === 'gp' ? 0 : rankOf(k, low, tot), sh = SHOT[k];
+    const band = sh ? tier(k === 'p3' ? 'm3' : k, v, tot ? att(k) : undefined) : '';
+    const tcls = k === 'per' ? (v >= 0 ? ' pos' : ' neg') : sh && !tot ? ' ' + band : '';
+    const txt = sh && tot ? `${made(k)}-${att(k)}` : v === null ? '–' : fmt(v, tot);
+    const sub = !sh ? null : tot ? <span className={`ps num ${band}`}>{pctTxt(v)}</span> : <span className="ps num att">{f1(a.pg(sh[1]))} A</span>;
     return {
-      key: `${txt}|${r}`, lead: r === 1,
-      body: <><span className="l">{l}</span><b className={`num${tcls}`}>{txt}</b><span className="r">{r === 1 ? 'Team best' : r ? ORD(r) : sub ? <span className="num">{sub}</span> : '\u00a0'}</span></>,
+      key: `${txt}|${r}|${tot && sh ? 't' : ''}`, lead: r === 1,
+      body: <><span className="l">{sh && tot ? l.slice(0, -1) : l}</span><b className={`num${tcls}${txt.length > 5 ? ' long' : ''}`}>{txt}</b>{sub}<span className="r">{r === 1 ? 'Team best' : r ? ORD(r) : '\u00a0'}</span></>,
     };
   });
   // Only the boxes that show a different number flip, one after another.
