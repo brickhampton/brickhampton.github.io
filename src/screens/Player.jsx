@@ -209,7 +209,7 @@ export function Player() {
   const faceFor = tot => tiles.map(([k, l, fmt, low]) => {
     const v = val(a, k, tot), r = k === 'gp' ? 0 : rankOf(k, low, tot), sh = SHOT[k];
     const band = sh ? tier(k === 'p3' ? 'm3' : k, v, tot ? att(k) : undefined) : '';
-    const tcls = k === 'per' ? (v >= 0 ? ' pos' : ' neg') : sh && !tot ? ' ' + band : '';
+    const tcls = k === 'per' ? (v >= 0 ? ' pos' : ' neg') : sh ? ' ' + band : '';
     const txt = sh && tot ? `${made(k)}-${att(k)}` : v === null ? '–' : fmt(v, tot);
     const sub = !sh ? null : tot ? <span className={`ps num ${band}`}>{pctTxt(v)}</span> : <span className="ps num att">{f1(a.pg(sh[1]))} A</span>;
     return {
