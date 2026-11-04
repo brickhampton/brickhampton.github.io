@@ -53,3 +53,12 @@ export function potgReason(potg, g, games) {
   if (hi.length) out.push(`Also ${hi.join(' and ')}.`);
   return out.join(' ');
 }
+
+// The same reason in a few words, for the Game page: "Top PER by 6.5, and 6.4 above their average."
+export function potgShort(potg, g) {
+  const others = Object.entries(g.rows).filter(([id]) => id !== potg.id).map(([, c]) => calc(c).per), next = others.length ? Math.max(...others) : null;
+  const first = next === null ? 'Only player recorded' : potg.s.per >= next ? (potg.s.per - next < .5 ? 'Top PER, just' : `Top PER by ${f1(potg.s.per - next)}`) : 'Biggest step up on their usual game';
+  const hi = potg.tags[0]?.label.replace(/^(Career|Season) high/, (_, a) => `${a.toLowerCase()} high`);
+  const second = potg.prevN >= MIN_PREV && potg.above >= .5 ? `${f1(potg.above)} above their average` : hi ? `a ${hi}` : null;
+  return `${first}${second ? ', and ' + second : ''}.`;
+}
