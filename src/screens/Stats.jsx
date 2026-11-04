@@ -21,7 +21,7 @@ const totVal = (a, k) => k === 'gp' ? a.gp : SHOTS[k] ? shot(a, k, 0) : a.s[k];
 const CNT = { fgm: 'fgm', fga: 'fga', m3m: 'm3', a3: 'a3', ftm: 'ftm', fta: 'fta', tsm: 'tsm', tsa: 'tsa' };
 const ATTS = new Set(['fga', 'a3', 'fta', 'tsa']);
 const DCOLS = RCOLS.flatMap(c => c[0] === 'fg' ? [['fgm', 'FGM'], ['fga', 'FGA'], c] : c[0] === 'm3' ? [['m3m', '3FGM'], ['a3', '3FGA'], c]
-  : c[0] === 'ft' ? [['ftm', 'FTM'], ['fta', 'FTA'], c] : c[0] === 'ts' ? [['tsm', 'TSM'], ['tsa', 'TSA'], c] : [c]);
+  : c[0] === 'ft' ? [['ftm', 'FTM'], ['fta', 'FTA'], c] : c[0] === 'ts' ? [['tsm', 'TS'], ['tsa', 'TSA'], c] : [c]);
 
 // pctOnly: All time Totals show shooting as just the % (made-attempts get too big).
 function Rankings({ aggs, team, tot, pctOnly }) {

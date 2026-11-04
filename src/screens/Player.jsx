@@ -206,7 +206,7 @@ export function Player() {
     ['fgm', 'FGM', n1], ['fga', 'FGA', n1, false, true], ['fg', 'FG%', pctTxt],
     ['m3', '3FGM', n1], ['a3', '3FGA', n1, false, true], ['p3', '3FG%', pctTxt],
     ['ftm', 'FTM', n1], ['fta', 'FTA', n1, false, true], ['ft', 'FT%', pctTxt],
-    ['tsm', 'TSM', n1], ['tsa', 'TSA', n1, false, true], ['ts', 'TS%', pctTxt],
+    ['tsm', 'TS', n1], ['tsa', 'TSA', n1, false, true], ['ts', 'TS%', pctTxt],
     ['to', 'Turnovers', n1, true], ['gp', 'Games', v => v],
   ] : [
     ['per', 'PER', (v, tot) => perTxt(v, !tot)], ['pts', 'Points', n1], ['reb', 'Rebounds', n1], ['ast', 'Assists', n1],
