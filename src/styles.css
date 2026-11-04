@@ -1294,7 +1294,7 @@ a.vbtn:active,button.vbtn:active{transform:scale(.94)}
 
 /* Player of the game, at the foot of the Game page: the player dancing in a little arena, their line and why. */
 .potg-row{display:flex;align-items:center;gap:8px}
-.potg-stage{flex:none;width:clamp(150px,30vw,240px);cursor:pointer;-webkit-mask:radial-gradient(ellipse 50% 50% at 50% 55%,#000 55%,transparent);mask:radial-gradient(ellipse 50% 50% at 50% 55%,#000 55%,transparent)}
+.potg-stage{flex:none;width:clamp(150px,30vw,250px);cursor:pointer;-webkit-mask:linear-gradient(90deg,transparent,#000 14%,#000 86%,transparent),linear-gradient(transparent,#000 12%,#000 82%,transparent);-webkit-mask-composite:source-in;mask:linear-gradient(90deg,transparent,#000 14%,#000 86%,transparent) intersect,linear-gradient(transparent,#000 12%,#000 82%,transparent)}
 .potg-stage[data-nopage]{cursor:default}
 .potg-stage svg{display:block;width:100%;height:auto;overflow:hidden}
 .potg-stage .av-fig{animation:none}
@@ -1311,7 +1311,6 @@ a.vbtn:active,button.vbtn:active{transform:scale(.94)}
 .potg-line{display:flex;gap:22px;margin:0 0 6px}
 .potg-line b{display:block;font-size:30px;font-weight:500;letter-spacing:-.04em;line-height:1}
 .potg-line span{font-family:var(--mono);font-size:11px;color:var(--granite)}
-.potg-shots{display:flex;flex-wrap:wrap;gap:2px 12px;font-size:13px;color:var(--stone)}
 .potg-why{margin:10px 0 0;font-size:14px;line-height:1.4;color:var(--stone)}
 @media (max-width:560px){
   .potg-row{gap:2px;margin-left:-12px}
@@ -1322,7 +1321,17 @@ a.vbtn:active,button.vbtn:active{transform:scale(.94)}
   .potg-line{gap:12px}
   .potg-line b{font-size:22px}
   .potg-line span{font-size:10px}
-  .potg-shots{font-size:12px;gap:0 10px}
   .potg-why{font-size:13px;margin-top:8px}
 }
-@media (prefers-reduced-motion:reduce){.pg-conf{animation:none;opacity:.7}}
+/* Backdrop bits: champagne spray, disco tiles and specks, fireworks. */
+.pg-drop{animation:pgDrop 1.4s cubic-bezier(.2,.6,.4,1) infinite}
+@keyframes pgDrop{0%{transform:translate(0,0);opacity:0}8%{opacity:1}55%{transform:translate(calc(var(--dx)*.7),var(--dy))}100%{transform:translate(var(--dx),calc(var(--dy)*.35 + 20px));opacity:0}}
+.pg-tile{opacity:0;animation:pgTile 3s steps(1) infinite}
+@keyframes pgTile{0%{opacity:.85}33%{opacity:.25}66%{opacity:0}}
+.pg-speck{animation:pgSpeck 6s steps(30) infinite}
+@keyframes pgSpeck{0%{transform:translate(0,0)}50%{transform:translate(18px,4px)}100%{transform:translate(0,0)}}
+.pg-glint{animation:pgGlint 1.2s steps(1) infinite}
+@keyframes pgGlint{0%{opacity:1}50%{opacity:0}}
+.pg-burst{opacity:0;animation:pgBurst 3.2s steps(12) infinite}
+@keyframes pgBurst{0%{transform:scale(.1);opacity:1}35%{transform:scale(1);opacity:1}60%{transform:scale(1.15) translateY(3px);opacity:0}100%{opacity:0}}
+@media (prefers-reduced-motion:reduce){.pg-conf,.pg-drop,.pg-tile,.pg-speck,.pg-glint,.pg-burst{animation:none}.pg-conf{opacity:.7}.pg-tile{opacity:.4}.pg-burst{opacity:1}}
