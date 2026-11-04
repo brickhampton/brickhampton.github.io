@@ -332,7 +332,7 @@ export function Player() {
     <div className="phero">
       <div className="pnum-clip" aria-hidden="true"><div className="pnum">{num}</div></div>
       <PStage p={p} num={num} mood={mood} />
-      <div className="pid"><h1 className="page pname">{p.name}<span className="pno num">#{num}</span></h1>{starter ? null : <p className="psub"><span className="subtag">Sub</span><span className="num">{mine.length} game{mine.length > 1 ? 's' : ''}</span><span>Last played {lastG.season} Game {lastG.no}</span></p>}<Badges id={id} key={id} /></div>
+      <div className="pid"><h1 className="page pname">{p.name}<span className="pno num">#{num}</span></h1>{starter ? null : <p className="psub"><span className="num">{mine.length} game{mine.length > 1 ? 's' : ''}</span><span>Last played {lastG.season} Game {lastG.no}</span></p>}<Badges id={id} key={id} /></div>
     </div>
 
     {starter && last5.length ? <div className="sec"><h3>Recent form</h3>

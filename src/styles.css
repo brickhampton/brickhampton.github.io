@@ -569,9 +569,8 @@ tr.tot td{font-weight:600;border-top:1px solid var(--stroke)}
 .p-strip .av-wrap{width:38px;height:38px}
 .p-strip .p-subs{width:38px;height:38px;display:grid;place-items:center;background:var(--lift2);color:var(--bone)}
 .p-strip .p-subs[aria-current="true"]{background:none}
-/* A sub's page: a small Sub tag, their games and last game, in place of badges. */
+/* A sub's page: their games and last game, above any badges. */
 .psub{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;margin-top:12px;color:var(--granite);font-size:14px}
-.psub .subtag{padding:3px 10px;border-radius:999px;background:var(--lift2);color:var(--bone);font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase}
 .psub .num{color:var(--bone)}
 .phero{position:relative;display:grid;grid-template-columns:auto minmax(0,1fr);gap:36px;align-items:center;padding:8px 0 28px;border-bottom:1px solid var(--lift2);clip-path:inset(-80px -100vw 0)}
 /* The header lets the stage's pop-ups (PER, badges) and spotlight rise above it, but keeps the big number inside. */
