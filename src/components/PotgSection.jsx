@@ -34,6 +34,8 @@ const NOD = [['dribble', 0, 0, 0], ['dribble', 0, 1, 0]];
 // A tap: a double fist pump, jumping with both fists up, twice.
 const CELEBRATE = [['down', 0, 1, 0], ['fist2', 0, -3, 0], ['fist2', 0, -6, 0], ['fist2', 0, -4, 0], ['fist2', 0, 0, 0],
   ['down', 0, 1, 0], ['fist2', 0, -3, 0], ['fist2', 0, -6, 0], ['fist2', 0, -4, 0], ['fist2', 0, 0, 0]];
+// After a loss, a tap: a single fist pump, feet on the floor.
+const FIST1 = [['fist', 0, 0, 0], ['fist', 0, 0, 0], ['fist', 0, 0, 0], ['fist', 0, 0, 0], ['down', 0, 0, 0]];
 // The clock ticks every 160 ms. A tap's celebration moves every tick, idle frames and tricks every 2, the after-a-loss nod every 3.
 const BEAT = 160, U = 104 / 34;
 // A burst of confetti from the player's middle, for a tap.
@@ -94,7 +96,11 @@ export function PotgSection({ g, games }) {
   const wide = useWide();
   const bg = backdrop(bgKey, look, wide), K = bg.k, fx = 130 - 50 * K, fy = bg.feet - 104 * K;
   // Tap to celebrate: a double fist pump with a jump, a pop of confetti and a cheer.
-  const tap = () => { sfx('cheer'); if (reduced) { setGrin(true); setTimeout(() => setGrin(false), 1500); return; } start(CELEBRATE, 1, true); setParty(x => x + 1); };
+  // After a loss a tap gets one fist pump on the spot: no jump, confetti, smile or cheer.
+  const tap = () => {
+    if (calm) { if (!reduced) start(FIST1, 2, false); return; }
+    sfx('cheer'); if (reduced) { setGrin(true); setTimeout(() => setGrin(false), 1500); return; } start(CELEBRATE, 1, true); setParty(x => x + 1);
+  };
   // Glasses wearers keep their normal eyes (smiling eyes read oddly behind the frames).
   const smile = grin && !cleanLook(look).glasses;
   const pl = play.current;
