@@ -29,6 +29,7 @@ const B = ({ children, fill }) => fill
 export const BIC = {
   flame: <B><path d="M12 22c4 0 7-2.7 7-6.6 0-3.1-2-5.4-3.6-7.1-.4 1.9-1.4 3-2.4 3.4.3-3.2-1.2-6.4-4-8.7.2 3.4-1.5 5.4-3 7.2C4.8 11.6 5 13.4 5 15.4 5 19.3 8 22 12 22z" /></B>,
   trophy: <B><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4zM17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3" /></B>,
+  star: <B><path d="M12 3.2l2.7 5.5 6 .9-4.35 4.25 1.03 6-5.38-2.83-5.38 2.83 1.03-6L3.3 9.6l6-.9z" /></B>,
   zap: <B><path d="M13 2 4 14h7l-1 8 9-12h-7z" /></B>,
   target: <B><circle cx="12" cy="12" r="9" /><circle cx="12" cy="12" r="5" /><circle cx="12" cy="12" r="1.2" fill="currentColor" /></B>,
   shield: <B><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z" /><path d="m9 12 2 2 4-4" /></B>,

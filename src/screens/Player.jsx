@@ -238,9 +238,9 @@ export function Player() {
   const highs = [['per', 'Best PER'], ['pts', 'Most points'], ['reb', 'Most rebounds'], ['ast', 'Most assists'], ['stl', 'Most steals'], ['blk', 'Most blocks'], ['m3', 'Most threes'], ['ftm', 'Most free throws']]
     .map(([k, l]) => ({ k, l, b: lines.reduce((x, y) => y.s[k] > x.s[k] ? y : x) }));
 
-  // Career-high trophies in the game log, with the full text on hover
+  // Career-high stars in the game log, with the full text on hover
   const TG = buildTags().byGame;
-  const logTags = g => { const tags = (TG[g.id]?.[id] || []).filter(t => t.type === 'high'); return tags.length ? <span className="mt high" title={tags.map(t => t.text).join(', ')}>{BIC.trophy}</span> : null; };
+  const logTags = g => { const tags = (TG[g.id]?.[id] || []).filter(t => t.type === 'high'); return tags.length ? <span className="mt high" title={tags.map(t => t.text).join(', ')}>{BIC.star}</span> : null; };
   // Game log, newest first, with the player's best in scope highlighted
   const LOGK = ['pts', 'reb', 'ast', 'stl', 'blk'];
   const best = Object.fromEntries(LOGK.map(k => [k, Math.max(...lines.map(l => l.s[k]))]));
