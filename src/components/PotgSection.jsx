@@ -1,22 +1,33 @@
 import { useEffect, useRef, useState } from 'react';
 import { P, numIn, perTxt, perCls } from '../lib/core.js';
 import { sfx } from '../lib/sfx.js';
-import { figure, cleanLook, pxShadow } from '../lib/avatar.js';
+import { figure, cleanLook, pxShadow, trickExtras } from '../lib/avatar.js';
 import { backdrop, randomBackdrop, BACKDROPS } from '../lib/potgBg.js';
 import { playerOfGame, potgShort } from '../lib/potg.js';
 
 // The dance, one frame a beat-and-a-half: [pose, body x, body y, head x], in sprite pixels.
 // Fist pumps side to side, a shoulder shimmy (the body shakes, the head stays put), hands-up hops, then a head-nod groove.
-// Idle is an easy groove with the arms down: bob on the beat, nod side to side, then sway a step each way.
-const NODS = [['down', 0, 0, 0], ['down', 0, 1, 0], ['down', 0, 0, -1], ['down', 0, 1, -1], ['down', 0, 0, 0], ['down', 0, 1, 0], ['down', 0, 0, 1], ['down', 0, 1, 1]];
-const SWAY = [['down', -1, 0, 0], ['down', -1, 1, 0], ['down', 0, 0, 0], ['down', 0, 1, 0], ['down', 1, 0, 0], ['down', 1, 1, 0], ['down', 0, 0, 0], ['down', 0, 1, 0]];
-const DANCE = [...NODS, ...SWAY];
+// Idle is a gentle bob with the arms down. Every few seconds the player does one of the tricks below, then goes back to bobbing.
+// Frames: [pose, body x, body y, head x, extra], extra being 'spin' (the spinning marks) or 'shades' (sunglasses on).
+const BOB = [['down', 0, 0, 0], ['down', 0, 1, 0]];
+const bob = (pose, n, extra) => Array.from({ length: n }, (_, i) => [pose, 0, i % 2, 0, extra]);
+const TRICKS = {
+  // A glass of champagne: held out, a sip, held out again.
+  champagne: [...bob('toast', 4), ['sip', 0, 0, 0], ['sip', 0, 0, 0], ['sip', 0, 0, 0], ['sip', 0, 0, 0], ['sip', 0, 0, 0], ...bob('toast', 4)],
+  peace: [['down', 0, 0, 0], ...bob('peace', 8), ['down', 0, 0, 0]],
+  spin: [['down', 0, 0, 0], ...Array.from({ length: 12 }, (_, i) => ['spin', 0, 0, 0, i % 2 ? 'spin' : null]), ['down', 0, 0, 0]],
+  // Sunglasses on, a cool bob, sunglasses off.
+  shades: bob('down', 12, 'shades'),
+  // The ball from one hand round the back to the other, and back again.
+  behind: [['dribble', 0, 0, 0], ['dribble', 0, 1, 0], ['lowball', 0, 0, 0], ['dribbleL', 0, 0, 0], ['dribbleL', 0, 1, 0], ['lowball', 0, 0, 0], ['dribble', 0, 0, 0], ['dribble', 0, 1, 0]],
+};
+const TRICK_KEYS = Object.keys(TRICKS);
 // After a loss there's no celebrating: just nodding along with the ball, no smile, no confetti.
-const NOD = [['dribble', 0, 0, 0], ['dribble', 0, 1, 0], ['dribble', 0, 0, -1], ['dribble', 0, 1, -1], ['dribble', 0, 0, 0], ['dribble', 0, 1, 0], ['dribble', 0, 0, 1], ['dribble', 0, 1, 1]];
-// A tap: jump with both fists up, pump each arm, jump again.
-const CELEBRATE = [['fist2', 0, 0, 0], ['fist2', 0, -3, 0], ['fist2', 0, -6, 0], ['fist2', 0, -7, 0], ['fist2', 0, -5, 0], ['fist2', 0, -2, 0], ['down', 0, 1, 0],
-  ['fist', 0, -1, 0], ['fist', 0, 0, 0], ['fistL', 0, -1, 0], ['fistL', 0, 0, 0], ['catch', 0, 1, 0], ['catch', 0, -4, 0], ['catch', 0, -6, 0], ['catch', 0, -4, 0], ['catch', 0, 0, 0]];
-// The clock ticks every 160 ms for a tap's celebration; the idle groove moves every 2 ticks, the after-a-loss nod every 3.
+const NOD = [['dribble', 0, 0, 0], ['dribble', 0, 1, 0]];
+// A tap: a double fist pump, jumping with both fists up, twice.
+const CELEBRATE = [['down', 0, 1, 0], ['fist2', 0, -3, 0], ['fist2', 0, -6, 0], ['fist2', 0, -4, 0], ['fist2', 0, 0, 0],
+  ['down', 0, 1, 0], ['fist2', 0, -3, 0], ['fist2', 0, -6, 0], ['fist2', 0, -4, 0], ['fist2', 0, 0, 0]];
+// The clock ticks every 160 ms. A tap's celebration moves every tick, idle frames and tricks every 2, the after-a-loss nod every 3.
 const BEAT = 160, U = 104 / 34;
 // A burst of confetti from the player's middle, for a tap.
 const POP = (() => {
@@ -26,40 +37,51 @@ const POP = (() => {
   return out;
 })();
 
-// Preview only: ?pbg=<name> fixes the backdrop; otherwise it's a random one each time.
-const FIXED = typeof location !== 'undefined' && new URLSearchParams(location.search).get('pbg');
+// Preview only: ?pbg=<name> fixes the backdrop (otherwise it's a random one each time); ?ptrick=<name> picks the first idle trick.
+const Q = typeof location !== 'undefined' ? new URLSearchParams(location.search) : new URLSearchParams(), FIXED = Q.get('pbg'), FIRST = Q.get('ptrick');
 
 export function PotgSection({ g, games }) {
   const potg = playerOfGame(g, games), p = P(potg.id);
-  const calm = g.result === 'L', steps = calm ? NOD : DANCE;
+  const calm = g.result === 'L';
   const reduced = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
   const [bgKey] = useState(() => FIXED in BACKDROPS ? FIXED : randomBackdrop());
   const [n, setN] = useState(0), [grin, setGrin] = useState(false), [party, setParty] = useState(0);
-  const cel = useRef(null);
+  // What's playing now (a tap's celebration or an idle trick): its frames, which one, and how many ticks each lasts.
+  const play = useRef(null), lastTrick = useRef(null);
+  const start = (frames, every, smile) => { play.current = { frames, i: 0, t: 0, every }; if (smile) setGrin(true); };
   useEffect(() => {
     if (reduced) return;
     const t = setInterval(() => {
       setN(x => x + 1);
-      if (cel.current) { cel.current.i++; if (cel.current.i >= CELEBRATE.length) { cel.current = null; setGrin(false); } }
+      const pl = play.current;
+      if (pl && ++pl.t >= pl.every) { pl.t = 0; if (++pl.i >= pl.frames.length) { play.current = null; setGrin(false); } }
     }, BEAT);
     return () => clearInterval(t);
-  }, [calm, reduced]);
-  // Now and then, a smile while dancing (not after a loss).
+  }, [reduced]);
+  // Idle: every few seconds a trick, never the same one twice running; in between, now and then a smile.
   useEffect(() => {
     if (reduced || calm) return;
     let t;
-    const next = () => { t = setTimeout(() => { if (!cel.current) setGrin(true); t = setTimeout(() => { if (!cel.current) setGrin(false); next(); }, 1400 + Math.random() * 800); }, 2500 + Math.random() * 4000); };
-    next();
+    const next = () => { t = setTimeout(() => {
+      if (!play.current) {
+        if (Math.random() < .3) { setGrin(true); setTimeout(() => !play.current && setGrin(false), 1600); }
+        else { const ks = TRICK_KEYS.filter(k => k !== lastTrick.current), k = ks[Math.floor(Math.random() * ks.length)]; lastTrick.current = k; start(TRICKS[k], 2, true); }
+      }
+      next();
+    }, 3500 + Math.random() * 3500); };
+    const first = FIRST in TRICKS ? FIRST : TRICK_KEYS[Math.floor(Math.random() * TRICK_KEYS.length)];
+    t = setTimeout(() => { if (!play.current) { lastTrick.current = first; start(TRICKS[first], 2, true); } next(); }, FIRST ? 300 : 1500);
     return () => clearTimeout(t);
   }, [calm, reduced]);
   if (!p) return null;
   const look = { ...p, num: numIn(g, potg.id) ?? p.num };
   const bg = backdrop(bgKey, look), K = bg.k, fx = 130 - 50 * K, fy = bg.feet - 104 * K;
-  // Tap to celebrate: a jump, fist pumps, both hands up, a pop of confetti and a cheer.
-  const tap = () => { sfx('cheer'); if (reduced) { setGrin(true); setTimeout(() => setGrin(false), 1500); return; } cel.current = { i: 0 }; setGrin(true); setParty(x => x + 1); };
+  // Tap to celebrate: a double fist pump with a jump, a pop of confetti and a cheer.
+  const tap = () => { sfx('cheer'); if (reduced) { setGrin(true); setTimeout(() => setGrin(false), 1500); return; } start(CELEBRATE, 1, true); setParty(x => x + 1); };
   // Glasses wearers keep their normal eyes (smiling eyes read oddly behind the frames).
   const smile = grin && !cleanLook(look).glasses;
-  const [pose, dx, dy, hx] = cel.current ? CELEBRATE[cel.current.i] : reduced ? [calm ? 'dribble' : 'fist2', 0, 0, 0] : steps[Math.floor(n / (calm ? 3 : 2)) % steps.length];
+  const pl = play.current;
+  const [pose, dx, dy, hx, extra] = pl ? pl.frames[pl.i] : reduced ? [calm ? 'dribble' : 'down', 0, 0, 0] : calm ? NOD[Math.floor(n / 3) % NOD.length] : BOB[Math.floor(n / 2) % BOB.length];
   const s = potg.s;
   const line = [['pts', 'PTS'], ['reb', 'REB'], ['ast', 'AST'], ['stl', 'STL'], ['blk', 'BLK']].filter(([k], i) => i < 3 || s[k] > 0);
   return (
@@ -70,7 +92,7 @@ export function PotgSection({ g, games }) {
             <g dangerouslySetInnerHTML={{ __html: bg.svg + (calm ? '' : bg.party) }} />
             <g transform={`translate(${fx} ${fy}) scale(${K})`}>
               <g dangerouslySetInnerHTML={{ __html: pxShadow(50, 103.5, 22, U) }} />
-              <g transform={`translate(${dx * U} ${dy * U})`} style={{ '--hx': `${hx * U}px` }} dangerouslySetInnerHTML={{ __html: figure(look, { stage: true, pose }) }} />
+              <g transform={`translate(${dx * U} ${dy * U})`} style={{ '--hx': `${hx * U}px` }} dangerouslySetInnerHTML={{ __html: figure(look, { stage: true, pose }) + (extra ? trickExtras(look, extra) : '') }} />
             </g>
             {party ? <g key={party} transform={`translate(0 ${bg.feet - 226})`} dangerouslySetInnerHTML={{ __html: POP }} /> : null}
           </svg>

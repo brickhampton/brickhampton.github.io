@@ -298,6 +298,20 @@ function sprite(c, num, pose) {
   } else if (pose === 'fist' || pose === 'fist2') {
     r(fx - 1, ty, 2, 3, S); r(fx, hy + 2, 2 + aw, ty - hy - 1, S); r(fx + 1 + aw, hy + 2, 1, ty - hy - 1, S2);
     r(fx - 1, hy - 2, 4 + aw, 4, S); r(fx, hy - 1, 2, 1, S2); r(fx + 2 + aw, hy - 2, 1, 4, S2);
+  } else if (pose === 'peace') {
+    // A peace sign beside the face: forearm up, hand at eye height, two fingers apart.
+    r(fx - 1, ty, 2, 3, S); r(fx, hy + 4, 2 + aw, ty - hy - 3, S); r(fx + 1 + aw, hy + 4, 1, ty - hy - 3, S2);
+    r(fx - 1, hy + 1, 4 + aw, 3, S); r(fx - 1, hy - 2, 1, 3, S); r(fx + 2 + aw, hy - 2, 1, 3, S); r(fx, hy + 2, 2, 1, S2);
+  } else if (pose === 'toast' || pose === 'sip') {
+    // A glass of champagne: held out at chest height ('toast'), or lifted to the mouth ('sip').
+    const GL = '#f4d37c', RIM = '#ffffff', STEM = '#dfe3ea';
+    if (pose === 'toast') {
+      r(fx - 1, ty, 2, 4, S); r(fx, ty + 4, 4, 2, S); r(fx + 3, ty + 2, 2, 3, S);
+      r(fx + 3, ty - 2, 2, 3, GL); r(fx + 3, ty - 3, 2, 1, RIM); r(fx + 3, ty + 1, 1, 1, STEM);
+    } else {
+      r(fx - 1, ty, 2, 3, S); r(fx, ty + 1, 3, 2, S); r(fx + 1, hy + 9, 2, ty - hy - 8, S); r(fx - 1, hy + 8, 3, 2, S);
+      r(fx - 1, hy + 4, 2, 3, GL); r(fx - 1, hy + 3, 2, 1, RIM); r(fx - 1, hy + 7, 1, 1, STEM);
+    }
   } else if (pose === 'ball') {
     ball(bx + Math.floor(bw / 2), ty + 5, r);
     r(fx - 1, ty + 1, 2, 3, S); r(fx - 3, ty + 3, 3, 3, S); r(fx - 3, ty + 5, 3, 1, S2);
@@ -394,6 +408,8 @@ export function trickExtras(raw, kind) {
   let out = '';
   if (kind === 'spin') out = px(fx - 4, hy - 2, 1, 2, '#fff', .7) + px(fx - 5, hy, 1, 1, '#fff', .45) + px(fx + 6, hy - 1, 1, 2, '#fff', .7) + px(fx + 7, hy - 3, 1, 1, '#fff', .45)
     + px(fx - 1, hy - 5, 3, 1, '#fff', .55);
+  // 'shades': sunglasses over the eyes, with a glint.
+  if (kind === 'shades') { const ey = hy + EYE_ROW[c.eyeY], hx = 8; out = px(hx + 1, ey - 1, 4, 3, '#111') + px(hx + 6, ey - 1, 4, 3, '#111') + px(hx + 5, ey - 1, 1, 1, '#111') + px(hx, ey - 1, 1, 1, '#111') + px(hx + 7, ey - 1, 1, 1, '#fff', .8) + px(hx + 2, ey - 1, 1, 1, '#fff', .6); }
   if (kind === 'behind') { BALL.forEach(([o, w], j) => { out += px(bx - 7 + o, ty + 6 + j, w, 1, BALL_C); }); out += px(bx - 10, ty + 7, 2, 1, '#fff', .6) + px(bx - 12, ty + 9, 3, 1, '#fff', .45) + px(bx - 10, ty + 11, 2, 1, '#fff', .6); }
   return `<g class="av-trick" transform="translate(50 0) scale(${(104 / FEET).toFixed(4)}) translate(-13 0)" shape-rendering="crispEdges">${out}</g>`;
 }
@@ -401,7 +417,7 @@ export function trickExtras(raw, kind) {
 const cache = new Map();
 // SVG markup for a player. Round avatars (the default) show the head and the top of the jersey in a 100 × 100 box.
 // opts.stage draws the whole player at their height, feet on the bottom of a 100 × 104 box: the court, the Home
-// photo, the player page and the builder. opts.pose: 'fist', 'fistL' (the other arm), 'fist2' (both), 'ball', 'trophy', 'shoot', 'catch', 'block', 'block1', 'pass', 'pass2', 'dribbleL', 'spin', 'lowball' (arms down, the ball behind the back), 'down' (arms down), or palming the ball (the default, as in the reference).
+// photo, the player page and the builder. opts.pose: 'fist', 'fistL' (the other arm), 'fist2' (both), 'ball', 'trophy', 'shoot', 'catch', 'block', 'block1', 'pass', 'pass2', 'dribbleL', 'spin', 'peace', 'toast', 'sip' (champagne), 'lowball' (arms down, the ball behind the back), 'down' (arms down), or palming the ball (the default, as in the reference).
 export function figure(raw, opts = {}) {
   const c = cleanLook(raw), key = JSON.stringify([c, raw.num, !!opts.stage, opts.pose || '']);
   if (cache.has(key)) return cache.get(key);
