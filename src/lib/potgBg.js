@@ -223,14 +223,12 @@ function beach() {
   const bx = 52, by = 214;
   s += rect(bx, by, 32, 18, '#2a2e3a') + rect(bx + 6, by - 5, 20, 2, '#8a93a6') + rect(bx + 6, by - 5, 2, 5, '#8a93a6') + rect(bx + 24, by - 5, 2, 5, '#8a93a6') + rect(bx + 13, by + 3, 6, 4, '#4fe3ff', ' opacity=".7"');
   const spk = x => `<g transform="translate(${x} ${by + 10})"><g class="pg-pulse">${rect(-4, -4, 8, 8, '#111')}${rect(-1.5, -1.5, 3, 3, '#555')}</g></g>`;
-  // A beach umbrella on the right: red and white stripes, a scalloped edge, the pole in the sand and its shade.
-  const ux = 192, uy = 146;
-  s += `<ellipse cx="${ux - 4}" cy="234" rx="26" ry="4" fill="#8a6a3c" opacity=".55"/>` + rect(ux - 1.2, uy + 4, 2.4, 234 - uy - 4, '#e8e2d0') + rect(ux + .6, uy + 4, .8, 234 - uy - 4, '#b9b2a0');
-  // The canopy is a dome of pixels, coloured in eight wedges fanning out from the top, so the stripes splay like a real umbrella.
-  const UP = 3.4, hws = [6, 13, 19, 23, 26, 28];
-  hws.forEach((hw, j) => { for (let x = -hw; x < hw; x += UP) { const t = (x + UP / 2) / hw; s += rect((ux + x).toFixed(1), (uy + j * UP).toFixed(1), Math.min(UP, hw - x).toFixed(1), UP, Math.floor((t + 1) * 4) % 2 ? '#ffffff' : '#e74c3c'); } });
-  for (let i = 0; i < 8; i++) s += rect((ux - 28 + i * 7 + 1).toFixed(1), uy + hws.length * UP, 5, 2.2, i % 2 ? '#ffffff' : '#e74c3c');
-  s += rect(ux - 1.5, uy - 3, 3, 3, '#e8e2d0');
+  // A little red crab on the sand to the right, claws up, scuttling side to side.
+  const cx = 190, cy = 226, P = 2.2, O = '#e0322a', D = '#a5201c';
+  const CRAB = ['.O.......O.', 'OO.......OO', '.O..o.o..O.', '..O.k.k.O..', '...OOOOO...', '..OOOOOOO..', '.DOOOOOOOD.', '..D.D.D.D..'];
+  let crab = '';
+  CRAB.forEach((row, j) => [...row].forEach((c, i) => { const f = { O, D, o: '#ffffff', k: '#111' }[c]; if (f) crab += rect((cx + (i - 5.5) * P).toFixed(1), (cy + (j - 8) * P).toFixed(1), P, P, f); }));
+  s += `<ellipse cx="${cx}" cy="${cy + .6}" rx="11" ry="1.6" fill="#8a6a3c" opacity=".45"/><g class="pg-crab">${crab}</g>`;
   return { svg: s, party: spk(bx + 6) + spk(bx + 26), feet: 226, view: V, k: K };
 }
 
