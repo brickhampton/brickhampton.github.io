@@ -1,0 +1,65 @@
+# Saves a copy of all team data every night to the `backups` branch, so the stats can be put back
+# to any day. Reads with the website's public key, so it needs no secrets and can't change anything.
+# A new dated folder is only added when the data changed, and folders older than two weeks are removed.
+# How to restore: README.md on that branch.
+name: Nightly backup
+
+on:
+  schedule:
+    - cron: '37 15 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: backup
+  cancel-in-progress: false
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Read the database
+        run: node scripts/backup.mjs "$RUNNER_TEMP/new"
+      - name: Save it to the backups branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          mkdir "$RUNNER_TEMP/b"
+          # Start from what's on the branch. Only a branch that doesn't exist yet starts empty;
+          # any other failure stops here, so the old backups are never replaced by mistake.
+          if git ls-remote --exit-code origin refs/heads/backups >/dev/null; then
+            git fetch --depth=1 origin backups
+            git archive FETCH_HEAD | tar -x -C "$RUNNER_TEMP/b"
+          elif [ $? -ne 2 ]; then
+            echo "Couldn't reach the backups branch"; exit 1
+          fi
+          cd "$RUNNER_TEMP/b"
+          last=$(ls -d 20??-??-?? 2>/dev/null | sort | tail -1 || true)
+          if [ -n "$last" ] && cmp -s "$last/data.json" "$RUNNER_TEMP/new/data.json"; then
+            echo "No changes since $last, nothing new to save."
+          else
+            day=$(date -u +%F)
+            rm -rf "$day" && cp -r "$RUNNER_TEMP/new" "$day"
+            echo "Saved $day"
+          fi
+          # Keep two weeks. The newest copy from before that stays too, since it's how the data
+          # looked at the start of the two weeks (and it's the only copy if nothing changed since).
+          cutoff=$(date -u -d '14 days ago' +%F)
+          old=$(ls -d 20??-??-?? | sort | awk -v c="$cutoff" '$0 < c')
+          keep=$(echo "$old" | tail -1)
+          for d in $old; do [ "$d" = "$keep" ] || { rm -rf "$d"; echo "Removed $d"; }; done
+          cp "$GITHUB_WORKSPACE/scripts/backups-README.md" README.md
+          # One fresh commit each time, so removed days are gone from the branch history too.
+          msg="Backups $(ls -d 20??-??-?? | head -1) to $(ls -d 20??-??-?? | tail -1)"
+          cd "$GITHUB_WORKSPACE"
+          export GIT_INDEX_FILE="$RUNNER_TEMP/index"
+          git --work-tree="$RUNNER_TEMP/b" add -A
+          commit=$(git commit-tree "$(git write-tree)" -m "$msg")
+          git push -qf origin "$commit:refs/heads/backups"
+          echo "$msg"
