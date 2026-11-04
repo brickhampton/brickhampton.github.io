@@ -19,7 +19,6 @@ const totVal = (a, k) => k === 'gp' ? a.gp : SHOTS[k] ? shot(a, k, 0) : a.s[k];
 // Detailed shooting (Settings): made and attempts columns to the left of each plain % column.
 // TSM is the TS numerator, PTS / 2, so TSM / TSA = TS%.
 const CNT = { fgm: 'fgm', fga: 'fga', m3m: 'm3', a3: 'a3', ftm: 'ftm', fta: 'fta', tsm: 'tsm', tsa: 'tsa' };
-const ATTS = new Set(['fga', 'a3', 'fta', 'tsa']);
 const DCOLS = RCOLS.flatMap(c => c[0] === 'fg' ? [['fgm', 'FGM'], ['fga', 'FGA'], c] : c[0] === 'm3' ? [['m3m', '3FGM'], ['a3', '3FGA'], c]
   : c[0] === 'ft' ? [['ftm', 'FTM'], ['fta', 'FTA'], c] : c[0] === 'ts' ? [['tsm', 'TS'], ['tsa', 'TSA'], c] : [c]);
 
@@ -44,8 +43,8 @@ function Rankings({ aggs, team, tot, pctOnly }) {
       return <td key={k} className="c"><span className={`per ${rank === 0 ? 'p-great' : rank <= 3 ? 'p-good' : 'p-mid'}`}>{perTxt(v, !tot)}</span></td>;
     }
     if (CNT[k]) {
-      const all = aggs.map(x => val(x, k)), top = !isTeam && !ATTS.has(k) && v === Math.max(...all);
-      return <td key={k}><span className={`n${top && aggs.length > 1 ? ' hi' : ''}`}>{tot ? v : f1(v)}</span></td>;
+      // Made and attempts columns are plain: no game-best box.
+      return <td key={k}><span className="n">{tot ? v : f1(v)}</span></td>;
     }
     if (SHOTS[k]) {
       const pct = aggVal(a, k);

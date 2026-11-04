@@ -227,7 +227,7 @@ export function Player() {
     const txt = dash ? `${made(k)}-${att(k)}` : v === null ? '–' : fmt(v, tot);
     const sub = !sh || detail || (tot && !dash) ? null : dash ? <span className={`ps num ${band}`}>{pctTxt(v)}</span> : <span className="ps num att">{f1(a.pg(sh[1]))} A</span>;
     return {
-      key: `${txt}|${r}|${dash ? 't' : ''}${sh && !tot && !detail ? 'a' : ''}`, lead: r === 1,
+      key: `${txt}|${r}|${dash ? 't' : ''}${sh && !tot && !detail ? 'a' : ''}`, lead: r === 1 && !['fgm', 'm3', 'ftm', 'tsm'].includes(k), // made tiles keep 'Team best' but no blue box
       body: <><span className="l">{dash ? l.slice(0, -1) : l}</span><b className={`num${tcls}${txt.length > 5 ? ' long' : ''}`}>{txt}</b>{sub}<span className="r">{r === 1 ? 'Team best' : r ? ORD(r) : '\u00a0'}</span></>,
     };
   });
