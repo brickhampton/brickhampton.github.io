@@ -3,7 +3,6 @@
 // band, wrist, sleeve, stripe, sock, shoe, shoeAcc, glassesC, shirt, hairFlip, wristFlip, sleeveFlip }: colours as hex, everything else an index into OPTS (0 is the default).
 // Looks saved before the pixel style (no v) are converted, so every saved avatar still draws.
 
-const SHRUG_V = typeof location !== 'undefined' ? +new URLSearchParams(location.search).get('pshrug') || 0 : 0;
 const HEX = /^#[0-9a-f]{6}$/i;
 const color = (v, d) => HEX.test(v || '') ? v : d;
 const pick = (v, list) => Number.isInteger(v) && v >= 0 && v < list.length ? v : 0;
@@ -186,16 +185,9 @@ function sprite(c, num, pose) {
     if (BS) side(ARM.slice(0, 5), BS, mirror);
     if (BW) side([[6, -3, 3], [7, -3, 3]], BW, mirror);
   };
-  // The shrug's open hand at the end of the forearm, drawn by R(dx from the body's edge, y, w, h, colour).
-  // Preview only: ?pshrug=1-4 tries flatter palms.
-  const shrugHand = (R, col) => {
-    const v = SHRUG_V;
-    if (v === 0) { R(3 + aw, ty + 3, 2, 2, col); R(3 + aw, ty + 5, 3, 1, S2); }
-    else if (v === 1) { R(4 + aw, ty + 4, 3, 1, col); R(4 + aw, ty + 5, 3, 1, S2); }
-    else if (v === 2) { R(4 + aw, ty + 4, 3, 1, col); }
-    else if (v === 3) { R(4 + aw, ty + 4, 3, 1, col); R(4 + aw, ty + 5, 3, 1, S2); R(6 + aw, ty + 3, 1, 1, col); }
-    else { R(3 + aw, ty + 3, 4, 1, col); R(3 + aw, ty + 4, 4, 1, S2); }
-  };
+  // The shrug's open hand at the end of the forearm, palm turned up: three pixels long, a row above the forearm.
+  // R draws it: (dx from the body's edge, y, w, h, colour).
+  const shrugHand = (R, col) => { R(3 + aw, ty + 3, 3, 1, col); R(3 + aw, ty + 4, 3, 1, S2); };
   rec = c.shirt ? [] : null;
   // Shooting, catching a rebound and blocking put the free arm up too.
   const up = pose === 'shoot' || pose === 'catch' || pose === 'block';
