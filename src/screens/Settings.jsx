@@ -11,7 +11,7 @@ import { EditGame, AddGame } from './EditGame.jsx';
 import { AvatarSheet } from './AvatarSheet.jsx';
 import { randomLook } from '../lib/avatar.js';
 import { soundOn, setSound, sfx } from '../lib/sfx.js';
-import { rebSplit, setRebSplit } from '../lib/prefs.js';
+import { rebSplit, setRebSplit, shotDetail, setShotDetail } from '../lib/prefs.js';
 import { supporter, supLook } from '../lib/supporter.js';
 
 const Grip = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="9" cy="6" r="1.6" /><circle cx="15" cy="6" r="1.6" /><circle cx="9" cy="12" r="1.6" /><circle cx="15" cy="12" r="1.6" /><circle cx="9" cy="18" r="1.6" /><circle cx="15" cy="18" r="1.6" /></svg>;
@@ -216,6 +216,7 @@ function Admin() {
     {err && <p className="ferr" id="a-err">{err}</p>}
     <SoundCard />
     <RebCard />
+    <ShotCard />
     <div className="adm-grid">
       <div className="sec"><h3>Seasons</h3><p className="hint">New games go here, and Games and Stats open on it</p>
         <div className="card alist" id="a-seasons">{seasons}
@@ -290,6 +291,18 @@ function RebCard() {
       <button data-s="split" aria-pressed={on} onClick={() => pick(true)}>Split</button></div></div>;
 }
 
+// Shooting stats on the Stats table and player tiles, compact or detailed. For this device only, like Sound.
+function ShotCard() {
+  const [on, setOn] = useState(shotDetail());
+  const pick = v => { if (v === on) return; setShotDetail(v); setOn(v); sfx('select'); };
+  return <div className="card admin-lock sound-card"><div className="lock-ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <circle cx="12" cy="12" r="9" /><circle cx="12" cy="12" r="5" /><circle cx="12" cy="12" r="1" /></svg></div>
+    <div><h3>Compact shooting stats</h3><p className="hint">Show combined shooting stats or full shooting stats (made, attempts, and shot %)</p></div>
+    <div className={`tog${on ? ' r' : ''}`} id="shot-detail" role="group" aria-label="Shooting stats compact or detailed">
+      <button data-s="compact" aria-pressed={!on} onClick={() => pick(false)}>Compact</button>
+      <button data-s="detailed" aria-pressed={on} onClick={() => pick(true)}>Detailed</button></div></div>;
+}
+
 // Our supporter on the Home photo: her outfit, the same for everyone who opens the site.
 const OUTFIT_OPTS = [['dress', 'Dress'], ['tee', 'T-shirt and jeans']];
 const supFig = look => <svg viewBox="8 2 84 102" aria-hidden="true" dangerouslySetInnerHTML={{ __html: supporter('rest', look) }} />;
@@ -314,6 +327,7 @@ export function Settings() {
     <div className="ghead"><div><h1 className="page">Settings</h1></div></div>
     <SoundCard />
     <RebCard />
+    <ShotCard />
     <div className="card admin-lock"><div className="lock-ic"><Lock /></div>
       <div><h3>Admin mode</h3><p className="hint">Record games, edit past games, players and opponents</p></div>
       <button className="btn primary" id="unlock" onClick={() => openSheet(<PinSheet />)}>Unlock with PIN</button></div>

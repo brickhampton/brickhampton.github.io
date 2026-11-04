@@ -1,6 +1,7 @@
 import { S, set } from '../lib/store.js';
 import { allGames, seasonList, seasonName, statPlayers, playerAgg, sumRows, ratio, pctTxt, perTxt, tier, f1, calc, P, numIn } from '../lib/core.js';
 import { go, openPlayer } from '../lib/nav.js';
+import { shotDetail } from '../lib/prefs.js';
 import { drawTrend, drawScatter, drawSeasonBars, STATS, TB_STATS, SLOT_COL, SC_B } from '../lib/charts.js';
 import { Avatar } from '../components/Avatar.jsx';
 import { TrophyGold } from '../components/icons.jsx';
@@ -15,10 +16,19 @@ const shot = (a, k, i) => k === 'ts' ? Math.round(i ? a.s.tsa : a.s.pts / 2) : a
 // Totals sort counting stats by their sums and shooting columns by shots made, like the box score.
 const totVal = (a, k) => k === 'gp' ? a.gp : SHOTS[k] ? shot(a, k, 0) : a.s[k];
 
+// Detailed shooting (Settings): made and attempts columns to the left of each plain % column.
+// TSM is the TS numerator, PTS / 2, so TSM / TSA = TS%.
+const CNT = { fgm: 'fgm', fga: 'fga', m3m: 'm3', a3: 'a3', ftm: 'ftm', fta: 'fta', tsm: 'tsm', tsa: 'tsa' };
+const ATTS = new Set(['fga', 'a3', 'fta', 'tsa']);
+const DCOLS = RCOLS.flatMap(c => c[0] === 'fg' ? [['fgm', 'FGM'], ['fga', 'FGA'], c] : c[0] === 'm3' ? [['m3m', '3FGM'], ['a3', '3FGA'], c]
+  : c[0] === 'ft' ? [['ftm', 'FTM'], ['fta', 'FTA'], c] : c[0] === 'ts' ? [['tsm', 'TS'], ['tsa', 'TSA'], c] : [c]);
+
 // pctOnly: All time Totals show shooting as just the % (made-attempts get too big).
 function Rankings({ aggs, team, tot, pctOnly }) {
-  const dash = tot && !pctOnly;
-  const val = tot ? (a, k) => SHOTS[k] && !dash ? aggVal(a, k) : totVal(a, k) : aggVal;
+  const detail = shotDetail(), cols = detail ? DCOLS : RCOLS;
+  const dash = tot && !pctOnly && !detail;
+  const cnt = (a, k) => k === 'tsm' ? (tot ? Math.round(a.s.pts / 2) : a.pg('pts') / 2) : k === 'tsa' && tot ? Math.round(a.s.tsa) : tot ? a.s[CNT[k]] : a.pg(CNT[k]);
+  const val = (a, k) => CNT[k] ? cnt(a, k) : tot ? (SHOTS[k] && !dash ? aggVal(a, k) : totVal(a, k)) : aggVal(a, k);
   const sk = S.rsort?.k, bestDir = (sk === 'name' || sk === 'to') ? 1 : -1, dir = S.rsort?.best ? bestDir : -bestDir;
   const sorted = !sk ? aggs : aggs.slice().sort((a, b) => {
     if (sk === 'name') return dir * P(a.id).name.localeCompare(P(b.id).name);
@@ -33,8 +43,13 @@ function Rankings({ aggs, team, tot, pctOnly }) {
       const rank = aggs.filter(x => val(x, 'per') > v).length;
       return <td key={k} className="c"><span className={`per ${rank === 0 ? 'p-great' : rank <= 3 ? 'p-good' : 'p-mid'}`}>{perTxt(v, !tot)}</span></td>;
     }
+    if (CNT[k]) {
+      const all = aggs.map(x => val(x, k)), top = !isTeam && !ATTS.has(k) && v === Math.max(...all);
+      return <td key={k}><span className={`n${top && aggs.length > 1 ? ' hi' : ''}`}>{tot ? v : f1(v)}</span></td>;
+    }
     if (SHOTS[k]) {
       const pct = aggVal(a, k);
+      if (detail) return <td key={k} className={tier(k, pct) || undefined}>{pctTxt(pct)}</td>;
       // Averages show attempts a game under the %, e.g. 3.6 A.
       if (!tot) return <td key={k} className={tier(k, pct) || undefined}>{pctTxt(pct)}<span className="sp att">{f1(a.pg(SHOTS[k][1]))} A</span></td>;
       if (!dash) return <td key={k} className={tier(k, pct) || undefined}>{pctTxt(pct)}</td>;
@@ -49,9 +64,9 @@ function Rankings({ aggs, team, tot, pctOnly }) {
   return (
     <div className="tbl-wrap"><table id="rank">
       <thead><tr><th className="sortable" data-rk="name" aria-sort={aria('name')} onClick={() => setSort('rsort', 'name')}>Player{arrow('name')}</th>
-        {RCOLS.map(([k, l]) => <th key={k} className={`sortable${k === 'per' ? ' c' : ''}`} data-rk={k} aria-sort={aria(k)} onClick={() => setSort('rsort', k)}>{arrow(k)}{dash && SHOTS[k] ? l.slice(0, -1) : l}</th>)}</tr></thead>
-      <tbody>{sorted.map(a => <tr key={a.id}><td className="pl"><div className="plc"><Avatar id={a.id} />{P(a.id).name}</div></td>{RCOLS.map(([k]) => cell(a, k))}</tr>)}
-        {team ? <tr className="tot"><td className="pl"><div className="plc">Team</div></td>{RCOLS.map(([k]) => cell(team, k, true))}</tr> : null}</tbody>
+        {cols.map(([k, l]) => <th key={k} className={`sortable${k === 'per' ? ' c' : ''}`} data-rk={k} aria-sort={aria(k)} onClick={() => setSort('rsort', k)}>{arrow(k)}{dash && SHOTS[k] ? l.slice(0, -1) : l}</th>)}</tr></thead>
+      <tbody>{sorted.map(a => <tr key={a.id}><td className="pl"><div className="plc"><Avatar id={a.id} />{P(a.id).name}</div></td>{cols.map(([k]) => cell(a, k))}</tr>)}
+        {team ? <tr className="tot"><td className="pl"><div className="plc">Team</div></td>{cols.map(([k]) => cell(team, k, true))}</tr> : null}</tbody>
     </table></div>
   );
 }
