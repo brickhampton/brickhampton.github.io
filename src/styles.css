@@ -1369,4 +1369,4 @@ a.vbtn:active,button.vbtn:active{transform:scale(.94)}
 
 /* iPad and computer: the PER badge sits under the name. iPhone: no reason sentence, just the name, PER and stats. */
 @media (min-width:701px){.potg-name{flex-direction:column;align-items:flex-start;gap:8px}}
-@media (max-width:700px){.potg-why{display:none}}
+@media (max-width:700px){.potg-why{display:none}.potg-txt{padding-top:16px}}
