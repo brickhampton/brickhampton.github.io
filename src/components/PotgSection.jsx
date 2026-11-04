@@ -37,7 +37,7 @@ const POP = (() => {
 })();
 
 // Preview only: ?pbg=<name> fixes the backdrop (otherwise it's a random one each time); ?ptrick=<name> picks the first idle trick.
-const Q = typeof location !== 'undefined' ? new URLSearchParams(location.search) : new URLSearchParams(), FIXED = Q.get('pbg'), FIRST = Q.get('ptrick'), RIGHT = Q.get('palign') === 'right';
+const Q = typeof location !== 'undefined' ? new URLSearchParams(location.search) : new URLSearchParams(), FIXED = Q.get('pbg'), FIRST = Q.get('ptrick');
 
 // On iPad and computer the stage is wider, the backdrop reaching out either side of the player.
 const WIDE_MQ = '(min-width: 701px)';
@@ -47,7 +47,7 @@ const useWide = () => {
   useEffect(() => { if (!mq) return; const f = () => setW(mq.matches); mq.addEventListener('change', f); return () => mq.removeEventListener('change', f); }, []);
   return w;
 };
-export function PotgSection({ g, games, tile }) {
+export function PotgSection({ g, games }) {
   const potg = playerOfGame(g, games), p = P(potg.id);
   const calm = g.result === 'L';
   const reduced = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -93,7 +93,7 @@ export function PotgSection({ g, games, tile }) {
   const s = potg.s;
   const line = [['pts', 'PTS'], ['reb', 'REB'], ['ast', 'AST'], ['stl', 'STL'], ['blk', 'BLK']].filter(([k], i) => i < 3 || s[k] > 0);
   return (
-    <div className={(tile ? 'potg lead-potg' : 'sec potg') + (RIGHT ? ' potg-right' : '')} id="g-potg">
+    <div className="sec potg" id="g-potg">
       <div className="potg-row">
         <button className={`potg-stage${wide ? ' wide' : ''}`} onClick={tap} aria-label={`${p.name}, player of the game. Tap to celebrate`}>
           <svg viewBox={bg.view} aria-hidden="true" className={`bg-${bgKey}${smile ? ' smiling' : ''}`}>

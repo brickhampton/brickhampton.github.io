@@ -1327,8 +1327,6 @@ a.vbtn:active,button.vbtn:active{transform:scale(.94)}
   .potg-line b{font-size:22px}
   .potg-line span{font-size:10px}
   .potg-why{font-size:13px;margin-top:8px}
-  .potg-right .potg-txt{text-align:right}
-  .potg-right .potg-name,.potg-right .potg-line{justify-content:flex-end}
 }
 /* Backdrop bits: champagne spray, disco tiles and specks, fireworks. */
 .pg-drop{animation:pgDrop 1.4s cubic-bezier(.2,.6,.4,1) infinite}
@@ -1369,11 +1367,6 @@ a.vbtn:active,button.vbtn:active{transform:scale(.94)}
 @keyframes pgPop{0%{transform:translate(0,0);opacity:1}60%{opacity:1}100%{transform:translate(var(--dx),var(--dy));opacity:0}}
 @media (prefers-reduced-motion:reduce){.potg-stage [class^="pg-"]{animation:none}.pg-tile{opacity:.4}.pg-burst,.pg-flash,.pg-coin{opacity:1}}
 
-/* Player of the game as the lead card of Top performances: two columns wide and two cards tall, no box, the scene fading into the page. */
-.lead-potg{grid-column:span 2;grid-row:span 2;align-self:center;min-width:0}
-.lead-potg .potg-stage{width:clamp(180px,22vw,260px)}
-@media (max-width:700px){
-  .lead-potg{grid-row:auto;margin-bottom:4px}
-  .lead-potg .potg-stage{width:47vw;max-width:210px}
-  .leaders.with-potg>.lead-card:last-child:nth-child(even){grid-column:span 2}
-}
+/* iPad and computer: the PER badge sits under the name. iPhone: no reason sentence, just the name, PER and stats. */
+@media (min-width:701px){.potg-name{flex-direction:column;align-items:flex-start;gap:8px}}
+@media (max-width:700px){.potg-why{display:none}}
