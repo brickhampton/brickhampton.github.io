@@ -39,7 +39,7 @@ const POP = (() => {
 // Preview only: ?pbg=<name> fixes the backdrop (otherwise it's a random one each time); ?ptrick=<name> picks the first idle trick.
 const Q = typeof location !== 'undefined' ? new URLSearchParams(location.search) : new URLSearchParams(), FIXED = Q.get('pbg'), FIRST = Q.get('ptrick');
 
-export function PotgSection({ g, games }) {
+export function PotgSection({ g, games, tile }) {
   const potg = playerOfGame(g, games), p = P(potg.id);
   const calm = g.result === 'L';
   const reduced = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -84,7 +84,7 @@ export function PotgSection({ g, games }) {
   const s = potg.s;
   const line = [['pts', 'PTS'], ['reb', 'REB'], ['ast', 'AST'], ['stl', 'STL'], ['blk', 'BLK']].filter(([k], i) => i < 3 || s[k] > 0);
   return (
-    <div className="sec potg" id="g-potg">
+    <div className={tile ? 'potg lead-potg' : 'sec potg'} id="g-potg">
       <div className="potg-row">
         <button className="potg-stage" onClick={tap} aria-label={`${p.name}, player of the game. Tap to celebrate`}>
           <svg viewBox={bg.view} aria-hidden="true" className={`bg-${bgKey}${smile ? ' smiling' : ''}`}>

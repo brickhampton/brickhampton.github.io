@@ -1364,3 +1364,12 @@ a.vbtn:active,button.vbtn:active{transform:scale(.94)}
 .pg-pop{animation:pgPop .9s steps(12) forwards}
 @keyframes pgPop{0%{transform:translate(0,0);opacity:1}60%{opacity:1}100%{transform:translate(var(--dx),var(--dy));opacity:0}}
 @media (prefers-reduced-motion:reduce){.potg-stage [class^="pg-"]{animation:none}.pg-tile{opacity:.4}.pg-burst,.pg-flash,.pg-coin{opacity:1}}
+
+/* Player of the game as the lead card of Top performances: two columns wide and two cards tall, no box, the scene fading into the page. */
+.lead-potg{grid-column:span 2;grid-row:span 2;align-self:center;min-width:0}
+.lead-potg .potg-stage{width:clamp(180px,22vw,260px)}
+@media (max-width:700px){
+  .lead-potg{grid-row:auto;margin-bottom:4px}
+  .lead-potg .potg-stage{width:47vw;max-width:210px}
+  .leaders.with-potg>.lead-card:last-child:nth-child(even){grid-column:span 2}
+}

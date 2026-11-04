@@ -11,9 +11,10 @@ import { openSheet } from '../components/Sheet.jsx';
 import { EditGame } from './EditGame.jsx';
 import { ShareSheet } from '../components/ShareSheet.jsx';
 import { PotgSection } from '../components/PotgSection.jsx';
+import { playerOfGame } from '../lib/potg.js';
 
 // Preview only: ?ppos=top puts Player of the game above Top performances.
-const POTG_TOP = typeof location !== 'undefined' && new URLSearchParams(location.search).get('ppos') === 'top';
+const PPOS = typeof location !== 'undefined' ? new URLSearchParams(location.search).get('ppos') : null, POTG_TOP = PPOS === 'top', POTG_LEAD = PPOS === 'lead';
 import { Chart, StatChips } from '../components/ui.jsx';
 
 export function ShootBar({ k, label, m, a, v }) {
@@ -77,6 +78,8 @@ export function Game() {
         </div></div>
     );
   }
+  // Player of the game as the first card of Top performances; it takes the Best PER card's place when it's the same player.
+  const lead = POTG_LEAD && rows.length ? (() => { const id = playerOfGame(g, games).id, top = rows.reduce((a, b) => b.s.per > a.s.per ? b : a); return { same: top.id === id }; })() : null;
   const seasonList = games.filter(x => x.season === g.season);
   const more = Object.fromEntries(moreFor(seasonList));
   const stat = S.gtStat in GT_STATS || S.gtStat in more ? S.gtStat : 'pts';
@@ -97,8 +100,9 @@ export function Game() {
       <div className="jres"><VideoBtn g={g} />{feat ? <span className={`tfeat ${feat[0]}`}>{BIC[feat[1]]}{feat[2]}</span> : null}<span className={`badge ${g.result}`}>{RES[g.result]}</span></div>
     </div>
     {POTG_TOP && rows.length ? <PotgSection key={g.id} g={g} games={games} /> : null}
-    <div className="sec"><h3>Top performances</h3><div className="leaders">
-      <Leader rows={rows} g={g} games={games} k="per" label="Best PER" fmt={v => perTxt(v)} />
+    <div className="sec"><h3>Top performances</h3><div className={`leaders${lead ? ' with-potg' : ''}`}>
+      {lead ? <PotgSection key={g.id} g={g} games={games} tile /> : null}
+      {lead && lead.same ? null : <Leader rows={rows} g={g} games={games} k="per" label="Best PER" fmt={v => perTxt(v)} />}
       <Leader rows={rows} g={g} games={games} k="pts" label="Most points" />
       <Leader rows={rows} g={g} games={games} k="reb" label="Most rebounds" />
       <Leader rows={rows} g={g} games={games} k="ast" label="Most assists" />
@@ -117,6 +121,6 @@ export function Game() {
     <div className="sec"><h3>{g.season} game by game</h3>
       <div className="card" id="gtrend-card"><div className="ctrl"><StatChips id="gt-stat" main={GT_STATS} more={more} value={stat} onPick={k => set({ gtStat: k })} /></div>
         <Chart id="gtrend" draw={w => drawGameTrend(w, g, games, stat)} deps={[g, games, stat]} /></div></div>
-    {!POTG_TOP && rows.length ? <PotgSection key={g.id} g={g} games={games} /> : null}
+    {!POTG_TOP && !POTG_LEAD && rows.length ? <PotgSection key={g.id} g={g} games={games} /> : null}
   </>;
 }
