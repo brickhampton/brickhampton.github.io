@@ -334,14 +334,14 @@ function sprite(c, num, pose) {
     ball(bx + Math.floor(bw / 2), ty + 5, r);
     r(fx - 1, ty + 1, 2, 3, S); r(fx - 3, ty + 3, 3, 3, S); r(fx - 3, ty + 5, 3, 1, S2);
   } else if (pose === 'flick1' || pose === 'flick2') {
-    // Making it rain: the back hand comes across the waist and holds a wad of notes out at the side, and the front hand
+    // Making it rain: the back hand comes across the waist and holds a wad of notes just right of the number, and the front hand
     // flicks notes off the top: on the wad ('flick1'), then flicked up and out ('flick2').
-    const GN = '#3f9b4a', GL = '#7fd08a', BD = '#e9e2c0', wx = fx + 1, wy = ty + 4;
-    r(bx + 2, ty + 6, wx - bx - 1, 2, SB); r(bx + 2, ty + 8, wx - bx - 1, 1, S2);
-    r(wx, wy, 6, 3, GN); r(wx, wy, 6, 1, GL); r(wx + 2, wy, 1, 3, BD); r(wx, wy + 3, 5, 2, SB); r(wx, wy + 4, 5, 1, S2);
+    const GN = '#3f9b4a', GL = '#7fd08a', BD = '#e9e2c0', wx = bx + bw - 4, wy = ty + 4;
+    r(bx + 2, ty + 6, wx - bx - 2, 2, SB); r(bx + 2, ty + 8, wx - bx - 2, 1, S2);
+    r(wx, wy, 5, 3, GN); r(wx, wy, 5, 1, GL); r(wx + 2, wy, 1, 3, BD); r(wx - 1, wy + 3, 5, 2, SB); r(wx - 1, wy + 4, 5, 1, S2);
     r(fx - 1, ty, 2, 2, S);
-    if (pose === 'flick1') { r(fx, ty + 1, 2, 2, S); r(fx + 1, ty + 2, 3, 2, S); r(wx + 2, wy - 2, 4, 2, S); r(wx + 2, wy - 1, 4, 1, S2); }
-    else { r(fx, ty + 1, 4, 2, S); r(fx + 3, ty - 1, 2, 3, S); r(fx + 4, ty - 3, 3, 3, S); r(fx + 7, ty - 4, 1, 1, S); }
+    if (pose === 'flick1') { r(fx - 1, ty + 2, 2, 1, S); r(wx + 1, wy - 2, 4, 2, S); r(wx + 1, wy - 1, 4, 1, S2); }
+    else { r(fx, ty + 1, 3, 2, S); r(fx + 2, ty - 1, 2, 3, S); r(fx + 3, ty - 3, 3, 3, S); r(fx + 6, ty - 4, 1, 1, S); }
   } else if (pose === 'trophy') {
     // Held one pixel below the collar, a hand on each handle.
     const cx = bx + Math.floor(bw / 2) - 1, G = '#f2c14e', G2 = '#c98f22', t = ty + 1;
@@ -437,8 +437,8 @@ export function trickExtras(raw, kind) {
     + px(fx - 1, hy - 5, 3, 1, '#fff', .55);
   // 'shades': sunglasses over the eyes, with a glint.
   if (kind === 'shades') { const ey = hy + EYE_ROW[c.eyeY], hx = 8; out = px(hx + 1, ey - 1, 4, 3, '#111') + px(hx + 6, ey - 1, 4, 3, '#111') + px(hx + 5, ey - 1, 1, 1, '#111') + px(hx, ey - 1, 1, 1, '#111') + px(hx + 7, ey - 1, 1, 1, '#fff', .8) + px(hx + 2, ey - 1, 1, 1, '#fff', .6); }
-  // Notes flicked off the top of the wad at the side, flying up and out, then fluttering down.
-  const bill = (x, y, o = 1) => px(x, y, 3, 2, '#3f9b4a', o) + px(x, y, 3, 1, '#7fd08a', o), nx = fx + 1;
+  // Notes flicked off the top of the wad, flying up and out, then fluttering down.
+  const bill = (x, y, o = 1) => px(x, y, 3, 2, '#3f9b4a', o) + px(x, y, 3, 1, '#7fd08a', o), nx = fx - 2;
   if (kind === 'note1') out = bill(nx + 7, ty - 1);
   if (kind === 'note2') out = bill(nx + 10, ty - 5, .9);
   if (kind === 'note3') out = bill(nx + 12, ty - 2, .65);

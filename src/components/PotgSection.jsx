@@ -22,7 +22,7 @@ const TRICKS = {
   behind: [['dribble', 0, 0, 0], ['dribble', 0, 1, 0], ['lowball', 0, 0, 0], ['dribbleL', 0, 0, 0], ['dribbleL', 0, 1, 0], ['lowball', 0, 0, 0], ['dribble', 0, 0, 0], ['dribble', 0, 1, 0]],
   // Pointing out to the crowd on one side, then the other, looking where he points.
   point: [...rep(['pointR', 0, 0, 0, 'eyesR'], 4), ['down', 0, 0, 0], ...rep(['pointL', 0, 0, 0, 'away'], 4), ['down', 0, 0, 0]],
-  // Making it rain: notes flicked off the top of a wad held out at his side, one after another.
+  // Making it rain: notes flicked off the top of a wad held just right of his number, one after another.
   cash: [['flick1', 0, 0, 0], ...[...Array(4)].flatMap(() => [['flick2', 0, 0, 0, 'note1 note3'], ['flick1', 0, 0, 0, 'note2 note4']]), ['flick1', 0, 0, 0, 'note3']],
 };
 const TRICK_KEYS = Object.keys(TRICKS);
