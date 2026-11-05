@@ -129,11 +129,10 @@ const TRICKS = {
   badge: (m) => { const b = m.badges[Math.floor(Math.random() * m.badges.length)]; return [['brag', '', 1700, { badge: b }]]; },
   look: () => [['look', '', 1900]],
   quick: () => Array.from({ length: 5 }, () => ['qbounce', '', 300]),
-  // Tap only, from the Player of the game: pointing out to the crowd, a money count, free throw form.
+  // Tap only, from the Player of the game: pointing out to the crowd, a money count.
   // A fifth item is drawn over the player (see trickExtras).
   point: () => [['eyesR', 'pointR', 1200], ['', 'down', 250], ['away', 'pointL', 1200]],
   cash: () => [['', 'flick1', 320], ...[...Array(4)].flatMap(() => [['', 'flick2', 320, null, 'note1 note3'], ['', 'flick1', 320, null, 'note2 note4']]), ['', 'flick1', 320, null, 'note3']],
-  freethrow: () => [['', 'down', 450], ['', 'shoot', 900], ['', 'down', 450], ['', 'shoot', 900]],
 };
 // The sounds of a trick that follows a tap (idle tricks stay silent): the ball hits the floor halfway through each bounce.
 const STEP_SFX = { bounce: [['dribble', 250]], qbounce: [['dribble', 150]], spin: [['trick', 0]], hop: [['hop', 0]], dance: [['trick', 0]],
