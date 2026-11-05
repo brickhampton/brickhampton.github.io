@@ -5,7 +5,7 @@ import { shotDetail } from '../lib/prefs.js';
 import { go } from '../lib/nav.js';
 import { drawRadar, drawTrend, P_STATS, P_MORE, SLOT_COL, SC_B, reduced } from '../lib/charts.js';
 import { Avatar, figure } from '../components/Avatar.jsx';
-import { pxShadow, BALL, BALL_C } from '../lib/avatar.js';
+import { pxShadow, BALL, BALL_C, trickExtras } from '../lib/avatar.js';
 import { playerCourt, COURT_VIEW } from '../lib/playerCourt.js';
 import { Back, BIC, MedalGold } from '../components/icons.jsx';
 import { Chart, SeasonPick, StatChips, MoreBtn, EmptyState, PerPill } from '../components/ui.jsx';
@@ -129,13 +129,22 @@ const TRICKS = {
   badge: (m) => { const b = m.badges[Math.floor(Math.random() * m.badges.length)]; return [['brag', '', 1700, { badge: b }]]; },
   look: () => [['look', '', 1900]],
   quick: () => Array.from({ length: 5 }, () => ['qbounce', '', 300]),
+  // Tap only, from the Player of the game: a bicep flex, pointing out to the crowd, a mic drop, a money count, free throw form.
+  // A fifth item is drawn over the player (see trickExtras).
+  flex: () => [...Array(3)].flatMap(() => [['', 'flex', 320], ['', 'flex2', 320]]),
+  point: () => [['eyesR', 'pointR', 1200], ['', 'down', 250], ['away', 'pointL', 1200]],
+  mic: () => [['', 'mic', 1400], ['', 'micopen', 250, null, 'micfall1'], ['mdrop', 'down', 250, null, 'micfall2'], ['hdown', 'down', 1500, null, 'micfloor']],
+  cash: () => [['', 'cash', 320], ...[...Array(2)].flatMap(() => [1, 2, 3].map(k => ['', 'cash', 320, null, 'bill' + k])), ['', 'cash', 320]],
+  freethrow: () => [['', 'down', 450], ['', 'shoot', 900], ['', 'down', 450], ['', 'shoot', 900]],
 };
 // The sounds of a trick that follows a tap (idle tricks stay silent): the ball hits the floor halfway through each bounce.
 const STEP_SFX = { bounce: [['dribble', 250]], qbounce: [['dribble', 150]], spin: [['trick', 0]], hop: [['hop', 0]], dance: [['trick', 0]],
-  cheer: [['cheer', 0]], brag: [['trophy', 0]], squash: [['boing', 0]], fumble: [['floor', 200]] };
+  cheer: [['cheer', 0]], brag: [['trophy', 0]], squash: [['boing', 0]], fumble: [['floor', 200]], mdrop: [['floor', 200]] };
 const IDLE = ['dribble', 'cross', 'quick', 'dribble', 'cross', 'quick', 'look'], IDLE_ONLY = ['quick', 'look'], RAPID = 320;
 // The ball on its own, for when it leaves the player's hands: centred on (0, 0) in the stage's units.
 const U = 104 / 34, LOOSE = BALL.map(([o, w], j) => `<rect x="${((o - 3.5) * U).toFixed(2)}" y="${((j - 3) * U).toFixed(2)}" width="${(w * U).toFixed(2)}" height="${U.toFixed(2)}" fill="${BALL_C}"/>`).join('');
+// Preview only: ?ptap=<name> picks the trick a tap plays.
+const PTAP = typeof location !== 'undefined' ? new URLSearchParams(location.search).get('ptap') : null;
 function PStage({ p, num, mood }) {
   const [step, setStep] = useState(null), timer = useRef(0), busy = useRef(false), last = useRef(''), taps = useRef({ n: 0, at: 0 });
   const m = useRef(mood); m.current = mood;
@@ -160,9 +169,9 @@ function PStage({ p, num, mood }) {
     const steps = TRICKS[k](m.current);
     const next = i => {
       if (i === steps.length) { setStep(null); busy.current = false; return; }
-      const [cls, pose, ms, fx] = steps[i];
+      const [cls, pose, ms, fx, x] = steps[i];
       if (loud) STEP_SFX[cls]?.forEach(([n, at]) => sfx(n, at));
-      setStep({ cls: cls + extra, pose, fx, n: Date.now() + i });
+      setStep({ cls: cls + extra, pose, fx, x, n: Date.now() + i });
       timer.current = setTimeout(() => next(i + 1), ms);
     };
     next(0);
@@ -186,7 +195,7 @@ function PStage({ p, num, mood }) {
     timer.current = setTimeout(() => {
       if (t.n > 1 || reduced) { timer.current = setTimeout(() => { setStep(null); busy.current = false; }, 400); return; }
       const ks = Object.keys(TRICKS).filter(x => x !== last.current && !IDLE_ONLY.includes(x) && (x !== 'badge' || m.current.badges.length) && (x !== 'mood' || m.current.per));
-      run(ks[Math.floor(Math.random() * ks.length)], smile, true);
+      run(PTAP in TRICKS ? PTAP : ks[Math.floor(Math.random() * ks.length)], smile, true);
     }, RAPID);
   };
   const fx = step?.fx;
@@ -194,7 +203,7 @@ function PStage({ p, num, mood }) {
     <svg className="pcourt" ref={court} viewBox={COURT_VIEW} aria-hidden="true" dangerouslySetInnerHTML={{ __html: COURT }} />
     <span className="pglow" />
     <svg className="pfig" viewBox="0 0 100 104" aria-hidden="true" dangerouslySetInnerHTML={{ __html: pxShadow(50, 103.5, 22, 104 / 34) }} />
-    <span className="phop" key={step?.n || 0}><svg className="pfig" viewBox="0 0 100 104" aria-hidden="true" dangerouslySetInnerHTML={{ __html: figure({ ...p, num }, { stage: true, pose: step?.pose || undefined }) }} /></span>
+    <span className="phop" key={step?.n || 0}><svg className="pfig" viewBox="0 0 100 104" aria-hidden="true" dangerouslySetInnerHTML={{ __html: figure({ ...p, num }, { stage: true, pose: step?.pose || undefined }) + (step?.x ? step.x.split(' ').map(k => trickExtras({ ...p, num }, k)).join('') : '') }} /></span>
     <svg className="pfig ploose" viewBox="0 0 100 104" aria-hidden="true" key={'b' + (step?.n || 0)} dangerouslySetInnerHTML={{ __html: `<g class="pball" shape-rendering="crispEdges">${LOOSE}</g>` }} />
     {fx ? <span key={'f' + step.n} className={`pfloat ${fx.tone || 'brag'}`} aria-hidden="true">{fx.badge ? <>{BIC[fx.badge.icon]}{fx.badge.name}</> : fx.text}</span> : null}
   </button>;

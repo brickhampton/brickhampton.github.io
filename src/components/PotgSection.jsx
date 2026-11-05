@@ -22,8 +22,6 @@ const TRICKS = {
   behind: [['dribble', 0, 0, 0], ['dribble', 0, 1, 0], ['lowball', 0, 0, 0], ['dribbleL', 0, 0, 0], ['dribbleL', 0, 1, 0], ['lowball', 0, 0, 0], ['dribble', 0, 0, 0], ['dribble', 0, 1, 0]],
   // Pointing out to the crowd on one side, then the other, looking where he points.
   point: [...rep(['pointR', 0, 0, 0, 'eyesR'], 4), ['down', 0, 0, 0], ...rep(['pointL', 0, 0, 0, 'away'], 4), ['down', 0, 0, 0]],
-  // Two taps on the number on his jersey.
-  number: [['tap2', 0, 0, 0], ['tap', 0, 0, 0], ['tap2', 0, 0, 0], ['tap', 0, 0, 0], ['tap', 0, 0, 0], ['tap', 0, 0, 0], ['down', 0, 0, 0]],
   // A mic held out, dropped, and a look down at it on the floor.
   mic: [...rep(['mic', 0, 0, 0], 5), ['micopen', 0, 0, 0, 'micfall1'], ['down', 0, 0, 0, 'micfall2'], ...rep(['down', 0, 0, 0, 'micfloor down'], 5)],
   // Flicking through a stack of notes, sending them flying.
@@ -36,21 +34,13 @@ const TRICK_KEYS = Object.keys(TRICKS);
 // 'bounce', 'look' and 'shrug' are classes on the stage that animate the ball and the eyes (see .potg-stage .pk-*).
 TRICKS.bounce = Array.from({ length: 10 }, () => ['dribble', 0, 0, 0, 'bounce']);
 TRICKS.look = Array.from({ length: 6 }, () => ['dribble', 0, 0, 0, 'look']);
-// A slow shake of the head, the ball tucked under his arm.
-TRICKS.headshake = [['tuck', 0, 0, 0], ...[-1, -1, 0, 1, 1, 0, -1, -1, 0, 1, 1, 0].map(h => ['tuck', 0, 0, h]), ['tuck', 0, 0, 0]];
-// Hands on hips, looking off to the side.
-TRICKS.hips = rep(['hips', 0, 0, 0, 'away'], 9);
-// A towel over the head for a moment.
-TRICKS.towel = rep(['down', 0, 0, 0, 'towel'], 10);
-// Two deep breaths: shoulders up, then a sigh out.
-TRICKS.breath = [...rep(['down', 0, 0, 0, 'inhale'], 3), ['down', 0, 0, 0, 'puff1'], ['down', 0, 0, 0, 'puff2'], ['down', 0, 0, 0], ...rep(['down', 0, 0, 0, 'inhale'], 3), ['down', 0, 0, 0, 'puff1'], ['down', 0, 0, 0, 'puff2']];
 // Going over his free throw form with no ball: a dip, up into the shot, the follow-through held. Twice.
 const FT = [['down', 0, 1, 0], ['down', 0, 1, 0], ['shoot', 0, -1, 0], ['shoot', 0, 0, 0], ['shoot', 0, 0, 0], ['down', 0, 0, 0]];
 TRICKS.freethrow = [...FT, ...FT];
 // A shrug (only for a tap after a loss): palms up for a moment, head tipped down a touch, the ball left at his feet.
 TRICKS.shrug = Array.from({ length: 6 }, () => ['shrug', 0, 0, 0, 'shrug']);
-const CALM_KEYS = ['bounce', 'behind', 'look', 'headshake', 'hips', 'towel', 'breath', 'freethrow'];
-const CLASS_EXTRAS = new Set(['bounce', 'look', 'shrug', 'down', 'eyesR', 'away', 'inhale']);
+const CALM_KEYS = ['bounce', 'behind', 'look', 'freethrow'];
+const CLASS_EXTRAS = new Set(['bounce', 'look', 'shrug', 'down', 'eyesR', 'away']);
 // After a loss there's no celebrating: arms by his sides, nodding along, no smile, no confetti.
 const NOD = [['down', 0, 0, 0], ['down', 0, 1, 0]];
 // A tap: a double fist pump, jumping with both fists up, twice.
