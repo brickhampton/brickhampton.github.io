@@ -22,8 +22,6 @@ const TRICKS = {
   behind: [['dribble', 0, 0, 0], ['dribble', 0, 1, 0], ['lowball', 0, 0, 0], ['dribbleL', 0, 0, 0], ['dribbleL', 0, 1, 0], ['lowball', 0, 0, 0], ['dribble', 0, 0, 0], ['dribble', 0, 1, 0]],
   // Pointing out to the crowd on one side, then the other, looking where he points.
   point: [...rep(['pointR', 0, 0, 0, 'eyesR'], 4), ['down', 0, 0, 0], ...rep(['pointL', 0, 0, 0, 'away'], 4), ['down', 0, 0, 0]],
-  // A mic held out, dropped, and a look down at it on the floor.
-  mic: [...rep(['mic', 0, 0, 0], 5), ['micopen', 0, 0, 0, 'micfall1'], ['down', 0, 0, 0, 'micfall2'], ...rep(['down', 0, 0, 0, 'micfloor down'], 5)],
   // Flicking through a stack of notes, sending them flying.
   cash: [['cash', 0, 0, 0], ['cash', 0, 0, 0, 'bill1'], ['cash', 0, 0, 0, 'bill2'], ['cash', 0, 0, 0, 'bill3'], ['cash', 0, 0, 0, 'bill1'], ['cash', 0, 0, 0, 'bill2'], ['cash', 0, 0, 0, 'bill3'], ['cash', 0, 0, 0]],
 };
