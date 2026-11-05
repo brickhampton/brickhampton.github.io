@@ -314,11 +314,9 @@ function sprite(c, num, pose) {
     r(fx - 1, ty, 2, 5, S); r(fx, ty + 4, 4 + aw, 2, S); shrugHand((dx, y, w, h, col) => r(fx + dx, y, w, h, col), S);
   } else if (pose === 'pointR') {
     pointArm((dx, y, w, h, col) => r(fx + dx, y, w, h, col), S);
-  } else if (pose === 'mic' || pose === 'micopen' || pose === 'cash') {
-    // The forearm up in front, holding a mic ('mic'), letting go of it ('micopen'), or holding a stack of notes ('cash').
+  } else if (pose === 'cash') {
+    // The forearm up in front, holding a stack of notes.
     r(fx - 1, ty, 2, 4, S); r(fx, ty + 4, 4, 2, S); r(fx + 3, ty + 2, 2, 3, S);
-    if (pose === 'mic') { r(fx + 3, ty - 1, 2, 3, '#2b2b33'); r(fx + 3, ty - 5, 2, 1, '#9aa0ac'); r(fx + 2, ty - 4, 4, 2, '#9aa0ac'); r(fx + 3, ty - 2, 2, 1, '#6b7080'); r(fx + 3, ty - 4, 1, 1, '#e3e6ec'); }
-    if (pose === 'micopen') { r(fx + 5, ty + 1, 1, 2, S); r(fx + 2, ty + 1, 1, 1, S); }
     if (pose === 'cash') { r(fx + 1, ty, 6, 3, '#3f9b4a'); r(fx + 1, ty, 6, 1, '#7fd08a'); r(fx + 3, ty, 2, 3, '#e9e2c0'); r(fx + 3, ty + 2, 2, 2, S); }
   } else if (pose === 'pass') {
     // Arm thrust out level, as on a pass or a reach for a steal.
@@ -434,12 +432,6 @@ export function trickExtras(raw, kind) {
     + px(fx - 1, hy - 5, 3, 1, '#fff', .55);
   // 'shades': sunglasses over the eyes, with a glint.
   if (kind === 'shades') { const ey = hy + EYE_ROW[c.eyeY], hx = 8; out = px(hx + 1, ey - 1, 4, 3, '#111') + px(hx + 6, ey - 1, 4, 3, '#111') + px(hx + 5, ey - 1, 1, 1, '#111') + px(hx, ey - 1, 1, 1, '#111') + px(hx + 7, ey - 1, 1, 1, '#fff', .8) + px(hx + 2, ey - 1, 1, 1, '#fff', .6); }
-  const sy = ty + 8 + Math.floor(tall / 2) + 4 + 1 + Math.ceil(tall / 2) + 2;
-  const mic = (x, y) => px(x + 1, y + 4, 2, 3, '#2b2b33') + px(x + 1, y, 2, 1, '#9aa0ac') + px(x, y + 1, 4, 2, '#9aa0ac') + px(x + 1, y + 3, 2, 1, '#6b7080') + px(x + 1, y + 1, 1, 1, '#e3e6ec');
-  // The mic drop: the mic falling past the hand, then lying on the floor.
-  if (kind === 'micfall1') out = mic(fx + 2, ty + 1);
-  if (kind === 'micfall2') out = mic(fx + 2, ty + 8);
-  if (kind === 'micfloor') out = px(fx + 4, sy - 1, 3, 3, '#9aa0ac') + px(fx + 5, sy - 1, 1, 1, '#e3e6ec') + px(fx + 7, sy, 1, 1, '#6b7080') + px(fx + 8, sy, 3, 2, '#2b2b33');
   // Notes flicked off the stack, flying up and away.
   const bill = (x, y, o = 1) => px(x, y, 3, 2, '#3f9b4a', o) + px(x, y, 3, 1, '#7fd08a', o);
   if (kind === 'bill1') out = bill(fx + 6, ty - 3);
@@ -452,7 +444,7 @@ export function trickExtras(raw, kind) {
 const cache = new Map();
 // SVG markup for a player. Round avatars (the default) show the head and the top of the jersey in a 100 × 100 box.
 // opts.stage draws the whole player at their height, feet on the bottom of a 100 × 104 box: the court, the Home
-// photo, the player page and the builder. opts.pose: 'fist', 'fistL' (the other arm), 'fist2' (both), 'ball', 'trophy', 'shoot', 'catch', 'block', 'block1', 'pass', 'pass2', 'dribbleL', 'spin', 'toast', 'sip' (champagne), 'lowball' (arms down, the ball behind the back), 'pointR'/'pointL' (pointing out either side), 'mic'/'micopen' (a mic drop), 'cash' (a stack of notes), 'down' (arms down), or palming the ball (the default, as in the reference).
+// photo, the player page and the builder. opts.pose: 'fist', 'fistL' (the other arm), 'fist2' (both), 'ball', 'trophy', 'shoot', 'catch', 'block', 'block1', 'pass', 'pass2', 'dribbleL', 'spin', 'toast', 'sip' (champagne), 'lowball' (arms down, the ball behind the back), 'pointR'/'pointL' (pointing out either side), 'cash' (a stack of notes), 'down' (arms down), or palming the ball (the default, as in the reference).
 export function figure(raw, opts = {}) {
   const c = cleanLook(raw), key = JSON.stringify([c, raw.num, !!opts.stage, opts.pose || '']);
   if (cache.has(key)) return cache.get(key);

@@ -129,16 +129,15 @@ const TRICKS = {
   badge: (m) => { const b = m.badges[Math.floor(Math.random() * m.badges.length)]; return [['brag', '', 1700, { badge: b }]]; },
   look: () => [['look', '', 1900]],
   quick: () => Array.from({ length: 5 }, () => ['qbounce', '', 300]),
-  // Tap only, from the Player of the game: pointing out to the crowd, a mic drop, a money count, free throw form.
+  // Tap only, from the Player of the game: pointing out to the crowd, a money count, free throw form.
   // A fifth item is drawn over the player (see trickExtras).
   point: () => [['eyesR', 'pointR', 1200], ['', 'down', 250], ['away', 'pointL', 1200]],
-  mic: () => [['', 'mic', 1400], ['', 'micopen', 250, null, 'micfall1'], ['mdrop', 'down', 250, null, 'micfall2'], ['hdown', 'down', 1500, null, 'micfloor']],
   cash: () => [['', 'cash', 320], ...[...Array(2)].flatMap(() => [1, 2, 3].map(k => ['', 'cash', 320, null, 'bill' + k])), ['', 'cash', 320]],
   freethrow: () => [['', 'down', 450], ['', 'shoot', 900], ['', 'down', 450], ['', 'shoot', 900]],
 };
 // The sounds of a trick that follows a tap (idle tricks stay silent): the ball hits the floor halfway through each bounce.
 const STEP_SFX = { bounce: [['dribble', 250]], qbounce: [['dribble', 150]], spin: [['trick', 0]], hop: [['hop', 0]], dance: [['trick', 0]],
-  cheer: [['cheer', 0]], brag: [['trophy', 0]], squash: [['boing', 0]], fumble: [['floor', 200]], mdrop: [['floor', 200]] };
+  cheer: [['cheer', 0]], brag: [['trophy', 0]], squash: [['boing', 0]], fumble: [['floor', 200]] };
 const IDLE = ['dribble', 'cross', 'quick', 'dribble', 'cross', 'quick', 'look'], IDLE_ONLY = ['quick', 'look'], RAPID = 320;
 // The ball on its own, for when it leaves the player's hands: centred on (0, 0) in the stage's units.
 const U = 104 / 34, LOOSE = BALL.map(([o, w], j) => `<rect x="${((o - 3.5) * U).toFixed(2)}" y="${((j - 3) * U).toFixed(2)}" width="${(w * U).toFixed(2)}" height="${U.toFixed(2)}" fill="${BALL_C}"/>`).join('');
