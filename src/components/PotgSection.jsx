@@ -22,13 +22,10 @@ const TRICKS = {
   behind: [['dribble', 0, 0, 0], ['dribble', 0, 1, 0], ['lowball', 0, 0, 0], ['dribbleL', 0, 0, 0], ['dribbleL', 0, 1, 0], ['lowball', 0, 0, 0], ['dribble', 0, 0, 0], ['dribble', 0, 1, 0]],
   // Pointing out to the crowd on one side, then the other, looking where he points.
   point: [...rep(['pointR', 0, 0, 0, 'eyesR'], 4), ['down', 0, 0, 0], ...rep(['pointL', 0, 0, 0, 'away'], 4), ['down', 0, 0, 0]],
-  // Flicking through a stack of notes, sending them flying.
-  cash: [['cash', 0, 0, 0], ['cash', 0, 0, 0, 'bill1'], ['cash', 0, 0, 0, 'bill2'], ['cash', 0, 0, 0, 'bill3'], ['cash', 0, 0, 0, 'bill1'], ['cash', 0, 0, 0, 'bill2'], ['cash', 0, 0, 0, 'bill3'], ['cash', 0, 0, 0]],
+  // Making it rain: notes flicked off the top of a wad held out at his side, one after another.
+  cash: [['flick1', 0, 0, 0], ...[...Array(4)].flatMap(() => [['flick2', 0, 0, 0, 'note1 note3'], ['flick1', 0, 0, 0, 'note2 note4']]), ['flick1', 0, 0, 0, 'note3']],
 };
 const TRICK_KEYS = Object.keys(TRICKS);
-// Preview only (money count options): A counts the notes with both hands, B makes it rain.
-TRICKS.cashA = [...Array(5)].flatMap(() => [['count1', 0, 0, 0], ['count2', 0, 0, 0]]).concat([['count1', 0, 0, 0, 'bill1'], ['count1', 0, 0, 0, 'bill2']]);
-TRICKS.cashB = [...Array(3)].flatMap(() => [['rain1', 0, 0, 0], ['rain1', 0, 0, 0], ['rain2', 0, 0, 0, 'rain1'], ['rain1', 0, 0, 0, 'rain2'], ['rain1', 0, 0, 0, 'rain3']]);
 // After a loss, low-key tricks only and no smile: a few bounces of the ball, the ball behind the back, a look left and right.
 // 'bounce', 'look' and 'shrug' are classes on the stage that animate the ball and the eyes (see .potg-stage .pk-*).
 TRICKS.bounce = Array.from({ length: 10 }, () => ['dribble', 0, 0, 0, 'bounce']);
@@ -96,7 +93,7 @@ export function PotgSection({ g, games }) {
       }
       next();
     }, 3500 + Math.random() * 3500); };
-    const first = keys.includes(FIRST) || FIRST in TRICKS ? FIRST : keys[Math.floor(Math.random() * keys.length)];
+    const first = keys.includes(FIRST) ? FIRST : keys[Math.floor(Math.random() * keys.length)];
     t = setTimeout(() => { if (!play.current) { lastTrick.current = first; start(TRICKS[first], 2, !calm); } next(); }, FIRST ? 300 : 1500);
     return () => clearTimeout(t);
   }, [calm, reduced]);

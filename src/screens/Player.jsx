@@ -132,7 +132,7 @@ const TRICKS = {
   // Tap only, from the Player of the game: pointing out to the crowd, a money count, free throw form.
   // A fifth item is drawn over the player (see trickExtras).
   point: () => [['eyesR', 'pointR', 1200], ['', 'down', 250], ['away', 'pointL', 1200]],
-  cash: () => [['', 'cash', 320], ...[...Array(2)].flatMap(() => [1, 2, 3].map(k => ['', 'cash', 320, null, 'bill' + k])), ['', 'cash', 320]],
+  cash: () => [['', 'flick1', 320], ...[...Array(4)].flatMap(() => [['', 'flick2', 320, null, 'note1 note3'], ['', 'flick1', 320, null, 'note2 note4']]), ['', 'flick1', 320, null, 'note3']],
   freethrow: () => [['', 'down', 450], ['', 'shoot', 900], ['', 'down', 450], ['', 'shoot', 900]],
 };
 // The sounds of a trick that follows a tap (idle tricks stay silent): the ball hits the floor halfway through each bounce.
