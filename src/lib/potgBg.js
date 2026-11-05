@@ -167,7 +167,15 @@ function redcarpet() {
   };
   const glow = `<defs><radialGradient id="rc-f"><stop offset="0" stop-color="#fff" stop-opacity=".55"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient></defs>`;
   const paps = glow + [28, 50, ...(W > 220 ? [6, -16] : [])].map(x => pap(x, 1) + pap(260 - x, -1)).join('');
-  return { svg: wall + floor + paps + posts, party: '', feet: 226, view: V, k: K };
+  // Big bright flashes going off on their own all over the scene, each with a wide glow and a brief wash of light.
+  const big = (x, y, i) => {
+    const dur = (3.5 + rnd() * 3).toFixed(1), dl = (-rnd() * 6).toFixed(1), z = (1.4 + rnd() * .8).toFixed(2);
+    return `<g class="pg-pap" style="animation-duration:${dur}s;animation-delay:${dl}s"><circle cx="${x}" cy="${y}" r="70" fill="url(#rc-b)"/>`
+      + `<g transform="translate(${x} ${y}) scale(${z})">${rect(-1.5, -10, 3, 20, '#fff')}${rect(-10, -1.5, 20, 3, '#fff')}${rect(-4, -4, 8, 8, '#fff')}${rect(-6, -6, 2, 2, '#fff')}${rect(4, -6, 2, 2, '#fff')}${rect(-6, 4, 2, 2, '#fff')}${rect(4, 4, 2, 2, '#fff')}</g></g>`;
+  };
+  const bigs = `<defs><radialGradient id="rc-b"><stop offset="0" stop-color="#fff" stop-opacity=".9"/><stop offset=".35" stop-color="#fff" stop-opacity=".35"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient></defs>`
+    + [[X0 + 22, 96], [X0 + 60, 140], [X1 - 30, 104], [X1 - 64, 150], [130 - 46, 86], [130 + 48, 122], [X0 + 30, 186], [X1 - 22, 180]].map(([x, y], i) => big(x, y, i)).join('');
+  return { svg: wall + floor + paps + posts + bigs, party: '', feet: 226, view: V, k: K };
 }
 
 // 9. Jumbotron: the player on the big screen above the crowd, who are lit up with phone lights.
