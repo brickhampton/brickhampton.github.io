@@ -26,8 +26,6 @@ const TRICKS = {
   mic: [...rep(['mic', 0, 0, 0], 5), ['micopen', 0, 0, 0, 'micfall1'], ['down', 0, 0, 0, 'micfall2'], ...rep(['down', 0, 0, 0, 'micfloor down'], 5)],
   // Flicking through a stack of notes, sending them flying.
   cash: [['cash', 0, 0, 0], ['cash', 0, 0, 0, 'bill1'], ['cash', 0, 0, 0, 'bill2'], ['cash', 0, 0, 0, 'bill3'], ['cash', 0, 0, 0, 'bill1'], ['cash', 0, 0, 0, 'bill2'], ['cash', 0, 0, 0, 'bill3'], ['cash', 0, 0, 0]],
-  // A double bicep flex, squeezing twice.
-  flex: [['flex', 0, 0, 0], ['flex2', 0, 0, 0], ['flex', 0, 0, 0], ['flex2', 0, 0, 0], ['flex', 0, 0, 0], ['flex2', 0, 0, 0], ['flex', 0, 0, 0]],
 };
 const TRICK_KEYS = Object.keys(TRICKS);
 // After a loss, low-key tricks only and no smile: a few bounces of the ball, the ball behind the back, a look left and right.

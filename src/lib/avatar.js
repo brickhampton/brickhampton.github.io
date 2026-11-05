@@ -188,14 +188,6 @@ function sprite(c, num, pose) {
   // The shrug's open hand at the end of the forearm, palm turned up: three pixels long, a row above the forearm.
   // R draws it: (dx from the body's edge, y, w, h, colour).
   const shrugHand = (R, col) => { R(3 + aw, ty + 3, 3, 1, col); R(3 + aw, ty + 4, 3, 1, S2); };
-  // A bicep flex: the upper arm out level from the shoulder, the forearm straight up and a fist beside the head.
-  // 'flex2' squeezes harder, so the bicep bulges a pixel higher. R draws it: (dx from the body's edge, y, w, h, colour).
-  const flexArm = (R, col) => {
-    const big = pose === 'flex2';
-    R(-1, ty + 1, 6 + aw, 2, col); R(-1, ty + 3, 6 + aw, 1, S2); if (big) { R(1, ty, 4, 1, col); R(2, ty - 1, 2, 1, col); } else R(2, ty, 2, 1, col);
-    R(4, hy + 6, 3 + aw, ty + 1 - hy - 6, col); R(6 + aw, hy + 6, 1, ty + 1 - hy - 6, S2);
-    R(3, hy + 2, 5 + aw, 4, col); R(3, hy + 5, 5 + aw, 1, S2); R(4, hy + 3, 1, 1, S2);
-  };
   // Pointing out to the crowd: the arm up and out on the diagonal, a fist and one finger out.
   const pointArm = (R, col) => {
     for (let i = 0; i < 4; i++) R(-1 + i, ty - i, 2 + aw, 2, col);
@@ -228,9 +220,6 @@ function sprite(c, num, pose) {
   } else if (pose === 'pointL') {
     pointArm((dx, y, w, h, col) => r(bx - dx - w, y, w, h, col), SB);
     if (BS) r(bx - 1 - aw, ty, 1 + aw, 2, BS);
-  } else if (pose === 'flex' || pose === 'flex2') {
-    flexArm((dx, y, w, h, col) => r(bx - dx - w, y, w, h, col), SB);
-    if (BS) r(bx - 1 - aw, ty + 1, 1 + aw, 2, BS);
   } else if (pose === 'fistL' || pose === 'fist2') {
     // A fist pump with this arm: the front arm's fist, mirrored onto this side.
     const m = (dx, y, w, h, col) => r(bx - dx - w, y, w, h, col);
@@ -323,8 +312,6 @@ function sprite(c, num, pose) {
     // A shrug: elbows in, forearms out to the sides and palms up, the ball left on the floor by the feet.
     ball(fx + 6, sy - 3, r);
     r(fx - 1, ty, 2, 5, S); r(fx, ty + 4, 4 + aw, 2, S); shrugHand((dx, y, w, h, col) => r(fx + dx, y, w, h, col), S);
-  } else if (pose === 'flex' || pose === 'flex2') {
-    flexArm((dx, y, w, h, col) => r(fx + dx, y, w, h, col), S);
   } else if (pose === 'pointR') {
     pointArm((dx, y, w, h, col) => r(fx + dx, y, w, h, col), S);
   } else if (pose === 'mic' || pose === 'micopen' || pose === 'cash') {
@@ -465,7 +452,7 @@ export function trickExtras(raw, kind) {
 const cache = new Map();
 // SVG markup for a player. Round avatars (the default) show the head and the top of the jersey in a 100 × 100 box.
 // opts.stage draws the whole player at their height, feet on the bottom of a 100 × 104 box: the court, the Home
-// photo, the player page and the builder. opts.pose: 'fist', 'fistL' (the other arm), 'fist2' (both), 'ball', 'trophy', 'shoot', 'catch', 'block', 'block1', 'pass', 'pass2', 'dribbleL', 'spin', 'toast', 'sip' (champagne), 'lowball' (arms down, the ball behind the back), 'flex'/'flex2' (a double bicep flex, squeezing), 'pointR'/'pointL' (pointing out either side), 'mic'/'micopen' (a mic drop), 'cash' (a stack of notes), 'down' (arms down), or palming the ball (the default, as in the reference).
+// photo, the player page and the builder. opts.pose: 'fist', 'fistL' (the other arm), 'fist2' (both), 'ball', 'trophy', 'shoot', 'catch', 'block', 'block1', 'pass', 'pass2', 'dribbleL', 'spin', 'toast', 'sip' (champagne), 'lowball' (arms down, the ball behind the back), 'pointR'/'pointL' (pointing out either side), 'mic'/'micopen' (a mic drop), 'cash' (a stack of notes), 'down' (arms down), or palming the ball (the default, as in the reference).
 export function figure(raw, opts = {}) {
   const c = cleanLook(raw), key = JSON.stringify([c, raw.num, !!opts.stage, opts.pose || '']);
   if (cache.has(key)) return cache.get(key);

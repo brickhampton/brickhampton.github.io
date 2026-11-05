@@ -129,9 +129,8 @@ const TRICKS = {
   badge: (m) => { const b = m.badges[Math.floor(Math.random() * m.badges.length)]; return [['brag', '', 1700, { badge: b }]]; },
   look: () => [['look', '', 1900]],
   quick: () => Array.from({ length: 5 }, () => ['qbounce', '', 300]),
-  // Tap only, from the Player of the game: a bicep flex, pointing out to the crowd, a mic drop, a money count, free throw form.
+  // Tap only, from the Player of the game: pointing out to the crowd, a mic drop, a money count, free throw form.
   // A fifth item is drawn over the player (see trickExtras).
-  flex: () => [...Array(3)].flatMap(() => [['', 'flex', 320], ['', 'flex2', 320]]),
   point: () => [['eyesR', 'pointR', 1200], ['', 'down', 250], ['away', 'pointL', 1200]],
   mic: () => [['', 'mic', 1400], ['', 'micopen', 250, null, 'micfall1'], ['mdrop', 'down', 250, null, 'micfall2'], ['hdown', 'down', 1500, null, 'micfloor']],
   cash: () => [['', 'cash', 320], ...[...Array(2)].flatMap(() => [1, 2, 3].map(k => ['', 'cash', 320, null, 'bill' + k])), ['', 'cash', 320]],
