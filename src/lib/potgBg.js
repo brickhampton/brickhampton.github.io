@@ -150,7 +150,7 @@ function magazine() {
   return { svg: cover, party: flashes([[38, 110], [222, 96], [30, 196], [226, 180], [214, 236], [42, 240]], 41), feet: 226, view: V, k: K };
 }
 
-// 6. Red carpet: a wall of little ball logos, the carpet running back, gold posts and velvet rope, and photographers' flashes.
+// 6. Red carpet: a wall of little ball logos, the carpet running back, gold posts and velvet rope, and paparazzi whose cameras flash every now and then.
 function redcarpet() {
   let wall = `<defs>${grad('rc-w', [[0, '#0e0f14'], [1, '#1b1d28']])}${grad('rc-c', [[0, '#7d1a1a'], [1, '#b32525']])}</defs>` + rect(X0, Y0, W, 196 - Y0, 'url(#rc-w)');
   for (let y = 82, r = 0; y < 186; y += 22, r++) for (let x = X0 + (r % 2) * 14; x < X1; x += 28) wall += rect(x, y, 6, 6, '#e9b949', ' opacity=".18"') + rect(x + 2.5, y, 1, 6, '#0e0f14', ' opacity=".25"');
@@ -159,7 +159,15 @@ function redcarpet() {
   const post = x => rect(x - 2, 198, 4, 30, '#e9b949') + rect(x - 4, 196, 8, 4, '#f4d37c') + rect(x - 5, 228, 10, 3, '#b8892a');
   const rope = (a, b) => { let r = ''; for (let i = 0; i <= 10; i++) { const t = i / 10, x = a + (b - a) * t, y = 201 + Math.sin(t * Math.PI) * 9; r += rect(x.toFixed(1), y.toFixed(1), 3.4, 3.4, '#8d1d2a'); } return r; };
   const posts = post(30) + post(66) + post(194) + post(230) + rope(30, 64) + rope(194, 228);
-  return { svg: wall + floor + posts, party: flashes([[36, 120], [58, 164], [222, 112], [200, 150], [44, 90], [228, 176]], 7), feet: 226, view: V, k: K };
+  // Paparazzi behind the rope on both sides, each one's camera going off every now and then with a burst and a glow.
+  const rnd = seeded(7), pap = (x, face) => {
+    const dur = (5 + rnd() * 4).toFixed(1), dl = (-rnd() * 8).toFixed(1), cx = x + face * 6;
+    return rect(x - 4, 176, 8, 8, '#33364a') + rect(x - 6, 184, 12, 22, '#33364a') + rect(cx - 3, 177, 6, 5, '#3a3d4c') + rect(cx + (face > 0 ? 2 : -4), 178, 2, 3, '#555a6e')
+      + `<g class="pg-pap" style="animation-duration:${dur}s;animation-delay:${dl}s"><circle cx="${cx}" cy="179" r="34" fill="url(#rc-f)"/>${rect(cx - 1.5, 172, 3, 14, '#fff')}${rect(cx - 7, 177.5, 14, 3, '#fff')}${rect(cx - 3, 176, 6, 6, '#fff')}</g>`;
+  };
+  const glow = `<defs><radialGradient id="rc-f"><stop offset="0" stop-color="#fff" stop-opacity=".55"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient></defs>`;
+  const paps = glow + [28, 50, ...(W > 220 ? [6, -16] : [])].map(x => pap(x, 1) + pap(260 - x, -1)).join('');
+  return { svg: wall + floor + paps + posts, party: '', feet: 226, view: V, k: K };
 }
 
 // 8. Parade: a street between buildings, streamers across the top, balloons, and ticker tape coming down.
