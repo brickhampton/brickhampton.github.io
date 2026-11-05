@@ -1312,9 +1312,11 @@ a.vbtn:active,button.vbtn:active{transform:scale(.94)}
 /* The shrug tips the head down a pixel, eyes lowered a pixel more. */
 .potg-stage .pk-shrug .av-head,.potg-stage .pk-down .av-head,.pstage.hdown .av-head{transform:translateY(3.06px)}
 .potg-stage .pk-shrug .av-eyes,.potg-stage .pk-shrug .av-smile,.potg-stage .pk-down .av-eyes,.potg-stage .pk-down .av-smile,.pstage.hdown .av-eyes,.pstage.hdown .av-smile{transform:translateY(3.06px)}
-/* Eyes turned to the side he's pointing. */
-.potg-stage .pk-eyesR .av-eyes,.potg-stage .pk-eyesR .av-smile,.pstage.eyesR .av-eyes,.pstage.eyesR .av-smile{transform:translateX(3.06px)}
-.potg-stage .pk-away .av-eyes,.potg-stage .pk-away .av-smile,.pstage.away .av-eyes,.pstage.away .av-smile{transform:translateX(-3.06px)}
+/* Head and eyes turned to the side he's pointing: the head a pixel, the eyes a pixel further. */
+.potg-stage .pk-eyesR .av-eyes,.potg-stage .pk-eyesR .av-smile,.pstage.eyesR .av-eyes,.pstage.eyesR .av-smile{transform:translateX(6.12px)}
+.pstage.eyesR .av-head{transform:translateX(3.06px)}
+.potg-stage .pk-away .av-eyes,.potg-stage .pk-away .av-smile,.pstage.away .av-eyes,.pstage.away .av-smile{transform:translateX(-6.12px)}
+.pstage.away .av-head{transform:translateX(-3.06px)}
 .pg-conf{animation:pgFall 4s steps(24) infinite}
 @keyframes pgFall{0%{transform:translateY(0);opacity:0}10%{opacity:.9}80%{opacity:.8}100%{transform:translateY(130px);opacity:0}}
 .potg-txt{min-width:0;flex:1}
