@@ -1345,6 +1345,10 @@ a.vbtn:active,button.vbtn:active{transform:scale(.94)}
 .pg-speck{animation:pgSpeck 6s steps(30) infinite}
 @keyframes pgSpeck{0%{transform:translate(0,0)}50%{transform:translate(18px,4px)}100%{transform:translate(0,0)}}
 .pg-glint{animation:pgGlint 1.2s steps(1) infinite}
+.pg-mir{opacity:0;animation:pgMir 1.12s steps(1) infinite}
+@keyframes pgMir{0%{opacity:.9}12%{opacity:.35}24%,100%{opacity:0}}
+.pg-spark{opacity:0;transform-box:fill-box;transform-origin:center;animation:pgSpark 1.8s steps(1) infinite}
+@keyframes pgSpark{0%{opacity:1;transform:scale(1)}8%{opacity:.7;transform:scale(.6)}16%,100%{opacity:0}}
 /* The beach crab scuttles a few steps one way, pauses, and back. */
 .pg-crab{animation:pgCrab 4s steps(1) infinite}
 /* Arcade: the space shooters sweep side to side, bolts flying up from them and fading. */

@@ -73,15 +73,20 @@ function disco() {
     }
     y += h; row++;
   }
-  // Mirror ball, upper left, on a string.
+  // Mirror ball on a string, turning and sparkling.
   const bx = 196, by = 98, r = 13;
   let ball = rect(bx - .5, Y0, 1, by - r - Y0, '#6b6f7a');
   for (let i = -r; i < r; i += PIX) for (let j = -r; j < r; j += PIX) {
     if ((i + PIX / 2) ** 2 + (j + PIX / 2) ** 2 > r * r) continue;
     const lit = (i + j) < -4 ? '#f4f6fb' : (i + j) < 6 ? '#b8bfcc' : '#6f7685';
     ball += rect(bx + i, by + j, PIX - .5, PIX - .5, lit);
+    // Each mirror catches the light in turn, column by column, so the ball looks like it's turning.
+    const col = Math.round((i + r) / PIX), row = Math.round((j + r) / PIX);
+    ball += rect(bx + i, by + j, PIX - .5, PIX - .5, row % 3 === col % 2 ? '#ffffff' : cols[(col + row) % cols.length], ` class="pg-mir" style="animation-delay:${(-col * .14 - (row % 2) * .07).toFixed(2)}s"`);
   }
-  const glint = rect(bx - 6, by - 7, 2, 2, '#fff', ' class="pg-glint"');
+  // Sparkles popping on the ball's surface.
+  const spark = (x, y, dl) => `<g class="pg-spark" style="animation-delay:${dl}s">${rect(x - .6, y - 4, 1.2, 8, '#fff')}${rect(x - 4, y - .6, 8, 1.2, '#fff')}${rect(x - 1.2, y - 1.2, 2.4, 2.4, '#fff')}</g>`;
+  const glint = rect(bx - 6, by - 7, 2, 2, '#fff', ' class="pg-glint"') + spark(bx - 6, by - 6, 0) + spark(bx + 5, by - 2, -.5) + spark(bx - 2, by + 6, -1) + spark(bx + 8, by + 7, -1.4);
   // Light specks thrown by the ball, drifting slowly across the wall and floor.
   let specks = '';
   for (let i = 0; i < 34; i++) {
@@ -175,7 +180,8 @@ function redcarpet() {
   };
   const bigs = `<defs><radialGradient id="rc-b"><stop offset="0" stop-color="#fff" stop-opacity=".9"/><stop offset=".35" stop-color="#fff" stop-opacity=".35"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient></defs>`
     + [[X0 + 22, 96], [X0 + 60, 140], [X1 - 30, 104], [X1 - 64, 150], [130 - 46, 86], [130 + 48, 122], [X0 + 30, 186], [X1 - 22, 180]].map(([x, y], i) => big(x, y, i)).join('');
-  return { svg: wall + floor + paps + posts + bigs, party: '', feet: 226, view: V, k: K };
+  // The big flashes are part of the party, so they don't go off after a loss.
+  return { svg: wall + floor + paps + posts, party: bigs, feet: 226, view: V, k: K };
 }
 
 // 9. Jumbotron: the player on the big screen above the crowd, who are lit up with phone lights.
