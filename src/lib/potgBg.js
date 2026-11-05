@@ -180,7 +180,8 @@ function redcarpet() {
   };
   const bigs = `<defs><radialGradient id="rc-b"><stop offset="0" stop-color="#fff" stop-opacity=".9"/><stop offset=".35" stop-color="#fff" stop-opacity=".35"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient></defs>`
     + [[X0 + 22, 96], [X0 + 60, 140], [X1 - 30, 104], [X1 - 64, 150], [130 - 46, 86], [130 + 48, 122], [X0 + 30, 186], [X1 - 22, 180]].map(([x, y], i) => big(x, y, i)).join('');
-  return { svg: wall + floor + paps + posts + bigs, party: '', feet: 226, view: V, k: K };
+  // The big flashes are part of the party, so they don't go off after a loss.
+  return { svg: wall + floor + paps + posts, party: bigs, feet: 226, view: V, k: K };
 }
 
 // 9. Jumbotron: the player on the big screen above the crowd, who are lit up with phone lights.
