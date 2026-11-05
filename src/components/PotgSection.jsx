@@ -25,9 +25,9 @@ const TRICK_KEYS = Object.keys(TRICKS);
 // 'bounce', 'look' and 'shrug' are classes on the stage that animate the ball and the eyes (see .potg-stage .pk-*).
 TRICKS.bounce = Array.from({ length: 10 }, () => ['dribble', 0, 0, 0, 'bounce']);
 TRICKS.look = Array.from({ length: 6 }, () => ['dribble', 0, 0, 0, 'look']);
-// A shrug: palms up for a moment, head tipped down a touch, the ball left at his feet.
+// A shrug (only for a tap after a loss): palms up for a moment, head tipped down a touch, the ball left at his feet.
 TRICKS.shrug = Array.from({ length: 6 }, () => ['shrug', 0, 0, 0, 'shrug']);
-const CALM_KEYS = ['bounce', 'behind', 'look', 'shrug'];
+const CALM_KEYS = ['bounce', 'behind', 'look'];
 const CLASS_EXTRAS = new Set(['bounce', 'look', 'shrug']);
 // After a loss there's no celebrating: arms by his sides, nodding along, no smile, no confetti.
 const NOD = [['down', 0, 0, 0], ['down', 0, 1, 0]];
