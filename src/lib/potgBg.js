@@ -170,27 +170,6 @@ function redcarpet() {
   return { svg: wall + floor + paps + posts, party: '', feet: 226, view: V, k: K };
 }
 
-// 8. Parade: a street between buildings, streamers across the top, balloons, and ticker tape coming down.
-function parade() {
-  let s = `<defs>${grad('pr-s', [[0, '#0c1020'], [1, '#1e2a4a']])}</defs>` + rect(X0, Y0, W, Y1 - Y0, 'url(#pr-s)');
-  const rnd = seeded(23), bricks = ['#4a2a24', '#3d2a36', '#2c3448', '#463a2a'];
-  for (const [x0, x1] of [[X0, 74], [186, X1]]) for (let x = x0; x < x1; x += 18) {
-    const h = 70 + rnd() * 60, top = 200 - h; s += rect(x, top, 18, h, bricks[Math.floor(rnd() * 4)]);
-    for (let wy = top + 6; wy < 192; wy += 11) for (let wx = x + 3; wx < x + 15; wx += 7) s += rect(wx, wy, 4, 5, rnd() < .45 ? '#e9b949' : '#141827', ' opacity=".8"');
-  }
-  s += rect(X0, 200, W, Y1 - 200, '#2a2d36') + rect(X0, 200, W, 3, '#3a3e4a');
-  for (let x = X0; x < X1; x += 24) s += rect(x, 232, 12, 2, '#d8d8d8', ' opacity=".35"');
-  // Streamers: zigzags strung between the buildings.
-  const cols = ['#2f55d4', '#e9b949', '#c0392b', '#eeeeee'];
-  for (const [y, c] of [[84, 0], [98, 1]]) for (let x = X0, i = 0; x < X1; x += 6, i++) s += rect(x, y + (i % 2) * 4, 6, 3, cols[(c + Math.floor(i / 3)) % 4]);
-  // Balloons with strings, bobbing.
-  let balloons = '';
-  for (const [x, y, c, dl] of [[50, 130, '#c0392b', 0], [64, 146, '#2f55d4', -.6], [206, 126, '#e9b949', -.3], [220, 142, '#4f7cff', -1]])
-    balloons += `<g class="pg-bob" style="animation-delay:${dl}s">${rect(x - 6, y - 8, 12, 14, c)}${rect(x - 4, y - 10, 8, 2, c)}${rect(x - 4, y + 6, 8, 2, c)}${rect(x - 3, y - 6, 2, 3, '#fff', ' opacity=".6"')}${rect(x - .5, y + 8, 1, 26, '#cfd3db', ' opacity=".7"')}</g>`;
-  const tape = fall(34, 31, ['#ffffff', '#f4d37c', '#cfe0ff'], { w: [1.5, 2.5], h: [4, 6], dur: [3.5, 6] });
-  return { svg: s, party: balloons + tape, feet: 226, view: V, k: K };
-}
-
 // 9. Jumbotron: the player on the big screen above the crowd, who are lit up with phone lights.
 function jumbotron(look) {
   let s = `<defs>${grad('jb-w', [[0, '#07080c'], [1, '#121522']])}</defs>` + rect(X0, Y0, W, Y1 - Y0, 'url(#jb-w)');
@@ -326,7 +305,7 @@ function neon() {
   return { svg: s + refl, party: sign + rain, feet: 226, view: V, k: K };
 }
 
-export const BACKDROPS = { podium, disco, fireworks, magazine, redcarpet, parade, jumbotron, beach, rooftop, arcade, space, neon };
+export const BACKDROPS = { podium, disco, fireworks, magazine, redcarpet, jumbotron, beach, rooftop, arcade, space, neon };
 export const BACKDROP_KEYS = Object.keys(BACKDROPS);
 const built = new Map();
 // Built once per backdrop (and per player for the jumbotron, which shows them on the screen).

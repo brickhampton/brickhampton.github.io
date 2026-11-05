@@ -214,8 +214,8 @@ function sprite(c, num, pose) {
     [[1, -1, 3 + aw], [2, 0, 5 + aw], [3, 1, 5 + aw], [4, 3, 5], [5, 3, 5]].forEach(([j, dx, w]) => r(bx - dx - w, ty + j, w, 1, SB));
     [3, 5, 7].forEach(dx => r(bx - dx - 1, ty + 6, 1, 1, SB));
     if (BS) r(bx - 1 - aw, ty + 1, 1 + aw, 2, BS);
-  } else if (pose === 'trophy') {
-    // Both hands hold the trophy by its handles: this upper arm comes forward from the shoulder to the near handle.
+  } else if (pose === 'trophy' || /^(count|rain)/.test(pose || '')) {
+    // Both hands hold the trophy by its handles (or a stack of notes): this upper arm comes forward from the shoulder to the near handle.
     r(bx - 2, ty + 1, 2, 4, SB); if (BS) r(bx - 2, ty + 1, 2, 2, BS);
   } else if (pose === 'pointL') {
     pointArm((dx, y, w, h, col) => r(bx - dx - w, y, w, h, col), SB);
@@ -337,6 +337,17 @@ function sprite(c, num, pose) {
   } else if (pose === 'ball') {
     ball(bx + Math.floor(bw / 2), ty + 5, r);
     r(fx - 1, ty + 1, 2, 3, S); r(fx - 3, ty + 3, 3, 3, S); r(fx - 3, ty + 5, 3, 1, S2);
+  } else if (/^(count|rain)/.test(pose)) {
+    // Counting notes with both hands. The back hand holds the stack in front of the chest.
+    // 'count1'/'count2': the front thumb flicks the top note up, then it flips over.
+    // 'rain1'/'rain2': the front hand on the stack, then flung out up and away, throwing notes.
+    const cx = bx + Math.floor(bw / 2) - 1, t = ty + 1, GN = '#3f9b4a', GL = '#7fd08a', BD = '#e9e2c0';
+    r(cx - 3, t + 1, 7, 5, GN); r(cx - 3, t + 1, 7, 1, GL); r(cx - 3, t + 3, 7, 1, mix(GN, -.12)); r(cx, t + 1, 1, 5, BD);
+    r(cx - 5, t + 2, 3, 3, SB); r(cx - 5, t + 4, 3, 1, S2);
+    if (pose === 'count1') { r(fx - 1, ty + 1, 2, 2, S); r(cx + 4, t + 1, fx - cx - 4, 2, S); r(cx + 2, t, 3, 2, S); r(cx + 2, t + 1, 3, 1, S2); }
+    if (pose === 'count2') { r(cx + 1, t - 1, 4, 1, GL); r(cx + 2, t, 3, 1, GN); r(fx - 1, ty + 1, 2, 2, S); r(cx + 4, t + 3, fx - cx - 4, 2, S); r(cx + 4, t + 2, 2, 3, S); }
+    if (pose === 'rain1') { r(fx - 1, ty + 1, 2, 2, S); r(cx + 4, t + 2, fx - cx - 4, 2, S); r(cx + 3, t + 1, 3, 3, S); r(cx + 3, t + 3, 3, 1, S2); }
+    if (pose === 'rain2') { for (let i = 0; i < 3; i++) r(fx - 1 + i, ty - i, 2 + aw, 2, S); r(fx + 2, ty - 5, 3 + aw, 3, S); r(fx + 5 + aw, ty - 5, 1, 1, S); r(fx + 5 + aw, ty - 3, 1, 1, S); }
   } else if (pose === 'trophy') {
     // Held one pixel below the collar, a hand on each handle.
     const cx = bx + Math.floor(bw / 2) - 1, G = '#f2c14e', G2 = '#c98f22', t = ty + 1;
@@ -437,6 +448,10 @@ export function trickExtras(raw, kind) {
   if (kind === 'bill1') out = bill(fx + 6, ty - 3);
   if (kind === 'bill2') out = bill(fx + 9, ty - 7, .85) + bill(fx + 7, ty - 2);
   if (kind === 'bill3') out = bill(fx + 12, ty - 9, .6) + bill(fx + 10, ty - 5, .85);
+  // Notes thrown up out of the hand, fanning out and fluttering down.
+  if (kind === 'rain1') out = bill(fx + 6, ty - 8) + bill(fx + 3, ty - 10, .9) + bill(fx + 8, ty - 5, .9);
+  if (kind === 'rain2') out = bill(fx + 9, ty - 11, .8) + bill(fx + 4, ty - 13, .75) + bill(fx + 11, ty - 6, .75) + bill(fx + 1, ty - 8, .7);
+  if (kind === 'rain3') out = bill(fx + 11, ty - 8, .5) + bill(fx + 5, ty - 10, .5) + bill(fx + 13, ty - 2, .45) + bill(fx, ty - 4, .45);
   if (kind === 'behind') { BALL.forEach(([o, w], j) => { out += px(bx - 7 + o, ty + 6 + j, w, 1, BALL_C); }); out += px(bx - 10, ty + 7, 2, 1, '#fff', .6) + px(bx - 12, ty + 9, 3, 1, '#fff', .45) + px(bx - 10, ty + 11, 2, 1, '#fff', .6); }
   return `<g class="av-trick" transform="translate(50 0) scale(${(104 / FEET).toFixed(4)}) translate(-13 0)" shape-rendering="crispEdges">${out}</g>`;
 }
