@@ -1367,8 +1367,6 @@ a.vbtn:active,button.vbtn:active{transform:scale(.94)}
 .pg-pap{opacity:0;animation:pgPap 6s steps(1) infinite}
 @keyframes pgPap{0%{opacity:1}2%{opacity:.5}4%,100%{opacity:0}}
 @keyframes pgFlash{0%{opacity:1;transform:scale(1)}4%{opacity:.6;transform:scale(.6)}8%{opacity:0}}
-.pg-bob{animation:pgBob 2.4s steps(4) infinite}
-@keyframes pgBob{50%{transform:translateY(-4px)}}
 .pg-twinkle{animation:pgTwinkle 1.6s steps(1) infinite}
 @keyframes pgTwinkle{0%{opacity:1}50%{opacity:.15}}
 .pg-screen{animation:pgScreen 1.2s steps(1) infinite}

@@ -22,8 +22,8 @@ const TRICKS = {
   behind: [['dribble', 0, 0, 0], ['dribble', 0, 1, 0], ['lowball', 0, 0, 0], ['dribbleL', 0, 0, 0], ['dribbleL', 0, 1, 0], ['lowball', 0, 0, 0], ['dribble', 0, 0, 0], ['dribble', 0, 1, 0]],
   // Pointing out to the crowd on one side, then the other, looking where he points.
   point: [...rep(['pointR', 0, 0, 0, 'eyesR'], 4), ['down', 0, 0, 0], ...rep(['pointL', 0, 0, 0, 'away'], 4), ['down', 0, 0, 0]],
-  // Flicking through a stack of notes, sending them flying.
-  cash: [['cash', 0, 0, 0], ['cash', 0, 0, 0, 'bill1'], ['cash', 0, 0, 0, 'bill2'], ['cash', 0, 0, 0, 'bill3'], ['cash', 0, 0, 0, 'bill1'], ['cash', 0, 0, 0, 'bill2'], ['cash', 0, 0, 0, 'bill3'], ['cash', 0, 0, 0]],
+  // Making it rain: notes flicked off the top of a wad held just right of his number, one after another.
+  cash: [['flick1', 0, 0, 0], ...[...Array(4)].flatMap(() => [['flick2', 0, 0, 0, 'note1 note3'], ['flick1', 0, 0, 0, 'note2 note4']]), ['flick1', 0, 0, 0, 'note3']],
 };
 const TRICK_KEYS = Object.keys(TRICKS);
 // After a loss, low-key tricks only and no smile: a few bounces of the ball, the ball behind the back, a look left and right.
