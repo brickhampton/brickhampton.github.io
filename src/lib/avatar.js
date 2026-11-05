@@ -188,6 +188,23 @@ function sprite(c, num, pose) {
   // The shrug's open hand at the end of the forearm, palm turned up: three pixels long, a row above the forearm.
   // R draws it: (dx from the body's edge, y, w, h, colour).
   const shrugHand = (R, col) => { R(3 + aw, ty + 3, 3, 1, col); R(3 + aw, ty + 4, 3, 1, S2); };
+  // A bicep flex: the upper arm out level from the shoulder, the forearm straight up and a fist beside the head.
+  // 'flex2' squeezes harder, so the bicep bulges a pixel higher. R draws it: (dx from the body's edge, y, w, h, colour).
+  const flexArm = (R, col) => {
+    const big = pose === 'flex2';
+    R(-1, ty + 1, 6 + aw, 2, col); R(-1, ty + 3, 6 + aw, 1, S2); if (big) { R(1, ty, 4, 1, col); R(2, ty - 1, 2, 1, col); } else R(2, ty, 2, 1, col);
+    R(4, hy + 6, 3 + aw, ty + 1 - hy - 6, col); R(6 + aw, hy + 6, 1, ty + 1 - hy - 6, S2);
+    R(3, hy + 2, 5 + aw, 4, col); R(3, hy + 5, 5 + aw, 1, S2); R(4, hy + 3, 1, 1, S2);
+  };
+  // Pointing out to the crowd: the arm up and out on the diagonal, a fist and one finger out.
+  const pointArm = (R, col) => {
+    for (let i = 0; i < 4; i++) R(-1 + i, ty - i, 2 + aw, 2, col);
+    R(3, ty - 6, 3 + aw, 3, col); R(3, ty - 4, 3 + aw, 1, S2); R(5 + aw, ty - 7, 1, 1, col); R(6 + aw, ty - 8, 1, 1, col);
+  };
+  // Hands on hips: the elbow out to the side and the hand back in on the waist.
+  const hipArm = (R, col) => {
+    R(-1, ty, 2, 2, col); R(0, ty + 2, 2, 2, col); R(1, ty + 4, 2 + aw, 2, col); R(0, ty + 6, 2, 1, col); R(-2, ty + 6, 3, 2, col); R(-2, ty + 8, 3, 1, S2);
+  };
   rec = c.shirt ? [] : null;
   // Shooting, catching a rebound and blocking put the free arm up too.
   const up = pose === 'shoot' || pose === 'catch' || pose === 'block';
@@ -212,6 +229,12 @@ function sprite(c, num, pose) {
   } else if (pose === 'trophy') {
     // Both hands hold the trophy by its handles: this upper arm comes forward from the shoulder to the near handle.
     r(bx - 2, ty + 1, 2, 4, SB); if (BS) r(bx - 2, ty + 1, 2, 2, BS);
+  } else if (pose === 'pointL' || pose === 'hips') {
+    (pose === 'hips' ? hipArm : pointArm)((dx, y, w, h, col) => r(bx - dx - w, y, w, h, col), SB);
+    if (BS) r(bx - 1 - aw, ty, 1 + aw, 2, BS);
+  } else if (pose === 'flex' || pose === 'flex2') {
+    flexArm((dx, y, w, h, col) => r(bx - dx - w, y, w, h, col), SB);
+    if (BS) r(bx - 1 - aw, ty + 1, 1 + aw, 2, BS);
   } else if (pose === 'fistL' || pose === 'fist2') {
     // A fist pump with this arm: the front arm's fist, mirrored onto this side.
     const m = (dx, y, w, h, col) => r(bx - dx - w, y, w, h, col);
@@ -304,6 +327,24 @@ function sprite(c, num, pose) {
     // A shrug: elbows in, forearms out to the sides and palms up, the ball left on the floor by the feet.
     ball(fx + 6, sy - 3, r);
     r(fx - 1, ty, 2, 5, S); r(fx, ty + 4, 4 + aw, 2, S); shrugHand((dx, y, w, h, col) => r(fx + dx, y, w, h, col), S);
+  } else if (pose === 'flex' || pose === 'flex2') {
+    flexArm((dx, y, w, h, col) => r(fx + dx, y, w, h, col), S);
+  } else if (pose === 'pointR' || pose === 'hips') {
+    (pose === 'hips' ? hipArm : pointArm)((dx, y, w, h, col) => r(fx + dx, y, w, h, col), S);
+  } else if (pose === 'tap' || pose === 'tap2') {
+    // Tapping the number on the jersey: the forearm across the chest, the hand on the number ('tap') or lifted off it.
+    const y = pose === 'tap' ? ty + 3 : ty + 2;
+    r(fx - 1, ty, 2, y + 1 - ty, S); r(bx + 5, y + 1, fx + 1 - bx - 5, 2, S); r(bx + 5, y + 3, fx + 1 - bx - 5, 1, S2); r(bx + 3, y, 3, 3, S); r(bx + 3, y + 2, 3, 1, S2);
+  } else if (pose === 'mic' || pose === 'micopen' || pose === 'cash') {
+    // The forearm up in front, holding a mic ('mic'), letting go of it ('micopen'), or holding a stack of notes ('cash').
+    r(fx - 1, ty, 2, 4, S); r(fx, ty + 4, 4, 2, S); r(fx + 3, ty + 2, 2, 3, S);
+    if (pose === 'mic') { r(fx + 3, ty - 1, 2, 3, '#2b2b33'); r(fx + 3, ty - 5, 2, 1, '#9aa0ac'); r(fx + 2, ty - 4, 4, 2, '#9aa0ac'); r(fx + 3, ty - 2, 2, 1, '#6b7080'); r(fx + 3, ty - 4, 1, 1, '#e3e6ec'); }
+    if (pose === 'micopen') { r(fx + 5, ty + 1, 1, 2, S); r(fx + 2, ty + 1, 1, 1, S); }
+    if (pose === 'cash') { r(fx + 1, ty, 6, 3, '#3f9b4a'); r(fx + 1, ty, 6, 1, '#7fd08a'); r(fx + 3, ty, 2, 3, '#e9e2c0'); r(fx + 3, ty + 2, 2, 2, S); }
+  } else if (pose === 'tuck') {
+    // The ball tucked under the arm at the hip, the forearm under it and the hand round the front.
+    ball(fx + 1, ty + 5, r);
+    r(fx - 1, ty, 2, 5, S); r(fx - 2, ty + 8, 7, 2, S); r(fx - 2, ty + 10, 7, 1, S2); r(fx + 4, ty + 5, 2, 4, S);
   } else if (pose === 'pass') {
     // Arm thrust out level, as on a pass or a reach for a steal.
     r(fx - 1, ty + 1, 7, 2 + aw, S); r(fx + 6, ty, 2, 4 + aw, S); r(fx - 1, ty + 2 + aw, 7, 1, S2);
@@ -418,6 +459,23 @@ export function trickExtras(raw, kind) {
     + px(fx - 1, hy - 5, 3, 1, '#fff', .55);
   // 'shades': sunglasses over the eyes, with a glint.
   if (kind === 'shades') { const ey = hy + EYE_ROW[c.eyeY], hx = 8; out = px(hx + 1, ey - 1, 4, 3, '#111') + px(hx + 6, ey - 1, 4, 3, '#111') + px(hx + 5, ey - 1, 1, 1, '#111') + px(hx, ey - 1, 1, 1, '#111') + px(hx + 7, ey - 1, 1, 1, '#fff', .8) + px(hx + 2, ey - 1, 1, 1, '#fff', .6); }
+  const sy = ty + 8 + Math.floor(tall / 2) + 4 + 1 + Math.ceil(tall / 2) + 2, hx = 8;
+  const mic = (x, y) => px(x + 1, y + 4, 2, 3, '#2b2b33') + px(x + 1, y, 2, 1, '#9aa0ac') + px(x, y + 1, 4, 2, '#9aa0ac') + px(x + 1, y + 3, 2, 1, '#6b7080') + px(x + 1, y + 1, 1, 1, '#e3e6ec');
+  // The mic drop: the mic falling past the hand, then lying on the floor.
+  if (kind === 'micfall1') out = mic(fx + 2, ty + 1);
+  if (kind === 'micfall2') out = mic(fx + 2, ty + 8);
+  if (kind === 'micfloor') out = px(fx + 4, sy - 1, 3, 3, '#9aa0ac') + px(fx + 5, sy - 1, 1, 1, '#e3e6ec') + px(fx + 7, sy, 1, 1, '#6b7080') + px(fx + 8, sy, 3, 2, '#2b2b33');
+  // Notes flicked off the stack, flying up and away.
+  const bill = (x, y, o = 1) => px(x, y, 3, 2, '#3f9b4a', o) + px(x, y, 3, 1, '#7fd08a', o);
+  if (kind === 'bill1') out = bill(fx + 6, ty - 3);
+  if (kind === 'bill2') out = bill(fx + 9, ty - 7, .85) + bill(fx + 7, ty - 2);
+  if (kind === 'bill3') out = bill(fx + 12, ty - 9, .6) + bill(fx + 10, ty - 5, .85);
+  // A white towel over the head, hanging down at the back.
+  if (kind === 'towel') out = px(hx + 1, hy - 2, 9, 1, '#f2f2f2') + px(hx - 1, hy - 1, 12, 5, '#f2f2f2') + px(hx - 1, hy + 4, 3, 8, '#f2f2f2') + px(hx + 9, hy + 4, 2, 1, '#f2f2f2')
+    + px(hx - 1, hy + 2, 12, 1, '#d5d8de') + px(hx - 1, hy + 10, 3, 1, '#c9ccd2') + px(hx + 1, hy + 4, 1, 8, '#dadde3');
+  // A sigh: a little puff of breath out in front of the face.
+  if (kind === 'puff1') out = px(hx + 12, hy + 8, 2, 2, '#fff', .75) + px(hx + 13, hy + 7, 1, 1, '#fff', .75);
+  if (kind === 'puff2') out = px(hx + 14, hy + 7, 3, 3, '#fff', .5) + px(hx + 15, hy + 6, 2, 1, '#fff', .5) + px(hx + 17, hy + 8, 1, 1, '#fff', .5);
   if (kind === 'behind') { BALL.forEach(([o, w], j) => { out += px(bx - 7 + o, ty + 6 + j, w, 1, BALL_C); }); out += px(bx - 10, ty + 7, 2, 1, '#fff', .6) + px(bx - 12, ty + 9, 3, 1, '#fff', .45) + px(bx - 10, ty + 11, 2, 1, '#fff', .6); }
   return `<g class="av-trick" transform="translate(50 0) scale(${(104 / FEET).toFixed(4)}) translate(-13 0)" shape-rendering="crispEdges">${out}</g>`;
 }
@@ -425,7 +483,7 @@ export function trickExtras(raw, kind) {
 const cache = new Map();
 // SVG markup for a player. Round avatars (the default) show the head and the top of the jersey in a 100 × 100 box.
 // opts.stage draws the whole player at their height, feet on the bottom of a 100 × 104 box: the court, the Home
-// photo, the player page and the builder. opts.pose: 'fist', 'fistL' (the other arm), 'fist2' (both), 'ball', 'trophy', 'shoot', 'catch', 'block', 'block1', 'pass', 'pass2', 'dribbleL', 'spin', 'toast', 'sip' (champagne), 'lowball' (arms down, the ball behind the back), 'down' (arms down), or palming the ball (the default, as in the reference).
+// photo, the player page and the builder. opts.pose: 'fist', 'fistL' (the other arm), 'fist2' (both), 'ball', 'trophy', 'shoot', 'catch', 'block', 'block1', 'pass', 'pass2', 'dribbleL', 'spin', 'toast', 'sip' (champagne), 'lowball' (arms down, the ball behind the back), 'flex'/'flex2' (a double bicep flex, squeezing), 'pointR'/'pointL' (pointing out either side), 'tap'/'tap2' (tapping the jersey number), 'mic'/'micopen' (a mic drop), 'cash' (a stack of notes), 'tuck' (the ball under the arm), 'hips' (hands on hips), 'down' (arms down), or palming the ball (the default, as in the reference).
 export function figure(raw, opts = {}) {
   const c = cleanLook(raw), key = JSON.stringify([c, raw.num, !!opts.stage, opts.pose || '']);
   if (cache.has(key)) return cache.get(key);

@@ -11,6 +11,7 @@ import { playerOfGame, potgShort } from '../lib/potg.js';
 // Frames: [pose, body x, body y, head x, extra], extra being 'spin' (the spinning marks) or 'shades' (sunglasses on).
 const BOB = [['down', 0, 0, 0], ['down', 0, 1, 0]];
 const bob = (pose, n, extra) => Array.from({ length: n }, (_, i) => [pose, 0, i % 2, 0, extra]);
+const rep = (f, n) => Array.from({ length: n }, () => f);
 const TRICKS = {
   // A glass of champagne: held out, a sip, held out again.
   champagne: [...bob('toast', 4), ['sip', 0, 0, 0], ['sip', 0, 0, 0], ['sip', 0, 0, 0], ['sip', 0, 0, 0], ['sip', 0, 0, 0], ...bob('toast', 4)],
@@ -19,16 +20,37 @@ const TRICKS = {
   shades: bob('down', 12, 'shades'),
   // The ball from one hand round the back to the other, and back again.
   behind: [['dribble', 0, 0, 0], ['dribble', 0, 1, 0], ['lowball', 0, 0, 0], ['dribbleL', 0, 0, 0], ['dribbleL', 0, 1, 0], ['lowball', 0, 0, 0], ['dribble', 0, 0, 0], ['dribble', 0, 1, 0]],
+  // Pointing out to the crowd on one side, then the other, looking where he points.
+  point: [...rep(['pointR', 0, 0, 0, 'eyesR'], 4), ['down', 0, 0, 0], ...rep(['pointL', 0, 0, 0, 'away'], 4), ['down', 0, 0, 0]],
+  // Two taps on the number on his jersey.
+  number: [['tap2', 0, 0, 0], ['tap', 0, 0, 0], ['tap2', 0, 0, 0], ['tap', 0, 0, 0], ['tap', 0, 0, 0], ['tap', 0, 0, 0], ['down', 0, 0, 0]],
+  // A mic held out, dropped, and a look down at it on the floor.
+  mic: [...rep(['mic', 0, 0, 0], 5), ['micopen', 0, 0, 0, 'micfall1'], ['down', 0, 0, 0, 'micfall2'], ...rep(['down', 0, 0, 0, 'micfloor down'], 5)],
+  // Flicking through a stack of notes, sending them flying.
+  cash: [['cash', 0, 0, 0], ['cash', 0, 0, 0, 'bill1'], ['cash', 0, 0, 0, 'bill2'], ['cash', 0, 0, 0, 'bill3'], ['cash', 0, 0, 0, 'bill1'], ['cash', 0, 0, 0, 'bill2'], ['cash', 0, 0, 0, 'bill3'], ['cash', 0, 0, 0]],
+  // A double bicep flex, squeezing twice.
+  flex: [['flex', 0, 0, 0], ['flex2', 0, 0, 0], ['flex', 0, 0, 0], ['flex2', 0, 0, 0], ['flex', 0, 0, 0], ['flex2', 0, 0, 0], ['flex', 0, 0, 0]],
 };
 const TRICK_KEYS = Object.keys(TRICKS);
-// After a loss, low-key tricks only and no smile: a few bounces of the ball, the ball behind the back, a look left and right, a shrug.
+// After a loss, low-key tricks only and no smile: a few bounces of the ball, the ball behind the back, a look left and right.
 // 'bounce', 'look' and 'shrug' are classes on the stage that animate the ball and the eyes (see .potg-stage .pk-*).
 TRICKS.bounce = Array.from({ length: 10 }, () => ['dribble', 0, 0, 0, 'bounce']);
 TRICKS.look = Array.from({ length: 6 }, () => ['dribble', 0, 0, 0, 'look']);
+// A slow shake of the head, the ball tucked under his arm.
+TRICKS.headshake = [['tuck', 0, 0, 0], ...[-1, -1, 0, 1, 1, 0, -1, -1, 0, 1, 1, 0].map(h => ['tuck', 0, 0, h]), ['tuck', 0, 0, 0]];
+// Hands on hips, looking off to the side.
+TRICKS.hips = rep(['hips', 0, 0, 0, 'away'], 9);
+// A towel over the head for a moment.
+TRICKS.towel = rep(['down', 0, 0, 0, 'towel'], 10);
+// Two deep breaths: shoulders up, then a sigh out.
+TRICKS.breath = [...rep(['down', 0, 0, 0, 'inhale'], 3), ['down', 0, 0, 0, 'puff1'], ['down', 0, 0, 0, 'puff2'], ['down', 0, 0, 0], ...rep(['down', 0, 0, 0, 'inhale'], 3), ['down', 0, 0, 0, 'puff1'], ['down', 0, 0, 0, 'puff2']];
+// Going over his free throw form with no ball: a dip, up into the shot, the follow-through held. Twice.
+const FT = [['down', 0, 1, 0], ['down', 0, 1, 0], ['shoot', 0, -1, 0], ['shoot', 0, 0, 0], ['shoot', 0, 0, 0], ['down', 0, 0, 0]];
+TRICKS.freethrow = [...FT, ...FT];
 // A shrug (only for a tap after a loss): palms up for a moment, head tipped down a touch, the ball left at his feet.
 TRICKS.shrug = Array.from({ length: 6 }, () => ['shrug', 0, 0, 0, 'shrug']);
-const CALM_KEYS = ['bounce', 'behind', 'look'];
-const CLASS_EXTRAS = new Set(['bounce', 'look', 'shrug']);
+const CALM_KEYS = ['bounce', 'behind', 'look', 'headshake', 'hips', 'towel', 'breath', 'freethrow'];
+const CLASS_EXTRAS = new Set(['bounce', 'look', 'shrug', 'down', 'eyesR', 'away', 'inhale']);
 // After a loss there's no celebrating: arms by his sides, nodding along, no smile, no confetti.
 const NOD = [['down', 0, 0, 0], ['down', 0, 1, 0]];
 // A tap: a double fist pump, jumping with both fists up, twice.
@@ -103,17 +125,19 @@ export function PotgSection({ g, games }) {
   const smile = grin && !cleanLook(look).glasses;
   const pl = play.current;
   const [pose, dx, dy, hx, extra] = pl ? pl.frames[pl.i] : reduced ? ['down', 0, 0, 0] : calm ? NOD[Math.floor(n / 3) % NOD.length] : BOB[Math.floor(n / 2) % BOB.length];
+  // An extra can be several words: classes on the stage (CLASS_EXTRAS) and things drawn on the player (trickExtras).
+  const xs = extra ? extra.split(' ') : [];
   const s = potg.s;
   const line = [['pts', 'PTS'], ['reb', 'REB'], ['ast', 'AST'], ['stl', 'STL'], ['blk', 'BLK']].filter(([k], i) => i < 3 || s[k] > 0);
   return (
     <div className="sec potg" id="g-potg">
       <div className="potg-row">
         <button className={`potg-stage${wide ? ' wide' : ''}`} onClick={tap} aria-label={`${p.name}, player of the game. Tap to celebrate`}>
-          <svg viewBox={bg.view} aria-hidden="true" className={`bg-${bgKey}${smile ? ' smiling' : ''}${CLASS_EXTRAS.has(extra) ? ` pk-${extra}` : ''}`}>
+          <svg viewBox={bg.view} aria-hidden="true" className={`bg-${bgKey}${smile ? ' smiling' : ''}${xs.filter(x => CLASS_EXTRAS.has(x)).map(x => ` pk-${x}`).join('')}`}>
             <g dangerouslySetInnerHTML={{ __html: bg.svg + (calm ? '' : bg.party) }} />
             <g transform={`translate(${fx} ${fy}) scale(${K})`}>
               <g dangerouslySetInnerHTML={{ __html: pxShadow(50, 103.5, 22, U) }} />
-              <g transform={`translate(${dx * U} ${dy * U})`} style={{ '--hx': `${hx * U}px` }} dangerouslySetInnerHTML={{ __html: figure(look, { stage: true, pose }) + (extra && !CLASS_EXTRAS.has(extra) ? trickExtras(look, extra) : '') }} />
+              <g transform={`translate(${dx * U} ${dy * U})`} style={{ '--hx': `${hx * U}px` }} dangerouslySetInnerHTML={{ __html: figure(look, { stage: true, pose }) + xs.filter(x => !CLASS_EXTRAS.has(x)).map(x => trickExtras(look, x)).join('') }} />
             </g>
             {party ? <g key={party} transform={`translate(0 ${bg.feet - 226})`} dangerouslySetInnerHTML={{ __html: POP }} /> : null}
           </svg>
