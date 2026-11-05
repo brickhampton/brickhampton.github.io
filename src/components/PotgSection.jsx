@@ -29,8 +29,8 @@ TRICKS.look = Array.from({ length: 6 }, () => ['dribble', 0, 0, 0, 'look']);
 TRICKS.shrug = Array.from({ length: 6 }, () => ['shrug', 0, 0, 0, 'shrug']);
 const CALM_KEYS = ['bounce', 'behind', 'look', 'shrug'];
 const CLASS_EXTRAS = new Set(['bounce', 'look', 'shrug']);
-// After a loss there's no celebrating: just nodding along with the ball, no smile, no confetti.
-const NOD = [['dribble', 0, 0, 0], ['dribble', 0, 1, 0]];
+// After a loss there's no celebrating: arms by his sides, nodding along, no smile, no confetti.
+const NOD = [['down', 0, 0, 0], ['down', 0, 1, 0]];
 // A tap: a double fist pump, jumping with both fists up, twice.
 const CELEBRATE = [['down', 0, 1, 0], ['fist2', 0, -3, 0], ['fist2', 0, -6, 0], ['fist2', 0, -4, 0], ['fist2', 0, 0, 0],
   ['down', 0, 1, 0], ['fist2', 0, -3, 0], ['fist2', 0, -6, 0], ['fist2', 0, -4, 0], ['fist2', 0, 0, 0]];
@@ -102,7 +102,7 @@ export function PotgSection({ g, games }) {
   // Glasses wearers keep their normal eyes (smiling eyes read oddly behind the frames).
   const smile = grin && !cleanLook(look).glasses;
   const pl = play.current;
-  const [pose, dx, dy, hx, extra] = pl ? pl.frames[pl.i] : reduced ? [calm ? 'dribble' : 'down', 0, 0, 0] : calm ? NOD[Math.floor(n / 3) % NOD.length] : BOB[Math.floor(n / 2) % BOB.length];
+  const [pose, dx, dy, hx, extra] = pl ? pl.frames[pl.i] : reduced ? ['down', 0, 0, 0] : calm ? NOD[Math.floor(n / 3) % NOD.length] : BOB[Math.floor(n / 2) % BOB.length];
   const s = potg.s;
   const line = [['pts', 'PTS'], ['reb', 'REB'], ['ast', 'AST'], ['stl', 'STL'], ['blk', 'BLK']].filter(([k], i) => i < 3 || s[k] > 0);
   return (
