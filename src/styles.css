@@ -193,10 +193,16 @@ td.t-poor{color:var(--neg)}
 .gnav .btn{height:40px;border-radius:999px;padding:0 16px}
 .gnav .btn.ghost,.gnav .pager{background:#1c1d21;box-shadow:inset 0 1px 0 rgba(255,255,255,.05)}
 .gnav .btn.ghost{padding:0 16px 0 12px;gap:6px}
-.gnav .btn.ghost:not(:disabled):hover{background:#25272c}
+@media (hover:hover){.gnav .btn.ghost:not(:disabled):hover{background:#25272c}}
+.gnav .btn.ghost:not(:disabled):active{background:#25272c}
 .gnav .pager{display:inline-flex;align-items:center;height:40px;border-radius:999px;flex:none}
 .gnav .pager .btn{background:none;box-shadow:none}
-.gnav .pager .btn:not(:disabled):hover{background:rgba(255,255,255,.06)}
+/* Each half lights up in its own shape: rounded on the outside, straight at the divider. On touch screens it only
+   shows while pressed, so it doesn't stay lit after a tap. */
+.gnav .pager{overflow:hidden}
+.gnav .pager .btn{border-radius:0}
+@media (hover:hover){.gnav .pager .btn:not(:disabled):hover{background:rgba(255,255,255,.08)}}
+.gnav .pager .btn:not(:disabled):active{background:rgba(255,255,255,.08);transform:none}
 .gnav .pager #g-prev{padding:0 14px 0 12px}
 .gnav .pager #g-next{padding:0 12px 0 14px}
 .gnav .pager i{width:1px;height:18px;background:#35373d;flex:none}
