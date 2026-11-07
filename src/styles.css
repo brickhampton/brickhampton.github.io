@@ -311,6 +311,15 @@ tr.tot td{font-weight:600;border-top:1px solid var(--stroke)}
 .h2h-head .av-wrap{width:48px;height:48px}
 
 .h2h-head .vs{color:var(--granite);font-size:13px}
+/* Phones: the avatar sits above the name picker, so the picker gets the whole side and names aren't cut off. */
+@media (max-width:560px){
+  #h2h .h2h-head{align-items:end}
+  #h2h .h2h-head .side{flex-direction:column;align-items:flex-start;gap:8px}
+  #h2h .h2h-head .side.r{flex-direction:column-reverse;align-items:flex-end}
+  #h2h .h2h-head .av-wrap{width:40px;height:40px}
+  #h2h .h2h-head select{max-width:100%}
+  #h2h .h2h-head .vs{padding-bottom:9px}
+}
 .h2h-row{display:grid;grid-template-columns:44px 1fr 56px 1fr 44px;align-items:center;gap:8px;padding:5px 0}
 .h2h-row .v{font-size:15px;color:var(--granite);font-variant-numeric:tabular-nums}
 .h2h-row .v.win{color:#fff;font-weight:600}

@@ -392,11 +392,14 @@ export function Entry() {
   useEffect(() => () => clearTimeout(toastT.current), []);
   if (!R) return null;
 
+  // Tapping the player who is already picked keeps them picked, so "tap player, tap action" works
+  // for back-to-back actions by the same player (a missed free throw, then a made one).
   const select = id => {
-    sfx(rec().sel === id ? 'close' : 'select');
-    change(r => { r.sel = r.sel === id ? null : id; });
-    stage.current?.placeActor(rec().sel, true);
-    if (rec().sel) caption(P(id).name, 'On court', '', true); else caption('Ready', 'Select a player, then an action', '', true);
+    if (rec().sel === id) return;
+    sfx('select');
+    change(r => { r.sel = id; });
+    stage.current?.placeActor(id, true);
+    caption(P(id).name, 'On court', '', true);
   };
   const deselect = () => { if (!rec().sel) return; select(rec().sel); };
   const hideToast = () => { clearTimeout(toastT.current); setToast(t => t && { ...t, show: false }); };

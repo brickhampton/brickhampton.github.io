@@ -24,6 +24,8 @@ export const ACTIONS = [
 export const A = Object.fromEntries(ACTIONS.map(a => [a.k, a]));
 
 export const todayIso = () => { const d = new Date(); return new Date(d - d.getTimezoneOffset() * 6e4).toISOString().slice(0, 10); };
+// Games are always on Sundays, so a new game starts on the most recent Sunday (today, if it is Sunday).
+export const lastSundayIso = () => { const d = new Date(); d.setDate(d.getDate() - d.getDay()); return new Date(d - d.getTimezoneOffset() * 6e4).toISOString().slice(0, 10); };
 
 let R = null;
 try { R = JSON.parse(localStorage.getItem(KEY)); } catch (e) { R = null; }
@@ -31,12 +33,12 @@ export const rec = () => R;
 const keep = () => { try { localStorage.setItem(KEY, JSON.stringify(R)); } catch (e) { /* ignore */ } notify(); };
 export const change = fn => { fn(R); keep(); };
 
-// A fresh game: the next number in the current season, today's date and the first opponent.
+// A fresh game: the next number in the current season and the most recent Sunday. The opponent is left for Admin to pick.
 export function startSetup() {
   if (R) { restoreSubs(); return; }
   const season = S.current;
   R = {
-    game: { season, no: lastNo(season) + 1, date: todayIso(), opp: (S.opps[season] || [])[0] || '' },
+    game: { season, no: lastNo(season) + 1, date: lastSundayIso(), opp: '' },
     order: S.roster.map(p => p.id), playing: null, nums: null, newSubs: [], todaySubs: [],
     events: [], seq: 0, sel: null, result: null,
   };

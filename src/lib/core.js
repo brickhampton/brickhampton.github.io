@@ -73,6 +73,12 @@ export const f1 = v => (Math.round(v * 10) / 10).toFixed(1);
 // Good and poor bands for shooting, tuned to a social league.
 const BANDS = { fg: [.30, .45], m2: [.35, .50], m3: [.25, .35], ft: [.50, .70], ts: [.40, .50] };
 export const tier = (k, v, a) => v === null || (a !== undefined && a < 2) ? '' : v >= BANDS[k][1] ? 't-good' : v < BANDS[k][0] ? 't-poor' : '';
+// Season and all-time shooting needs at least 5 attempts before it gets a colour, a rank or Team best,
+// so 2 of 3 from three doesn't top the team. (Single games keep their own rule above.)
+export const MIN_SHOTS = 5;
+export const shotAtt = (agg, k) => k === 'ts' ? agg.s.tsa : k === 'fg' ? agg.s.fga : k === 'm3' || k === 'p3' ? agg.s.a3 : k === 'p2' ? agg.s.a2 : k === 'ft' ? agg.s.fta : null;
+export const enoughShots = (agg, k) => { const n = shotAtt(agg, k); return n === null || n >= MIN_SHOTS; };
+export const aggTier = (k, v, agg) => enoughShots(agg, k) ? tier(k === 'p3' ? 'm3' : k, v) : '';
 export const fmtDate = (d, opts = { day: 'numeric', month: 'long', year: 'numeric' }) => new Date(d + 'T12:00:00').toLocaleDateString('en-AU', opts);
 export const RES = { W: 'Win', L: 'Loss', D: 'Draw', U: 'Result unknown' };
 export const esc = v => String(v ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');

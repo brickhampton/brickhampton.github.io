@@ -23,7 +23,7 @@ function Opponents({ season }) {
     try {
       await adminCall('set_season_opponents', { p_season: season, p_names: list });
       S.opps = { ...S.opps, [season]: list };
-      change(r => { if (!list.includes(r.game.opp)) r.game.opp = list[0] || ''; });
+      change(r => { if (!list.includes(r.game.opp)) r.game.opp = ''; });
       closeSheet();
     } catch (e) { setErr(e.message); setBusy(false); }
   };
@@ -189,7 +189,7 @@ export function Setup() {
       </div>
       <div className="fields">
         <div className="field"><label htmlFor="f-season">Season</label>
-          <select id="f-season" value={g.season} onChange={e => { const s = e.target.value; setGame({ season: s, no: lastNo(s) + 1, opp: (S.opps[s] || [])[0] || '' }); }}>
+          <select id="f-season" value={g.season} onChange={e => { const s = e.target.value; setGame({ season: s, no: lastNo(s) + 1, opp: '' }); }}>
             {seasonList().map(({ code }) => <option key={code}>{code}</option>)}</select></div>
         <div className="field"><label id="l-no">Game</label><div className="stepper" role="group" aria-labelledby="l-no">
           <button type="button" id="no-down" aria-label="Previous game number" disabled={g.no <= 1} onClick={() => setGame({ no: Math.max(1, g.no - 1) })}><ChevDown width="18" height="18" /></button>
@@ -200,7 +200,7 @@ export function Setup() {
           {dateErr && <span className="ferr" id="date-err">Games can't be in the future.</span>}</div>
         <div className="field"><label htmlFor="f-opp">Opponent</label><div className="oppsel">
           <select id="f-opp" value={opps.includes(g.opp) ? g.opp : ''} onChange={e => setGame({ opp: e.target.value })}>
-            {opps.length ? opps.map(o => <option key={o} value={o}>{o}</option>) : <option value="">Add an opponent first</option>}</select>
+            {opps.length ? <><option value="" disabled>Pick the opponent</option>{opps.map(o => <option key={o} value={o}>{o}</option>)}</> : <option value="">Add an opponent first</option>}</select>
           <button className="iconbtn" id="edit-opps" type="button" aria-label="Edit opponents" onClick={() => openSheet(<Opponents season={g.season} />)}><Pencil width="18" height="18" /></button></div></div>
       </div>
       <div className="roster" id="roster" ref={grid}>
@@ -216,7 +216,7 @@ export function Setup() {
         <button className="ptile addtile" id="add" onClick={() => openSheet(<SubPicker />, { cls: 'subs' })}><span className="plus">+</span><span>Add subs</span></button>
       </div>
       <div className="startrow">
-        <button className="btn primary" id="start" disabled={!n} onClick={startWarning}>{n ? `Start recording with ${n} player${n > 1 ? 's' : ''}` : 'Tick at least one player'}</button>
+        <button className="btn primary" id="start" disabled={!n || !opps.includes(g.opp)} onClick={startWarning}>{!opps.includes(g.opp) ? (opps.length ? 'Pick the opponent' : 'Add an opponent first') : n ? `Start recording with ${n} player${n > 1 ? 's' : ''}` : 'Tick at least one player'}</button>
         <button className="btn ghost" id="setup-cancel" onClick={() => { if (!R.events.length) clearRecording(); go('games'); }}>Cancel</button>
       </div>
     </div>
