@@ -62,4 +62,12 @@ export function boot() {
 }
 
 // Loads the latest games again, for example after a change is saved.
-export const reload = () => loadData().then(d => { Object.assign(S, d, { offline: false }); fit(); notify(); });
+// If the database can't be reached, the site keeps showing what it has and says it's offline.
+export const reload = () => loadData().then(d => { Object.assign(S, d, { ready: true, error: null, offline: false }); fit(); notify(); },
+  e => { if (S.ready) { S.offline = true; notify(); } throw e; });
+
+// Tries again when the connection comes back or the site is reopened, if the last load failed.
+export function retry() {
+  if (!S.offline && !S.error) return Promise.resolve();
+  return reload().catch(e => { if (!S.ready) { S.error = e?.message || String(e); notify(); } });
+}

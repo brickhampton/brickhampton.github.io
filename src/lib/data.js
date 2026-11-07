@@ -1,10 +1,16 @@
-import { createClient } from '@supabase/supabase-js';
+import { PostgrestClient } from '@supabase/postgrest-js';
 
 // The stats database. The publishable key only allows reading; every change goes through
 // database functions that need an Admin session, and only the PIN opens one.
-const URL = import.meta.env.VITE_SUPABASE_URL || 'https://iwwmtturlbxebaiagscc.supabase.co';
-const KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || 'sb_publishable_RVq88Qby-XtccIL-JUwWUw_w5OiMjzC';
-export const db = createClient(URL, KEY, { auth: { persistSession: false, autoRefreshToken: false } });
+const URL = import.meta.env?.VITE_SUPABASE_URL || 'https://iwwmtturlbxebaiagscc.supabase.co';
+const KEY = import.meta.env?.VITE_SUPABASE_PUBLISHABLE_KEY || 'sb_publishable_RVq88Qby-XtccIL-JUwWUw_w5OiMjzC';
+// Reads give up after 10 seconds (the database client then tries a few more times), so a database that
+// hangs instead of answering still ends with the site saying it's offline rather than loading forever.
+const READ_TIMEOUT = 10e3;
+const timedFetch = (url, o = {}) => fetch(url, (o.method || 'GET') === 'GET' && !o.signal && AbortSignal.timeout ? { ...o, signal: AbortSignal.timeout(READ_TIMEOUT) } : o);
+// Only the database part of Supabase is used (no sign-in, storage or live updates), so the site loads just that
+// piece, which keeps the download small. It sends the key the same way the full Supabase client does.
+export const db = new PostgrestClient(URL + '/rest/v1', { headers: { apikey: KEY, Authorization: `Bearer ${KEY}` }, fetch: timedFetch });
 
 // The last data this browser loaded, so the site opens instantly and still works on a bad connection.
 const CACHE_KEY = 'bh-data-v1';
@@ -20,15 +26,15 @@ const player = p => ({ id: p.id, name: p.name, num: p.role === 'starter' ? +p.nu
 //   games: [{id, season, no, date, opp, result, oppPts, recorded, video, rows: {playerId: counts}, nums: {playerId: sub number}}],
 //   seasons: season codes newest first, current: the current season, opps: {season: [opponents in list order]}.
 export async function loadData() {
-  const [seasons, players, opps, games] = await Promise.all([
+  const [seasons, players, opps, games, site] = await Promise.all([
     db.from('seasons').select('code, sort, is_current').order('sort', { ascending: false }),
     db.from('players').select('id, name, num, role, look, created_at').order('created_at').order('id'),
     db.from('season_opponents').select('season, name, pos').order('season').order('pos'),
     // '*' so the site keeps working before 09-game-video.sql adds the video column.
     db.from('games').select('*, lines(*)').order('season').order('no'),
+    // The supporter's outfit and camera (10-supporter.sql). Before that runs she keeps her defaults.
+    db.from('site').select('key, value').then(r => r, () => ({ data: null })),
   ]);
-  // The supporter's outfit and camera (10-supporter.sql). Before that runs she keeps her defaults.
-  const site = await db.from('site').select('key, value').then(r => r, () => ({ data: null }));
   const err = [seasons, players, opps, games].find(r => r.error)?.error;
   if (err) throw new Error(err.message);
   const data = {

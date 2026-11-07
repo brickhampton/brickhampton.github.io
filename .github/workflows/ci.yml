@@ -1,4 +1,4 @@
-# Checks that every pull request still builds.
+# Checks that every pull request still passes the stats tests and builds.
 name: Build
 
 on:
@@ -14,6 +14,7 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - run: npm test
       - run: npm run build
 
   # Checks the live database the site reads: the history is all there, and the public key can only read.

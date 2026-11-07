@@ -2,8 +2,7 @@ import { useState } from 'react';
 import { P } from '../lib/core.js';
 import { adminEdit } from '../lib/admin.js';
 import { figure, pxShadow, cleanLook, lookOf, randomLook, OPTS, CHOICES, SKINS, HAIRS, BANDS, SHOES, SOCKS } from '../lib/avatar.js';
-import { closeSheet } from '../components/Sheet.jsx';
-import { useSave } from './Settings.jsx';
+import { closeSheet, useSave } from '../components/Sheet.jsx';
 
 // Which part of the drawing each kind of thumbnail shows: the whole player, or the head from a round avatar.
 const VIEW = { body: '6 -2 92 108', head: '0 0 100 100', face: '14 20 72 72', feet: '14 80 76 26' };

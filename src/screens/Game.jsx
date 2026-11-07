@@ -8,8 +8,7 @@ import { Back, Fwd, BIC, Pencil, ShareIcon, VideoPlay, VideoOff } from '../compo
 import { VideoSheet } from '../components/VideoSheet.jsx';
 import { isAdmin } from '../lib/admin.js';
 import { openSheet } from '../components/Sheet.jsx';
-import { EditGame } from './EditGame.jsx';
-import { ShareSheet } from '../components/ShareSheet.jsx';
+import { EditGame, ShareSheet } from '../lazy.jsx';
 import { PotgSection } from '../components/PotgSection.jsx';
 import { Chart, StatChips } from '../components/ui.jsx';
 

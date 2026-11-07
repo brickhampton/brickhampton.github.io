@@ -1,5 +1,5 @@
-import { useEffect, useLayoutEffect, useRef } from 'react';
-import { S, useStore, boot, set } from './lib/store.js';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { S, useStore, boot, set, retry } from './lib/store.js';
 import { allGames, statPlayers } from './lib/core.js';
 import { go, fromHash, peekHash, openTab, openPlayer, POS, posKey } from './lib/nav.js';
 import { reduced } from './lib/charts.js';
@@ -10,9 +10,7 @@ import { Games } from './screens/Games.jsx';
 import { Game } from './screens/Game.jsx';
 import { Stats } from './screens/Stats.jsx';
 import { Player } from './screens/Player.jsx';
-import { Settings } from './screens/Settings.jsx';
-import { Setup } from './screens/Setup.jsx';
-import { Entry } from './screens/Entry.jsx';
+import { Settings, Setup, Entry, preloadRest } from './lazy.jsx';
 import { SheetRoot } from './components/Sheet.jsx';
 import { recordGame } from './components/PinSheet.jsx';
 import { isAdmin, lock, touch } from './lib/admin.js';
@@ -81,14 +79,35 @@ const Section = ({ id, cls, show, children }) => (
   <section className="screen pad-x" id={'s-' + id} hidden={!show}>{children ?? <div className={`wrap ${cls}`} id={cls} />}</section>
 );
 
+// Shown while the database can't be reached and the site is showing the stats this device saved last time.
+function Offline({ show }) {
+  const [busy, setBusy] = useState(false);
+  if (!show) return null;
+  const again = () => { setBusy(true); retry().finally(() => setBusy(false)); };
+  return (
+    <div className="offline" role="status">
+      <span className="dot" aria-hidden="true" />
+      <span>Offline, showing saved stats</span>
+      <button onClick={again} disabled={busy}>{busy ? 'Trying' : 'Try again'}</button>
+    </div>
+  );
+}
+
 export default function App() {
   const s = useStore();
   const scr = s.screen;
 
   useEffect(() => {
-    boot().then(() => { if (S.ready) fromHash({ fromHistory: true }); });
+    boot().then(() => { if (S.ready) fromHash({ fromHistory: true }); }).finally(preloadRest);
     const pop = () => S.ready && fromHash({ fromHistory: true });
     addEventListener('popstate', pop);
+    // After a failed load, try again as soon as the connection is back or the site is reopened.
+    const again = () => {
+      if (document.visibilityState !== 'visible') return;
+      const was = S.ready;
+      retry().then(() => { if (!was && S.ready) fromHash({ fromHistory: true }); });
+    };
+    addEventListener('online', again); document.addEventListener('visibilitychange', again);
     // Avatars open the player's page on Games, a game page and Stats.
     const avClick = e => {
       const av = e.target.closest?.('[data-av]');
@@ -121,7 +140,7 @@ export default function App() {
     let raf = 0;
     const gs = $('#s-games'), onScroll = () => { if (!raf) raf = requestAnimationFrame(() => { raf = 0; homeFade(); }); };
     gs.addEventListener('scroll', onScroll, { passive: true });
-    return () => { removeEventListener('popstate', pop); removeEventListener('click', avClick, true); removeEventListener('pointerdown', tap, true); clearInterval(idle); removeEventListener('resize', rz); offs.forEach(f => f()); gs.removeEventListener('scroll', onScroll); };
+    return () => { removeEventListener('popstate', pop); removeEventListener('online', again); document.removeEventListener('visibilitychange', again); removeEventListener('click', avClick, true); removeEventListener('pointerdown', tap, true); clearInterval(idle); removeEventListener('resize', rz); offs.forEach(f => f()); gs.removeEventListener('scroll', onScroll); };
   }, []);
 
   // Which tab is lit: Home (top of Games) lights none.
@@ -154,7 +173,7 @@ export default function App() {
     if (t === 'games' && S.screen === 'games') return $('#s-games').scrollTo({ top: heroH(), behavior: reduced ? 'auto' : 'smooth' });
     openTab(t);
   };
-  const body = (name, El, kind) => scr !== name ? null : s.error ? <EmptyState title="Couldn't load the stats" text="Check your connection, then pull down or reload to try again."><p className="foot">{s.error}</p></EmptyState> : s.ready ? <El /> : <Skeleton kind={kind} />;
+  const body = (name, El, kind) => scr !== name ? null : s.error ? <EmptyState title="Couldn't load the stats" text="Check your connection. The site tries again as soon as you're back online."><p className="foot">{s.error}</p></EmptyState> : s.ready ? <El /> : <Skeleton kind={kind} />;
 
   return (
     <div id="app">
@@ -184,6 +203,7 @@ export default function App() {
         <Section id="setup" show={scr === 'setup'}>{s.ready && scr === 'setup' ? <Setup /> : <div />}</Section>
         <section className="screen" id="s-entry" hidden={scr !== 'entry'} style={{ overflow: 'hidden' }}>{s.ready && scr === 'entry' && <Entry />}</section>
       </main>
+      <Offline show={s.offline && scr !== 'setup' && scr !== 'entry'} />
       <SheetRoot />
     </div>
   );

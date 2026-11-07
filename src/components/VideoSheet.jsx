@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { S } from '../lib/store.js';
 import { adminEdit } from '../lib/admin.js';
-import { closeSheet } from './Sheet.jsx';
-import { useSave } from '../screens/Settings.jsx';
+import { closeSheet, useSave } from './Sheet.jsx';
 import { X, VideoPlay } from './icons.jsx';
 
 // Accepts youtube.com, m.youtube.com, youtu.be, /live/ and /shorts/ links, with or without https://.
