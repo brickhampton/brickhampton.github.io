@@ -34,11 +34,12 @@ function Leader({ rows, k, label, fmt = v => v, g, games }) {
   );
 }
 
+// The arrow shows which way the number moved; the colour shows whether that's good (fewer turnovers is green).
 function CmpTile({ label, val, base, lowerBetter, pctMode }) {
   const d = val - base, good = lowerBetter ? d < 0 : d > 0, flat = Math.abs(d) < (pctMode ? .0005 : .05);
   // TS% moves by a tenth of a point; the game's own TS% stays a whole number.
   const txt = pctMode ? (d >= 0 ? '+' : '−') + (Math.abs(d) * 100).toFixed(1) + '%' : (d >= 0 ? '+' : '−') + f1(Math.abs(d));
-  return <div><span>{label}</span><b className="num">{pctMode ? pctTxt(val) : val}</b><em className={flat ? 'flat' : good ? 'up' : 'down'}>{flat ? '=' : good ? '▲' : '▼'} {txt}</em></div>;
+  return <div><span>{label}</span><b className="num">{pctMode ? pctTxt(val) : val}</b><em className={flat ? 'flat' : good ? 'up' : 'down'}>{flat ? '=' : d > 0 ? '▲' : '▼'} {txt}</em></div>;
 }
 
 // The game's YouTube recording. Hidden when there isn't one, except in Admin mode, where it opens the link editor.

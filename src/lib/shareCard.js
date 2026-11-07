@@ -7,7 +7,7 @@ import { playerOfGame } from './potg.js';
 
 const W = 1080, PAD = 48, SCALE = 2;
 const C = {
-  canvas: '#101010', lift: '#1d1a18', lift2: '#272321', stroke: '#3d3a39', granite: '#8a8380', stone: '#b8b3b0', bone: '#eeeeee',
+  canvas: '#101010', lift: '#1a1b1f', lift2: '#23252a', stroke: '#383a40', granite: '#8b8e96', stone: '#b7bac1', bone: '#eeeeee',
   royal: '#2f55d4', green: '#a0ca92', neg: '#e3826f', draw: '#e2b23a', gold: '#f4d37c', goodBg: 'rgba(160,202,146,.14)', poorBg: 'rgba(227,130,111,.14)',
 };
 const SANS = '"Geist", Inter, system-ui, sans-serif', MONO = '"Geist Mono", ui-monospace, Menlo, monospace';
@@ -95,7 +95,7 @@ export async function drawShareCard(g, games, cel = randomCelebration(null, g)) 
   ctx.fillStyle = C.bone; ctx.font = font(500, 40); ctx.letterSpacing = '-1px'; ctx.fillText(`vs ${g.opp}`, mid, 122); ctx.letterSpacing = '0px';
   ctx.fillStyle = C.granite; ctx.font = font(400, 22);
   ctx.fillText(`${g.season}, Game ${g.no}, ${fmtDate(g.date)}${g.oppPts != null ? ` · Final ${t.pts}–${g.oppPts}` : ''}`, mid, 160);
-  const RB = { W: [C.royal, '#fff'], L: ['#4d4947', C.bone], D: [C.draw, '#2a1f00'], U: [null, C.granite] }[g.result] || [null, C.granite];
+  const RB = { W: [C.royal, '#fff'], L: ['#4a4c53', C.bone], D: [C.draw, '#2a1f00'], U: [null, C.granite] }[g.result] || [null, C.granite];
   const bw = pill(ctx, W - PAD, 46, RES[g.result], { bg: RB[0], fg: RB[1], f: font(600, 20), h: 40, px: 18, align: 'right', r: 20 });
   if (feat) pill(ctx, W - PAD - bw - 10, 46, feat[2], { bg: 'rgba(233,185,73,.13)', fg: C.gold, f: font(500, 19), h: 40, px: 16, align: 'right', r: 20 });
   ctx.fillStyle = C.lift2; ctx.fillRect(PAD, HEAD - 6, W - PAD * 2, 1); ctx.fillStyle = C.royal; ctx.fillRect(PAD, HEAD - 7, 96, 2);

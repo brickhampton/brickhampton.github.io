@@ -88,16 +88,16 @@ export function drawGameTrend(wrap, g, games, stat) {
   const every = Math.ceil(list.length / Math.max(4, Math.floor((W - ml - mr) / 40)));
   let svg = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Team ${LBL[k]} by game">
     <defs><linearGradient id="gtfill" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="${c}" stop-opacity=".28"/><stop offset="1" stop-color="${c}" stop-opacity="0"/></linearGradient></defs>
-    <line x1="${ml}" x2="${W - mr}" y1="${H - mb}" y2="${H - mb}" stroke="#3d3a39"/>
+    <line x1="${ml}" x2="${W - mr}" y1="${H - mb}" y2="${H - mb}" stroke="#383a40"/>
     <line x1="${x(cur)}" x2="${x(cur)}" y1="${mt - 8}" y2="${H - mb}" stroke="${c}" stroke-width="1" stroke-dasharray="3 4" opacity=".7"/>
-    <line x1="${ml}" x2="${W - mr}" y1="${y(avg)}" y2="${y(avg)}" stroke="#8a8380" stroke-width="1.2" stroke-dasharray="5 5"/>
-    <text x="${ml}" y="${y(avg) - 6}" font-size="11" fill="#8a8380" font-family="Geist Mono, monospace">Avg ${pct ? fmt(avg) : f1(avg)}</text>
+    <line x1="${ml}" x2="${W - mr}" y1="${y(avg)}" y2="${y(avg)}" stroke="#8b8e96" stroke-width="1.2" stroke-dasharray="5 5"/>
+    <text x="${ml}" y="${y(avg) - 6}" font-size="11" fill="#8b8e96" font-family="Geist Mono, monospace">Avg ${pct ? fmt(avg) : f1(avg)}</text>
     <path d="${area}" fill="url(#gtfill)"/>
     <path d="${line}" fill="none" stroke="${c}" stroke-width="2.5" stroke-linecap="round" class="gline"/>`;
   svg += `<circle cx="${x(cur)}" cy="${y(vals[cur])}" r="11" fill="${c}" opacity=".22"/><circle cx="${x(cur)}" cy="${y(vals[cur])}" r="6.5" fill="#eeeeee" stroke="${c}" stroke-width="3"/>
-    <text x="${Math.min(W - mr - 4, Math.max(ml + 4, x(cur)))}" y="${y(vals[cur]) - 16}" text-anchor="${cur === 0 ? 'start' : cur === list.length - 1 ? 'end' : 'middle'}" font-size="14" font-weight="600" fill="#eeeeee" font-family="Geist, sans-serif" stroke="#1d1a18" stroke-width="4" paint-order="stroke">${fmt(vals[cur])}</text>`;
-  list.forEach((gg, i) => { if (i % every === 0 || i === cur || i === list.length - 1) svg += `<text x="${x(i)}" y="${H - 9}" text-anchor="middle" font-size="11" fill="${i === cur ? '#eeeeee' : '#8a8380'}" font-family="Geist Mono, monospace">G${gg.no}</text>`; });
-  svg += `<line class="gxh" x1="0" x2="0" y1="${mt}" y2="${H - mb}" stroke="#8a8380" stroke-dasharray="3 3" opacity="0"/><circle class="ghd" r="5" fill="${c}" stroke="#1d1a18" stroke-width="2" opacity="0" pointer-events="none"/><rect x="${ml - step / 2}" y="0" width="${W - ml - mr + step}" height="${H}" fill="transparent" class="hit"/></svg>`;
+    <text x="${Math.min(W - mr - 4, Math.max(ml + 4, x(cur)))}" y="${y(vals[cur]) - 16}" text-anchor="${cur === 0 ? 'start' : cur === list.length - 1 ? 'end' : 'middle'}" font-size="14" font-weight="600" fill="#eeeeee" font-family="Geist, sans-serif" stroke="#1a1b1f" stroke-width="4" paint-order="stroke">${fmt(vals[cur])}</text>`;
+  list.forEach((gg, i) => { if (i % every === 0 || i === cur || i === list.length - 1) svg += `<text x="${x(i)}" y="${H - 9}" text-anchor="middle" font-size="11" fill="${i === cur ? '#eeeeee' : '#8b8e96'}" font-family="Geist Mono, monospace">G${gg.no}</text>`; });
+  svg += `<line class="gxh" x1="0" x2="0" y1="${mt}" y2="${H - mb}" stroke="#8b8e96" stroke-dasharray="3 3" opacity="0"/><circle class="ghd" r="5" fill="${c}" stroke="#1a1b1f" stroke-width="2" opacity="0" pointer-events="none"/><rect x="${ml - step / 2}" y="0" width="${W - ml - mr + step}" height="${H}" fill="transparent" class="hit"/></svg>`;
   wrap.innerHTML = svg;
   drawIn(wrap.querySelector('.gline'), 650);
   const svgEl = wrap.querySelector('svg'), xh = wrap.querySelector('.gxh'), hd = wrap.querySelector('.ghd'), hit = wrap.querySelector('.hit');
@@ -142,9 +142,9 @@ export function drawTrend(wrap, games, { k, ids, season, single: one = false }) 
   for (let v = loN; v <= hi + 1e-9; v += tStep) ticks.push(+v.toFixed(4));
   const fmt = v => isPct ? Math.round(v * 100) + '%' : k === 'per' ? perTxt(v, season === 'ALL') : Number.isInteger(v) ? v : f1(v);
   let svg = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${STATS[k] || k} trend">`;
-  ticks.forEach(t => svg += `<line x1="${ml}" x2="${W - mr}" y1="${y(t)}" y2="${y(t)}" stroke="${t === 0 ? '#4d4947' : '#2a2624'}" stroke-width="1"/><text x="${ml - (narrow ? 5 : 8)}" y="${y(t) + 4}" text-anchor="end" font-size="${narrow ? 10 : 11}" fill="#8a8380" font-family="Geist Mono, monospace">${isPct ? Math.round(t * 100) + '%' : +t.toFixed(1)}</text>`);
+  ticks.forEach(t => svg += `<line x1="${ml}" x2="${W - mr}" y1="${y(t)}" y2="${y(t)}" stroke="${t === 0 ? '#4a4c53' : '#26282d'}" stroke-width="1"/><text x="${ml - (narrow ? 5 : 8)}" y="${y(t) + 4}" text-anchor="end" font-size="${narrow ? 10 : 11}" fill="#8b8e96" font-family="Geist Mono, monospace">${isPct ? Math.round(t * 100) + '%' : +t.toFixed(1)}</text>`);
   const every = Math.ceil(xs.length / Math.max(4, Math.floor((W - ml - mr) / 44)));
-  xs.forEach((p, i) => { if (i % every === 0 || i === xs.length - 1) svg += `<text x="${x(i)}" y="${H - 8}" text-anchor="middle" font-size="11" fill="#8a8380" font-family="Geist Mono, monospace">${p.label}</text>`; });
+  xs.forEach((p, i) => { if (i % every === 0 || i === xs.length - 1) svg += `<text x="${x(i)}" y="${H - 8}" text-anchor="middle" font-size="11" fill="#8b8e96" font-family="Geist Mono, monospace">${p.label}</text>`; });
   const ends = [];
   series.forEach(s => {
     const c = one ? statCol(k, SLOT_COL[0]) : SLOT_COL[ids.indexOf(s.id)];
@@ -161,16 +161,16 @@ export function drawTrend(wrap, games, { k, ids, season, single: one = false }) 
       const rv = s.vals.filter(real), avg = rv.reduce((a, v) => a + v, 0) / rv.length, full = smooth(pts);
       svg += `<defs><linearGradient id="parea" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="${c}" stop-opacity=".28"/><stop offset="1" stop-color="${c}" stop-opacity="0"/></linearGradient></defs>`;
       svg += `<path d="${full} L${pts[pts.length - 1][0].toFixed(1)} ${y(Math.max(loN, 0))} L${pts[0][0].toFixed(1)} ${y(Math.max(loN, 0))}Z" fill="url(#parea)" class="parea"/>`;
-      svg += `<line x1="${ml}" x2="${W - mr}" y1="${y(avg)}" y2="${y(avg)}" stroke="#b8b3b0" stroke-dasharray="4 4" opacity=".6"/><rect x="${ml + 4}" y="${y(avg) - 21}" width="${(String(fmt(avg)).length + 4) * 7 + 12}" height="17" rx="8.5" fill="#272321"/><text x="${ml + 10}" y="${y(avg) - 9}" font-size="11" fill="#eeeeee" font-family="Geist Mono, monospace">AVG ${fmt(avg)}</text>`;
+      svg += `<line x1="${ml}" x2="${W - mr}" y1="${y(avg)}" y2="${y(avg)}" stroke="#b7bac1" stroke-dasharray="4 4" opacity=".6"/><rect x="${ml + 4}" y="${y(avg) - 21}" width="${(String(fmt(avg)).length + 4) * 7 + 12}" height="17" rx="8.5" fill="#23252a"/><text x="${ml + 10}" y="${y(avg) - 9}" font-size="11" fill="#eeeeee" font-family="Geist Mono, monospace">AVG ${fmt(avg)}</text>`;
     }
     if (solid) svg += `<path d="${solid}" fill="none" stroke="${c}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" class="tline"/>`;
-    s.vals.forEach((v, i) => { if (real(v)) svg += `<circle cx="${x(i)}" cy="${y(v)}" r="${one ? 4.5 : 4}" fill="${c}" stroke="#1d1a18" stroke-width="2"/>`; });
+    s.vals.forEach((v, i) => { if (real(v)) svg += `<circle cx="${x(i)}" cy="${y(v)}" r="${one ? 4.5 : 4}" fill="${c}" stroke="#1a1b1f" stroke-width="2"/>`; });
     const li = s.vals.map((v, i) => real(v) ? i : -1).filter(i => i >= 0).pop();
     if (li !== undefined && !one) ends.push({ id: s.id, c, yy: y(s.vals[li]), xx: x(li) });
   });
   ends.sort((a, b) => a.yy - b.yy); const gap = narrow ? 13 : 14; for (let i = 1; i < ends.length; i++) if (ends[i].yy - ends[i - 1].yy < gap) ends[i].yy = ends[i - 1].yy + gap;
-  ends.forEach(e => svg += `<text x="${W - mr + (narrow ? 6 : 8)}" y="${e.yy + 4}" font-size="${narrow ? 11 : 12}" fill="#b8b3b0" font-family="Geist, sans-serif">${esc(P(e.id).name)}</text>`);
-  svg += `<line class="xh" x1="0" x2="0" y1="${mt}" y2="${H - mb}" stroke="#8a8380" stroke-width="1" stroke-dasharray="3 3" opacity="0"/>`;
+  ends.forEach(e => svg += `<text x="${W - mr + (narrow ? 6 : 8)}" y="${e.yy + 4}" font-size="${narrow ? 11 : 12}" fill="#b7bac1" font-family="Geist, sans-serif">${esc(P(e.id).name)}</text>`);
+  svg += `<line class="xh" x1="0" x2="0" y1="${mt}" y2="${H - mb}" stroke="#8b8e96" stroke-width="1" stroke-dasharray="3 3" opacity="0"/>`;
   svg += `<rect x="${ml - step / 2}" y="0" width="${W - ml - mr + step}" height="${H}" fill="transparent" class="hit"/></svg>`;
   wrap.innerHTML = svg;
   const svgEl = wrap.querySelector('svg'), xh = wrap.querySelector('.xh');
@@ -236,20 +236,20 @@ function barChart(wrap, data, { label, avg, legend = '', fmt = f1, fill = false 
   cols.forEach((c, i) => svg += `<linearGradient id="bg${i}" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="${c}"/><stop offset="1" stop-color="${c}" stop-opacity=".28"/></linearGradient>`);
   svg += `</defs>`;
   for (let v = tick; v <= hi + 1e-9; v += tick) {
-    svg += `<line x1="${ml}" x2="${W - mr}" y1="${y(v)}" y2="${y(v)}" stroke="#2a2624"/>`;
+    svg += `<line x1="${ml}" x2="${W - mr}" y1="${y(v)}" y2="${y(v)}" stroke="#26282d"/>`;
     if (avg === undefined || Math.abs(y(v) - y(avg)) > 26) svg += `<text x="${ml - 8}" y="${y(v) + 4}" text-anchor="end" font-size="10" fill="#6b6663" font-family="Geist Mono, monospace">${fmt === f1 || !String(fmt(v)).includes('%') ? +v.toFixed(1) : fmt(v)}</text>`;
   }
-  svg += `<line x1="${ml}" x2="${W - mr}" y1="${H - mb}" y2="${H - mb}" stroke="#3d3a39"/>`;
+  svg += `<line x1="${ml}" x2="${W - mr}" y1="${H - mb}" y2="${H - mb}" stroke="#383a40"/>`;
   data.forEach((d, i) => {
     const cx = ml + bw * (i + .5), x0 = cx - w / 2, y0 = y(d.v), h = H - mb - y0, rr = Math.min(r, h);
     const fillUrl = `url(#bg${cols.indexOf(d.col || '#4f7cff')})`;
     svg += `<path class="bar" d="M${x0} ${H - mb} V${y0 + rr} A${rr} ${rr} 0 0 1 ${x0 + rr} ${y0} H${x0 + w - rr} A${rr} ${rr} 0 0 1 ${x0 + w} ${y0 + rr} V${H - mb}Z" fill="${fillUrl}" data-tip="${esc(d.tip)}"/>`;
-    if (!many || i === last) svg += `<text x="${cx}" y="${y0 - 7}" text-anchor="middle" font-size="${i === last ? 13 : 11}" font-weight="${i === last ? 600 : 400}" fill="${i === last ? '#eeeeee' : '#b8b3b0'}" font-family="Geist, sans-serif" stroke="#1d1a18" stroke-width="4" paint-order="stroke">${d.txt}</text>`;
-    if ((i % every === 0 && last - i >= every) || i === last) svg += `<text x="${cx}" y="${H - 8}" text-anchor="middle" font-size="10.5" fill="${i === last ? '#eeeeee' : '#8a8380'}" font-family="Geist Mono, monospace">${d.label}</text>`;
+    if (!many || i === last) svg += `<text x="${cx}" y="${y0 - 7}" text-anchor="middle" font-size="${i === last ? 13 : 11}" font-weight="${i === last ? 600 : 400}" fill="${i === last ? '#eeeeee' : '#b7bac1'}" font-family="Geist, sans-serif" stroke="#1a1b1f" stroke-width="4" paint-order="stroke">${d.txt}</text>`;
+    if ((i % every === 0 && last - i >= every) || i === last) svg += `<text x="${cx}" y="${H - 8}" text-anchor="middle" font-size="10.5" fill="${i === last ? '#eeeeee' : '#8b8e96'}" font-family="Geist Mono, monospace">${d.label}</text>`;
   });
-  if (avg !== undefined) svg += `<line x1="${ml}" x2="${W - mr}" y1="${y(avg)}" y2="${y(avg)}" stroke="#b8b3b0" stroke-width="1" stroke-dasharray="4 4" opacity=".7" pointer-events="none"/>
-    <rect x="0" y="${y(avg) - 9}" width="${ml - 4}" height="18" rx="9" fill="#272321"/><text x="${(ml - 4) / 2}" y="${y(avg) + 4}" text-anchor="middle" font-size="10.5" fill="#eeeeee" font-family="Geist Mono, monospace">${fmt(avg)}</text>
-    <text x="${(ml - 4) / 2}" y="${y(avg) - 13}" text-anchor="middle" font-size="9" fill="#8a8380" font-family="Geist, sans-serif" letter-spacing=".04em">AVG</text>`;
+  if (avg !== undefined) svg += `<line x1="${ml}" x2="${W - mr}" y1="${y(avg)}" y2="${y(avg)}" stroke="#b7bac1" stroke-width="1" stroke-dasharray="4 4" opacity=".7" pointer-events="none"/>
+    <rect x="0" y="${y(avg) - 9}" width="${ml - 4}" height="18" rx="9" fill="#23252a"/><text x="${(ml - 4) / 2}" y="${y(avg) + 4}" text-anchor="middle" font-size="10.5" fill="#eeeeee" font-family="Geist Mono, monospace">${fmt(avg)}</text>
+    <text x="${(ml - 4) / 2}" y="${y(avg) - 13}" text-anchor="middle" font-size="9" fill="#8b8e96" font-family="Geist, sans-serif" letter-spacing=".04em">AVG</text>`;
   wrap.innerHTML = legend + svg + '</svg>';
   wrap.querySelectorAll('.bar').forEach(el => {
     const show = ev => { const rc = wrap.getBoundingClientRect(); wrap.querySelectorAll('.bar').forEach(b => b.style.opacity = b === el ? 1 : .55); showTip(wrap, el.dataset.tip, ev.clientX - rc.left, ev.clientY - rc.top); };
@@ -272,11 +272,11 @@ export function drawScatter(wrap, list, openPlayer) {
   const xStep = (x1 - x0) > 12 ? 4 : 2, yStep = (y1 - y0) > .3 ? .1 : .05;
   let svg = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Shots a game against true shooting"><defs><clipPath id="sclip"><circle r="${R}"/></clipPath>
     <radialGradient id="qglow" cx="1" cy="0" r="1"><stop offset="0" stop-color="#3969e6" stop-opacity=".16"/><stop offset="1" stop-color="#3969e6" stop-opacity="0"/></radialGradient></defs>`;
-  svg += `<rect x="${X(mx)}" y="${mt}" width="${W - mr - X(mx)}" height="${Y(my) - mt}" fill="url(#qglow)"/><line x1="${ml}" x2="${W - mr}" y1="${mt}" y2="${mt}" stroke="#2a2624"/>`;
-  for (let v = Math.ceil(y0 / yStep) * yStep; v <= y1 + 1e-9; v += yStep) svg += `<line x1="${ml}" x2="${W - mr}" y1="${Y(v)}" y2="${Y(v)}" stroke="#2a2624"/><text x="${ml - 6}" y="${Y(v) + 4}" text-anchor="end" font-size="${narrow ? 10 : 11}" fill="#8a8380" font-family="Geist Mono, monospace">${Math.round(v * 100)}%</text>`;
-  for (let v = Math.ceil(x0 / xStep) * xStep; v <= x1 + 1e-9; v += xStep) svg += `<text x="${X(v)}" y="${H - mb + 18}" text-anchor="middle" font-size="${narrow ? 10 : 11}" fill="#8a8380" font-family="Geist Mono, monospace">${v}</text>`;
-  svg += `<text x="${W - mr}" y="${H - 4}" text-anchor="end" font-size="11" fill="#8a8380" font-family="Geist, sans-serif">Shots a game (TSA) →</text>`;
-  svg += `<line x1="${X(mx)}" x2="${X(mx)}" y1="${mt}" y2="${H - mb}" stroke="#4d4947" stroke-dasharray="4 4"/><line x1="${ml}" x2="${W - mr}" y1="${Y(my)}" y2="${Y(my)}" stroke="#4d4947" stroke-dasharray="4 4"/>`;
+  svg += `<rect x="${X(mx)}" y="${mt}" width="${W - mr - X(mx)}" height="${Y(my) - mt}" fill="url(#qglow)"/><line x1="${ml}" x2="${W - mr}" y1="${mt}" y2="${mt}" stroke="#26282d"/>`;
+  for (let v = Math.ceil(y0 / yStep) * yStep; v <= y1 + 1e-9; v += yStep) svg += `<line x1="${ml}" x2="${W - mr}" y1="${Y(v)}" y2="${Y(v)}" stroke="#26282d"/><text x="${ml - 6}" y="${Y(v) + 4}" text-anchor="end" font-size="${narrow ? 10 : 11}" fill="#8b8e96" font-family="Geist Mono, monospace">${Math.round(v * 100)}%</text>`;
+  for (let v = Math.ceil(x0 / xStep) * xStep; v <= x1 + 1e-9; v += xStep) svg += `<text x="${X(v)}" y="${H - mb + 18}" text-anchor="middle" font-size="${narrow ? 10 : 11}" fill="#8b8e96" font-family="Geist Mono, monospace">${v}</text>`;
+  svg += `<text x="${W - mr}" y="${H - 4}" text-anchor="end" font-size="11" fill="#8b8e96" font-family="Geist, sans-serif">Shots a game (TSA) →</text>`;
+  svg += `<line x1="${X(mx)}" x2="${X(mx)}" y1="${mt}" y2="${H - mb}" stroke="#4a4c53" stroke-dasharray="4 4"/><line x1="${ml}" x2="${W - mr}" y1="${Y(my)}" y2="${Y(my)}" stroke="#4a4c53" stroke-dasharray="4 4"/>`;
   const qbox = [];
   const q = (t, x, y, a) => { const w = t.length * (narrow ? 6.2 : 6.8); qbox.push({ x: a === 'end' ? x - w / 2 : x + w / 2, y: y - 3, w }); return `<text x="${x}" y="${y}" text-anchor="${a}" font-size="${narrow ? 10 : 11}" fill="#6b6663" font-family="Geist Mono, monospace" letter-spacing=".04em">${t}</text>`; };
   // Quadrant names sit above the plot (top pair) and in the bottom corners, clear of the avatars.
@@ -290,12 +290,12 @@ export function drawScatter(wrap, list, openPlayer) {
     const spots = [[cx, cy + R + 14, 'middle'], [cx, cy - R - 7, 'middle'], [cx + R + 6 + bw / 2, cy + 4, 'middle'], [cx - R - 6 - bw / 2, cy + 4, 'middle']];
     const [lx, ly] = spots.find(([x, y]) => !hits(x, y, bw) && y < H - mb + 6 && x - bw / 2 > ml && x + bw / 2 < W - mr) || spots[0];
     labels.push({ x: lx, y: ly, w: bw });
-    labelSvg += `<text x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" text-anchor="middle" font-size="${narrow ? 11 : 12}" fill="#d4d0cd" font-family="Geist, sans-serif" paint-order="stroke" stroke="#1d1a18" stroke-width="3" pointer-events="none">${esc(name)}</text>`;
+    labelSvg += `<text x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" text-anchor="middle" font-size="${narrow ? 11 : 12}" fill="#d2d4d9" font-family="Geist, sans-serif" paint-order="stroke" stroke="#1a1b1f" stroke-width="3" pointer-events="none">${esc(name)}</text>`;
   });
   pts.forEach((p, i) => {
     const cx = X(p.x), cy = Y(p.y), pl = P(p.id);
     svg += `<g class="sdot" data-av="${p.id}" data-i="${i}" transform="translate(${cx.toFixed(1)} ${cy.toFixed(1)})" tabindex="0" role="button" aria-label="${esc(pl.name)}: ${f1(p.x)} shots a game, ${pctTxt(p.y)} true shooting">
-      <g class="sd-in"><circle r="${R + 2.5}" fill="#1d1a18" stroke="${SLOT_COL[statPlayers().indexOf(p.id)] || '#8a8380'}" stroke-width="2"/><circle r="${R}" fill="#272321"/>
+      <g class="sd-in"><circle r="${R + 2.5}" fill="#1a1b1f" stroke="${SLOT_COL[statPlayers().indexOf(p.id)] || '#8b8e96'}" stroke-width="2"/><circle r="${R}" fill="#23252a"/>
       <g clip-path="url(#sclip)"><svg x="${-R}" y="${-R * .86}" width="${2 * R}" height="${2 * R}" viewBox="0 0 100 100">${figure(pl)}</svg></g></g></g>`;
   });
   wrap.innerHTML = svg + labelSvg + '</svg>';
@@ -326,10 +326,10 @@ export function drawRadar(wrap, a, peers, cmp) {
   AX.forEach((_, i) => { const [x, y] = pt(i, 1); svg += `<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="#2f2b29"/>`; });
   svg += `<polygon points="${poly(theirs)}" fill="none" stroke="#eeeeee" stroke-width="1.4" stroke-dasharray="4 4" opacity=".55"/>`;
   svg += `<g class="rshape"><polygon points="${poly(mine)}" fill="url(#rfill)" stroke="#4f7cff" stroke-width="2.2" stroke-linejoin="round"/>
-    ${mine.map((f, i) => { const [x, y] = pt(i, Math.max(.04, Math.min(1, f))); return `<circle cx="${x}" cy="${y}" r="4" fill="#4f7cff" stroke="#1d1a18" stroke-width="2"/>`; }).join('')}</g>`;
+    ${mine.map((f, i) => { const [x, y] = pt(i, Math.max(.04, Math.min(1, f))); return `<circle cx="${x}" cy="${y}" r="4" fill="#4f7cff" stroke="#1a1b1f" stroke-width="2"/>`; }).join('')}</g>`;
   AX.forEach(([k, l], i) => {
     const [x, y] = pt(i, 1.24), anchor = Math.abs(x - cx) < 8 ? 'middle' : x > cx ? 'start' : 'end';
-    svg += `<text x="${x}" y="${y - 3}" text-anchor="${anchor}" font-size="11" fill="#8a8380" font-family="Geist Mono, monospace" letter-spacing=".04em">${l}</text>
+    svg += `<text x="${x}" y="${y - 3}" text-anchor="${anchor}" font-size="11" fill="#8b8e96" font-family="Geist Mono, monospace" letter-spacing=".04em">${l}</text>
       <text x="${x}" y="${y + 13}" text-anchor="${anchor}" font-size="15" font-weight="600" fill="#eeeeee" font-family="Geist, sans-serif">${fmt(k, v(a, k))}</text>`;
   });
   wrap.innerHTML = svg + '</svg>';
