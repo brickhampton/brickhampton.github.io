@@ -79,6 +79,30 @@ function woosh({ t = 0, d = 0.35, f0, f1, f2, q = 1, v = 0.3, pk = 0.45 }) {
   s.start(now, Math.random()); s.stop(now + d + 0.05);
 }
 
+// A slap: noise with an instant attack and a very fast fade, shaped by a filter. echo sends some of it into the gym echo too.
+function burst({ t = 0, d = 0.05, f = 2000, to, q = 0.8, v = 0.3, echo = false }) {
+  if (!nbuf) noise({ d: 0.01, v: 0.0001 });
+  const now = ctx.currentTime + t, s = ctx.createBufferSource(), fl = ctx.createBiquadFilter(), g = ctx.createGain();
+  s.buffer = nbuf; fl.type = 'bandpass'; fl.Q.value = q; fl.frequency.setValueAtTime(f, now);
+  if (to) fl.frequency.exponentialRampToValueAtTime(to, now + d);
+  g.gain.setValueAtTime(v, now); g.gain.exponentialRampToValueAtTime(0.0001, now + d);
+  s.connect(fl); fl.connect(g); g.connect(out); if (echo) g.connect(gym());
+  s.start(now, Math.random() * 1.5); s.stop(now + d + 0.02);
+}
+// A short gym-hall echo (decaying noise as the room), made once.
+let verb = null;
+function gym() {
+  if (!verb) {
+    verb = ctx.createConvolver();
+    const L = Math.floor(ctx.sampleRate * 0.7), ir = ctx.createBuffer(2, L, ctx.sampleRate);
+    for (let c = 0; c < 2; c++) { const d = ir.getChannelData(c); for (let i = 0; i < L; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / L, 3.2); }
+    verb.buffer = ir; const wet = ctx.createGain(); wet.gain.value = 0.35; verb.connect(wet); wet.connect(out);
+  }
+  return verb;
+}
+// Vary a value a little, so repeated sounds aren't identical.
+const jit = (x, p = 0.06) => x * (1 + (Math.random() * 2 - 1) * p);
+
 const N = { G4: 392, A4: 440, Bb4: 466.16, C5: 523.25, D5: 587.33, E5: 659.25, G5: 783.99, A5: 880, B5: 987.77, C6: 1046.5, E6: 1318.5 };
 const arp = (notes, t = 0, step = 0.07, d = 0.14, v = 0.28) => notes.forEach((f, i) => tone({ f, t: t + i * step, d, v }));
 // Pitched low (2000 -> 450 Hz), Geoff picked option C from the preview.
@@ -122,8 +146,14 @@ const SOUNDS = {
   passWoosh: () => woosh({ d: 0.35, f0: 500, f1: 1500, f2: 600, v: 0.225 }),
   assist: () => { tone({ f: N.C6, d: 0.07, v: 0.16 }); tone({ f: N.E6, t: 0.06, d: 0.12, v: 0.16 }); },
   steal: () => { tone({ f: 400, to: 1800, d: 0.12, v: 0.22 }); noise({ d: 0.1, f: 2500, to: 6000, q: 2, v: 0.18 }); tone({ f: N.G5, t: 0.13, d: 0.1, v: 0.16 }); },
-  // Just the low thud: Geoff dropped the noisy smack.
-  block: () => tone({ f: 180, to: 60, d: 0.22, v: 0.4 }),
+  // The low thud plus the hand on the ball: option C "Big swat" from the preview at 80%, a heavy smack with a little gym echo.
+  block: () => {
+    tone({ f: 180, to: 60, d: 0.22, v: 0.4 });
+    const k = 0.8;
+    burst({ d: 0.014, f: jit(2800), q: 0.6, v: 0.3 * k, echo: true });
+    burst({ t: 0.003, d: jit(0.085), f: jit(1300), to: 700, q: 0.8, v: 0.5 * k, echo: true });
+    tone({ f: jit(260), to: 190, d: 0.12, type: 'triangle', v: 0.14 * k });
+  },
   turnover: () => { tone({ f: N.Bb4, d: 0.18, v: 0.2, type: 'triangle' }); tone({ f: N.A4, t: 0.2, d: 0.18, v: 0.2, type: 'triangle' }); tone({ f: 415.3, to: 370, t: 0.4, d: 0.45, v: 0.2, type: 'triangle', vib: 9 }); },
   roll: () => thud(0, 0.25),
 };
