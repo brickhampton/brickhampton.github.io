@@ -1391,3 +1391,18 @@ a.vbtn:active,button.vbtn:active{transform:scale(.94)}
 /* iPad and computer: the PER badge sits under the name. iPhone: no reason sentence, just the name, PER and stats. */
 @media (min-width:701px){.potg-name{flex-direction:column;align-items:flex-start;gap:8px}}
 @media (max-width:700px){.potg-why{display:none}.potg-txt{padding-top:16px}}
+
+/* Offline note: the database couldn't be reached, so the site shows the stats saved on this device. */
+.offline{position:fixed;left:50%;bottom:calc(14px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:40;display:flex;align-items:center;gap:10px;
+  width:max-content;max-width:calc(100vw - 32px);padding:6px 6px 6px 14px;border-radius:999px;background:var(--lift2);box-shadow:inset 0 0 0 1px var(--stroke),0 8px 24px rgba(0,0,0,.45);
+  font-size:13px;font-weight:500;color:var(--stone);animation:offin .3s var(--ease-out)}
+.offline .dot{flex:none;width:8px;height:8px;border-radius:50%;background:var(--draw)}
+.offline button{flex:none;font:inherit;font-weight:600;color:var(--bone);background:var(--mid);border:0;border-radius:999px;padding:0 12px;height:32px;cursor:pointer}
+.offline button:disabled{opacity:.6}
+@keyframes offin{from{opacity:0;transform:translate(-50%,8px)}}
+@media (prefers-reduced-motion:reduce){.offline{animation:none}}
+/* Shown instead of a blank page if something in the site breaks. */
+.crash{height:100vh;height:100dvh;overflow:auto;display:grid;place-content:center;gap:14px;padding:24px;text-align:center;color:var(--bone)}
+.crash h1{font-size:22px;font-weight:600;letter-spacing:-.02em;margin:0}
+.crash p{color:var(--stone);max-width:340px;line-height:1.45;margin:0}
+.crash .btn{justify-self:center}

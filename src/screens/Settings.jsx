@@ -3,7 +3,7 @@ import { S, set, useStore } from '../lib/store.js';
 import { allGames, seasonList, seasonName, teamPts, fmtDate, RES, P, calc } from '../lib/core.js';
 import { isAdmin, lock, changePin, adminEdit, loadHistory } from '../lib/admin.js';
 import { Lock, Shield, Pencil, X } from '../components/icons.jsx';
-import { openSheet, closeSheet } from '../components/Sheet.jsx';
+import { openSheet, closeSheet, useSave, errText } from '../components/Sheet.jsx';
 import { PinSheet } from '../components/PinSheet.jsx';
 import { Avatar } from '../components/Avatar.jsx';
 import { SeasonPick, MoreBtn } from '../components/ui.jsx';
@@ -20,14 +20,6 @@ const nextSeasonCode = () => { const top = S.seasons[0], yy = +top.slice(1); ret
 const ago = t => { const m = Math.round((Date.now() - new Date(t)) / 60e3); return m < 1 ? 'just now' : m < 60 ? `${m} min ago` : m < 1440 ? `${Math.round(m / 60)} h ago` : fmtDate(new Date(t).toISOString().slice(0, 10), { day: 'numeric', month: 'long' }); };
 // Players who appeared in the same game can't be merged.
 const sharedGames = (a, b) => allGames().filter(g => g.rows[a] && g.rows[b]);
-export const errText = e => e.locked ? 'Admin mode locked itself. Unlock it again to make changes.' : e.message;
-
-// A sheet's Save button: runs the change, closes on success, shows the problem otherwise.
-export function useSave() {
-  const [err, setErr] = useState(''), [busy, setBusy] = useState(false);
-  const run = async (fn, after) => { setBusy(true); setErr(''); try { const r = await fn(); closeSheet(); after?.(r); } catch (e) { setErr(errText(e)); setBusy(false); } };
-  return { err, setErr, busy, run };
-}
 
 function ChangePin() {
   const [a, setA] = useState(''), [b, setB] = useState('');

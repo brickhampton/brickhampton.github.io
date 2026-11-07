@@ -2,7 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { reload } from '../lib/store.js';
 import { P, calc, sumRows, perTxt, fmtDate, esc, lastNo } from '../lib/core.js';
 import { sfx } from '../lib/sfx.js';
-import { rec, change, countsFor, livePts, ACTIONS, A, saveGame, clearRecording } from '../lib/record.js';
+import { rec, change, countsFor, livePts, ACTIONS, A, saveGame, clearRecording, savedCopy } from '../lib/record.js';
 import { reduced } from '../lib/charts.js';
 import { go } from '../lib/nav.js';
 import { Avatar, figure } from '../components/Avatar.jsx';
@@ -327,8 +327,11 @@ function EndGame() {
       setBusy(false);
       if (e.locked) { openSheet(<PinSheet why="Admin mode locked itself. Enter the PIN to save this game." onDone={() => openSheet(<EndGame />)} />); return; }
       if (/already has stats/.test(e.message)) {
-        // Someone saved this game number first: move this one to the next free number.
-        await reload().catch(() => {});
+        if (!await reload().then(() => true, () => false)) { setErr(`Couldn't check whether this game is already saved. Everything you recorded is kept on this device, so try again.`); return; }
+        // It may be this very game: saved a moment ago, but the reply was lost. Then it's done.
+        const done = savedCopy();
+        if (done) { clearRecording(); sfx('save'); closeSheet(true); go('game', { gameId: done, top: true }); return; }
+        // Otherwise someone saved this game number first: move this one to the next free number.
         const { season, no } = rec().game, next = lastNo(season) + 1;
         change(r => { r.game.no = Math.max(next, no + 1); });
         setErr(`${season} Game ${no} is already saved, so this one is now Game ${rec().game.no}. Tap Save game again.`);

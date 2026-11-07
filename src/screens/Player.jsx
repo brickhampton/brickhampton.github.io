@@ -15,7 +15,7 @@ import { sfx } from '../lib/sfx.js';
 import { openSheet, closeSheet } from '../components/Sheet.jsx';
 import { X, Pencil } from '../components/icons.jsx';
 import { isAdmin } from '../lib/admin.js';
-import { AvatarSheet } from './AvatarSheet.jsx';
+import { AvatarSheet } from '../lazy.jsx';
 
 // Subs who have played, latest game first, with how many games they've played.
 function subsPlayed() {

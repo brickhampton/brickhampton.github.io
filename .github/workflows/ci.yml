@@ -1,4 +1,4 @@
-# Checks that every pull request still builds.
+# Checks that every pull request still passes the stats tests and builds.
 name: Build
 
 on:
@@ -14,9 +14,11 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - run: npm test
       - run: npm run build
 
   # Checks the live database the site reads: the history is all there, and the public key can only read.
+  # Players can go down when Admin merges duplicate subs, so only the seven starters are required.
   database:
     runs-on: ubuntu-latest
     env:
@@ -27,7 +29,7 @@ jobs:
         run: |
           count() { curl -fsS -o /dev/null -D - "$API/$1?select=*" -H "apikey: $KEY" -H "Prefer: count=exact" -H "Range: 0-0" | tr -d '\r' | sed -n 's/^content-range: .*\///Ip'; }
           for t in seasons players games lines; do echo "$t: $(count $t)"; done
-          test "$(count games)" -ge 81 && test "$(count lines)" -ge 449 && test "$(count players)" -ge 21
+          test "$(count games)" -ge 81 && test "$(count lines)" -ge 449 && test "$(count players)" -ge 7
       - name: The public key can't write
         run: |
           code=$(curl -s -o /dev/null -w '%{http_code}' -X POST "$API/seasons" -H "apikey: $KEY" -H "Content-Type: application/json" -d '{"code":"X99","sort":999}')

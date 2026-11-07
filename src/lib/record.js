@@ -96,6 +96,21 @@ export function countsFor(pid, events) {
 }
 export const livePts = () => R.events.reduce((t, e) => t + (A[e.a].pts || 0), 0);
 
+// The recording as it would appear once saved: one line per player who played, in playing order.
+const LINE_KEYS = ['m2', 'a2', 'm3', 'a3', 'ftm', 'fta', 'oreb', 'dreb', 'ast', 'stl', 'blk', 'to'];
+export const recordedLines = () => R.playing.map(pid => ({ player_id: pid, ...countsFor(pid, R.events) }));
+
+// Whether this exact recording is already in the database. That happens when Save worked on the server
+// but the reply never reached this device (the connection dropped), so tapping Save again must not save it twice.
+export function savedCopy() {
+  const { season, no, opp } = R.game;
+  const g = S.games.find(x => x.season === season && x.no === no);
+  if (!g || g.opp !== opp) return null;
+  const lines = recordedLines(), ids = Object.keys(g.rows);
+  if (ids.length !== lines.length) return null;
+  return lines.every(l => g.rows[l.player_id] && LINE_KEYS.every(k => (g.rows[l.player_id][k] ?? 0) === l[k])) ? g.id : null;
+}
+
 // Saves the game to the database. On success the recording is cleared and the new game's id returned.
 export async function saveGame() {
   const nums = R.nums || subNumbers();
@@ -104,7 +119,7 @@ export async function saveGame() {
     p_game: {
       ...R.game, result: R.result,
       new_players: R.newSubs.filter(p => used.has(p.id)).map(p => ({ id: p.id, name: p.name, num: p.num, look: lookOf(p) })),
-      lines: R.playing.map(pid => ({ player_id: pid, num: nums[pid] ?? null, ...countsFor(pid, R.events) })),
+      lines: recordedLines().map(l => ({ ...l, num: nums[l.player_id] ?? null })),
     },
   });
   clearRecording();
