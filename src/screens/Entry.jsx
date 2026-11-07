@@ -21,6 +21,7 @@ const NS = 'http://www.w3.org/2000/svg';
 const RX = 542, RY = 64, FLOOR = 168, SC = .78;
 const SPOT = { '2M': 330, '2X': 330, '3M': 120, '3X': 120, 'FM': 383, 'FX': 383, 'OR': 470, 'DR': 470, 'AS': 150, 'ST': 300, 'BK': 470, 'TO': 300 };
 const HAND_Y = FLOOR - 104 * SC + 22; // just above the head
+const THREE_Y = HAND_Y - 9; // a 3 goes up from higher, at the forehead
 const D = 140; // let the player get to their spot before the ball moves
 // A free throw starts with two quick dribbles behind the line; the ball goes up once they're done.
 const BOUNCE = 190, FT_D = 60 + 2 * BOUNCE + 60;
@@ -170,12 +171,12 @@ function makeStage() {
     });
     setTimeout(() => g.remove(), 600);
   }
-  function shot(x0, h, d, made, delay = D) {
+  function shot(x0, h, d, made, delay = D, y0 = HAND_Y) {
     // A late shot (after the free-throw dribbles) only puts its ball up once the player rises to shoot.
-    if (delay > D) { setTimeout(() => shot(x0, h, d, made, 0), delay); return; }
+    if (delay > D) { setTimeout(() => shot(x0, h, d, made, 0, y0), delay); return; }
     const b = ball();
     const tx = made ? RX : RX - 20, ty = made ? RY - 2 : RY - 4;
-    then(fly(b, arc(x0, HAND_Y, tx, ty, h), d, 'linear', delay), () => {
+    then(fly(b, arc(x0, y0, tx, ty, h), d, 'linear', delay), () => {
       if (made) { ripple(); then(fly(b, [[RX, RY - 2, 300], [RX, 96, 330], [RX - 4, FLOOR - 14, 360, 0]], 300, 'ease-in'), () => b.remove()); }
       else { shake(); then(fly(b, arc(RX - 20, RY - 4, RX - 130, FLOOR, 60, 10, -200, 300).map((p, i, arr) => [...p, i === arr.length - 1 ? 0 : 1]), 440, 'ease-in'), () => b.remove()); }
     });
@@ -222,8 +223,8 @@ function makeStage() {
     switch (k) {
       case '2M': actorMood('celebrate', D); shot(x, h2, d2, true); setTimeout(() => pop('+2', RX, 40), D + d2); break;
       case '2X': actorMood('celebrate', D); shot(x, h2, d2, false); actorMood('slump', D + d2 + 60); break;
-      case '3M': actorMood('celebrate', D); shot(x, 125, 460, true); setTimeout(() => { burst(RX, RY + 6); pop('+3', RX, 36, '#ee6018', 32); }, D + 460); break;
-      case '3X': actorMood('celebrate', D); shot(x, 125, 460, false); actorMood('slump', D + 520); break;
+      case '3M': actorMood('celebrate', D); shot(x, 125, 460, true, D, THREE_Y); setTimeout(() => { burst(RX, RY + 6); pop('+3', RX, 36, '#ee6018', 32); }, D + 460); break;
+      case '3X': actorMood('celebrate', D); shot(x, 125, 460, false, D, THREE_Y); actorMood('slump', D + 520); break;
       case 'FM': shot(x, 50, 320, true, FT_D); actorMood('celebrate', FT_D + 320); setTimeout(() => pop('+1', RX, 40), FT_D + 320); break;
       case 'FX': shot(x, 50, 320, false, FT_D); actorMood('slump', FT_D + 360); break;
       case 'OR': { // the player crashes in, jumps toward the basket to grab the miss overhead, then looks left and right
