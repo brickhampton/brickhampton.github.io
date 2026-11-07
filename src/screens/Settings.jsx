@@ -206,10 +206,7 @@ function Admin() {
       <span className="admin-on"><Shield />Admin mode on</span><button className="btn ghost sm" id="lock" onClick={lock}><Lock size={16} />Lock</button></div>
     <p className="hint top">Locks after 15 minutes idle. To edit a game, tap <b>Edit game</b> on it, or the pencil in Results</p>
     {err && <p className="ferr" id="a-err">{err}</p>}
-    <SoundCard />
-    <RebCard />
-    <ShotCard />
-    <SubPagesCard onErr={setErr} />
+    <div className="card setgroup"><SoundCard /><RebCard /><ShotCard /><SubPagesCard onErr={setErr} /></div>
     <div className="adm-grid">
       <div className="sec"><h3>Seasons</h3><p className="hint">New games go here, and Games and Stats open on it</p>
         <div className="card alist" id="a-seasons">{seasons}
@@ -277,7 +274,7 @@ function RebCard() {
   const [on, setOn] = useState(rebSplit());
   const pick = v => { if (v === on) return; setRebSplit(v); setOn(v); sfx('select'); };
   return <div className="card admin-lock sound-card"><div className="lock-ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-    <path d="M12 19V5M5 12l7-7 7 7" /></svg></div>
+    <rect x="3" y="2" width="18" height="12" rx="2" /><path d="M9 14V9h6v5M7 14h10M8.5 14l1.2 7M15.5 14l-1.2 7M9.2 17.5h5.6" /></svg></div>
     <div><h3>Rebounds in box scores</h3><p className="hint">Show total REB or OREB/DREB split, in games that recorded them, on this device</p></div>
     <div className={`tog${on ? ' r' : ''}`} id="reb-split" role="group" aria-label="Rebounds as total or split">
       <button data-s="total" aria-pressed={!on} onClick={() => pick(false)}>Total</button>
@@ -335,12 +332,10 @@ export function Settings() {
   useStore();
   if (!isAdmin()) return <>
     <div className="ghead"><div><h1 className="page">Settings</h1></div></div>
-    <SoundCard />
-    <RebCard />
-    <ShotCard />
+    <div className="card setgroup"><SoundCard /><RebCard /><ShotCard /></div>
     <div className="card admin-lock"><div className="lock-ic"><Lock /></div>
       <div><h3>Admin mode</h3><p className="hint">Record games, edit past games, players and opponents</p></div>
-      <button className="btn primary" id="unlock" onClick={() => openSheet(<PinSheet />)}>Unlock with PIN</button></div>
+      <button className="btn primary pill" id="unlock" onClick={() => openSheet(<PinSheet />)}>Unlock with PIN</button></div>
   </>;
   return <Admin />;
 }

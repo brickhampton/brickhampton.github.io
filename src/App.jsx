@@ -14,6 +14,7 @@ import { Settings, Setup, Entry, preloadRest } from './lazy.jsx';
 import { SheetRoot } from './components/Sheet.jsx';
 import { recordGame } from './components/PinSheet.jsx';
 import { isAdmin, lock, touch } from './lib/admin.js';
+import { startEdgeFade } from './lib/edgeFade.js';
 
 const $ = s => document.querySelector(s);
 peekHash();
@@ -97,6 +98,7 @@ export default function App() {
   const s = useStore();
   const scr = s.screen;
 
+  useEffect(() => startEdgeFade(), []);
   useEffect(() => {
     boot().then(() => { if (S.ready) fromHash({ fromHistory: true }); }).finally(preloadRest);
     const pop = () => S.ready && fromHash({ fromHistory: true });
