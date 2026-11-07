@@ -136,6 +136,10 @@ h1.page{font-size:40px;font-weight:500;letter-spacing:-.04em;margin:0;line-heigh
 .badge.L{background:var(--mid);color:var(--bone)}
 .badge.D{background:var(--draw);color:#2a1f00}
 .badge.U{box-shadow:inset 0 0 0 1px var(--stroke);color:var(--granite);font-weight:500}
+/* In the Games list the result pills are soft tints, so the score leads; the game page keeps the solid pill */
+.grow-row .badge.W{background:rgba(79,124,255,.18);color:#a9bfff}
+.grow-row .badge.D{background:rgba(226,178,58,.15);color:#ecc865}
+.grow-row .badge.L{background:rgba(255,255,255,.07);color:var(--stone)}
 .newtag{font-size:12px;font-weight:600;color:var(--canvas);background:var(--orange);border-radius:999px;padding:3px 8px}
 
 /* PER pills and tiers */
@@ -419,8 +423,10 @@ tr.tot td{font-weight:600;border-top:1px solid var(--stroke)}
 .prow.flash{animation:rowflash .4s}
 @keyframes rowflash{0%{background:#4a2410}}
 .right{display:grid;grid-template-rows:auto minmax(0,1fr);gap:12px;min-height:0;min-width:0}
-.stage{position:relative;height:180px;border-radius:14px;background:linear-gradient(180deg,#171412 0%,#1d1814 70%,#2a1f17 100%);box-shadow:inset 0 0 0 1px var(--lift2);overflow:hidden}
+.stage{position:relative;height:180px;border-radius:14px;background:linear-gradient(180deg,#0e1322 0%,#111829 70%,#16203a 100%);box-shadow:inset 0 0 0 1px var(--lift2);overflow:hidden}
 .stage svg{position:absolute;inset:0;width:100%;height:100%}
+/* "Box score" and "End game": the second word is its own span (hidden on phones), so no flex gap between the words */
+#open-box,#end{gap:0}
 .caption{position:absolute;left:18px;top:14px;display:flex;flex-direction:column;gap:2px;pointer-events:none}
 .caption .cn{font-size:13px;color:var(--granite)}
 .caption .ca{font-size:24px;font-weight:500;letter-spacing:-.03em;display:flex;gap:10px;align-items:baseline}
@@ -436,6 +442,9 @@ tr.tot td{font-weight:600;border-top:1px solid var(--stroke)}
 .key .cnt{position:absolute;right:12px;top:12px;font-family:var(--sans);font-variant-numeric:tabular-nums;font-size:13px;color:var(--granite)}
 .key .dot{width:10px;height:10px;border-radius:50%;flex:none}
 .key.make .dot{background:var(--green)}
+/* Made keys carry a faint green wash and Turnover a faint red one, so they stand apart at a glance while tapping fast */
+.key.make{background:linear-gradient(180deg,rgba(160,202,146,.11),rgba(160,202,146,.04)) var(--lift2)}
+.key.to{background:linear-gradient(180deg,rgba(227,130,111,.11),rgba(227,130,111,.04)) var(--lift2)}
 .key.miss{background:transparent;box-shadow:inset 0 0 0 1.5px var(--stroke)}
 .key.miss .k{color:var(--stone)}
 .key.miss .dot{box-shadow:inset 0 0 0 2px var(--granite)}
@@ -1438,3 +1447,15 @@ a.vbtn:active,button.vbtn:active{transform:scale(.94)}
 .crash h1{font-size:22px;font-weight:600;letter-spacing:-.02em;margin:0}
 .crash p{color:var(--stone);max-width:340px;line-height:1.45;margin:0}
 .crash .btn{justify-self:center}
+/* iPhone Games list: "Game 5 · 25 October" is one line under the opponent instead of a narrow three-line date column */
+@media (max-width:700px){
+  .grow-row{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"o pts" "d pts" "tp res";column-gap:12px;row-gap:2px}
+  .grow-row .d{display:flex;align-items:baseline;min-width:0;font-size:13px;color:var(--granite);white-space:nowrap}
+  .grow-row .d > span{order:-1;font-size:13px}
+  .grow-row .d b,.grow-row .d b .dm+.dm{font-size:13px;font-weight:400;color:var(--granite);white-space:nowrap}
+  .grow-row .d b .dm{display:inline}
+  .grow-row .d b::before{content:"\00a0·\00a0"}
+  .grow-row .tp{margin-top:8px}
+  .grow-row .res{margin-top:8px}
+  .grow-row .pts{align-self:start}
+}

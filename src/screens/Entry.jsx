@@ -52,8 +52,9 @@ const THREE = (() => {
 // Two rows of fans in muted greys and navies with a little white, dimmed toward the background so they stay part of it.
 // Shirts are scattered by a hash so no pattern repeats along the row. Each fan has their own reaction to the smaller
 // plays (a steal, block or assist): a hop, a shake, a clap or a cheer, and a few stay seated.
+const BG = '111829'; // the stage's navy backdrop (styles.css .stage), which the fans fade toward
 const CROWD = (() => {
-  const dim = c => '#' + [1, 3, 5].map(i => Math.round(parseInt(c.slice(i, i + 2), 16) * .3 + parseInt('1d1a18'.slice(i - 1, i + 1), 16) * .7).toString(16).padStart(2, '0')).join('');
+  const dim = c => '#' + [1, 3, 5].map(i => Math.round(parseInt(c.slice(i, i + 2), 16) * .3 + parseInt(BG.slice(i - 1, i + 1), 16) * .7).toString(16).padStart(2, '0')).join('');
   const SK = ['#c9a27e', '#a87a55', '#e0b994', '#7a5238'].map(dim), HR = ['#1c1714', '#3a2a1e', '#0f0c0c'].map(dim);
   const TOP = ['#6e7076', '#8a8380', '#eeeeee', '#1f2d5c', '#b8b3b0', '#5a5c63', '#2a3a72', '#9a9da4', '#7b7f88', '#22388f', '#7b7570', '#1f2d5c'].map(dim);
   const RX = ['bob', 'bob', 'shake', 'shake', 'clap', 'clap', 'cheer', 'cheer', '', ''];
@@ -469,7 +470,7 @@ export function Entry() {
                   <rect x={f.x + 3} y={f.y + 15} width="6" height="3" fill={f.skin} className="clap" />
                 </g>))}</g>
               <g shapeRendering="crispEdges">
-                <rect x="-400" y="136" width="1440" height="32" fill="#191513" /><rect x="-400" y="136" width="1440" height="2" fill="#2c2520" />
+                <rect x="-400" y="136" width="1440" height="32" fill="#121a33" /><rect x="-400" y="136" width="1440" height="2" fill="#2a3a6a" />
                 <rect x="-400" y="168" width="1440" height="12" fill="#e2c9a0" /><rect x="-400" y="168" width="1440" height="2" fill="#efdcbb" />
                 {Array.from({ length: 44 }, (_, i) => <rect key={i} x={i * 33 - 400 + (i % 2) * 9} y="174" width="3" height="6" fill="#cfb185" />)}
                 <rect x="400" y="170" width="180" height="10" fill="#2f55d4" opacity=".55" /><rect x="400" y="170" width="2" height="10" fill="#f4ead8" />

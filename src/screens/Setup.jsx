@@ -218,7 +218,6 @@ export function Setup() {
       <div className="startrow">
         <button className="btn primary" id="start" disabled={!n} onClick={startWarning}>{n ? `Start recording with ${n} player${n > 1 ? 's' : ''}` : 'Tick at least one player'}</button>
         <button className="btn ghost" id="setup-cancel" onClick={() => { if (!R.events.length) clearRecording(); go('games'); }}>Cancel</button>
-        <span className="note">Avatars are placeholders.</span>
       </div>
     </div>
   );
