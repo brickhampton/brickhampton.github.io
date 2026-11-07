@@ -197,12 +197,17 @@ td.t-poor{color:var(--neg)}
 .gnav .btn.ghost:not(:disabled):active{background:#25272c}
 .gnav .pager{display:inline-flex;align-items:center;height:40px;border-radius:999px;flex:none}
 .gnav .pager .btn{background:none;box-shadow:none}
-/* Each half lights up in its own shape: rounded on the outside, straight at the divider. On touch screens it only
-   shows while pressed, so it doesn't stay lit after a tap. */
-.gnav .pager{overflow:hidden}
-.gnav .pager .btn{border-radius:0}
-@media (hover:hover){.gnav .pager .btn:not(:disabled):hover{background:rgba(255,255,255,.08)}}
-.gnav .pager .btn:not(:disabled):active{background:rgba(255,255,255,.08);transform:none}
+/* Hover: a smaller pill sits inside the split pill, and the divider hides while either side is lit. On touch screens
+   it only shows while pressed, so it doesn't stay lit after a tap. */
+.gnav .pager{padding:0 3px;box-sizing:border-box}
+.gnav .pager .btn{height:34px;border-radius:999px}
+.gnav .pager i{transition:opacity .15s}
+@media (hover:hover){
+  .gnav .pager .btn:not(:disabled):hover{background:rgba(255,255,255,.09)}
+  .gnav .pager:has(.btn:not(:disabled):hover) i{opacity:0}
+}
+.gnav .pager .btn:not(:disabled):active{background:rgba(255,255,255,.09);transform:none}
+.gnav .pager:has(.btn:not(:disabled):active) i{opacity:0}
 .gnav .pager #g-prev{padding:0 14px 0 12px}
 .gnav .pager #g-next{padding:0 12px 0 14px}
 .gnav .pager i{width:1px;height:18px;background:#35373d;flex:none}
