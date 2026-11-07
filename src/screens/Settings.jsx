@@ -274,7 +274,7 @@ function RebCard() {
   const [on, setOn] = useState(rebSplit());
   const pick = v => { if (v === on) return; setRebSplit(v); setOn(v); sfx('select'); };
   return <div className="card admin-lock sound-card"><div className="lock-ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-    <rect x="3" y="2" width="18" height="12" rx="2" /><path d="M9 14V9h6v5M7 14h10M8.5 14l1.2 7M15.5 14l-1.2 7M9.2 17.5h5.6" /></svg></div>
+    <rect x="2" y="5.6" width="20" height="11" rx="2" /><path d="M9 16.6v-5h6v5" /><ellipse cx="12" cy="18.4" rx="4.25" ry="1.8" /></svg></div>
     <div><h3>Rebounds in box scores</h3><p className="hint">Show total REB or OREB/DREB split, in games that recorded them, on this device</p></div>
     <div className={`tog${on ? ' r' : ''}`} id="reb-split" role="group" aria-label="Rebounds as total or split">
       <button data-s="total" aria-pressed={!on} onClick={() => pick(false)}>Total</button>
