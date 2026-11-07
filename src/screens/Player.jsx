@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { S, set } from '../lib/store.js';
-import { allGames, seasonList, seasonName, statPlayers, isStarter, playerAgg, calc, ratio, pctTxt, perTxt, tier, f1, ORD, P, hasPage, numIn, buildTags, playerBadges } from '../lib/core.js';
+import { allGames, seasonList, seasonName, statPlayers, isStarter, playerAgg, calc, ratio, pctTxt, perTxt, tier, aggTier, enoughShots, f1, ORD, P, hasPage, numIn, buildTags, playerBadges } from '../lib/core.js';
 import { shotDetail } from '../lib/prefs.js';
 import { go } from '../lib/nav.js';
 import { drawRadar, drawTrend, P_STATS, P_MORE, SLOT_COL, SC_B, reduced } from '../lib/charts.js';
@@ -233,8 +233,8 @@ export function Player() {
   const peers = [...new Set([...statPlayers(), id])].map(x => playerAgg(inScope, x)).filter(Boolean);
   const val = (agg, k, tot) => k === 'tsm' ? (tot ? Math.round(agg.s.pts / 2) : agg.pg('pts') / 2) : k === 'tsa' && tot ? Math.round(agg.s.tsa) : k === 'gp' ? agg.gp : k === 'ts' ? agg.s.ts : k === 'fg' ? ratio(agg.s.fgm, agg.s.fga) : k === 'p3' ? ratio(agg.s.m3, agg.s.a3) : k === 'ft' ? ratio(agg.s.ftm, agg.s.fta) : tot ? agg.s[k] : agg.pg(k);
   const rankOf = (k, lowerBetter, tot) => {
-    if (!starter || peers.length < 2) return 0; const v = val(a, k, tot); if (v === null) return 0;
-    return 1 + peers.filter(x => x.id !== id && val(x, k, tot) !== null && (lowerBetter ? val(x, k, tot) < v : val(x, k, tot) > v)).length;
+    if (!starter || peers.length < 2 || !enoughShots(a, k)) return 0; const v = val(a, k, tot); if (v === null) return 0;
+    return 1 + peers.filter(x => x.id !== id && enoughShots(x, k) && val(x, k, tot) !== null && (lowerBetter ? val(x, k, tot) < v : val(x, k, tot) > v)).length;
   };
 
   // The player on the stage celebrates when their latest game's PER beat their own average for that season.
@@ -268,7 +268,7 @@ export function Player() {
     const v = val(a, k, tot), r = k === 'gp' || noRank ? 0 : rankOf(k, low, tot), sh = SHOT[k];
     // All time Totals show shooting as just the %, like Averages without the attempts line. Detailed shows just the % too.
     const dash = sh && tot && scope !== 'ALL' && !detail;
-    const band = sh ? tier(k === 'p3' ? 'm3' : k, v, dash ? att(k) : undefined) : '';
+    const band = sh ? aggTier(k, v, a) : '';
     const tcls = k === 'per' ? (v >= 0 ? ' pos' : ' neg') : sh ? ' ' + band : '';
     const txt = dash ? `${made(k)}-${att(k)}` : v === null ? '–' : fmt(v, tot);
     const sub = !sh || detail || (tot && !dash) ? null : dash ? <span className={`ps num ${band}`}>{pctTxt(v)}</span> : <span className="ps num att">{f1(a.pg(sh[1]))} A</span>;

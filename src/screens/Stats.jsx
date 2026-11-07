@@ -1,5 +1,5 @@
 import { S, set } from '../lib/store.js';
-import { allGames, seasonList, seasonName, statPlayers, playerAgg, sumRows, ratio, pctTxt, perTxt, tier, f1, calc, P, numIn } from '../lib/core.js';
+import { allGames, seasonList, seasonName, statPlayers, playerAgg, sumRows, ratio, pctTxt, perTxt, tier, aggTier, enoughShots, f1, calc, P, numIn } from '../lib/core.js';
 import { go, openPlayer } from '../lib/nav.js';
 import { shotDetail } from '../lib/prefs.js';
 import { drawTrend, drawScatter, drawSeasonBars, STATS, TB_STATS, SLOT_COL, SC_B } from '../lib/charts.js';
@@ -48,12 +48,12 @@ function Rankings({ aggs, team, tot, pctOnly }) {
     }
     if (SHOTS[k]) {
       const pct = aggVal(a, k);
-      if (detail) return <td key={k} className={tier(k, pct) || undefined}>{pctTxt(pct)}</td>;
+      if (detail) return <td key={k} className={aggTier(k, pct, a) || undefined}>{pctTxt(pct)}</td>;
       // Averages show attempts a game under the %, e.g. 3.6 A.
-      if (!tot) return <td key={k} className={tier(k, pct) || undefined}>{pctTxt(pct)}<span className="sp att">{f1(a.pg(SHOTS[k][1]))} A</span></td>;
-      if (!dash) return <td key={k} className={tier(k, pct) || undefined}>{pctTxt(pct)}</td>;
+      if (!tot) return <td key={k} className={aggTier(k, pct, a) || undefined}>{pctTxt(pct)}<span className="sp att">{f1(a.pg(SHOTS[k][1]))} A</span></td>;
+      if (!dash) return <td key={k} className={aggTier(k, pct, a) || undefined}>{pctTxt(pct)}</td>;
       const at = shot(a, k, 1);
-      return <td key={k} className={tier(k, pct, at) || undefined}>{shot(a, k, 0)}-{at}<span className="sp">{pctTxt(pct)}</span></td>;
+      return <td key={k} className={aggTier(k, pct, a) || undefined}>{shot(a, k, 0)}-{at}<span className="sp">{pctTxt(pct)}</span></td>;
     }
     const all = aggs.map(x => val(x, k)), top = !isTeam && (k === 'to' ? v === Math.min(...all) : v === Math.max(...all));
     return <td key={k}><span className={`n${top && aggs.length > 1 ? ' hi' : ''}`}>{tot ? v : f1(v)}</span></td>;
@@ -134,10 +134,12 @@ export function Stats() {
   const team = { id: 'team', gp: inSeason.length, s: teamS, pg: k => teamS[k] / inSeason.length };
   const minGP = Math.min(3, Math.max(...aggs.map(a => a.gp))), qual = aggs.filter(a => a.gp >= minGP);
   const pickable = statPlayers();
+  // The trend chart starts with the season's top 3 by PER, so a phone isn't a tangle of 7 lines. The chips add more.
+  if (!Array.isArray(S.trend)) S.trend = qual.slice().sort((x, y) => y.pg('per') - x.pg('per')).slice(0, 3).map(x => x.id);
   const trend = S.trend.filter(id => pickable.includes(id));
   if (!S.h2h.every(id => pickable.includes(id))) S.h2h = pickable.slice(0, 2);
   const leadTile = (k, l, fmt) => {
-    const b = qual.reduce((x, y) => aggVal(y, k) > aggVal(x, k) ? y : x);
+    const pool = qual.filter(x => enoughShots(x, k)), b = (pool.length ? pool : qual).reduce((x, y) => aggVal(y, k) > aggVal(x, k) ? y : x);
     return <div className="ltile" key={k}><div className="top"><Avatar id={b.id} /><span className="nm">{P(b.id).name}</span></div>
       <b className={`num${k === 'per' ? (aggVal(b, k) >= 0 ? ' pos' : ' neg') : ''}`}>{fmt(aggVal(b, k))}</b><span className="l">{l}</span></div>;
   };

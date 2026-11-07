@@ -47,7 +47,6 @@ function fit() {
   const codes = S.seasons;
   if (!S.gSeason || (S.gSeason !== 'ALL' && !codes.includes(S.gSeason))) S.gSeason = S.current;
   if (!S.sSeason || (S.sSeason !== 'ALL' && !codes.includes(S.sSeason))) S.sSeason = S.current;
-  if (!Array.isArray(S.trend)) S.trend = S.roster.map(p => p.id);
   if (!Array.isArray(S.h2h)) S.h2h = S.roster.slice(0, 2).map(p => p.id);
 }
 

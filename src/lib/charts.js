@@ -132,14 +132,17 @@ export function drawTrend(wrap, games, { k, ids, season, single: one = false }) 
   const all = series.flatMap(s => s.vals).filter(real);
   const W = Math.max(320, Math.round(wrap.clientWidth) || 800), narrow = W < 560, H = narrow ? 240 : 280, ml = narrow ? 24 : 36, mr = one ? 14 : narrow ? 52 : 70, mt = 14, mb = 30;
   const lo = Math.min(0, ...all); let hi = isPct ? 1 : niceMax(Math.max(...all, 1));
-  const loN = lo < 0 ? -niceMax(-lo) : 0;
   const step = (W - ml - mr) / Math.max(1, xs.length - 1);
   const x = i => ml + i * step;
-  const ticks = []; const tStep = Math.max(isPct ? 0 : .5, niceMax((hi - loN) / 4) / (niceMax((hi - loN) / 4) > (hi - loN) / 2.5 ? 2 : 1));
+  // Gridlines on round numbers (0, 20, 40). A small dip below zero just gets a little room under 0,
+  // with no odd gridline like -0.3.
+  const span = hi - Math.min(0, lo) || 1, ticks = [];
+  const tStep = Math.max(isPct ? 0 : .5, niceMax(span / 4) / (niceMax(span / 4) > span / 2.5 ? 2 : 1));
+  const loN = lo < 0 ? lo - span * .04 : 0;
   // Top the scale at the first gridline above the highest value, so there is no empty band.
   if (!isPct) hi = Math.max(tStep, Math.ceil(Math.max(...all, 0) / tStep - 1e-9) * tStep);
   const y = v => mt + (H - mt - mb) * (1 - (v - loN) / (hi - loN));
-  for (let v = loN; v <= hi + 1e-9; v += tStep) ticks.push(+v.toFixed(4));
+  for (let v = Math.ceil(loN / tStep - 1e-9) * tStep; v <= hi + 1e-9; v += tStep) ticks.push(+v.toFixed(4));
   const fmt = v => isPct ? Math.round(v * 100) + '%' : k === 'per' ? perTxt(v, season === 'ALL') : Number.isInteger(v) ? v : f1(v);
   let svg = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${STATS[k] || k} trend">`;
   ticks.forEach(t => svg += `<line x1="${ml}" x2="${W - mr}" y1="${y(t)}" y2="${y(t)}" stroke="${t === 0 ? '#4a4c53' : '#26282d'}" stroke-width="1"/><text x="${ml - (narrow ? 5 : 8)}" y="${y(t) + 4}" text-anchor="end" font-size="${narrow ? 10 : 11}" fill="#8b8e96" font-family="Geist Mono, monospace">${isPct ? Math.round(t * 100) + '%' : +t.toFixed(1)}</text>`);
@@ -202,7 +205,7 @@ export function drawSeasonBars(wrap, games, stat, season) {
   barChart(wrap, data, { label: `Team ${name.toLowerCase()} per game by season`, fmt, fill: true });
 }
 
-const RES_COL = { W: '#4f7cff', L: '#6b6663', D: '#e2b23a', U: '#4f7cff' };
+const RES_COL = { W: '#4f7cff', L: '#696b72', D: '#e2b23a', U: '#4f7cff' };
 function drawGameBars(gs, wrap, k = 'pts', pct = false, name = 'Points') {
   const fmt = v => pct ? Math.round(v * 100) + '%' : Number.isInteger(v) ? v : f1(v);
   const data = gs.map(g => {
@@ -237,7 +240,7 @@ function barChart(wrap, data, { label, avg, legend = '', fmt = f1, fill = false 
   svg += `</defs>`;
   for (let v = tick; v <= hi + 1e-9; v += tick) {
     svg += `<line x1="${ml}" x2="${W - mr}" y1="${y(v)}" y2="${y(v)}" stroke="#26282d"/>`;
-    if (avg === undefined || Math.abs(y(v) - y(avg)) > 26) svg += `<text x="${ml - 8}" y="${y(v) + 4}" text-anchor="end" font-size="10" fill="#6b6663" font-family="Geist Mono, monospace">${fmt === f1 || !String(fmt(v)).includes('%') ? +v.toFixed(1) : fmt(v)}</text>`;
+    if (avg === undefined || Math.abs(y(v) - y(avg)) > 26) svg += `<text x="${ml - 8}" y="${y(v) + 4}" text-anchor="end" font-size="10" fill="#696b72" font-family="Geist Mono, monospace">${fmt === f1 || !String(fmt(v)).includes('%') ? +v.toFixed(1) : fmt(v)}</text>`;
   }
   svg += `<line x1="${ml}" x2="${W - mr}" y1="${H - mb}" y2="${H - mb}" stroke="#383a40"/>`;
   data.forEach((d, i) => {
@@ -278,7 +281,7 @@ export function drawScatter(wrap, list, openPlayer) {
   svg += `<text x="${W - mr}" y="${H - 4}" text-anchor="end" font-size="11" fill="#8b8e96" font-family="Geist, sans-serif">Shots a game (TSA) →</text>`;
   svg += `<line x1="${X(mx)}" x2="${X(mx)}" y1="${mt}" y2="${H - mb}" stroke="#4a4c53" stroke-dasharray="4 4"/><line x1="${ml}" x2="${W - mr}" y1="${Y(my)}" y2="${Y(my)}" stroke="#4a4c53" stroke-dasharray="4 4"/>`;
   const qbox = [];
-  const q = (t, x, y, a) => { const w = t.length * (narrow ? 6.2 : 6.8); qbox.push({ x: a === 'end' ? x - w / 2 : x + w / 2, y: y - 3, w }); return `<text x="${x}" y="${y}" text-anchor="${a}" font-size="${narrow ? 10 : 11}" fill="#6b6663" font-family="Geist Mono, monospace" letter-spacing=".04em">${t}</text>`; };
+  const q = (t, x, y, a) => { const w = t.length * (narrow ? 6.2 : 6.8); qbox.push({ x: a === 'end' ? x - w / 2 : x + w / 2, y: y - 3, w }); return `<text x="${x}" y="${y}" text-anchor="${a}" font-size="${narrow ? 10 : 11}" fill="#696b72" font-family="Geist Mono, monospace" letter-spacing=".04em">${t}</text>`; };
   // Quadrant names sit above the plot (top pair) and in the bottom corners, clear of the avatars.
   svg += q(narrow ? 'HIGH VOL, EFFICIENT' : 'HIGH VOLUME, EFFICIENT', W - mr, 14, 'end') + q(narrow ? 'LOW VOL, EFFICIENT' : 'LOW VOLUME, EFFICIENT', ml, 14, 'start') + q(narrow ? 'HIGH VOL, COLD' : 'HIGH VOLUME, COLD', W - mr - 6, H - mb - 8, 'end') + q(narrow ? 'LOW VOL, COLD' : 'LOW VOLUME, COLD', ml + 6, H - mb - 8, 'start');
   // Labels go under each avatar, or above it when two labels would collide.
@@ -322,8 +325,8 @@ export function drawRadar(wrap, a, peers, cmp) {
   const mine = AX.map(([k]) => v(a, k) / max[k]), theirs = AX.map(([k]) => other[k] / max[k]);
   const fmt = (k, x) => k === 'ts' ? Math.round(x * 100) + '%' : f1(x);
   let svg = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Radar of ${AX.map(([, l]) => l).join(', ')}"><defs><radialGradient id="rfill" cx="50%" cy="50%" r="60%"><stop offset="0" stop-color="#4f7cff" stop-opacity=".55"/><stop offset="1" stop-color="#4f7cff" stop-opacity=".18"/></radialGradient></defs>`;
-  [.25, .5, .75, 1].forEach(f => svg += `<polygon points="${poly(AX.map(() => f))}" fill="${f === 1 ? '#191614' : 'none'}" stroke="#2f2b29" stroke-width="1"/>`);
-  AX.forEach((_, i) => { const [x, y] = pt(i, 1); svg += `<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="#2f2b29"/>`; });
+  [.25, .5, .75, 1].forEach(f => svg += `<polygon points="${poly(AX.map(() => f))}" fill="${f === 1 ? '#18191c' : 'none'}" stroke="#2e3035" stroke-width="1"/>`);
+  AX.forEach((_, i) => { const [x, y] = pt(i, 1); svg += `<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="#2e3035"/>`; });
   svg += `<polygon points="${poly(theirs)}" fill="none" stroke="#eeeeee" stroke-width="1.4" stroke-dasharray="4 4" opacity=".55"/>`;
   svg += `<g class="rshape"><polygon points="${poly(mine)}" fill="url(#rfill)" stroke="#4f7cff" stroke-width="2.2" stroke-linejoin="round"/>
     ${mine.map((f, i) => { const [x, y] = pt(i, Math.max(.04, Math.min(1, f))); return `<circle cx="${x}" cy="${y}" r="4" fill="#4f7cff" stroke="#1a1b1f" stroke-width="2"/>`; }).join('')}</g>`;
