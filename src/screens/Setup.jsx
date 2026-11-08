@@ -3,7 +3,7 @@ import { flushSync } from 'react-dom';
 import { S } from '../lib/store.js';
 import { seasonList, seasonName, lastNo, isStarter, P } from '../lib/core.js';
 import { rec, change, setupPlayers, syncPlaying, newSub, addSubs, subNumbers, todayIso, clearRecording } from '../lib/record.js';
-import { adminCall } from '../lib/admin.js';
+import { adminCall, lock } from '../lib/admin.js';
 import { go } from '../lib/nav.js';
 import { Avatar } from '../components/Avatar.jsx';
 import { ChevDown, ChevUp, Pencil, X } from '../components/icons.jsx';
@@ -217,7 +217,7 @@ export function Setup() {
       </div>
       <div className="startrow">
         <button className="btn primary" id="start" disabled={!n || !opps.includes(g.opp)} onClick={startWarning}>{!opps.includes(g.opp) ? (opps.length ? 'Pick the opponent' : 'Add an opponent first') : n ? `Start recording with ${n} player${n > 1 ? 's' : ''}` : 'Tick at least one player'}</button>
-        <button className="btn ghost" id="setup-cancel" onClick={() => { if (!R.events.length) clearRecording(); go('games'); }}>Cancel</button>
+        <button className="btn ghost" id="setup-cancel" onClick={() => { if (!R.events.length) clearRecording(); lock(); go('games'); }}>Cancel</button>
       </div>
     </div>
   );
