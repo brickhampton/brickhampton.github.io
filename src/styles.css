@@ -462,9 +462,9 @@ tr.tot td{font-weight:600;border-top:1px solid var(--stroke)}
 .key .cnt{position:absolute;right:12px;top:12px;font-family:var(--sans);font-variant-numeric:tabular-nums;font-size:13px;color:var(--granite)}
 .key .dot{width:10px;height:10px;border-radius:50%;flex:none}
 .key.make .dot{background:var(--green)}
-/* Made keys carry a faint green wash and Turnover a faint red one, so they stand apart at a glance while tapping fast */
-.key.make{background:linear-gradient(180deg,rgba(160,202,146,.11),rgba(160,202,146,.04)) var(--lift2)}
-.key.to{background:linear-gradient(180deg,rgba(227,130,111,.11),rgba(227,130,111,.04)) var(--lift2)}
+/* Made keys carry a flat faint green tint and Turnover a flat faint red one, so they stand apart at a glance while tapping fast */
+.key.make{background:linear-gradient(rgba(160,202,146,.08),rgba(160,202,146,.08)) var(--lift2)}
+.key.to{background:linear-gradient(rgba(227,130,111,.08),rgba(227,130,111,.08)) var(--lift2)}
 .key.miss{background:transparent;box-shadow:inset 0 0 0 1.5px var(--stroke)}
 .key.miss .k{color:var(--stone)}
 .key.miss .dot{box-shadow:inset 0 0 0 2px var(--granite)}
