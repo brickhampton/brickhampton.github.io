@@ -10,6 +10,7 @@ import { BALL, BALL_C, pxShadow } from '../lib/avatar.js';
 import { BoxScore } from '../components/BoxScore.jsx';
 import { openSheet, closeSheet } from '../components/Sheet.jsx';
 import { PinSheet } from '../components/PinSheet.jsx';
+import { lock } from '../lib/admin.js';
 
 const $ = s => document.querySelector(s);
 const UndoIcon = ({ size = 18 }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M9 14 4 9l5-5" /><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11" /></svg>;
@@ -324,7 +325,8 @@ function EndGame() {
   const pick = r => { setResult(r); change(x => { x.result = r; }); };
   const save = async () => {
     setBusy(true); setErr('');
-    try { const id = await saveGame(); sfx('save'); closeSheet(true); go('game', { gameId: id, top: true }); }
+    // Admin locks only once the game is safely saved, so a failed save can be tried again straight away.
+    try { const id = await saveGame(); lock(); sfx('save'); closeSheet(true); go('game', { gameId: id, top: true }); }
     catch (e) {
       setBusy(false);
       if (e.locked) { openSheet(<PinSheet why="Admin mode locked itself. Enter the PIN to save this game." onDone={() => openSheet(<EndGame />)} />); return; }
@@ -332,7 +334,7 @@ function EndGame() {
         if (!await reload().then(() => true, () => false)) { setErr(`Couldn't check whether this game is already saved. Everything you recorded is kept on this device, so try again.`); return; }
         // It may be this very game: saved a moment ago, but the reply was lost. Then it's done.
         const done = savedCopy();
-        if (done) { clearRecording(); sfx('save'); closeSheet(true); go('game', { gameId: done, top: true }); return; }
+        if (done) { clearRecording(); lock(); sfx('save'); closeSheet(true); go('game', { gameId: done, top: true }); return; }
         // Otherwise someone saved this game number first: move this one to the next free number.
         const { season, no } = rec().game, next = lastNo(season) + 1;
         change(r => { r.game.no = Math.max(next, no + 1); });
@@ -347,7 +349,7 @@ function EndGame() {
     return <>
       <h2>Discard this game?</h2><p className="sheet-sub">{n ? `${n === 1 ? 'The 1 stat' : `All ${n} stats`} recorded against ${R.game.opp} will be deleted.` : `Nothing has been recorded against ${R.game.opp} yet.`} This can't be undone.</p>
       <div className="actions"><button className="btn ghost" id="back" onClick={() => setStep('end')}>Go back</button>
-        <button className="btn danger" id="confirm-discard" onClick={() => { clearRecording(); closeSheet(); go('games'); }}><Trash lid={false} />Discard game</button></div>
+        <button className="btn danger" id="confirm-discard" onClick={() => { clearRecording(); lock(); closeSheet(); go('games'); }}><Trash lid={false} />Discard game</button></div>
     </>;
   }
   return <>
