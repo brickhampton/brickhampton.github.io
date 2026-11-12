@@ -146,7 +146,7 @@ const WIDE = [0, 1, 2, 4];
 const K = '#16121a', T = '#f2f2f2', J = '#2f55d4', J2 = mix(J, .2);
 
 // The sprite as a grid of [colour, layer] (layer: b body, h head, e eyes), plus where the head sits.
-function sprite(c, num, pose, legs) {
+function sprite(c, num, pose) {
   const g = Array.from({ length: H + TOPM }, () => Array(W).fill(null));
   // The ball has its own grid, so the hand drawn over it doesn't cut holes in it when it bounces away.
   const go = Array.from({ length: H + TOPM }, () => Array(W).fill(null));
@@ -160,27 +160,19 @@ function sprite(c, num, pose, legs) {
   const S = c.skin, S2 = mix(S, .12), SB = mix(S, .06), HR = c.hair;
   // Broad and Heavy add one and two pixels to the body's width, mostly at the back; Obese adds four, two each side.
   const tall = TALL[c.height], wide = WIDE[c.weight], aw = c.muscle > 1 ? 1 : 0;
-  // Leg frames: 'runA'/'runB' lift one knee then the other, 'tuck' pulls both feet up in the air, and 'crouch' bends the
-  // knees (the body drops a pixel, the feet spread).
-  const cr = legs === 'crouch' ? 1 : 0;
-  const hx = 8, hy = 3 + (3 - tall) + cr, ty = hy + 11, bx = hx - Math.ceil(wide / 2), bw = 10 + wide;
+  const hx = 8, hy = 3 + (3 - tall), ty = hy + 11, bx = hx - Math.ceil(wide / 2), bw = 10 + wide;
   const torsoH = 8 + Math.floor(tall / 2), shortsY = ty + torsoH, legY = shortsY + 4, legSkin = 1 + Math.ceil(tall / 2);
   // ---- legs, socks, shoes
   // High socks stop a pixel lower on Shandy, so they don't climb as far up the longer leg.
   const L1 = bx + 1, L2 = bx + bw - 3, sockH = [2, 1 + legSkin - (tall === 5 ? 1 : 0), 1][c.socks];
-  // Each leg: how far its foot is lifted (the leg shortens by as much) and how far the foot shifts sideways.
-  const LEG = { runA: [[2, 1], [0, 0]], runB: [[0, 0], [2, -1]], tuck: [[1, 1], [1, -1]], crouch: [[0, -1], [0, 1]] }[legs] || [[0, 0], [0, 0]];
-  const sy0 = legY + legSkin + 2 - cr, shoe = c.shoe, light = parseInt(shoe.slice(1, 3), 16) > 200, st = c.shoeType;
-  const acc = c.shoeAcc || (light ? '#c9ccd2' : st === 2 ? '#f2f2f2' : mix(shoe, -.3));
+  [L1, L2].forEach(L => { r(L, legY, 2, legSkin + 2, S); r(L, legY + legSkin + 2 - sockH, 2, sockH, c.sock || T); if (c.stripe) r(L, legY + legSkin + 2 - sockH, 2, 1, c.stripe); });
   // Shoes in two colours. Classic: a flash on the side. High-top: up over the ankle with a coloured collar. Runner: the classic shape on a coloured sole.
-  [L1, L2].forEach((L, i) => {
-    const [lift, dx] = LEG[i], len = Math.max(1, legSkin + 2 - cr - lift), sk = Math.min(sockH, len), X = L + dx, sy = sy0 - lift;
-    r(L, legY, 2, len, S); r(X, legY + len - sk, 2, sk, c.sock || T); if (c.stripe) r(X, legY + len - sk, 2, 1, c.stripe);
-    // Classic and runner share a shape; the runner's second colour is its whole sole. The left foot points left, the right foot right.
-    if (i === 0) { r(X - 1, sy, 4, 1, shoe); r(X - 2, sy + 1, 5, 1, st === 2 ? acc : shoe); } else { r(X, sy, 4, 1, shoe); r(X, sy + 1, 5, 1, st === 2 ? acc : shoe); }
-    if (st === 1) { r(X, sy - 1, 2, 1, acc); r(X, sy, 2, 1, shoe); }
-    else if (st === 0) r(i === 0 ? X - 1 : X + 2, sy + 1, 2, 1, acc);
-  });
+  const sy = legY + legSkin + 2, shoe = c.shoe, light = parseInt(shoe.slice(1, 3), 16) > 200, st = c.shoeType;
+  const acc = c.shoeAcc || (light ? '#c9ccd2' : st === 2 ? '#f2f2f2' : mix(shoe, -.3));
+  // Classic and runner share a shape; the runner's second colour is its whole sole.
+  r(L1 - 1, sy, 4, 1, shoe); r(L1 - 2, sy + 1, 5, 1, st === 2 ? acc : shoe); r(L2, sy, 4, 1, shoe); r(L2, sy + 1, 5, 1, st === 2 ? acc : shoe);
+  if (st === 1) { r(L1, sy - 1, 2, 1, acc); r(L2, sy - 1, 2, 1, acc); r(L1, sy, 2, 1, shoe); r(L2, sy, 2, 1, shoe); }
+  else if (st === 0) { r(L1 - 1, sy + 1, 2, 1, acc); r(L2 + 2, sy + 1, 2, 1, acc); }
   // ---- shorts
   r(bx, shortsY, bw, 4, J); r(bx + Math.floor(bw / 2) - 1, shortsY + 3, 1, 1, null); r(bx + bw - 1, shortsY, 1, 4, T);
   // ---- back arm: hangs just off the body, thickening from the shoulder to the hand
@@ -320,7 +312,7 @@ function sprite(c, num, pose, legs) {
     r(bx + 2, ty + 4, fx + 1 - bx - 2, 2, SB); r(bx + 2, ty + 5, fx + 1 - bx - 2, 1, S2); r(fx + 1, ty + 3, 2, 4, S);
   } else if (pose === 'shrug') {
     // A shrug: elbows in, forearms out to the sides and palms up, the ball left on the floor by the feet.
-    ball(fx + 6, sy0 - 3, r);
+    ball(fx + 6, sy - 3, r);
     r(fx - 1, ty, 2, 5, S); r(fx, ty + 4, 4 + aw, 2, S); shrugHand((dx, y, w, h, col) => r(fx + dx, y, w, h, col), S);
   } else if (pose === 'pointR') {
     pointArm((dx, y, w, h, col) => r(fx + dx, y, w, h, col), S);
@@ -462,9 +454,9 @@ const cache = new Map();
 // opts.stage draws the whole player at their height, feet on the bottom of a 100 × 104 box: the court, the Home
 // photo, the player page and the builder. opts.pose: 'fist', 'fistL' (the other arm), 'fist2' (both), 'ball', 'trophy', 'shoot', 'catch', 'block', 'block1', 'pass', 'pass2', 'dribbleL', 'spin', 'toast', 'sip' (champagne), 'lowball' (arms down, the ball behind the back), 'pointR'/'pointL' (pointing out either side), 'flick1'/'flick2' (flicking notes off a wad), 'down' (arms down), or palming the ball (the default, as in the reference).
 export function figure(raw, opts = {}) {
-  const c = cleanLook(raw), key = JSON.stringify([c, raw.num, !!opts.stage, opts.pose || '', opts.legs || '']);
+  const c = cleanLook(raw), key = JSON.stringify([c, raw.num, !!opts.stage, opts.pose || '']);
   if (cache.has(key)) return cache.get(key);
-  const { g, go, ge, hy } = sprite(c, raw.num, opts.pose, opts.legs), smile = sprite({ ...c, eyes: 4 }, raw.num, opts.pose, opts.legs).ge;
+  const { g, go, ge, hy } = sprite(c, raw.num, opts.pose), smile = sprite({ ...c, eyes: 4 }, raw.num, opts.pose).ge;
   // The ball, head, eyes and smiling eyes are their own groups (outside the pixel scale), so the bounce, blink and smile
   // animations work in the box's units. The smiling eyes stay hidden until an animation shows them.
   const tf = opts.stage ? `translate(50 0) scale(${(104 / FEET).toFixed(4)}) translate(-13 0)` : `scale(6.25) translate(-5 ${3 - hy})`, at = s => `<g transform="${tf}">${s}</g>`;
