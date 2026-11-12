@@ -1,7 +1,7 @@
 import { useLayoutEffect, useRef, useState } from 'react';
 import { flushSync } from 'react-dom';
 import { S } from '../lib/store.js';
-import { seasonList, seasonName, lastNo, isStarter, P } from '../lib/core.js';
+import { seasonList, seasonName, lastNo, isStarter, P, fmtDate } from '../lib/core.js';
 import { rec, change, setupPlayers, syncPlaying, newSub, addSubs, subNumbers, todayIso, clearRecording } from '../lib/record.js';
 import { adminCall, lock } from '../lib/admin.js';
 import { go } from '../lib/nav.js';
@@ -195,10 +195,11 @@ export function Setup() {
           <button type="button" id="no-down" aria-label="Previous game number" disabled={g.no <= 1} onClick={() => setGame({ no: Math.max(1, g.no - 1) })}><ChevDown width="18" height="18" /></button>
           <output id="f-no" className="num" aria-live="polite">{g.no}</output>
           <button type="button" id="no-up" aria-label="Next game number" disabled={g.no >= 40} onClick={() => setGame({ no: Math.min(40, g.no + 1) })}><ChevUp width="18" height="18" /></button></div></div>
-        <div className="field"><label htmlFor="f-date">Date</label><input id="f-date" type="date" max={todayIso()} value={g.date}
-          onChange={e => { let d = e.target.value; const future = d > todayIso(); if (future) d = todayIso(); setDateErr(future); if (d) setGame({ date: d }); }} />
+        <div className="field f-date"><label htmlFor="f-date">Date</label><div className="datepill"><span id="f-date-txt">{fmtDate(g.date, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).replace(',', '')}</span>
+          <input id="f-date" type="date" max={todayIso()} value={g.date} onClick={e => { try { e.currentTarget.showPicker?.(); } catch (err) { /* the browser opens it itself */ } }}
+            onChange={e => { let d = e.target.value; const future = d > todayIso(); if (future) d = todayIso(); setDateErr(future); if (d) setGame({ date: d }); }} /></div>
           {dateErr && <span className="ferr" id="date-err">Games can't be in the future.</span>}</div>
-        <div className="field"><label htmlFor="f-opp">Opponent</label><div className="oppsel">
+        <div className="field f-opp"><label htmlFor="f-opp">Opponent</label><div className="oppsel">
           <select id="f-opp" value={opps.includes(g.opp) ? g.opp : ''} onChange={e => setGame({ opp: e.target.value })}>
             {opps.length ? <><option value="" disabled>Pick the opponent</option>{opps.map(o => <option key={o} value={o}>{o}</option>)}</> : <option value="">Add an opponent first</option>}</select>
           <button className="iconbtn" id="edit-opps" type="button" aria-label="Edit opponents" onClick={() => openSheet(<Opponents season={g.season} />)}><Pencil width="18" height="18" /></button></div></div>
@@ -216,8 +217,8 @@ export function Setup() {
         <button className="ptile addtile" id="add" onClick={() => openSheet(<SubPicker />, { cls: 'subs' })}><span className="plus">+</span><span>Add subs</span></button>
       </div>
       <div className="startrow">
-        <button className="btn primary" id="start" disabled={!n || !opps.includes(g.opp)} onClick={startWarning}>{!opps.includes(g.opp) ? (opps.length ? 'Pick the opponent' : 'Add an opponent first') : n ? `Start recording with ${n} player${n > 1 ? 's' : ''}` : 'Tick at least one player'}</button>
-        <button className="btn ghost" id="setup-cancel" onClick={() => { if (!R.events.length) clearRecording(); lock(); go('games'); }}>Cancel</button>
+        <button className="btn primary pill" id="start" disabled={!n || !opps.includes(g.opp)} onClick={startWarning}>{!opps.includes(g.opp) ? (opps.length ? 'Pick the opponent' : 'Add an opponent first') : n ? `Start recording with ${n} player${n > 1 ? 's' : ''}` : 'Tick at least one player'}</button>
+        <button className="btn ghost pill" id="setup-cancel" onClick={() => { if (!R.events.length) clearRecording(); lock(); go('games'); }}>Cancel</button>
       </div>
     </div>
   );
