@@ -112,9 +112,10 @@ export default function App() {
     addEventListener('online', again); document.addEventListener('visibilitychange', again);
     // Avatars open the player's page on Games, a game page and Stats.
     const avClick = e => {
-      const av = e.target.closest?.('[data-av]');
+      // A leader or top performance card opens its player too, wherever it is tapped.
+      const av = e.target.closest?.('[data-av], [data-op]');
       if (!av || !['games', 'game', 'stats', 'player'].includes(S.screen) || av.closest('.panel, .p-strip')) return;
-      e.preventDefault(); e.stopPropagation(); openPlayer(av.dataset.av);
+      e.preventDefault(); e.stopPropagation(); openPlayer(av.dataset.av || av.dataset.op);
     };
     addEventListener('click', avClick, true);
     // Any tap keeps Admin mode unlocked; 15 minutes without one locks it.

@@ -284,19 +284,35 @@ export function drawScatter(wrap, list, openPlayer) {
   const q = (t, x, y, a) => { const w = t.length * (narrow ? 6.2 : 6.8); qbox.push({ x: a === 'end' ? x - w / 2 : x + w / 2, y: y - 3, w }); return `<text x="${x}" y="${y}" text-anchor="${a}" font-size="${narrow ? 10 : 11}" fill="#696b72" font-family="Geist Mono, monospace" letter-spacing=".04em">${t}</text>`; };
   // Quadrant names sit above the plot (top pair) and in the bottom corners, clear of the avatars.
   svg += q(narrow ? 'HIGH VOL, EFFICIENT' : 'HIGH VOLUME, EFFICIENT', W - mr, 14, 'end') + q(narrow ? 'LOW VOL, EFFICIENT' : 'LOW VOLUME, EFFICIENT', ml, 14, 'start') + q(narrow ? 'HIGH VOL, COLD' : 'HIGH VOLUME, COLD', W - mr - 6, H - mb - 8, 'end') + q(narrow ? 'LOW VOL, COLD' : 'LOW VOLUME, COLD', ml + 6, H - mb - 8, 'start');
-  // Labels go under each avatar, or above it when two labels would collide.
-  const boxes = pts.map(p => ({ x: X(p.x), y: Y(p.y) })), labels = [...qbox];
-  const hits = (bx, by, bw) => labels.some(o => Math.abs(o.x - bx) < (o.w + bw) / 2 + 4 && Math.abs(o.y - by) < 14) || boxes.some(o => Math.abs(o.x - bx) < bw / 2 + R && Math.abs(o.y - (by - 4)) < R + 6);
+  // Avatars that would sit on top of each other are eased apart by a few pixels, never far from their true spot.
+  const pos = pts.map(p => ({ x: X(p.x), y: Y(p.y), ox: X(p.x), oy: Y(p.y) })), gap = 2 * R + 7, maxMove = R * .8;
+  for (let n = 0; n < 24; n++) for (let i = 0; i < pos.length; i++) for (let j = i + 1; j < pos.length; j++) {
+    const a = pos[i], b = pos[j]; let dx = b.x - a.x, dy = b.y - a.y, d = Math.hypot(dx, dy);
+    if (d >= gap) continue;
+    if (d < .01) { dx = 0; dy = 1; d = 1; }
+    const push = (gap - d) / 2;
+    [[a, -1], [b, 1]].forEach(([o, sgn]) => {
+      o.x += sgn * push * dx / d; o.y += sgn * push * dy / d;
+      const mx2 = o.x - o.ox, my2 = o.y - o.oy, m = Math.hypot(mx2, my2);
+      if (m > maxMove) { o.x = o.ox + mx2 / m * maxMove; o.y = o.oy + my2 / m * maxMove; }
+    });
+  }
+  // Each name takes the free spot nearest its avatar: under, over, either side, then the corners. A spot is free when the
+  // name would touch no other name, no quadrant title and no avatar. With no free spot it takes the least crowded one.
+  const labels = [...qbox], TH = narrow ? 11 : 12;
+  const clash = (bx, by, bw, self) => labels.reduce((n, o) => n + (Math.abs(o.x - bx) < (o.w + bw) / 2 + 4 && Math.abs(o.y - by) < TH + 2 ? 1 : 0), 0)
+    + pos.reduce((n, o, i) => { if (i === self) return n; const nx = Math.max(bx - bw / 2, Math.min(o.x, bx + bw / 2)), ny = Math.max(by - TH + 1, Math.min(o.y, by + 3)); return n + (Math.hypot(nx - o.x, ny - o.y) < R + 5 ? 1 : 0); }, 0);
   let labelSvg = '';
-  pts.forEach(p => {
-    const cx = X(p.x), cy = Y(p.y), name = P(p.id).name, bw = name.length * (narrow ? 6 : 6.6);
-    const spots = [[cx, cy + R + 14, 'middle'], [cx, cy - R - 7, 'middle'], [cx + R + 6 + bw / 2, cy + 4, 'middle'], [cx - R - 6 - bw / 2, cy + 4, 'middle']];
-    const [lx, ly] = spots.find(([x, y]) => !hits(x, y, bw) && y < H - mb + 6 && x - bw / 2 > ml && x + bw / 2 < W - mr) || spots[0];
+  pts.forEach((p, i) => {
+    const cx = pos[i].x, cy = pos[i].y, name = P(p.id).name, bw = name.length * (narrow ? 6 : 6.6), sx = R + 7 + bw / 2, dg = R * .72 + 4;
+    const spots = [[cx, cy + R + 15], [cx, cy - R - 8], [cx + sx, cy + 4], [cx - sx, cy + 4], [cx + dg + bw / 2, cy + dg + 9], [cx - dg - bw / 2, cy + dg + 9], [cx + dg + bw / 2, cy - dg - 2], [cx - dg - bw / 2, cy - dg - 2]]
+      .filter(([x, y]) => y < H - mb + 6 && y > mt - 2 && x - bw / 2 > ml - 4 && x + bw / 2 < W - 2);
+    const [lx, ly] = (spots.length ? spots : [[cx, cy + R + 15]]).map(sp => [sp, clash(sp[0], sp[1], bw, i)]).reduce((a, b) => b[1] < a[1] ? b : a)[0];
     labels.push({ x: lx, y: ly, w: bw });
-    labelSvg += `<text x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" text-anchor="middle" font-size="${narrow ? 11 : 12}" fill="#d2d4d9" font-family="Geist, sans-serif" paint-order="stroke" stroke="#1a1b1f" stroke-width="3" pointer-events="none">${esc(name)}</text>`;
+    labelSvg += `<text x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" text-anchor="middle" font-size="${TH}" fill="#d2d4d9" font-family="Geist, sans-serif" paint-order="stroke" stroke="#1a1b1f" stroke-width="3" pointer-events="none">${esc(name)}</text>`;
   });
   pts.forEach((p, i) => {
-    const cx = X(p.x), cy = Y(p.y), pl = P(p.id);
+    const cx = pos[i].x, cy = pos[i].y, pl = P(p.id);
     svg += `<g class="sdot" data-av="${p.id}" data-i="${i}" transform="translate(${cx.toFixed(1)} ${cy.toFixed(1)})" tabindex="0" role="button" aria-label="${esc(pl.name)}: ${f1(p.x)} shots a game, ${pctTxt(p.y)} true shooting">
       <g class="sd-in"><circle r="${R + 2.5}" fill="#1a1b1f" stroke="${SLOT_COL[statPlayers().indexOf(p.id)] || '#8b8e96'}" stroke-width="2"/><circle r="${R}" fill="#23252a"/>
       <g clip-path="url(#sclip)"><svg x="${-R}" y="${-R * .86}" width="${2 * R}" height="${2 * R}" viewBox="0 0 100 100">${figure(pl)}</svg></g></g></g>`;

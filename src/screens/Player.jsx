@@ -387,7 +387,7 @@ export function Player() {
             <td className="c"><span className={`rdot ${g.result}`}>{g.result === 'U' ? '–' : g.result}</span></td><td className="c"><PerPill v={s.per} /></td>
             {LOGK.map(k => <td key={k}><span className={`n${s[k] === best[k] && s[k] > 0 && lines.length > 1 ? ' hi' : ''}`}>{s[k]}</span></td>)}
             <td><span className={`n${s.to === minTo && lines.length > 1 ? ' hi' : ''}`}>{s.to}</span></td>
-            <td className={tier('fg', ratio(s.fgm, s.fga), s.fga) || undefined}>{s.fgm}/{s.fga}</td><td className={tier('m3', ratio(s.m3, s.a3), s.a3) || undefined}>{s.m3}/{s.a3}</td><td className={tier('ft', ratio(s.ftm, s.fta), s.fta) || undefined}>{s.ftm}/{s.fta}</td>
+            <td className={tier('fg', ratio(s.fgm, s.fga), s.fga) || undefined}>{s.fgm}-{s.fga}</td><td className={tier('m3', ratio(s.m3, s.a3), s.a3) || undefined}>{s.m3}-{s.a3}</td><td className={tier('ft', ratio(s.ftm, s.fta), s.fta) || undefined}>{s.ftm}-{s.fta}</td>
             <td className={tier('ts', s.ts, s.tsa) || undefined}>{pctTxt(s.ts)}</td></tr>))}
       </tbody></table></div>
       {logRows.length > 10 ? <MoreBtn id="p-logmore" open={!!S.pLogAll} n={logRows.length} noun="games" onClick={() => keepScroll({ pLogAll: !S.pLogAll })} /> : null}

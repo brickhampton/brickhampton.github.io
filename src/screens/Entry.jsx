@@ -413,6 +413,8 @@ export function Entry() {
     if (!sel) { sfx('pinBad'); const pl = $('#plist'); pl.classList.remove('nudge'); void pl.offsetWidth; pl.classList.add('nudge'); caption('', 'Pick a player first', '', true); return; }
     const a = A[k], e = { id: rec().seq + 1, pid: sel, a: k };
     change(x => { x.seq = e.id; x.events.push(e); });
+    // The key itself confirms the tap: a flash in its own colour and a pop on its count, easy to catch from the corner of the eye.
+    btn.classList.remove('hit'); void btn.offsetWidth; btn.classList.add('hit');
     const row = $(`.prow[data-id="${sel}"]`);
     if (row) {
       row.classList.remove('flash'); void row.offsetWidth; row.classList.add('flash');
@@ -436,11 +438,11 @@ export function Entry() {
   const rows = R.playing.map(id => { const c = countsFor(id, R.events); return { id, c, s: calc(c) }; });
   const t = sumRows(rows.map(r => r.c));
   const top = rows.map(r => ({ id: r.id, pts: r.s.pts })).sort((a, b) => b.pts - a.pts)[0];
-  const items = [['fg', 'FG', `${t.fgm}/${t.fga}`], ['m3', '3FG', `${t.m3}/${t.a3}`], ['ft', 'FT', `${t.ftm}/${t.fta}`], ['reb', 'REB', t.reb], ['ast', 'AST', t.ast], ['stl', 'STL', t.stl], ['to', 'TO', t.to],
+  const items = [['fg', 'FG', `${t.fgm}-${t.fga}`], ['m3', '3FG', `${t.m3}-${t.a3}`], ['ft', 'FT', `${t.ftm}-${t.fta}`], ['reb', 'REB', t.reb], ['ast', 'AST', t.ast], ['stl', 'STL', t.stl], ['to', 'TO', t.to],
     ['top', 'Top scorer', top && top.pts ? `${P(top.id).name} ${top.pts}` : '–']];
   const prev = stripPrev.current; stripPrev.current = Object.fromEntries(items.map(([k, , v]) => [k, String(v)]));
   const sc = R.sel ? countsFor(R.sel, R.events) : null;
-  const cnt = k => !sc ? '' : k[0] === '2' ? `${sc.m2}/${sc.a2}` : k[0] === '3' ? `${sc.m3}/${sc.a3}` : k[0] === 'F' ? `${sc.ftm}/${sc.fta}` : sc[{ OR: 'oreb', DR: 'dreb', AS: 'ast', ST: 'stl', BK: 'blk', TO: 'to' }[k]];
+  const cnt = k => !sc ? '' : k[0] === '2' ? `${sc.m2}-${sc.a2}` : k[0] === '3' ? `${sc.m3}-${sc.a3}` : k[0] === 'F' ? `${sc.ftm}-${sc.fta}` : sc[{ OR: 'oreb', DR: 'dreb', AS: 'ast', ST: 'stl', BK: 'blk', TO: 'to' }[k]];
   const numOf = id => R.nums?.[id] ?? P(id).num;
   const log = R.events.slice().reverse().slice(0, 30);
 

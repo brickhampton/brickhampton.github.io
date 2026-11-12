@@ -140,7 +140,7 @@ export function Stats() {
   if (!S.h2h.every(id => pickable.includes(id))) S.h2h = pickable.slice(0, 2);
   const leadTile = (k, l, fmt) => {
     const pool = qual.filter(x => enoughShots(x, k)), b = (pool.length ? pool : qual).reduce((x, y) => aggVal(y, k) > aggVal(x, k) ? y : x);
-    return <div className="ltile" key={k}><div className="top"><Avatar id={b.id} /><span className="nm">{P(b.id).name}</span></div>
+    return <div className="ltile" key={k} data-op={b.id}><div className="top"><Avatar id={b.id} /><span className="nm">{P(b.id).name}</span></div>
       <b className={`num${k === 'per' ? (aggVal(b, k) >= 0 ? ' pos' : ' neg') : ''}`}>{fmt(aggVal(b, k))}</b><span className="l">{l}</span></div>;
   };
   const togglePlayer = id => set({ trend: trend.includes(id) ? trend.filter(x => x !== id) : [...trend, id].slice(-7) });

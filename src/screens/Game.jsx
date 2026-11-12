@@ -1,5 +1,5 @@
 import { S, set } from '../lib/store.js';
-import { allGames, calc, sumRows, ratio, pctTxt, perTxt, tier, f1, fmtDate, RES, P, numIn, perfTags, teamFeat } from '../lib/core.js';
+import { allGames, calc, sumRows, ratio, pctTxt, perTxt, tier, f1, fmtDate, RES, P, numIn, perfTags, teamFeat, hasPage } from '../lib/core.js';
 import { go } from '../lib/nav.js';
 import { drawGameTrend, GT_STATS, moreFor } from '../lib/charts.js';
 import { Avatar } from '../components/Avatar.jsx';
@@ -26,7 +26,7 @@ function Leader({ rows, k, label, fmt = v => v, g, games }) {
     <div className="lead-card none"><div className="top"><div><div className="ln">Nobody</div><div className="ll">{label}</div></div></div><div className="lbot"><div className="lv num">0</div></div></div>
   );
   return (
-    <div className="lead-card">
+    <div className="lead-card" data-op={hasPage(best.id) ? best.id : undefined}>
       <div className="top"><Avatar id={best.id} num={best.num} /><div><div className="ln">{P(best.id).name}</div><div className="ll">{label}</div></div></div>
       <div className="lbot"><div className={`lv num${k === 'per' ? (best.s.per >= 0 ? ' pos' : ' neg') : ''}`}>{fmt(best.s[k])}</div>
         <div className="ltags">{perfTags(g, best.id, k, games).map(t => <span key={t.t} className={`mtag sm ${t.t}`} title={t.title}>{BIC[t.icon]}{t.label}</span>)}</div></div>
@@ -39,7 +39,7 @@ function CmpTile({ label, val, base, lowerBetter, pctMode }) {
   const d = val - base, good = lowerBetter ? d < 0 : d > 0, flat = Math.abs(d) < (pctMode ? .0005 : .05);
   // TS% moves by a tenth of a point; the game's own TS% stays a whole number.
   const txt = pctMode ? (d >= 0 ? '+' : '−') + (Math.abs(d) * 100).toFixed(1) + '%' : (d >= 0 ? '+' : '−') + f1(Math.abs(d));
-  return <div><span>{label}</span><b className="num">{pctMode ? pctTxt(val) : val}</b><em className={flat ? 'flat' : good ? 'up' : 'down'}>{flat ? '=' : d > 0 ? '▲' : '▼'} {txt}</em></div>;
+  return <div><span>{label}</span><b className="num">{pctMode ? pctTxt(val) : val}</b><em className={flat ? 'flat' : good ? 'up' : 'down'}>{flat ? 'same' : `${d > 0 ? '▲' : '▼'} ${txt}`}</em></div>;
 }
 
 // The game's YouTube recording. Hidden when there isn't one, except in Admin mode, where it opens the link editor.
