@@ -774,6 +774,17 @@ b.pos{color:var(--green)} b.neg{color:var(--neg)}
 .pshoot .legend{margin:0}
 .pshoot .legend b{color:var(--bone);font-weight:500;margin-left:2px}
 .shoot.two-col{grid-template-columns:repeat(2,minmax(0,1fr));gap:18px 20px;margin-top:6px}
+/* Beside Skill shape (iPad and PC) the Shooting card fills its height: bigger numbers and thicker bars, spread evenly, with roomier top and bottom padding */
+@media (min-width:901px){
+  .two .pshoot{gap:16px;padding-block:32px}
+  .two .pshoot .shoot.two-col{flex:1;align-content:space-evenly;gap:26px 28px}
+  .two .pshoot .sbar .h b{font-size:32px}
+  .two .pshoot .sbar .track{height:14px;border-radius:7px}
+  .two .pshoot .sbar .fill{border-radius:7px}
+  .two .pshoot .sbar .m{font-size:13px}
+  .two .pshoot .mix{height:20px;border-radius:10px}
+  .two .pshoot .mixh b{font-size:28px}
+}
 .recs.one{grid-template-columns:repeat(2,minmax(0,1fr))}
 .rec .rk{width:44px;height:44px;border-radius:12px;background:var(--lift);display:grid;place-items:center;font-family:var(--sans);font-variant-numeric:tabular-nums;font-size:11px;color:var(--stone);letter-spacing:.04em}
 .vsl{display:flex;flex-direction:column;gap:2px}
