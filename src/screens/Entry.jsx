@@ -35,7 +35,10 @@ let blockN = 0; // blocks alternate: one hand, then both hands, then one hand...
 const twoSpot = () => between(TWO[Math.random() < .5 ? 0 : 1]);
 // The ball and hoop are drawn in the same flat pixel style as the players (3 screen units to a pixel).
 const PX = 3, BALL_D = BALL.map(([o, w], j) => `M${o} ${j}h${w}v1h${-w}z`).join('');
-const NET = Array.from({ length: 8 }, (_, j) => Array.from({ length: 12 - j }, (_, i) => (i + j) % 2 ? '' : `M${542 - (12 - j) * 2 + i * 4} ${73 + j * 4}h3v3h-3z`).join('')).join('');
+// The net is drawn frame by frame: hanging at rest, pulled long and thin as the ball drops through, then its hem flicking out.
+// Each frame lists how many squares wide each row is, top to bottom.
+const netPath = rows => rows.map((n, j) => Array.from({ length: n }, (_, i) => (i + j) % 2 ? '' : `M${542 - n * 2 + i * 4} ${73 + j * 4}h3v3h-3z`).join('')).join('');
+const NET_FRAMES = [[12, 11, 10, 9, 8, 7, 6, 5], [12, 10, 9, 8, 7, 6, 6, 5, 5, 4], [12, 11, 10, 9, 8, 8, 9]].map(netPath);
 const MATE = { v: 2, skin: '#d9b48e', hair: '#2e2e33', style: 3 }; // a short fringe
 // The crowd behind the courtside boards: one sparse row of soft, dim figures in muted colours (never the team's blue),
 // so they sit back in the dark and the player stays the focus. Most fans get up for a made 2; every third fan is one
@@ -131,7 +134,7 @@ function makeStage() {
   // A leap for a block: the player springs up and drops back down.
   // cls 'hop' is a smaller jump, as for a rebound.
   function leap(delay, cls = 'leap') {
-    setTimeout(() => { if (!actor) return; const b = actor.querySelector('.body'); b.classList.remove(cls); void b.getBBox(); b.classList.add(cls); setTimeout(() => b.classList.remove(cls), 850); }, delay);
+    setTimeout(() => { if (!actor) return; const b = actor.querySelector('.body'); b.classList.remove(cls); void b.getBBox(); b.classList.add(cls); setTimeout(() => b.classList.remove(cls), 1100); }, delay);
   }
   function mk(tag, attrs, parent = fx) { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); parent.appendChild(e); return e; }
   function ball(fill = BALL_C) {
@@ -148,7 +151,10 @@ function makeStage() {
   const tf = p => ({ transform: `translate(${p[0]}px,${p[1]}px)`, opacity: p[3] ?? 1 });
   const fly = (el, pts, duration, easing = 'linear', delay = 0) => el.animate(pts.map(tf), { duration, easing, delay, fill: 'both' });
   const then = (anim, fn) => { anim.finished.then(fn).catch(() => {}); };
-  const ripple = () => net.animate([{ transform: 'scale(1,1)' }, { transform: 'scale(.82,1.32)' }, { transform: 'scale(1.04,.94)' }, { transform: 'scale(1,1)' }], { duration: 340, easing: 'ease-out' });
+  // A made shot: the net's three drawn frames, one after another.
+  let netT = [];
+  const netFrame = n => [...net.children].forEach((p, i) => p.setAttribute('visibility', i === n ? 'visible' : 'hidden'));
+  const ripple = () => { netT.forEach(clearTimeout); netFrame(1); netT = [setTimeout(() => netFrame(2), 130), setTimeout(() => netFrame(0), 260)]; };
   const shake = () => rim.animate([{ transform: 'translateY(0)' }, { transform: 'translateY(-3px)' }, { transform: 'translateY(2px)' }, { transform: 'translateY(0)' }], { duration: 240 });
   function pop(text, x, y, color = '#ee6018', size = 26) {
     const t = mk('text', { x: 0, y: 0, 'text-anchor': 'middle', 'font-family': 'Geist, system-ui, sans-serif', 'font-weight': 600, 'font-size': size, fill: color });
@@ -499,8 +505,8 @@ export function Entry() {
                 <rect x="560" y="66" width="7" height="6" fill="#ee6018" />
               </g>
               <g id="rim" shapeRendering="crispEdges"><rect x="517" y="69" width="50" height="4" fill="#ee6018" /></g>
-              <g id="net" shapeRendering="crispEdges" style={{ transformBox: 'view-box', transformOrigin: '542px 72px' }}>
-                <path d={NET} fill="#e8e6e3" />
+              <g id="net" shapeRendering="crispEdges">
+                {NET_FRAMES.map((d, i) => <path key={i} d={d} fill="#e8e6e3" visibility={i ? 'hidden' : 'visible'} />)}
               </g>
               <g id="actor-wrap" />
               <g id="fx" />

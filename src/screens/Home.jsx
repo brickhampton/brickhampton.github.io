@@ -2,7 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { P, statPlayers, esc } from '../lib/core.js';
 import { S as DATA } from '../lib/store.js';
 import { reduced } from '../lib/charts.js';
-import { figure, pxShadow, raisedTrophy } from '../lib/avatar.js';
+import { figure, pxShadow, raisedTrophy, trophyGlint } from '../lib/avatar.js';
 import { ChevDown } from '../components/icons.jsx';
 import { stage } from '../lib/homeStage.js';
 import { sfx } from '../lib/sfx.js';
@@ -45,7 +45,7 @@ function homeScene(cw, ch) {
   // Each player bobs, blinks and smiles on their own timing.
   const vars = () => `--hd:${(rnd() * 1.6).toFixed(2)}s;--bd:${(rnd() * -5).toFixed(2)}s;--sd:${(rnd() * -12).toFixed(2)}s;--sl:${(10 + rnd() * 6).toFixed(1)}s`;
   const refl = [];
-  const fig = (id, cx, top, w) => { const st = vars(), nt = POSE.now[id] && `--nc:${NOW_T[id][0]}s;--nd:${NOW_T[id][1]}s`, body = POSE.now[id] ? `<g class="hp-rest" style="${nt}">${figure(P(id), { stage: true, pose: 'down' })}</g><g class="hp-now" style="${nt}">${figure(P(id), { stage: true, pose: POSE.now[id] })}</g>` : figure(P(id), { stage: true, pose: POSE.hold[id] || 'down' });
+  const fig = (id, cx, top, w) => { const st = vars(), nt = POSE.now[id] && `--nc:${NOW_T[id][0]}s;--nd:${NOW_T[id][1]}s`, body = POSE.now[id] ? `<g class="hp-rest" style="${nt}">${figure(P(id), { stage: true, pose: 'down' })}</g><g class="hp-now" style="${nt}">${figure(P(id), { stage: true, pose: POSE.now[id] })}</g>` : figure(P(id), { stage: true, pose: POSE.hold[id] || 'down' }) + (POSE.hold[id] === 'trophy' ? trophyGlint(P(id)) : '');
     const svg = inner => `<svg x="${cx - w / 2}" y="${top}" width="${w}" height="${w * 1.04}" viewBox="0 0 100 104" overflow="visible">${inner}</svg>`;
     // A faint reflection in the polished floor, flipped about the player's feet.
     if (S.refl) { const fy = top + w * 1.035; refl.push(`<g class="alive" style="${st}" mask="url(#hrmask)" opacity="${S.refl}"><g transform="translate(0 ${(2 * fy).toFixed(1)}) scale(1 -1)">${svg(figure(P(id), { stage: true, pose: POSE.hold[id] || 'down' }))}</g></g>`); }
@@ -60,12 +60,16 @@ function homeScene(cw, ch) {
   // Confetti in front of the team stays clear of the players, so none of it covers a face.
   const half = Math.round(n * .55), k = A < 1 ? 1.3 : 1, onTeam = (x, y) => (Math.abs(x - 400) < 165 * k && y > 300 - 195 * k && y < 300 + 50 * k)
     || (x > 400 - (400 - sx + 55) * k && x < 400 - (400 - sx - 30) * k && y > 300 - 175 * k && y < 300 - 50 * k);
+  // Confetti is square pixels the size of the players' own, falling the height of the arena in steps and flipping
+  // between its wide and narrow sides as it turns. The pieces in front fall down the sides, clear of the team.
+  const CU = A < 1 ? 5 : 4, top = vy - 3 * CU, inCols = x => Math.abs(x - 400) < 165 * k || (x > 400 - (400 - sx + 55) * k && x < 400 - (400 - sx - 30) * k);
   const pieces = Array.from({ length: n }, (_, i) => {
-    let x, y;
-    do { x = vx + rnd() * vw; y = vy + rnd() * ((i % 4 ? 250 : 470) - vy); } while (i >= half && onTeam(x, y));
-    const c = COLS[i % COLS.length], r = Math.round(rnd() * 180), w = 5 + rnd() * 5, ani = i % 3 === 0;
-    return i % 5 === 4 ? `<circle class="${ani ? 'cf' : 'cf0'}" cx="${x.toFixed(0)}" cy="${y.toFixed(0)}" r="2.6" fill="${c}" style="--d:${(4 + rnd() * 4).toFixed(1)}s;--dl:${(-rnd() * 4).toFixed(1)}s"/>`
-      : `<rect class="${ani ? 'cf' : 'cf0'}" x="${x.toFixed(0)}" y="${y.toFixed(0)}" width="${w.toFixed(1)}" height="${(w * .45).toFixed(1)}" rx="1" fill="${c}" style="--r:${r}deg;--d:${(4 + rnd() * 4).toFixed(1)}s;--dl:${(-rnd() * 4).toFixed(1)}s"/>`;
+    let x, y; const end = i < half ? 470 : Math.max(470, vb);
+    do { x = vx + rnd() * vw; y = top + rnd() * (end - top); } while (i >= half && (inCols(x) || onTeam(x, y)));
+    x = Math.round(x / CU) * CU; y = Math.round(y / CU) * CU;
+    const c = COLS[i % COLS.length], tall = i % 3 === 1, one = i % 5 === 4, w = one || tall ? CU : 2 * CU, h = tall ? 2 * CU : CU;
+    const dur = 9 + rnd() * 7, drift = (Math.round(rnd() * 6) - 3) * CU;
+    return `<rect class="cf${one ? '' : tall ? ' cf-t' : ' cf-w'}" x="${x}" y="${y}" width="${w}" height="${h}" fill="${c}" style="--y0:${(top - y).toFixed(0)}px;--fy:${(end - y).toFixed(0)}px;--fx:${drift}px;--d:${dur.toFixed(1)}s;--dl:${(-rnd() * dur).toFixed(1)}s;--fd:${(.5 + rnd() * .6).toFixed(2)}s"/>`;
   });
   const { back, front } = rows(ids);
   // Huddled: the back row stands shoulder to shoulder at slightly different depths, and the front row stands close in
@@ -89,17 +93,17 @@ function homeScene(cw, ch) {
   const vbox = `${vx.toFixed(1)} ${vy.toFixed(1)} ${vw.toFixed(1)} ${vh.toFixed(1)}`, RS = 240, rw = vw + 2 * RS;
   const rays = `<svg class="hscene hrays" aria-hidden="true" viewBox="${(vx - RS).toFixed(1)} ${vy.toFixed(1)} ${rw.toFixed(1)} ${vh.toFixed(1)}" style="left:${(-RS / vw * 100).toFixed(3)}%;width:${(rw / vw * 100).toFixed(3)}%;--rs:${(RS / rw * 100).toFixed(3)}%">${S.rays}</svg>`;
   return `<svg class="hscene" aria-hidden="true" viewBox="${vbox}"><defs>${S.defs}</defs>${S.under}</svg>${rays}
+  <svg class="hscene hconf" aria-hidden="true" viewBox="${vbox}" shape-rendering="crispEdges">${pieces.slice(0, half).join('')}</svg>
   <svg class="hscene" viewBox="${vbox}" role="img" aria-label="Team photo: ${ids.map(id => esc(P(id).name)).join(', ')} with the trophy">
     <defs><linearGradient id="hrgrad" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#fff"/><stop offset=".4" stop-color="#fff" stop-opacity="0"/></linearGradient><mask id="hrmask" maskContentUnits="objectBoundingBox"><rect width="1" height="1" fill="url(#hrgrad)"/></mask></defs>
     <g${A < 1 ? ' transform="translate(400 300) scale(1.3) translate(-400 -300)"' : ''}>${sup.refl}${refl.join('')}</g>
-    <g>${pieces.slice(0, half).join('')}</g>
     <g${A < 1 ? ' transform="translate(400 300) scale(1.3) translate(-400 -300)"' : ''}>
     ${sup.fig}
     ${team}
     </g>
     ${trophy}${ball}
-    <g>${pieces.slice(half).join('')}</g>
-  </svg>`;
+  </svg>
+  <svg class="hscene hconf" aria-hidden="true" viewBox="${vbox}" shape-rendering="crispEdges">${pieces.slice(half).join('')}</svg>`;
 }
 
 // Where she stands (the middle of her box, her feet, and the box's width; the players' back row is 132 wide), and her
