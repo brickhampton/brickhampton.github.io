@@ -48,7 +48,17 @@ function podium() {
   // Two flutes on step 2.
   const flute = x => rect(x, 199, 6, 10, '#f4d37c', ' opacity=".9"') + rect(x, 198, 6, 1.5, '#fff', ' opacity=".8"') + rect(x + 2.2, 209, 1.6, 5, '#dfe3ea') + rect(x, 214, 6, 2, '#dfe3ea');
   // The bottle on step 3, tipped toward the player, with the cork popped.
-  const bottle = `<g transform="translate(190 222) rotate(-35)">${rect(-7, -30, 14, 30, '#1f5a34')}${rect(-4, -28, 3, 24, '#3a8a57')}${rect(-7, -17, 14, 9, '#f4d37c')}${rect(-3.5, -42, 7, 12, '#1f5a34')}${rect(-3.5, -44, 7, 4, '#e9b949')}</g>`;
+  // The bottle leans on the podium, drawn row by row on the pixel grid: each row sits a step further left than the one below.
+  const bottle = (() => {
+    const u = 3, bx = 181, by = 219; let o = '';
+    for (let r = 0; r < 15; r++) {
+      const x = bx - r * 2, y = by - r * u, neck = r >= 10;
+      if (neck) { o += rect(x + 4, y, 6, u, r >= 13 ? '#e9b949' : '#1f5a34'); continue; }
+      o += rect(x, y, 15, u, r >= 4 && r <= 6 ? '#f4d37c' : '#1f5a34');
+      if (r < 4 || r > 6) o += rect(x + 3, y, 3, u, '#3a8a57');
+    }
+    return `<g shape-rendering="crispEdges">${o}</g>`;
+  })();
   // The spray: foam squares arcing up and over the player from the bottle's neck.
   const rnd = seeded(5);
   let spray = '';
@@ -292,7 +302,7 @@ function space() {
   for (const [x, y, w] of [[40, 222, 22], [92, 240, 16], [176, 232, 26], [214, 216, 14], [X0 + 6, 236, 18], [X1 - 30, 244, 20]]) moon += `<ellipse cx="${x}" cy="${y}" rx="${w / 2}" ry="${w / 6}" fill="#55586a"/><ellipse cx="${x}" cy="${y - 1}" rx="${w / 2 - 2}" ry="${w / 6 - 1}" fill="#4a4d5e"/>`;
   // A small flag planted beside the player.
   moon += rect(176, 176, 1.6, 34, '#cfd3db') + rect(177.6, 176, 18, 11, '#2f55d4') + rect(177.6, 176, 18, 2.5, '#e9b949');
-  const rocket = `<g class="pg-rocket"><g transform="translate(${X0 + 10} 128) rotate(-20)">${rect(0, 0, 14, 6, '#e8e8ee')}${rect(14, 1, 4, 4, '#e74c3c')}${rect(3, 1.5, 3, 3, '#4fe3ff')}${rect(-3, -1, 3, 2, '#e74c3c')}${rect(-3, 5, 3, 2, '#e74c3c')}${rect(-7, 1.5, 5, 3, '#f4b24a', ' class="pg-twinkle"')}</g></g>`;
+  const rocket = `<g class="pg-rocket"><g transform="translate(${X0 + 10} 128)" shape-rendering="crispEdges">${rect(0, 0, 14, 6, '#e8e8ee')}${rect(14, 1, 4, 4, '#e74c3c')}${rect(3, 1.5, 3, 3, '#4fe3ff')}${rect(-3, -1, 3, 2, '#e74c3c')}${rect(-3, 5, 3, 2, '#e74c3c')}${rect(-7, 1.5, 5, 3, '#f4b24a', ' class="pg-twinkle"')}</g></g>`;
   return { svg: s + earth + moon, party: stars + rocket, feet: 226, view: V, k: K };
 }
 
@@ -302,7 +312,7 @@ function neon() {
   let s = `<defs>${grad('ne-s', [[0, '#05060e'], [1, '#141030']])}${grad('ne-g', [[0, '#1a1630'], [1, '#0a0912']])}</defs>` + rect(X0, Y0, W, ground - Y0, 'url(#ne-s)');
   // Blurred city lights far off.
   const rnd = seeded(13), cols = ['#ff4fd8', '#4fe3ff', '#ffe14f', '#8a5bff'];
-  for (let i = 0; i < 40; i++) { const z = 3 + rnd() * 5; s += `<circle cx="${(X0 + rnd() * W).toFixed(1)}" cy="${(150 + rnd() * 50).toFixed(1)}" r="${z.toFixed(1)}" fill="${cols[i % 4]}" opacity="${(.08 + rnd() * .12).toFixed(2)}"/>`; }
+  for (let i = 0; i < 40; i++) { const z = 6 + Math.round(rnd() * 3) * 3; s += `<rect x="${Math.round((X0 + rnd() * W) / 3) * 3}" y="${Math.round((150 + rnd() * 50) / 3) * 3}" width="${z}" height="${z}" fill="${cols[i % 4]}" opacity="${(.08 + rnd() * .12).toFixed(2)}" shape-rendering="crispEdges"/>`; }
   // The sign on its frame, glowing.
   // The M is five pixels wide (the 3 × 5 font's M reads as an H); V and P come from the font.
   const NP = 7, mw = 5 * NP, tw = mw + NP + textW('VP', NP), tx = 130 - tw / 2, ty = 92;
@@ -335,6 +345,22 @@ export function backdrop(k, look, wide) {
   }
   return built.get(key);
 }
+// How each scene lights the player: a wash of the scene's colour over the whole sprite (tint, strength), and a one-pixel
+// rim of light along the edges facing the light: [colour, strength, dx, dy] in sprite pixels (dx 1 lights the left edges,
+// -1 the right, dy 1 the top). 'both' lights the left and right edges, as with the sun behind.
+export const LIGHT = {
+  podium: { tint: ['#1b2a5c', .08], rim: ['#dfe6ff', .3, 0, 1] },
+  disco: { tint: ['#b03cff', .12], rim: ['#ff6ad5', .45, 1, 0] },
+  fireworks: { tint: ['#16255c', .16], rim: ['#ffd98a', .4, 1, 0] },
+  magazine: { tint: ['#c0392b', .05], rim: ['#ffffff', .25, 0, 1] },
+  redcarpet: { tint: ['#3a1020', .08], rim: ['#fff4dc', .4, 1, 0], both: true },
+  jumbotron: { tint: ['#1c3896', .1], rim: ['#bcd0ff', .35, 0, 1] },
+  beach: { tint: ['#ff8a3c', .18], rim: ['#ffd27a', .55, 1, 0], both: true },
+  rooftop: { tint: ['#6a3fa0', .14], rim: ['#ff9a6a', .45, 1, 0] },
+  arcade: { tint: ['#7a1fd0', .12], rim: ['#ff4fd8', .45, 0, -1] },
+  space: { tint: ['#0d1c4a', .16], rim: ['#cfe0ff', .45, -1, 1] },
+  neon: { tint: ['#ff4fd8', .12], rim: ['#ff8ae6', .45, 0, 1] },
+};
 // A different backdrop from last time, each time a Game page opens.
 let last = null;
 export function randomBackdrop() {

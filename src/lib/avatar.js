@@ -381,7 +381,7 @@ function sprite(c, num, pose) {
   if (back) walk(back, x => x >= bx - 2 - aw, d => d <= 1 ? c.shirt : null);
   // The undershirt's collar shows in the jersey's neckline, and it covers the back shoulder at the jersey's corner.
   if (c.shirt) { r(bx + 4, ty, bw - 8, 1, c.shirt); r(bx, ty, 1, 1, c.shirt); }
-  return { g, go, ge, hy };
+  return { g, go, ge, hy, shortsY };
 }
 // A shadow in the same chunky pixels as the players: three stepped rows, centred on (cx, cy), u units to a pixel.
 export function pxShadow(cx, cy, rx, u = 3, op = .35) {
@@ -420,6 +420,16 @@ export function raisedTrophy(raw) {
     + px(l + 2, t + 4, w - 4, 1, G) + px(m - 1, t + 5, 2, 1, G2) + px(m - 2, t + 6, 4, 1, G) + px(l - 1, t + 7, w + 2, 1, '#4a3418') + '</g>';
 }
 
+// A sparkle for the held trophy (the 'trophy' pose): a bar of light crossing the cup in three frames, then a small star
+// at its rim. The frames are shown one at a time by CSS (.av-glint .g1 to .g4).
+export function trophyGlint(raw) {
+  const c = cleanLook(raw), wide = WIDE[c.weight], hy = 3 + (3 - TALL[c.height]), bx = 8 - Math.ceil(wide / 2), bw = 10 + wide;
+  const cx = bx + Math.floor(bw / 2) - 1, t = hy + 12, px = (x, y, w, h, cls) => `<rect class="${cls}" x="${x}" y="${y}" width="${w}" height="${h}" fill="#fffbe6"/>`;
+  return `<g class="av-glint" transform="translate(50 0) scale(${(104 / FEET).toFixed(4)}) translate(-13 0)" shape-rendering="crispEdges">`
+    + px(cx - 2, t + 1, 1, 3, 'g1') + px(cx, t + 1, 1, 3, 'g2') + px(cx + 2, t + 1, 1, 3, 'g3')
+    + `<g class="g4">${px(cx + 3, t - 1, 1, 3, '')}${px(cx + 2, t, 3, 1, '')}</g></g>`;
+}
+
 // A ball held up over the head, to go with the 'catch' pose (both hands up): drawn behind the hands, between them.
 export function raisedBall(raw) {
   const c = cleanLook(raw), tall = TALL[c.height], aw = c.muscle > 1 ? 1 : 0;
@@ -456,12 +466,23 @@ const cache = new Map();
 export function figure(raw, opts = {}) {
   const c = cleanLook(raw), key = JSON.stringify([c, raw.num, !!opts.stage, opts.pose || '']);
   if (cache.has(key)) return cache.get(key);
-  const { g, go, ge, hy } = sprite(c, raw.num, opts.pose), smile = sprite({ ...c, eyes: 4 }, raw.num, opts.pose).ge;
+  const { g, go, ge, hy, shortsY } = sprite(c, raw.num, opts.pose);
+  // The smiling eyes. Behind glasses a smile reads oddly, so glasses wearers keep their own eyes and get a glint of
+  // light in each lens instead: the clear pixel beside the eye turns white.
+  let smile;
+  if (c.glasses) {
+    smile = ge.map(row => row.slice());
+    const ey = hy + EYE_ROW[c.eyeY] + TOPM;
+    [10, 16].forEach(x => { const y = [ey, ey + 1].find(j => !smile[j][x]); if (y != null) smile[y][x] = ['#ffffff', 'e']; });
+  } else smile = sprite({ ...c, eyes: 4 }, raw.num, opts.pose).ge;
   // The ball, head, eyes and smiling eyes are their own groups (outside the pixel scale), so the bounce, blink and smile
   // animations work in the box's units. The smiling eyes stay hidden until an animation shows them.
   const tf = opts.stage ? `translate(50 0) scale(${(104 / FEET).toFixed(4)}) translate(-13 0)` : `scale(6.25) translate(-5 ${3 - hy})`, at = s => `<g transform="${tf}">${s}</g>`;
   // A palmed ball sits behind the hand; a ball held in front of the chest sits over the body.
-  const bl = `<g class="av-ball" style="--drop:${((5 + TALL[c.height]) * 104 / FEET).toFixed(1)}px">${at(paths(go, 'o'))}</g>`, body = at(paths(g, 'b'));
+  const bl = `<g class="av-ball" style="--drop:${((5 + TALL[c.height]) * 104 / FEET).toFixed(1)}px">${at(paths(go, 'o'))}</g>`, cut = shortsY + TOPM;
+  // On the stage the jersey and arms (everything above the shorts) are their own group, so they can settle a pixel
+  // onto the shorts when the player lands from a hop.
+  const body = opts.stage ? at(paths(g.map((row, y) => y < cut ? [] : row), 'b')) + `<g class="av-top">${at(paths(g.map((row, y) => y < cut ? row : []), 'b'))}</g>` : at(paths(g, 'b'));
   const svg = `<g class="av-fig" shape-rendering="crispEdges">${opts.pose === 'ball' ? body + bl : bl + body}`
     + `<g class="av-head">${at(paths(g, 'h'))}<g class="av-eyes">${at(paths(ge, 'e'))}</g><g class="av-smile">${at(paths(smile, 'e'))}</g></g></g>`;
   if (cache.size > 400) cache.clear();

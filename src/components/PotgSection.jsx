@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { P, numIn, perTxt, perCls } from '../lib/core.js';
 import { sfx } from '../lib/sfx.js';
 import { figure, cleanLook, pxShadow, trickExtras } from '../lib/avatar.js';
-import { backdrop, randomBackdrop, BACKDROPS } from '../lib/potgBg.js';
+import { backdrop, randomBackdrop, BACKDROPS, LIGHT } from '../lib/potgBg.js';
 import { playerOfGame, potgShort } from '../lib/potg.js';
 
 // The dance, one frame a beat-and-a-half: [pose, body x, body y, head x], in sprite pixels.
@@ -97,6 +97,7 @@ export function PotgSection({ g, games }) {
   if (!p) return null;
   const look = { ...p, num: numIn(g, potg.id) ?? p.num };
   const wide = useWide();
+  const lit = LIGHT[bgKey];
   const bg = backdrop(bgKey, look, wide), K = bg.k, fx = 130 - 50 * K, fy = bg.feet - 104 * K;
   // Tap to celebrate: a double fist pump with a jump, a pop of confetti and a cheer.
   // After a loss a tap gets a shrug: no jump, confetti, smile or cheer.
@@ -104,8 +105,8 @@ export function PotgSection({ g, games }) {
     if (calm) { if (!reduced) start(TRICKS.shrug, 2, false); return; }
     sfx('cheer'); if (reduced) { setGrin(true); setTimeout(() => setGrin(false), 1500); return; } start(CELEBRATE, 1, true); setParty(x => x + 1);
   };
-  // Glasses wearers keep their normal eyes (smiling eyes read oddly behind the frames).
-  const smile = grin && !cleanLook(look).glasses;
+  // Glasses wearers keep their normal eyes and get a glint on the lenses instead (see figure in avatar.js).
+  const smile = grin;
   const pl = play.current;
   const [pose, dx, dy, hx, extra] = pl ? pl.frames[pl.i] : reduced ? ['down', 0, 0, 0] : calm ? NOD[Math.floor(n / 3) % NOD.length] : BOB[Math.floor(n / 2) % BOB.length];
   // An extra can be several words: classes on the stage (CLASS_EXTRAS) and things drawn on the player (trickExtras).
@@ -118,9 +119,17 @@ export function PotgSection({ g, games }) {
         <button className={`potg-stage${wide ? ' wide' : ''}`} onClick={tap} aria-label={`${p.name}, player of the game. Tap to celebrate`}>
           <svg viewBox={bg.view} aria-hidden="true" className={`bg-${bgKey}${smile ? ' smiling' : ''}${xs.filter(x => CLASS_EXTRAS.has(x)).map(x => ` pk-${x}`).join('')}`}>
             <g dangerouslySetInnerHTML={{ __html: bg.svg + (calm ? '' : bg.party) }} />
+            {/* The scene's light on the player: a wash of its colour, and a one-pixel rim along the edges that face the light. */}
+            {lit && <defs><filter id="potg-lit" x="-60%" y="-60%" width="220%" height="220%" primitiveUnits="userSpaceOnUse" colorInterpolationFilters="sRGB">
+              <feFlood floodColor={lit.tint[0]} floodOpacity={lit.tint[1]} /><feComposite in2="SourceAlpha" operator="in" result="wash" />
+              <feOffset in="SourceAlpha" dx={lit.rim[2] * U} dy={lit.rim[3] * U} result="off" /><feComposite in="SourceAlpha" in2="off" operator="out" result="edge" />
+              {lit.both && <><feOffset in="SourceAlpha" dx={-lit.rim[2] * U} dy={-lit.rim[3] * U} result="off2" /><feComposite in="SourceAlpha" in2="off2" operator="out" result="edge2" /><feMerge result="edges"><feMergeNode in="edge" /><feMergeNode in="edge2" /></feMerge></>}
+              <feFlood floodColor={lit.rim[0]} floodOpacity={lit.rim[1]} /><feComposite in2={lit.both ? 'edges' : 'edge'} operator="in" result="rim" />
+              <feMerge><feMergeNode in="SourceGraphic" /><feMergeNode in="wash" /><feMergeNode in="rim" /></feMerge>
+            </filter></defs>}
             <g transform={`translate(${fx} ${fy}) scale(${K})`}>
-              <g dangerouslySetInnerHTML={{ __html: pxShadow(50, 103.5, 22, U) }} />
-              <g transform={`translate(${dx * U} ${dy * U})`} style={{ '--hx': `${hx * U}px` }} dangerouslySetInnerHTML={{ __html: figure(look, { stage: true, pose }) + xs.filter(x => !CLASS_EXTRAS.has(x)).map(x => trickExtras(look, x)).join('') }} />
+              <g className={dy <= -4 ? 'sh-high' : dy < 0 ? 'sh-low' : undefined} dangerouslySetInnerHTML={{ __html: pxShadow(50, 103.5, 22, U) }} />
+              <g transform={`translate(${dx * U} ${dy * U})`} filter={lit ? 'url(#potg-lit)' : undefined} style={{ '--hx': `${hx * U}px` }} dangerouslySetInnerHTML={{ __html: figure(look, { stage: true, pose }) + xs.filter(x => !CLASS_EXTRAS.has(x)).map(x => trickExtras(look, x)).join('') }} />
             </g>
             {party ? <g key={party} transform={`translate(0 ${bg.feet - 226})`} dangerouslySetInnerHTML={{ __html: POP }} /> : null}
           </svg>

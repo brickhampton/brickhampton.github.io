@@ -35,7 +35,8 @@ export function courtLines(c, { full = false } = {}) {
 export const keyPaint = (c, z0 = 0, s = 1) => c.poly([[-2.45, z0], [2.45, z0], [2.45, z0 + s * 5.8], [-2.45, z0 + s * 5.8]]);
 
 // A small crowd in the stands: rows of heads and shoulders, dim, getting darker towards the back.
-export function crowd({ x0, x1, yb, rows = 5, gap = 15, size = 7, seed = 3, light = 1 }) {
+// sway: now and then a fan shifts in their seat, a sprite pixel to one side and back (the Home stage).
+export function crowd({ x0, x1, yb, rows = 5, gap = 15, size = 7, seed = 3, light = 1, sway = false }) {
   let s = seed; const rnd = () => (s = (s * 16807) % 2147483647) / 2147483647;
   const SK = ['#c99a74', '#e2b48b', '#a8704a', '#f0c8a2', '#8a5638'], SH = ['#2f55d4', '#e9b949', '#eeeeee', '#3a3f4f', '#c0392b', '#2f55d4', '#1b1b1b'];
   let out = '';
@@ -45,7 +46,10 @@ export function crowd({ x0, x1, yb, rows = 5, gap = 15, size = 7, seed = 3, ligh
     for (let x = x0 + rnd() * u; x < x1; x += u * (1.5 + rnd() * .9)) {
       if (rnd() < .12) continue;
       const hy = y - u * 1.9 - (rnd() < .2 ? u * .5 : 0);
-      out += `<rect x="${f1(x - u * .65)}" y="${f1(hy + u * .9)}" width="${f1(u * 1.3)}" height="${f1(u * 1.5)}" fill="${SH[Math.floor(rnd() * SH.length)]}"/><rect x="${f1(x - u * .4)}" y="${f1(hy)}" width="${f1(u * .8)}" height="${f1(u * .9)}" fill="${SK[Math.floor(rnd() * SK.length)]}"/>`;
+      const fan = `<rect x="${f1(x - u * .65)}" y="${f1(hy + u * .9)}" width="${f1(u * 1.3)}" height="${f1(u * 1.5)}" fill="${SH[Math.floor(rnd() * SH.length)]}"/><rect x="${f1(x - u * .4)}" y="${f1(hy)}" width="${f1(u * .8)}" height="${f1(u * .9)}" fill="${SK[Math.floor(rnd() * SK.length)]}"/>`;
+      // Chosen by position, not by the seeded sequence, so the crowd itself is the same with or without the sway.
+      const h = sway ? (Math.imul(Math.round(x * 7) ^ (r * 7919) ^ seed, 2654435761) >>> 0) % 97 : 99;
+      out += h < 13 ? `<g class="hfan${h % 3 === 0 ? ' hfan-b' : ''}" style="--u:${f1(u * (h % 2 ? .3 : -.3))}px;--d:${(3.4 + h * .27).toFixed(1)}s;--dl:${(-h * .61).toFixed(1)}s">${fan}</g>` : fan;
     }
     out += '</g>';
   }

@@ -78,18 +78,22 @@ function banner(x, y, w, h, kind, op) {
   const u = w / 11, e = EMBLEM[kind];
   let px = '';
   e.forEach((row, j) => [...row].forEach((ch, i) => { if (ch === '#') px += `<rect x="${f1(x + (i + 2) * u)}" y="${f1(y + h * .3 + j * u)}" width="${f1(u + .2)}" height="${f1(u + .2)}"/>`; }));
-  const cut = h + w * .28;
+  const cut = h + w * .28, split = h * .74, n = Math.round(x * 3 + w);
+  const cloth = `<path d="M${f1(x)} ${f1(y)}h${f1(w)}V${f1(y + h)}L${f1(x + w / 2)} ${f1(y + cut)}L${f1(x)} ${f1(y + h)}Z" fill="#16295e"/>
+    <path d="M${f1(x + u)} ${f1(y)}V${f1(y + h - u * .4)}L${f1(x + w / 2)} ${f1(y + cut - u * 1.3)}L${f1(x + w - u)} ${f1(y + h - u * .4)}V${f1(y)}" fill="none" stroke="#e9b949" stroke-width="${f1(u * .7)}" opacity=".75"/>`;
+  // The cloth is drawn in two pieces: the top hangs still and the tail, below the emblem, sways a pixel to one side
+  // and back, slowly, each banner in its own time.
   return `<g opacity="${op}"><path d="M${f1(x - 2)} ${f1(y - 400)}V${f1(y)}M${f1(x + w + 2)} ${f1(y - 400)}V${f1(y)}" stroke="#1d2436" stroke-width="1.2"/>
-    <path d="M${f1(x)} ${f1(y)}h${f1(w)}V${f1(y + h)}L${f1(x + w / 2)} ${f1(y + cut)}L${f1(x)} ${f1(y + h)}Z" fill="#16295e"/>
-    <path d="M${f1(x + u)} ${f1(y)}V${f1(y + h - u * .4)}L${f1(x + w / 2)} ${f1(y + cut - u * 1.3)}L${f1(x + w - u)} ${f1(y + h - u * .4)}V${f1(y)}" fill="none" stroke="#e9b949" stroke-width="${f1(u * .7)}" opacity=".75"/>
+    <g style="clip-path:inset(0 0 ${f1(cut - split)}px 0)">${cloth}</g>
+    <g class="hbn-tail" style="--u:${f1(n % 2 ? u : -u)}px;--d:${5 + n % 5}s;--dl:${-(n % 7)}s"><g style="clip-path:inset(${f1(split)}px 0 0 0)">${cloth}</g></g>
     <rect x="${f1(x)}" y="${f1(y)}" width="${f1(w)}" height="${f1(u * 1.6)}" fill="#e9b949" opacity=".8"/>
     <g fill="${kind === 'ball' ? '#ee6018' : '#e9b949'}" shape-rendering="crispEdges">${px}</g></g>`;
 }
 function stands(vx, vw, vy, top) {
   // Lower tier right behind the floor, upper tier above a dark gap, fainter and smaller.
-  let s = crowd({ x0: vx, x1: vx + vw, yb: top - 12, rows: 5, gap: 12, size: 6.5, seed: 9 })
+  let s = crowd({ x0: vx, x1: vx + vw, yb: top - 12, rows: 5, gap: 12, size: 6.5, seed: 9, sway: true })
     + `<rect x="${f1(vx)}" y="${f1(top - 82)}" width="${f1(vw)}" height="9" fill="#0d1226"/><rect x="${f1(vx)}" y="${f1(top - 74)}" width="${f1(vw)}" height="1.2" fill="#2f55d4" opacity=".55"/>`
-    + crowd({ x0: vx, x1: vx + vw, yb: top - 86, rows: 4, gap: 10, size: 5, seed: 21, light: .7 })
+    + crowd({ x0: vx, x1: vx + vw, yb: top - 86, rows: 4, gap: 10, size: 5, seed: 21, light: .7, sway: true })
     + flashes({ x0: vx, x1: vx + vw, y0: top - 120, y1: top - 16, n: 12, seed: 5 })
     + `<rect x="${f1(vx)}" y="${f1(top - 10)}" width="${f1(vw)}" height="10" fill="#14224f"/><rect x="${f1(vx)}" y="${f1(top - 10)}" width="${f1(vw)}" height="1.5" fill="#e9b949" opacity=".5"/>`;
   // Banners: a far row, small and faint, and a near pair on each side, bigger and closer to the edges.
