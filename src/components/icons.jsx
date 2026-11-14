@@ -47,7 +47,7 @@ export const BIC = {
   knife: <B><rect x="2.5" y="12.5" width="14" height="6" rx="3" /><path d="M8 12.5 19 5l2 2.2-9 5.3" /><path d="M16.5 15.5h4.5" /><circle cx="6" cy="15.5" r=".9" fill="currentColor" /></B>,
   cookie: <B><path d="M20.5 12.5A8.5 8.5 0 1 1 11.5 3.5a3 3 0 0 0 4 4 3 3 0 0 0 5 5z" /><circle cx="8.5" cy="10" r="1" fill="currentColor" /><circle cx="12.5" cy="15.5" r="1" fill="currentColor" /><circle cx="8" cy="15" r=".8" fill="currentColor" /><circle cx="15.5" cy="12" r=".8" fill="currentColor" /></B>,
   money: <B><circle cx="12" cy="12" r="6" /><path d="M12 2v4M12 18v4M2 12h4M18 12h4" /></B>,
-  net: <B><ellipse cx="12" cy="5.5" rx="8" ry="2.5" /><path d="M4 5.5 7 20h10l3-14.5M9 8l1.2 12M15 8l-1.2 12M5.6 13h12.8" /></B>,
+  auto: <B><path d="M17 2.5 20.5 6 17 9.5" /><path d="M3.5 11.5V10a4 4 0 0 1 4-4h13" /><path d="M7 21.5 3.5 18 7 14.5" /><path d="M20.5 12.5V14a4 4 0 0 1-4 4h-13" /></B>,
   cross: <B><circle cx="12" cy="12" r="8" /><path d="M12 2v6M12 16v6M2 12h6M16 12h6" /><circle cx="12" cy="12" r="1" fill="currentColor" /></B>,
   house: <B><path d="M3 11.5 12 4l9 7.5" /><path d="M5.5 9.5V20h13V9.5" /><path d="M10 20v-5.5h4V20" /></B>,
   medic: <B><path d="M9.5 3.5h5v6h6v5h-6v6h-5v-6h-6v-5h6z" /></B>,
