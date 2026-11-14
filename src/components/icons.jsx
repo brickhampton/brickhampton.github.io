@@ -47,6 +47,16 @@ export const BIC = {
   knife: <B><rect x="2.5" y="12.5" width="14" height="6" rx="3" /><path d="M8 12.5 19 5l2 2.2-9 5.3" /><path d="M16.5 15.5h4.5" /><circle cx="6" cy="15.5" r=".9" fill="currentColor" /></B>,
   cookie: <B><path d="M20.5 12.5A8.5 8.5 0 1 1 11.5 3.5a3 3 0 0 0 4 4 3 3 0 0 0 5 5z" /><circle cx="8.5" cy="10" r="1" fill="currentColor" /><circle cx="12.5" cy="15.5" r="1" fill="currentColor" /><circle cx="8" cy="15" r=".8" fill="currentColor" /><circle cx="15.5" cy="12" r=".8" fill="currentColor" /></B>,
   money: <B><circle cx="12" cy="12" r="6" /><path d="M12 2v4M12 18v4M2 12h4M18 12h4" /></B>,
+  net: <B><ellipse cx="12" cy="5.5" rx="8" ry="2.5" /><path d="M4 5.5 7 20h10l3-14.5M9 8l1.2 12M15 8l-1.2 12M5.6 13h12.8" /></B>,
+  cross: <B><circle cx="12" cy="12" r="8" /><path d="M12 2v6M12 16v6M2 12h6M16 12h6" /><circle cx="12" cy="12" r="1" fill="currentColor" /></B>,
+  house: <B><path d="M3 11.5 12 4l9 7.5" /><path d="M5.5 9.5V20h13V9.5" /><path d="M10 20v-5.5h4V20" /></B>,
+  medic: <B><path d="M9.5 3.5h5v6h6v5h-6v6h-5v-6h-6v-5h6z" /></B>,
+  bars: <B><path d="M6 20v-9M12 20v-9M18 20v-9" /></B>,
+  heart: <B><path d="M12 20s-7.5-4.6-7.5-10.2A4.2 4.2 0 0 1 12 7.3a4.2 4.2 0 0 1 7.5 2.5C19.5 15.4 12 20 12 20z" /></B>,
+  stop: <B><path d="M8.2 3h7.6L21 8.2v7.6L15.8 21H8.2L3 15.8V8.2z" /><path d="M8 12h8" /></B>,
+  cal: <B><rect x="3.5" y="5" width="17" height="15.5" rx="2" /><path d="M3.5 10h17M8 3v4M16 3v4" /><path d="m9 15 2 2 4-4" /></B>,
+  board: <B><rect x="2" y="4" width="20" height="11" rx="2" /><path d="M9 15v-5h6v5" /><ellipse cx="12" cy="17.6" rx="4.25" ry="1.8" /></B>,
+  coin: <B><circle cx="12" cy="12" r="9" /><path d="M14.6 9.2c-.5-.9-1.5-1.4-2.6-1.4-1.5 0-2.6.8-2.6 2s1 1.7 2.6 2.1 2.6.9 2.6 2.1-1.1 2.1-2.6 2.1c-1.2 0-2.2-.5-2.7-1.5M12 6.2v1.6M12 16.2v1.6" /></B>,
   burger: (
     <svg className="burger" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
       <path d="M3.5 10.2C3.5 6.3 7.3 3.5 12 3.5s8.5 2.8 8.5 6.7c0 .5-.4.8-.9.8H4.4c-.5 0-.9-.3-.9-.8z" fill="#f0a84e" />
