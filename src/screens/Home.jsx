@@ -58,14 +58,20 @@ function homeScene(cw, ch) {
   const COLS = ['#4f7cff', '#eeeeee', '#e9b949', '#9db4ff', '#f4d37c', '#2f55d4'];
   const n = Math.min(110, Math.round(54 * vw * (Math.min(vb, 470) - vy) / (800 * 470)));
   // Confetti in front of the team stays clear of the players, so none of it covers a face.
-  const half = Math.round(n * .55), k = A < 1 ? 1.3 : 1, onTeam = (x, y) => (Math.abs(x - 400) < 165 * k && y > 300 - 195 * k && y < 300 + 50 * k)
+  const half0 = Math.round(n * .55), k = A < 1 ? 1.3 : 1, onTeam = (x, y) => (Math.abs(x - 400) < 165 * k && y > 300 - 195 * k && y < 300 + 50 * k)
     || (x > 400 - (400 - sx + 55) * k && x < 400 - (400 - sx - 30) * k && y > 300 - 175 * k && y < 300 - 50 * k);
   // Confetti is square pixels the size of the players' own, falling the height of the arena in steps and flipping
   // between its wide and narrow sides as it turns. The pieces in front fall down the sides, clear of the team.
   const CU = A < 1 ? 5 : 4, top = vy - 3 * CU, inCols = x => Math.abs(x - 400) < 165 * k || (x > 400 - (400 - sx + 55) * k && x < 400 - (400 - sx - 30) * k);
+  // The front pieces need a clear strip down each side of the team. On a narrow screen (a phone held upright) there is
+  // none on the left and only a sliver on the right, so there every piece falls behind the team instead, right across
+  // the screen and all the way down it.
+  const free = (a, b) => { let f = 0; for (let x = a; x < b; x += CU) if (!inCols(x)) f += CU; return f; };
+  const sides = Math.min(free(vx, 400), free(400, vx + vw)) >= vw * .12, half = sides ? half0 : n;
   const pieces = Array.from({ length: n }, (_, i) => {
-    let x, y; const end = i < half ? 470 : Math.max(470, vb);
-    do { x = vx + rnd() * vw; y = top + rnd() * (end - top); } while (i >= half && (inCols(x) || onTeam(x, y)));
+    let x, y; const end = i < half && sides ? 470 : Math.max(470, vb);
+    // Front pieces take the left and right sides in turn, so Ash's column on the left doesn't push them all to the right.
+    do { x = vx + rnd() * vw; if (i >= half) x = i % 2 ? 400 + (x - vx) / 2 : vx + (x - vx) / 2; y = top + rnd() * (end - top); } while (i >= half && (inCols(x) || onTeam(x, y)));
     x = Math.round(x / CU) * CU; y = Math.round(y / CU) * CU;
     const c = COLS[i % COLS.length], tall = i % 3 === 1, one = i % 5 === 4, w = one || tall ? CU : 2 * CU, h = tall ? 2 * CU : CU;
     const dur = 9 + rnd() * 7, drift = (Math.round(rnd() * 6) - 3) * CU;
