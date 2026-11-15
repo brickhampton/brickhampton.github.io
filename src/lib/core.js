@@ -149,10 +149,12 @@ export function teamFeat(g, games) {
 }
 
 /* ================= badges ================= */
+// Badge colours by part of the game (Geoff, 2026-11-14): orange scoring, green shooting, blue playmaking and
+// all-round, purple defence and rebounds, gold form, red roasts, grey for Ol' reliable only.
 // Player badges for their latest season and recent games. Nothing about stat totals.
 // asOf looks at things as they stood at the end of that season.
 // Badge thresholds: round numbers this team can reach (see player-badges.md).
-const BT = { lock: 15, auto: .6, autoA: 10, stl: 2, blk: 1, snipe: 3, eff: .5, effA: 20, p3: .35, p3A: 15, ft: .6, ftA: 5, steady: 10, rise: 3.5, sak: 3 };
+const BT = { lock: 15, auto: .6, autoA: 10, stl: 2, blk: 1, snipe: 3, eff: .5, effA: 20, p3: .35, p3A: 15, ft: .6, ftA: 5, steady: 10, rise: 3.5, sak: 3, sakTop: 3 };
 export function playerBadges(id, asOf, noTie) {
   const order = seasonList().map(x => x.code), games = asOf ? allGames().filter(g => order.indexOf(g.season) >= order.indexOf(asOf)) : allGames(), mine = games.filter(g => g.rows[id]);
   if (!mine.length || (asOf && !mine.some(g => g.season === asOf))) return [];
@@ -173,44 +175,58 @@ export function playerBadges(id, asOf, noTie) {
   const lines = mine.map(g => calc(g.rows[id])), last = n => lines.slice(-n), out = [];
   const add = (key, name, icon, tone, desc) => out.push({ key, name, icon, tone, desc });
   const l3 = last(3), t3 = sumRows(l3), l5 = last(5);
-  if (l3.length === 3 && l3.every(s => s.per >= BT.lock)) add('heater', 'LOCKED IN', 'zap', 'hot', `${BT.lock}+ PER in each of their last 3 games.`);
-  if (l3.length === 3 && t3.tsa >= BT.autoA && t3.ts >= BT.auto) add('hot', 'Automatic', 'flame', 'hot', `${pctTxt(t3.ts)} true shooting over their last 3 games.`);
-  if (best(x => x.pg('pts'))) add('pts', 'Bucket getter', 'ball', 'blue', `Most points a game in ${nm} (${f1(a.pg('pts'))}).`);
+  if (l3.length === 3 && l3.every(s => s.per >= BT.lock)) add('heater', 'LOCKED IN', 'zap', 'gold', `${BT.lock}+ PER in each of their last 3 games.`);
+  if (l3.length === 3 && t3.tsa >= BT.autoA && t3.ts >= BT.auto) add('hot', 'Automatic', 'auto', 'green', `${pctTxt(t3.ts)} true shooting over their last 3 games.`);
+  if (best(x => x.pg('pts'))) add('pts', 'Scoring leader', 'sword', 'hot', `Most points a game in ${nm} (${f1(a.pg('pts'))}).`);
+  if (best(x => x.pg('ftm')) && a.s.ftm > 0) add('ftm', 'Free throw merchant', 'moneybag', 'hot', `Most points from free throws a game in ${nm} (${f1(a.pg('ftm'))}).`);
   // BAM!: the most points in one game this season, among the starters who played in it.
   const bamOf = x => Math.max(...sg.filter(g => g.rows[x]).map(g => calc(g.rows[x]).pts)), bamPeers = statPlayers().filter(x => sg.some(g => g.rows[x])).map(x => ({ id: x, v: bamOf(x) }));
   const bam = bamOf(id);
-  if (starter && bam > 0 && bamPeers.length > 2 && lead(bamPeers, { id, v: bam }, x => x.v)) add('bam', 'BAM!', 'boom', 'hot', `Most points in a single game in ${nm} (${bam}).`);
-  if (best(x => x.pg('reb'))) add('reb', 'Glass cleaner', 'up', 'blue', `Most rebounds a game in ${nm} (${f1(a.pg('reb'))}).`);
+  if (starter && bam > 0 && bamPeers.length > 2 && lead(bamPeers, { id, v: bam }, x => x.v)) add('bam', 'BAM!', 'bang', 'hot', `Most points in a single game in ${nm} (${bam}).`);
+  if (best(x => x.pg('reb'))) add('reb', 'Glass cleaner', 'window', 'purple', `Most rebounds a game in ${nm} (${f1(a.pg('reb'))}).`);
   // Offensive rebounds are only recorded in newer games, so only those games count, and a season without any gives no badge.
   const orAgg = x => { const l = sg.filter(g => g.rows[x] && g.rows[x].oreb !== undefined).map(g => g.rows[x].oreb); return { id: x, gp: l.length, pg: l.reduce((t, v) => t + v, 0) / (l.length || 1) }; };
   // Until the season has 3 games with OREB, a player needs every one of them.
   const orGames = sg.filter(g => Object.values(g.rows).some(r => r.oreb !== undefined)).length, orMin = Math.min(3, orGames);
   const oa = orAgg(id), oPeers = statPlayers().map(orAgg).filter(x => x.gp >= Math.min(orMin, oa.gp));
-  if (starter && orMin > 0 && oa.gp >= orMin && oa.pg > 0 && oPeers.length > 2 && lead(oPeers, oa, x => x.pg)) add('oreb', 'Crash out', 'bull', 'blue', `Most offensive rebounds a game in ${nm} (${f1(oa.pg)}).`);
-  if (best(x => x.pg('ast'))) add('ast', 'Assistaholic', 'pass', 'blue', `Most assists a game in ${nm} (${f1(a.pg('ast'))}).`);
+  if (starter && orMin > 0 && oa.gp >= orMin && oa.pg > 0 && oPeers.length > 2 && lead(oPeers, oa, x => x.pg)) add('oreb', 'Crash out', 'boom', 'blue', `Most offensive rebounds a game in ${nm} (${f1(oa.pg)}).`);
+  if (best(x => x.pg('ast'))) add('ast', 'Assistaholic', 'hearts', 'blue', `Most assists a game in ${nm} (${f1(a.pg('ast'))}).`);
   const def = x => (x.s.stl + x.s.blk) / x.gp;
   // Subs can earn the 3+ a game version: it doesn't compare them with anyone.
-  if (a.gp >= 3 && (def(a) >= 3 || best(def))) add('def', 'Clamps', 'shield', 'green', `${f1(def(a))} steals and blocks a game in ${nm}${best(def) ? ', the most on the team' : ''}.`);
+  if (a.gp >= 3 && (def(a) >= 3 || best(def))) add('def', 'Clamps', 'shield2', 'purple', `${f1(def(a))} steals and blocks a game in ${nm}${best(def) ? ', the most on the team' : ''}.`);
   const hasDef = out.some(b => b.key === 'def');
-  if (!hasDef && a.gp >= 3 && a.pg('stl') >= BT.stl) add('stl', 'Cookiesss', 'cookie', 'green', `${f1(a.pg('stl'))} steals a game in ${nm}.`);
-  if (!hasDef && a.gp >= 3 && a.pg('blk') >= BT.blk) add('blk', 'Not in my house!', 'shield', 'green', `${f1(a.pg('blk'))} blocks a game in ${nm}.`);
-  const snipe = l5.filter(s => s.m3 >= BT.snipe).length; if (snipe) add('snipe', 'Sniper', 'target', 'gold', `${snipe === 1 ? 'A game' : snipe + ' games'} with ${BT.snipe}+ threes in their last ${l5.length}.`);
-  if (a.s.tsa >= BT.effA && a.s.ts >= BT.eff) add('eff', 'Clinical', 'check', 'gold', `${pctTxt(a.s.ts)} true shooting in ${nm}.`);
+  if (!hasDef && a.gp >= 3 && a.pg('stl') >= BT.stl) add('stl', 'Cookiesss', 'cookie', 'purple', `${f1(a.pg('stl'))} steals a game in ${nm}.`);
+  if (!hasDef && a.gp >= 3 && a.pg('blk') >= BT.blk) add('blk', 'Not in my house!', 'wag', 'purple', `${f1(a.pg('blk'))} blocks a game in ${nm}.`);
+  const snipe = l5.filter(s => s.m3 >= BT.snipe).length; if (snipe) add('snipe', 'Sniper', 'cross', 'green', `${snipe === 1 ? 'A game' : snipe + ' games'} with ${BT.snipe}+ threes in their last ${l5.length}.`);
+  if (a.s.tsa >= BT.effA && a.s.ts >= BT.eff) add('eff', 'Clinical', 'syringe', 'green', `${pctTxt(a.s.ts)} true shooting in ${nm}.`);
   const seasons = seasonList().map(x => x.code), prevS = seasons.slice(seasons.indexOf(season) + 1).find(c => mine.some(g => g.season === c));
   const pa = prevS && playerAgg(games.filter(g => g.season === prevS), id);
-  if (pa && pa.gp >= 3 && a.gp >= 3 && a.pg('per') - pa.pg('per') >= BT.rise) add('rise', 'Let him cook', 'flame', 'hot', `${f1(a.pg('per'))} PER a game in ${nm}, up from ${f1(pa.pg('per'))} in ${prevS}.`);
-  const p3 = ratio(a.s.m3, a.s.a3); if (a.s.a3 >= BT.p3A && p3 >= BT.p3) add('3', 'Green bean', 'target', 'gold', `${pctTxt(p3)} from three in ${nm} (${a.s.m3} of ${a.s.a3}).`);
-  const ft = ratio(a.s.ftm, a.s.fta); if (a.s.fta >= BT.ftA && ft >= BT.ft) add('ft', 'Philanthropist', 'money', 'gold', `${pctTxt(ft)} at the free throw line in ${nm} (${a.s.ftm} of ${a.s.fta}).`);
-  if (best(x => x.pg('fta')) && a.s.fta > 0) add('fta', 'Ref\'s best friend', 'whistle', 'blue', `Most free throw attempts a game in ${nm} (${f1(a.pg('fta'))}).`);
+  if (pa && pa.gp >= 3 && a.gp >= 3 && a.pg('per') - pa.pg('per') >= BT.rise) add('rise', 'Let him cook', 'flame', 'gold', `${f1(a.pg('per'))} PER a game in ${nm}, up from ${f1(pa.pg('per'))} in ${prevS}.`);
+  const p3 = ratio(a.s.m3, a.s.a3); if (a.s.a3 >= BT.p3A && p3 >= BT.p3) add('3', 'Green bean', 'target', 'green', `${pctTxt(p3)} from three in ${nm} (${a.s.m3} of ${a.s.a3}).`);
+  const ft = ratio(a.s.ftm, a.s.fta); if (a.s.fta >= BT.ftA && ft >= BT.ft) add('ft', 'For free?', 'piggy', 'green', `${pctTxt(ft)} at the free throw line in ${nm} (${a.s.ftm} of ${a.s.fta}).`);
+  if (best(x => x.pg('fta')) && a.s.fta > 0) add('fta', 'Ref\'s best friend', 'whistle', 'red', `Most free throw attempts a game in ${nm} (${f1(a.pg('fta'))}).`);
   const dd = sg.filter(g => g.rows[id]).map(g => calc(g.rows[id])).filter(s => [s.pts, s.reb, s.ast, s.stl, s.blk].filter(v => v >= 10).length >= 2).length;
-  if (dd >= 2) add('dd', 'Double-double machine', 'layers', 'blue', `${dd} double-doubles in ${nm}.`);
-  const sak = sg.filter(g => g.rows[id]).map(g => calc(g.rows[id])).filter(s => s.pts >= 1 && s.reb >= 1 && s.ast >= 1 && s.stl >= 1).length;
-  if (sak >= BT.sak) add('sak', 'Swiss army knife', 'knife', 'blue', `${sak} games in ${nm} with at least a point, a rebound, an assist and a steal.`);
-  if (best(x => x.pg('to'), true) && a.gp >= 5) add('safe', 'Safe hands', 'lock', 'green', `Fewest turnovers a game in ${nm} (${f1(a.pg('to'))}).`);
-  if (best(x => x.pg('to')) && a.gp >= 5) add('butter', 'Butter fingers', 'butter', 'red', `Most turnovers a game in ${nm} (${f1(a.pg('to'))}).`);
-  if (best(x => x.pg('tsa'), true)) add('unselfish', 'Unselfish', 'pass', 'blue', `Fewest shot attempts a game in ${nm} (${f1(a.pg('tsa'))} true shooting attempts).`);
-  if (best(x => x.pg('tsa'))) add('chuck', 'Possession ends here', 'ball', 'red', `Most shot attempts a game in ${nm} (${f1(a.pg('tsa'))} true shooting attempts).`);
-  if (l5.length === 5 && l5.every(s => s.per >= BT.steady)) add('steady', 'Mr Consistent', 'check', 'green', `${BT.steady}+ PER in each of their last 5 games.`);
-  if (sg.length >= 5 && a.gp === sg.length) add('ever', 'Ol\' reliable', 'iron', 'grey', `Played all ${sg.length} games in ${nm}.`);
+  if (dd >= 1) add('dd', 'Double trouble', 'cards', 'blue', `${dd === 1 ? 'A double-double' : dd + ' double-doubles'} in ${nm}.`);
+  // Swiss army knife: 3+ games with a point, a rebound, an assist and a steal, and at most 3 players get it (Geoff, 2026-11-15).
+  // Ranked by how many of those games, then by the share of their games that were one. A tie at the cut-off goes to the tied
+  // player with the fewest other badges, or to all of them if they have the same number (the team-best tie rule).
+  const sakOf = x => { const l = sg.filter(g => g.rows[x]).map(g => calc(g.rows[x])), n = l.filter(s => s.pts >= 1 && s.reb >= 1 && s.ast >= 1 && s.stl >= 1).length; return { id: x, n, r: l.length ? n / l.length : 0 }; };
+  const sk = sakOf(id);
+  if (sk.n >= BT.sak) {
+    const all = [...new Set(sg.flatMap(g => Object.keys(g.rows)))].map(sakOf).filter(x => x.n >= BT.sak);
+    const ahead = all.filter(x => x.n > sk.n || (x.n === sk.n && x.r > sk.r)).length, level = all.filter(x => x.id !== id && x.n === sk.n && x.r === sk.r);
+    let ok = ahead + level.length < BT.sakTop;
+    if (!ok && ahead < BT.sakTop && level.length && !noTie) {
+      const mine = playerBadges(id, season, true).length;
+      ok = level.filter(x => playerBadges(x.id, season, true).length < mine).length < BT.sakTop - ahead;
+    }
+    if (ok) add('sak', 'Swiss army knife', 'knife', 'blue', `${sk.n} games in ${nm} with at least a point, a rebound, an assist and a steal (${Math.round(sk.r * 100)}% of their games).`);
+  }
+  if (best(x => x.pg('to'), true) && a.gp >= 5) add('safe', 'Safe hands', 'lock', 'blue', `Fewest turnovers a game in ${nm} (${f1(a.pg('to'))}).`);
+  if (best(x => x.pg('to')) && a.gp >= 5) add('butter', 'Butter fingers', 'butterSlices', 'red', `Most turnovers a game in ${nm} (${f1(a.pg('to'))}).`);
+  if (best(x => x.pg('tsa'), true)) add('unselfish', 'Unselfish', 'heart', 'blue', `Fewest shot attempts a game in ${nm} (${f1(a.pg('tsa'))} true shooting attempts).`);
+  if (best(x => x.pg('tsa'))) add('chuck', 'Possession ends here', 'stop', 'red', `Most shot attempts a game in ${nm} (${f1(a.pg('tsa'))} true shooting attempts).`);
+  if (l5.length === 5 && l5.every(s => s.per >= BT.steady)) add('steady', 'Mr Consistent', 'key', 'gold', `${BT.steady}+ PER in each of their last 5 games.`);
+  if (sg.length >= 5 && a.gp === sg.length) add('ever', 'Ol\' reliable', 'cal', 'grey', `Played all ${sg.length} games in ${nm}.`);
   return asOf ? out : out.slice(0, 6);
 }
