@@ -64,13 +64,14 @@ export const BIC = {
   sword: <B><path d="M14.5 17.5 3 6V3h3l11.5 11.5" /><path d="M13 19l6-6" /><path d="M16.6 16.6l3.6 3.6" strokeWidth="4" /></B>,
   // Butter fingers: a block of butter with slices falling off (Geoff's reference picture).
   butterSlices: <B><g strokeWidth="1.8"><path d="M10 9 16.5 4H22l-6.5 5z" /><path d="M10 9h5.5v6.5H10z" /><path d="M15.5 15.5 22 10.5V4" /><path d="M5 8.6 7.6 7.4l1.6 6.4-2.6 1.2z" /><path d="M1.5 18.2 4.5 16.2h5.2l-3 2z" /><path d="M1.5 18.2v1.8h5.2l3-2v-1.8M6.7 18.2V20" /></g></B>,
-  // Glass cleaner sponge with bubbles, BAM! comic exclamation marks, For free? piggy bank, Free throw merchant money bag.
-  sponge: <B><rect x="2.5" y="11" width="14" height="9.5" rx="2.2" /><circle cx="6.5" cy="15" r=".9" fill="currentColor" stroke="none" /><circle cx="10.5" cy="17.3" r=".9" fill="currentColor" stroke="none" /><circle cx="12.8" cy="14" r=".9" fill="currentColor" stroke="none" /><circle cx="18.5" cy="7" r="2.4" /><circle cx="13.2" cy="5" r="1.5" /><circle cx="20.6" cy="13.2" r="1.3" /></B>,
+  // BAM! comic exclamation marks, For free? piggy bank, Free throw merchant money bag.
   bang: <B><path d="M7.2 3.2h4.6L9.6 14.2H7.6z" fill="currentColor" strokeWidth="1.2" /><circle cx="8.1" cy="18.6" r="1.9" fill="currentColor" stroke="none" /><path d="M15.2 3.2h4.6l-2.2 11h-2z" fill="currentColor" strokeWidth="1.2" /><circle cx="16.1" cy="18.6" r="1.9" fill="currentColor" stroke="none" /></B>,
   piggy: <B><path d="M11 17h3v2a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1v-3a3.2 3.2 0 0 0 2-2h1a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1h-1a5 5 0 0 0-2-4V3a4 4 0 0 0-3.2 1.6l-.3.4H11a6 6 0 0 0-6 6v1a5 5 0 0 0 2 4v3a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1z" /><path d="M16 10h.01M2 8v1a2 2 0 0 0 2 2h1" /></B>,
   moneybag: <B><path d="M9 3h6l-1.6 3h-2.8z" /><path d="M10.4 6C6.2 8 4 12 4 15.5 4 19 7 21 12 21s8-2 8-5.5C20 12 17.8 8 13.6 6" /><path d="M14 12.2c-.4-.7-1.2-1.1-2-1.1-1.1 0-2 .6-2 1.4s.8 1.2 2 1.5 2 .7 2 1.5-.9 1.4-2 1.4c-.9 0-1.7-.4-2.1-1.1M12 9.8v1.3M12 16.9v1.3" /></B>,
   // Double trouble: a pair of playing cards.
   cards: <B><defs><mask id="bic-cards"><rect width="24" height="24" fill="#fff" /><rect x="9.5" y="4.5" width="10" height="15" rx="1.8" transform="rotate(12 14.5 12)" fill="#000" stroke="#000" strokeWidth="5" /></mask></defs><rect x="4" y="4.5" width="10" height="15" rx="1.8" transform="rotate(-12 9 12)" mask="url(#bic-cards)" /><rect x="9.5" y="4.5" width="10" height="15" rx="1.8" transform="rotate(12 14.5 12)" /><path d="M14.6 9.2l2 2.8-2 2.8-2-2.8z" fill="currentColor" strokeWidth="1" /></B>,
+  // Glass cleaner: a shiny, clean window.
+  window: <B><rect x="3" y="3" width="18" height="18" rx="2" /><path d="M7.5 12 12 7.5M7.5 16 16 7.5M12 16l4-4" /></B>,
   burger: (
     <svg className="burger" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
       <path d="M3.5 10.2C3.5 6.3 7.3 3.5 12 3.5s8.5 2.8 8.5 6.7c0 .5-.4.8-.9.8H4.4c-.5 0-.9-.3-.9-.8z" fill="#f0a84e" />
