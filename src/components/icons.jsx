@@ -60,8 +60,8 @@ export const BIC = {
   key: <B><g transform="rotate(-45 12 12)"><rect x="2" y="7.5" width="8.5" height="9" rx="3" /><circle cx="5.6" cy="12" r="1.3" /><path d="M10.5 10.5h10l1 1.5-1 1.5h-1.3l-1 1.5-1-1.5h-1.4l-1 1.5-1-1.5h-3.3" /></g></B>,
   // Clamps: a shield with an inner border.
   shield2: <B><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z" /><path d="M12 7l3.8 1.6V12c0 2.6-1.6 4.4-3.8 5.3-2.2-.9-3.8-2.7-3.8-5.3V8.6z" /></B>,
-  // Scoring leader: a sword whose blade broadens towards the tip, grip drawn as an outline.
-  sword: <B><path d="M2.5 2.5l7.5 1.3 7.2 11-2.4 2.4-11-7.2z" /><path d="M12.5 19.5l7-7" /><rect x="16.8" y="15.6" width="3.6" height="6.6" rx="1.1" transform="rotate(-45 18.6 18.9)" /></B>,
+  // Scoring leader: a sword whose blade gently broadens towards the tip, grip drawn as an outline.
+  sword: <B><path d="M3 3h4.2l10.2 11.6-2.8 2.8L3 7.2z" /><path d="M12.5 19.5l7-7" /><rect x="16.8" y="15.6" width="3.6" height="6.6" rx="1.1" transform="rotate(-45 18.6 18.9)" /></B>,
   // Butter fingers: a block of butter with slices falling off (Geoff's reference picture).
   butterSlices: <B><g strokeWidth="1.8"><path d="M10 9 16.5 4H22l-6.5 5z" /><path d="M10 9h5.5v6.5H10z" /><path d="M15.5 15.5 22 10.5V4" /><path d="M5 8.6 7.6 7.4l1.6 6.4-2.6 1.2z" /><path d="M1.5 18.2 4.5 16.2h5.2l-3 2z" /><path d="M1.5 18.2v1.8h5.2l3-2v-1.8M6.7 18.2V20" /></g></B>,
   // BAM! comic exclamation marks, For free? piggy bank, Free throw merchant money bag.
