@@ -210,7 +210,7 @@ export function playerBadges(id, asOf, noTie) {
   const sak = sg.filter(g => g.rows[id]).map(g => calc(g.rows[id])).filter(s => s.pts >= 1 && s.reb >= 1 && s.ast >= 1 && s.stl >= 1).length;
   if (sak >= BT.sak) add('sak', 'Swiss army knife', 'knife', 'blue', `${sak} games in ${nm} with at least a point, a rebound, an assist and a steal.`);
   if (best(x => x.pg('to'), true) && a.gp >= 5) add('safe', 'Safe hands', 'lock', 'blue', `Fewest turnovers a game in ${nm} (${f1(a.pg('to'))}).`);
-  if (best(x => x.pg('to')) && a.gp >= 5) add('butter', 'Butter fingers', 'pancakes', 'red', `Most turnovers a game in ${nm} (${f1(a.pg('to'))}).`);
+  if (best(x => x.pg('to')) && a.gp >= 5) add('butter', 'Butter fingers', 'butterSlices', 'red', `Most turnovers a game in ${nm} (${f1(a.pg('to'))}).`);
   if (best(x => x.pg('tsa'), true)) add('unselfish', 'Unselfish', 'heart', 'blue', `Fewest shot attempts a game in ${nm} (${f1(a.pg('tsa'))} true shooting attempts).`);
   if (best(x => x.pg('tsa'))) add('chuck', 'Possession ends here', 'stop', 'red', `Most shot attempts a game in ${nm} (${f1(a.pg('tsa'))} true shooting attempts).`);
   if (l5.length === 5 && l5.every(s => s.per >= BT.steady)) add('steady', 'Mr Consistent', 'key', 'gold', `${BT.steady}+ PER in each of their last 5 games.`);
