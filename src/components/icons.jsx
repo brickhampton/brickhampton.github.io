@@ -69,6 +69,8 @@ export const BIC = {
   bang: <B><path d="M7.2 3.2h4.6L9.6 14.2H7.6z" fill="currentColor" strokeWidth="1.2" /><circle cx="8.1" cy="18.6" r="1.9" fill="currentColor" stroke="none" /><path d="M15.2 3.2h4.6l-2.2 11h-2z" fill="currentColor" strokeWidth="1.2" /><circle cx="16.1" cy="18.6" r="1.9" fill="currentColor" stroke="none" /></B>,
   piggy: <B><path d="M11 17h3v2a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1v-3a3.2 3.2 0 0 0 2-2h1a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1h-1a5 5 0 0 0-2-4V3a4 4 0 0 0-3.2 1.6l-.3.4H11a6 6 0 0 0-6 6v1a5 5 0 0 0 2 4v3a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1z" /><path d="M16 10h.01M2 8v1a2 2 0 0 0 2 2h1" /></B>,
   moneybag: <B><path d="M9 3h6l-1.6 3h-2.8z" /><path d="M10.4 6C6.2 8 4 12 4 15.5 4 19 7 21 12 21s8-2 8-5.5C20 12 17.8 8 13.6 6" /><path d="M14 12.2c-.4-.7-1.2-1.1-2-1.1-1.1 0-2 .6-2 1.4s.8 1.2 2 1.5 2 .7 2 1.5-.9 1.4-2 1.4c-.9 0-1.7-.4-2.1-1.1M12 9.8v1.3M12 16.9v1.3" /></B>,
+  // Double trouble: a pair of playing cards.
+  cards: <B><defs><mask id="bic-cards"><rect width="24" height="24" fill="#fff" /><rect x="9.5" y="4.5" width="10" height="15" rx="1.8" transform="rotate(12 14.5 12)" fill="#000" stroke="#000" strokeWidth="5" /></mask></defs><rect x="4" y="4.5" width="10" height="15" rx="1.8" transform="rotate(-12 9 12)" mask="url(#bic-cards)" /><rect x="9.5" y="4.5" width="10" height="15" rx="1.8" transform="rotate(12 14.5 12)" /><path d="M14.6 9.2l2 2.8-2 2.8-2-2.8z" fill="currentColor" strokeWidth="1" /></B>,
   burger: (
     <svg className="burger" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
       <path d="M3.5 10.2C3.5 6.3 7.3 3.5 12 3.5s8.5 2.8 8.5 6.7c0 .5-.4.8-.9.8H4.4c-.5 0-.9-.3-.9-.8z" fill="#f0a84e" />

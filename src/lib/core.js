@@ -154,7 +154,7 @@ export function teamFeat(g, games) {
 // Player badges for their latest season and recent games. Nothing about stat totals.
 // asOf looks at things as they stood at the end of that season.
 // Badge thresholds: round numbers this team can reach (see player-badges.md).
-const BT = { lock: 15, auto: .6, autoA: 10, stl: 2, blk: 1, snipe: 3, eff: .5, effA: 20, p3: .35, p3A: 15, ft: .6, ftA: 5, steady: 10, rise: 3.5, sak: 3 };
+const BT = { lock: 15, auto: .6, autoA: 10, stl: 2, blk: 1, snipe: 3, eff: .5, effA: 20, p3: .35, p3A: 15, ft: .6, ftA: 5, steady: 10, rise: 3.5, sak: 3, sakTop: 3 };
 export function playerBadges(id, asOf, noTie) {
   const order = seasonList().map(x => x.code), games = asOf ? allGames().filter(g => order.indexOf(g.season) >= order.indexOf(asOf)) : allGames(), mine = games.filter(g => g.rows[id]);
   if (!mine.length || (asOf && !mine.some(g => g.season === asOf))) return [];
@@ -206,9 +206,22 @@ export function playerBadges(id, asOf, noTie) {
   const ft = ratio(a.s.ftm, a.s.fta); if (a.s.fta >= BT.ftA && ft >= BT.ft) add('ft', 'For free?', 'piggy', 'green', `${pctTxt(ft)} at the free throw line in ${nm} (${a.s.ftm} of ${a.s.fta}).`);
   if (best(x => x.pg('fta')) && a.s.fta > 0) add('fta', 'Ref\'s best friend', 'whistle', 'red', `Most free throw attempts a game in ${nm} (${f1(a.pg('fta'))}).`);
   const dd = sg.filter(g => g.rows[id]).map(g => calc(g.rows[id])).filter(s => [s.pts, s.reb, s.ast, s.stl, s.blk].filter(v => v >= 10).length >= 2).length;
-  if (dd >= 2) add('dd', 'Double Trouble', 'layers', 'blue', `${dd} double-doubles in ${nm}.`);
-  const sak = sg.filter(g => g.rows[id]).map(g => calc(g.rows[id])).filter(s => s.pts >= 1 && s.reb >= 1 && s.ast >= 1 && s.stl >= 1).length;
-  if (sak >= BT.sak) add('sak', 'Swiss army knife', 'knife', 'blue', `${sak} games in ${nm} with at least a point, a rebound, an assist and a steal.`);
+  if (dd >= 1) add('dd', 'Double trouble', 'cards', 'blue', `${dd === 1 ? 'A double-double' : dd + ' double-doubles'} in ${nm}.`);
+  // Swiss army knife: 3+ games with a point, a rebound, an assist and a steal, and at most 3 players get it (Geoff, 2026-11-15).
+  // Ranked by how many of those games, then by the share of their games that were one. A tie at the cut-off goes to the tied
+  // player with the fewest other badges, or to all of them if they have the same number (the team-best tie rule).
+  const sakOf = x => { const l = sg.filter(g => g.rows[x]).map(g => calc(g.rows[x])), n = l.filter(s => s.pts >= 1 && s.reb >= 1 && s.ast >= 1 && s.stl >= 1).length; return { id: x, n, r: l.length ? n / l.length : 0 }; };
+  const sk = sakOf(id);
+  if (sk.n >= BT.sak) {
+    const all = [...new Set(sg.flatMap(g => Object.keys(g.rows)))].map(sakOf).filter(x => x.n >= BT.sak);
+    const ahead = all.filter(x => x.n > sk.n || (x.n === sk.n && x.r > sk.r)).length, level = all.filter(x => x.id !== id && x.n === sk.n && x.r === sk.r);
+    let ok = ahead + level.length < BT.sakTop;
+    if (!ok && ahead < BT.sakTop && level.length && !noTie) {
+      const mine = playerBadges(id, season, true).length;
+      ok = level.filter(x => playerBadges(x.id, season, true).length < mine).length < BT.sakTop - ahead;
+    }
+    if (ok) add('sak', 'Swiss army knife', 'knife', 'blue', `${sk.n} games in ${nm} with at least a point, a rebound, an assist and a steal (${Math.round(sk.r * 100)}% of their games).`);
+  }
   if (best(x => x.pg('to'), true) && a.gp >= 5) add('safe', 'Safe hands', 'lock', 'blue', `Fewest turnovers a game in ${nm} (${f1(a.pg('to'))}).`);
   if (best(x => x.pg('to')) && a.gp >= 5) add('butter', 'Butter fingers', 'butterSlices', 'red', `Most turnovers a game in ${nm} (${f1(a.pg('to'))}).`);
   if (best(x => x.pg('tsa'), true)) add('unselfish', 'Unselfish', 'heart', 'blue', `Fewest shot attempts a game in ${nm} (${f1(a.pg('tsa'))} true shooting attempts).`);
