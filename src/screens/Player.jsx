@@ -5,7 +5,7 @@ import { shotDetail } from '../lib/prefs.js';
 import { go } from '../lib/nav.js';
 import { drawRadar, drawTrend, P_STATS, P_MORE, SLOT_COL, SC_B, reduced } from '../lib/charts.js';
 import { Avatar, figure } from '../components/Avatar.jsx';
-import { pxShadow, BALL, BALL_C, trickExtras } from '../lib/avatar.js';
+import { pxShadow, BALL, BALL_C, trickExtras, CASH } from '../lib/avatar.js';
 import { playerCourt, COURT_VIEW } from '../lib/playerCourt.js';
 import { Back, BIC, MedalGold } from '../components/icons.jsx';
 import { Chart, SeasonPick, StatChips, MoreBtn, EmptyState, PerPill } from '../components/ui.jsx';
@@ -132,7 +132,7 @@ const TRICKS = {
   // Tap only, from the Player of the game: pointing out to the crowd, a money count.
   // A fifth item is drawn over the player (see trickExtras).
   point: () => [['eyesR', 'pointR', 1200], ['', 'down', 250], ['away', 'pointL', 1200]],
-  cash: () => [['', 'flick1', 320], ...[...Array(4)].flatMap(() => [['', 'flick2', 320, null, 'note1 note3'], ['', 'flick1', 320, null, 'note2 note4']]), ['', 'flick1', 320, null, 'note3']],
+  cash: () => CASH.map(([pose, notes]) => ['', pose, 160, null, notes]),
 };
 // The sounds of a trick that follows a tap (idle tricks stay silent): the ball hits the floor halfway through each bounce.
 const STEP_SFX = { bounce: [['dribble', 250]], qbounce: [['dribble', 150]], spin: [['trick', 0]], hop: [['hop', 0]], dance: [['trick', 0]],
