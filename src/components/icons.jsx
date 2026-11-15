@@ -63,7 +63,7 @@ export const BIC = {
   // Not in my house!: a wagging finger. Butter fingers: a pat of butter on a stack of pancakes. Mr Consistent: a modern house key.
   wag: <B><g transform="rotate(-12 12 12)"><path d="M11 13.5V5a1.5 1.5 0 0 1 3 0v7" /><path d="M14 11a1.5 1.5 0 0 1 3 0v1.5M17 12a1.5 1.5 0 0 1 3 0v3a6.5 6.5 0 0 1-6.5 6.5h-1a5.5 5.5 0 0 1-5-3.2L6 15.6a1.5 1.5 0 0 1 2.7-1.3l2.3 2.7" /><path d="M7.5 6.5A5 5 0 0 1 9 3.5M17.5 6.5A5 5 0 0 0 16 3.5" /></g></B>,
   pancakes: <B><path d="M3.5 13c0-1.4 1.1-2 2.5-2h12c1.4 0 2.5.6 2.5 2s-1.1 2-2.5 2H6c-1.4 0-2.5-.6-2.5-2z" /><path d="M3 16c0 1.4 1.3 2 2.8 2h12.4c1.5 0 2.8-.6 2.8-2M3.5 19c0 1.4 1.1 2 2.5 2h12c1.4 0 2.5-.6 2.5-2" /><path d="M9 11V7.8l3-1.3 3 1.3V11M9 7.8l3 1.3 3-1.3M12 9.1V11" /><path d="M7 15v1.6" /></B>,
-  key: <B><rect x="2" y="7.5" width="8.5" height="9" rx="3" /><circle cx="5.6" cy="12" r="1.3" /><path d="M10.5 10.5h10l1 1.5-1 1.5h-1.3l-1 1.5-1-1.5h-1.4l-1 1.5-1-1.5h-3.3" /></B>,
+  key: <B><g transform="rotate(-45 12 12)"><rect x="2" y="7.5" width="8.5" height="9" rx="3" /><circle cx="5.6" cy="12" r="1.3" /><path d="M10.5 10.5h10l1 1.5-1 1.5h-1.3l-1 1.5-1-1.5h-1.4l-1 1.5-1-1.5h-3.3" /></g></B>,
   // Clamps: a shield with an inner border.
   shield2: <B><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z" /><path d="M12 7l3.8 1.6V12c0 2.6-1.6 4.4-3.8 5.3-2.2-.9-3.8-2.7-3.8-5.3V8.6z" /></B>,
   burger: (
