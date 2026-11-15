@@ -198,7 +198,7 @@ export function playerBadges(id, asOf, noTie) {
   if (!hasDef && a.gp >= 3 && a.pg('stl') >= BT.stl) add('stl', 'Cookiesss', 'cookie', 'purple', `${f1(a.pg('stl'))} steals a game in ${nm}.`);
   if (!hasDef && a.gp >= 3 && a.pg('blk') >= BT.blk) add('blk', 'Not in my house!', 'house', 'purple', `${f1(a.pg('blk'))} blocks a game in ${nm}.`);
   const snipe = l5.filter(s => s.m3 >= BT.snipe).length; if (snipe) add('snipe', 'Sniper', 'cross', 'green', `${snipe === 1 ? 'A game' : snipe + ' games'} with ${BT.snipe}+ threes in their last ${l5.length}.`);
-  if (a.s.tsa >= BT.effA && a.s.ts >= BT.eff) add('eff', 'Clinical', 'medic', 'green', `${pctTxt(a.s.ts)} true shooting in ${nm}.`);
+  if (a.s.tsa >= BT.effA && a.s.ts >= BT.eff) add('eff', 'Clinical', 'syringe', 'green', `${pctTxt(a.s.ts)} true shooting in ${nm}.`);
   const seasons = seasonList().map(x => x.code), prevS = seasons.slice(seasons.indexOf(season) + 1).find(c => mine.some(g => g.season === c));
   const pa = prevS && playerAgg(games.filter(g => g.season === prevS), id);
   if (pa && pa.gp >= 3 && a.gp >= 3 && a.pg('per') - pa.pg('per') >= BT.rise) add('rise', 'Let him cook', 'flame', 'gold', `${f1(a.pg('per'))} PER a game in ${nm}, up from ${f1(pa.pg('per'))} in ${prevS}.`);
