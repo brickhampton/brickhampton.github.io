@@ -1204,9 +1204,9 @@ a.vbtn:active,button.vbtn:active{transform:scale(.94)}
 @keyframes hpBob{0%,100%{transform:none}50%{transform:translateY(-2.5px)}}
 /* Confetti: pixels that fall the height of the arena in steps, drifting a little, and flip between their wide and narrow sides */
 .hconf{pointer-events:none}
-.cf{animation:cfFall var(--d) steps(48,jump-none) var(--dl) infinite}
-.cf-w{transform-box:fill-box;transform-origin:0 0;animation:cfFall var(--d) steps(48,jump-none) var(--dl) infinite, cfFlipW var(--fd) steps(1,end) var(--dl) infinite}
-.cf-t{transform-box:fill-box;transform-origin:0 0;animation:cfFall var(--d) steps(48,jump-none) var(--dl) infinite, cfFlipT var(--fd) steps(1,end) var(--dl) infinite}
+.cf{animation:cfFall var(--d) steps(var(--n,48),jump-none) var(--dl) infinite}
+.cf-w{transform-box:fill-box;transform-origin:0 0;animation:cfFall var(--d) steps(var(--n,48),jump-none) var(--dl) infinite, cfFlipW var(--fd) steps(1,end) var(--dl) infinite}
+.cf-t{transform-box:fill-box;transform-origin:0 0;animation:cfFall var(--d) steps(var(--n,48),jump-none) var(--dl) infinite, cfFlipT var(--fd) steps(1,end) var(--dl) infinite}
 @keyframes cfFall{from{translate:0 var(--y0)}to{translate:var(--fx) var(--fy)}}
 @keyframes cfFlipW{0%{scale:1 1}50%,100%{scale:.5 1}}
 @keyframes cfFlipT{0%{scale:1 1}50%,100%{scale:1 .5}}

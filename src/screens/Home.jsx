@@ -74,8 +74,8 @@ function homeScene(cw, ch) {
     do { x = vx + rnd() * vw; if (i >= half) x = i % 2 ? 400 + (x - vx) / 2 : vx + (x - vx) / 2; y = top + rnd() * (end - top); } while (i >= half && (inCols(x) || onTeam(x, y)));
     x = Math.round(x / CU) * CU; y = Math.round(y / CU) * CU;
     const c = COLS[i % COLS.length], tall = i % 3 === 1, one = i % 5 === 4, w = one || tall ? CU : 2 * CU, h = tall ? 2 * CU : CU;
-    const dur = 9 + rnd() * 7, drift = (Math.round(rnd() * 6) - 3) * CU;
-    return `<rect class="cf${one ? '' : tall ? ' cf-t' : ' cf-w'}" x="${x}" y="${y}" width="${w}" height="${h}" fill="${c}" style="--y0:${(top - y).toFixed(0)}px;--fy:${(end - y).toFixed(0)}px;--fx:${drift}px;--d:${dur.toFixed(1)}s;--dl:${(-rnd() * dur).toFixed(1)}s;--fd:${(.5 + rnd() * .6).toFixed(2)}s"/>`;
+    const dur = 26 + rnd() * 18, drift = (Math.round(rnd() * 6) - 3) * CU;
+    return `<rect class="cf${one ? '' : tall ? ' cf-t' : ' cf-w'}" x="${x}" y="${y}" width="${w}" height="${h}" fill="${c}" style="--y0:${(top - y).toFixed(0)}px;--fy:${(end - y).toFixed(0)}px;--fx:${drift}px;--d:${dur.toFixed(1)}s;--dl:${(-rnd() * dur).toFixed(1)}s;--fd:${(2.2 + rnd() * 2.2).toFixed(2)}s;--n:${Math.round((end - top) / CU)}"/>`;
   });
   const { back, front } = rows(ids);
   // Huddled: the back row stands shoulder to shoulder at slightly different depths, and the front row stands close in
