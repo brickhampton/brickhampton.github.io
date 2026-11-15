@@ -220,7 +220,7 @@ export function playerBadges(id, asOf, noTie) {
       const mine = playerBadges(id, season, true).length;
       ok = level.filter(x => playerBadges(x.id, season, true).length < mine).length < BT.sakTop - ahead;
     }
-    if (ok) add('sak', 'Swiss army knife', 'knife', 'blue', `${sk.n} games in ${nm} with at least a point, a rebound, an assist and a steal (${Math.round(sk.r * 100)}% of their games).`);
+    if (ok) add('sak', 'Swiss army knife', 'knife', 'blue', `${sk.n} games in ${nm} with at least a point, a rebound, an assist and a steal.`);
   }
   if (best(x => x.pg('to'), true) && a.gp >= 5) add('safe', 'Safe hands', 'lock', 'blue', `Fewest turnovers a game in ${nm} (${f1(a.pg('to'))}).`);
   if (best(x => x.pg('to')) && a.gp >= 5) add('butter', 'Butter fingers', 'butterSlices', 'red', `Most turnovers a game in ${nm} (${f1(a.pg('to'))}).`);
