@@ -1542,13 +1542,11 @@ a.vbtn:active,button.vbtn:active{transform:scale(.94)}
 .potg-stage .sh-high rect{scale:.6 1}
 @media (prefers-reduced-motion:reduce){.pxsh rect{animation:none!important}}
 
-/* The held trophy catches the light every few seconds: a bar crossing the cup, then a star at its rim, a frame at a time */
-.av-glint :is(.g1,.g2,.g3,.g4){visibility:hidden;animation:var(--ga) 6.4s steps(1,end) 2s infinite}
-.av-glint .g1{--ga:tGl1}.av-glint .g2{--ga:tGl2}.av-glint .g3{--ga:tGl3}.av-glint .g4{--ga:tGl4}
-@keyframes tGl1{0%{visibility:visible}1.6%,100%{visibility:hidden}}
-@keyframes tGl2{0%{visibility:hidden}1.6%{visibility:visible}3.2%,100%{visibility:hidden}}
-@keyframes tGl3{0%{visibility:hidden}3.2%{visibility:visible}4.8%,100%{visibility:hidden}}
-@keyframes tGl4{0%{visibility:hidden}4.8%{visibility:visible}8%,100%{visibility:hidden}}
+/* The held trophy sparkles a little every few seconds: a pixel of light at the rim, a small star, a pixel again */
+.av-glint :is(.g1,.g2){visibility:hidden;animation:var(--ga) 5s steps(1,end) 2s infinite}
+.av-glint .g1{--ga:tGl1}.av-glint .g2{--ga:tGl2}
+@keyframes tGl1{0%{visibility:visible}3%{visibility:hidden}8%{visibility:visible}11%,100%{visibility:hidden}}
+@keyframes tGl2{0%{visibility:hidden}3%{visibility:visible}8%,100%{visibility:hidden}}
 @media (prefers-reduced-motion:reduce){.av-glint{display:none}}
 
 /* Life in the Home stands: a few fans shift a pixel in their seats (some bob instead), and the banners' tails sway a
