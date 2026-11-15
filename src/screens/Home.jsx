@@ -2,7 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { P, statPlayers, esc } from '../lib/core.js';
 import { S as DATA } from '../lib/store.js';
 import { reduced } from '../lib/charts.js';
-import { figure, pxShadow, raisedTrophy, trophyGlint } from '../lib/avatar.js';
+import { figure, pxShadow, raisedTrophy } from '../lib/avatar.js';
 import { ChevDown } from '../components/icons.jsx';
 import { stage } from '../lib/homeStage.js';
 import { sfx } from '../lib/sfx.js';
@@ -45,7 +45,7 @@ function homeScene(cw, ch) {
   // Each player bobs, blinks and smiles on their own timing.
   const vars = () => `--hd:${(rnd() * 1.6).toFixed(2)}s;--bd:${(rnd() * -5).toFixed(2)}s;--sd:${(rnd() * -12).toFixed(2)}s;--sl:${(10 + rnd() * 6).toFixed(1)}s`;
   const refl = [];
-  const fig = (id, cx, top, w) => { const st = vars(), nt = POSE.now[id] && `--nc:${NOW_T[id][0]}s;--nd:${NOW_T[id][1]}s`, body = POSE.now[id] ? `<g class="hp-rest" style="${nt}">${figure(P(id), { stage: true, pose: 'down' })}</g><g class="hp-now" style="${nt}">${figure(P(id), { stage: true, pose: POSE.now[id] })}</g>` : figure(P(id), { stage: true, pose: POSE.hold[id] || 'down' }) + (POSE.hold[id] === 'trophy' ? trophyGlint(P(id)) : '');
+  const fig = (id, cx, top, w) => { const st = vars(), nt = POSE.now[id] && `--nc:${NOW_T[id][0]}s;--nd:${NOW_T[id][1]}s`, body = POSE.now[id] ? `<g class="hp-rest" style="${nt}">${figure(P(id), { stage: true, pose: 'down' })}</g><g class="hp-now" style="${nt}">${figure(P(id), { stage: true, pose: POSE.now[id] })}</g>` : figure(P(id), { stage: true, pose: POSE.hold[id] || 'down' });
     const svg = inner => `<svg x="${cx - w / 2}" y="${top}" width="${w}" height="${w * 1.04}" viewBox="0 0 100 104" overflow="visible">${inner}</svg>`;
     // A faint reflection in the polished floor, flipped about the player's feet.
     if (S.refl) { const fy = top + w * 1.035; refl.push(`<g class="alive" style="${st}" mask="url(#hrmask)" opacity="${S.refl}"><g transform="translate(0 ${(2 * fy).toFixed(1)}) scale(1 -1)">${svg(figure(P(id), { stage: true, pose: POSE.hold[id] || 'down' }))}</g></g>`); }

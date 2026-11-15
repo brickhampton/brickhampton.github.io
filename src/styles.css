@@ -1542,12 +1542,6 @@ a.vbtn:active,button.vbtn:active{transform:scale(.94)}
 .potg-stage .sh-high rect{scale:.6 1}
 @media (prefers-reduced-motion:reduce){.pxsh rect{animation:none!important}}
 
-/* The held trophy sparkles a little every few seconds: a pixel of light at the rim, a small star, a pixel again */
-.av-glint :is(.g1,.g2){visibility:hidden;animation:var(--ga) 5s steps(1,end) 2s infinite}
-.av-glint .g1{--ga:tGl1}.av-glint .g2{--ga:tGl2}
-@keyframes tGl1{0%{visibility:visible}3%{visibility:hidden}8%{visibility:visible}11%,100%{visibility:hidden}}
-@keyframes tGl2{0%{visibility:hidden}3%{visibility:visible}8%,100%{visibility:hidden}}
-@media (prefers-reduced-motion:reduce){.av-glint{display:none}}
 
 /* Life in the Home stands: a few fans shift a pixel in their seats (some bob instead), and the banners' tails sway a
    pixel to one side and back, all in two frames */
