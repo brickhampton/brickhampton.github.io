@@ -356,8 +356,8 @@ export function Player() {
       <div className="phead"><h3>{scope === 'ALL' ? 'Career' : scopeName}</h3>
         <span className="grow" />
         <div className={`tog${totals ? ' r' : ''}`} id="p-mode" role="group" aria-label="Averages or totals">
-          <button data-m="avg" aria-pressed={!totals} onClick={() => totals && set({ pTotals: false })}>Averages</button>
-          <button data-m="tot" aria-pressed={totals} onClick={() => !totals && set({ pTotals: true })}>Totals</button></div></div>
+          <button data-m="avg" aria-pressed={!totals} onClick={() => set({ pTotals: !totals })}>Averages</button>
+          <button data-m="tot" aria-pressed={totals} onClick={() => set({ pTotals: !totals })}>Totals</button></div></div>
       <SeasonPick id="p-scope" className="pscope" value={scope} seasons={seasonsPlayed} onPick={v => keepScroll({ pScope: v, pLogAll: false })} />
       <div className="ptiles">{faces.map((f, i) => <StatTile key={`${id}|${scope}|${tiles[i][0]}`} face={f} delay={delays[i]} />)}</div>
     </div>

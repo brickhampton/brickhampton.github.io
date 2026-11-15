@@ -154,8 +154,8 @@ export function Stats() {
       <div className="phead rhead"><h3>{all ? 'All time' : 'Season'} {totals ? 'totals' : 'averages'}</h3>
         <span className="grow" />
         <div className={`tog${totals ? ' r' : ''}`} id="s-mode" role="group" aria-label="Averages or totals">
-          <button data-m="avg" aria-pressed={!totals} onClick={() => totals && set({ sTotals: false })}>Averages</button>
-          <button data-m="tot" aria-pressed={totals} onClick={() => !totals && set({ sTotals: true })}>Totals</button></div></div>
+          <button data-m="avg" aria-pressed={!totals} onClick={() => set({ sTotals: !totals })}>Averages</button>
+          <button data-m="tot" aria-pressed={totals} onClick={() => set({ sTotals: !totals })}>Totals</button></div></div>
       <div id="rank-wrap"><Rankings aggs={aggs} team={team} tot={totals} pctOnly={all} /></div></div>
 
     <div className="sec"><h3>{all ? 'Season by season' : 'Trend over the season'}</h3>
