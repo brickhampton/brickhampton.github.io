@@ -260,7 +260,8 @@ function exportCsv() {
 // Sound effects on or off, for this device only. Anyone can change it, Admin mode or not.
 function SoundCard() {
   const [on, setOn] = useState(soundOn());
-  const pick = v => { if (v === on) return; setSound(v); setOn(v); if (v) sfx('select'); };
+  const pick = v => { if (v === on) v = !on; // tapping the lit side flips it too
+    setSound(v); setOn(v); if (v) sfx('select'); };
   return <div className="card admin-lock sound-card"><div className="lock-ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
     <path d="M11 5 6 9H3v6h3l5 4z" />{on ? <path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13" /> : <path d="m16 9 5 6m0-6-5 6" />}</svg></div>
     <div><h3>Sound</h3><p className="hint">Sound effects for taps, players, and recording, on this device</p></div>
@@ -272,7 +273,8 @@ function SoundCard() {
 // Box score rebounds as one REB column, or split into OREB and DREB. For this device only, like Sound.
 function RebCard() {
   const [on, setOn] = useState(rebSplit());
-  const pick = v => { if (v === on) return; setRebSplit(v); setOn(v); sfx('select'); };
+  const pick = v => { if (v === on) v = !on; // tapping the lit side flips it too
+    setRebSplit(v); setOn(v); sfx('select'); };
   return <div className="card admin-lock sound-card"><div className="lock-ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
     <rect x="2" y="5.6" width="20" height="11" rx="2" /><path d="M9 16.6v-5h6v5" /><ellipse cx="12" cy="18.4" rx="4.25" ry="1.8" /></svg></div>
     <div><h3>Rebounds in box scores</h3><p className="hint">Show total REB or OREB/DREB split, in games that recorded them, on this device</p></div>
@@ -284,7 +286,8 @@ function RebCard() {
 // Shooting stats on the Stats table and player tiles, compact or detailed. For this device only, like Sound.
 function ShotCard() {
   const [on, setOn] = useState(shotDetail());
-  const pick = v => { if (v === on) return; setShotDetail(v); setOn(v); sfx('select'); };
+  const pick = v => { if (v === on) v = !on; // tapping the lit side flips it too
+    setShotDetail(v); setOn(v); sfx('select'); };
   return <div className="card admin-lock sound-card"><div className="lock-ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
     <circle cx="12" cy="12" r="9" /><circle cx="12" cy="12" r="5" /><circle cx="12" cy="12" r="1" /></svg></div>
     <div><h3>Compact shooting stats</h3><p className="hint">Show combined shooting stats or full shooting stats (made, attempts, and shot %), on this device</p></div>
@@ -297,7 +300,7 @@ function ShotCard() {
 function SubPagesCard({ onErr }) {
   const s = useStore(), on = !!s.subPages;
   const pick = async v => {
-    if (v === on) return;
+    if (v === on) v = !on; // tapping the lit side flips it too
     sfx('select'); onErr('');
     try { await adminEdit('set_sub_pages', { p_on: v }); }
     catch (e) { onErr(/set_sub_pages/.test(e.message) ? 'Run 12-sub-pages.sql in Supabase first, then try again.' : errText(e)); }
