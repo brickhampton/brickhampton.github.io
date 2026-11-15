@@ -67,7 +67,7 @@ export const BIC = {
   // Clamps: a shield with an inner border.
   shield2: <B><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z" /><path d="M12 7l3.8 1.6V12c0 2.6-1.6 4.4-3.8 5.3-2.2-.9-3.8-2.7-3.8-5.3V8.6z" /></B>,
   // Scoring leader: a sword.
-  sword: <B><path d="M14.5 17.5 3 6V3h3l11.5 11.5" /><path d="M13 19l6-6M16 16l4 4M19 21l2-2" /></B>,
+  sword: <B><path d="M14.5 17.5 3 6V3h3l11.5 11.5" /><path d="M13 19l6-6M16 16l2.6 2.6" /><circle cx="19.9" cy="19.9" r="1.6" /></B>,
   // Butter fingers: a block of butter with slices falling off (Geoff's reference picture).
   butterSlices: <B><g strokeWidth="1.8"><path d="M10 9 16.5 4H22l-6.5 5z" /><path d="M10 9h5.5v6.5H10z" /><path d="M15.5 15.5 22 10.5V4" /><path d="M5 8.6 7.6 7.4l1.6 6.4-2.6 1.2z" /><path d="M1.5 18.2 4.5 16.2h5.2l-3 2z" /><path d="M1.5 18.2v1.8h5.2l3-2v-1.8M6.7 18.2V20" /></g></B>,
   burger: (
