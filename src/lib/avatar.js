@@ -420,15 +420,6 @@ export function raisedTrophy(raw) {
     + px(l + 2, t + 4, w - 4, 1, G) + px(m - 1, t + 5, 2, 1, G2) + px(m - 2, t + 6, 4, 1, G) + px(l - 1, t + 7, w + 2, 1, '#4a3418') + '</g>';
 }
 
-// A little sparkle for the held trophy (the 'trophy' pose), at the rim of the cup: a pixel of light, a small star, a
-// pixel again. The frames are shown one at a time by CSS (.av-glint .g1 and .g2).
-export function trophyGlint(raw) {
-  const c = cleanLook(raw), wide = WIDE[c.weight], hy = 3 + (3 - TALL[c.height]), bx = 8 - Math.ceil(wide / 2), bw = 10 + wide;
-  const cx = bx + Math.floor(bw / 2) - 1, t = hy + 12, px = (x, y, w, h, cls) => `<rect class="${cls}" x="${x}" y="${y}" width="${w}" height="${h}" fill="#fffbe6"/>`;
-  return `<g class="av-glint" transform="translate(50 0) scale(${(104 / FEET).toFixed(4)}) translate(-13 0)" shape-rendering="crispEdges">`
-    + px(cx + 3, t, 1, 1, 'g1') + `<g class="g2">${px(cx + 3, t - 1, 1, 3, '')}${px(cx + 2, t, 3, 1, '')}</g></g>`;
-}
-
 // A ball held up over the head, to go with the 'catch' pose (both hands up): drawn behind the hands, between them.
 export function raisedBall(raw) {
   const c = cleanLook(raw), tall = TALL[c.height], aw = c.muscle > 1 ? 1 : 0;
