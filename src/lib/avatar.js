@@ -449,15 +449,37 @@ export function trickExtras(raw, kind) {
     + px(fx - 1, hy - 5, 3, 1, '#fff', .55);
   // 'shades': sunglasses over the eyes, with a glint.
   if (kind === 'shades') { const ey = hy + EYE_ROW[c.eyeY], hx = 8; out = px(hx + 1, ey - 1, 4, 3, '#111') + px(hx + 6, ey - 1, 4, 3, '#111') + px(hx + 5, ey - 1, 1, 1, '#111') + px(hx, ey - 1, 1, 1, '#111') + px(hx + 7, ey - 1, 1, 1, '#fff', .8) + px(hx + 2, ey - 1, 1, 1, '#fff', .6); }
-  // Notes flicked off the top of the wad, flying up and out, then fluttering down.
-  const bill = (x, y, o = 1) => px(x, y, 3, 2, '#3f9b4a', o) + px(x, y, 3, 1, '#7fd08a', o), nx = fx - 2;
-  if (kind === 'note1') out = bill(nx + 7, ty - 1);
-  if (kind === 'note2') out = bill(nx + 10, ty - 5, .9);
-  if (kind === 'note3') out = bill(nx + 12, ty - 2, .65);
-  if (kind === 'note4') out = bill(nx + 13, ty + 3, .4);
+  // A note flicked off the wad: 'bX,Y,F' is a note X, Y sprite pixels from the wad, at one frame of its tumble: flat,
+  // turning (a thin sliver), flat the other way up, edge on, then lying on the floor.
+  if (kind[0] === 'b' && kind !== 'behind') {
+    const [x, y, f] = kind.slice(1).split(',').map(Number), X = fx - 2 + x, Y = f === 4 ? FEET - 2 : Math.min(ty + y, FEET - 3), G = '#3f9b4a', L = '#7fd08a', D = '#2c7a39';
+    out = f === 0 ? px(X, Y, 3, 2, G) + px(X, Y, 3, 1, L) + px(X + 1, Y + 1, 1, 1, '#e9e2c0') : f === 1 ? px(X, Y + 1, 3, 1, L) : f === 2 ? px(X, Y, 3, 2, D) + px(X, Y + 1, 3, 1, G) : f === 3 ? px(X + 1, Y, 1, 2, L) : px(X, Y + 1, 3, 1, G, .8);
+  }
   if (kind === 'behind') { BALL.forEach(([o, w], j) => { out += px(bx - 7 + o, ty + 6 + j, w, 1, BALL_C); }); out += px(bx - 10, ty + 7, 2, 1, '#fff', .6) + px(bx - 12, ty + 9, 3, 1, '#fff', .45) + px(bx - 10, ty + 11, 2, 1, '#fff', .6); }
   return `<g class="av-trick" transform="translate(50 0) scale(${(104 / FEET).toFixed(4)}) translate(-13 0)" shape-rendering="crispEdges">${out}</g>`;
 }
+
+// Making it rain, beat by beat: [pose, extras]. A wind-up, then eight flicks, each sending a note up and out in an arc
+// (alternately long and short) that tumbles down to the floor, lies there a moment and goes. Several are in the air at
+// once, and the last ones are still falling after the hand has stopped.
+const NOTE_PATHS = [
+  [[6, -4], [9, -8], [11, -10], [13, -10], [14, -8], [15, -5], [14, -2], [15, 1], [14, 4], [15, 7], [14, 10], [15, 13], [14, 16]],
+  [[6, -3], [8, -6], [9, -7], [10, -6], [10, -3], [11, 0], [10, 3], [11, 6], [10, 9], [11, 12], [10, 15]],
+];
+export const CASH = (() => {
+  const flicks = [2, 4, 6, 8, 11, 13, 15, 17], out = [];
+  for (let t = 0; t < 36; t++) {
+    const notes = [];
+    flicks.forEach((s, n) => {
+      const a = t - s, path = NOTE_PATHS[n % 2];
+      if (a < 0 || a > path.length + 3) return;
+      if (a >= path.length) { const [x] = path[path.length - 1]; notes.push(`b${x + (n % 3) - 1},0,4`); return; }
+      const [x, y] = path[a]; notes.push(`b${x + (n % 3) - 1},${y},${(a + n) % 4}`);
+    });
+    out.push([flicks.includes(t) ? 'flick2' : 'flick1', notes.join(' ')]);
+  }
+  return out;
+})();
 
 const cache = new Map();
 // SVG markup for a player. Round avatars (the default) show the head and the top of the jersey in a 100 × 100 box.
