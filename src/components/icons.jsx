@@ -60,10 +60,12 @@ export const BIC = {
   // Assistaholic: two hearts, the small one behind (masked where the big one sits).
   hearts: <B><defs><mask id="bic-hearts"><rect width="24" height="24" fill="#fff" /><g transform="translate(-2.6 2.2) scale(.86)"><path d="M12 20s-7.5-4.6-7.5-10.2A4.2 4.2 0 0 1 12 7.3a4.2 4.2 0 0 1 7.5 2.5C19.5 15.4 12 20 12 20z" fill="#000" stroke="#000" strokeWidth="5.5" /></g></mask></defs><g mask="url(#bic-hearts)"><g transform="translate(8.8 -1.4) scale(.62)"><path d="M12 20s-7.5-4.6-7.5-10.2A4.2 4.2 0 0 1 12 7.3a4.2 4.2 0 0 1 7.5 2.5C19.5 15.4 12 20 12 20z" strokeWidth="3.4" /></g></g><g transform="translate(-2.6 2.2) scale(.86)"><path d="M12 20s-7.5-4.6-7.5-10.2A4.2 4.2 0 0 1 12 7.3a4.2 4.2 0 0 1 7.5 2.5C19.5 15.4 12 20 12 20z" strokeWidth="2.5" /></g></B>,
   bag: <B><path d="M5 8h14l-1.2 12a1.5 1.5 0 0 1-1.5 1.4H7.7a1.5 1.5 0 0 1-1.5-1.4z" /><path d="M9 10V6a3 3 0 0 1 6 0v4" /></B>,
-  // Not in my house!: a wagging finger. Butter fingers: a pat of butter on a stack of pancakes. Mr Consistent: a key.
+  // Not in my house!: a wagging finger. Butter fingers: a pat of butter on a stack of pancakes. Mr Consistent: a modern house key.
   wag: <B><g transform="rotate(-12 12 12)"><path d="M11 13.5V5a1.5 1.5 0 0 1 3 0v7" /><path d="M14 11a1.5 1.5 0 0 1 3 0v1.5M17 12a1.5 1.5 0 0 1 3 0v3a6.5 6.5 0 0 1-6.5 6.5h-1a5.5 5.5 0 0 1-5-3.2L6 15.6a1.5 1.5 0 0 1 2.7-1.3l2.3 2.7" /><path d="M7.5 6.5A5 5 0 0 1 9 3.5M17.5 6.5A5 5 0 0 0 16 3.5" /></g></B>,
   pancakes: <B><path d="M3.5 13c0-1.4 1.1-2 2.5-2h12c1.4 0 2.5.6 2.5 2s-1.1 2-2.5 2H6c-1.4 0-2.5-.6-2.5-2z" /><path d="M3 16c0 1.4 1.3 2 2.8 2h12.4c1.5 0 2.8-.6 2.8-2M3.5 19c0 1.4 1.1 2 2.5 2h12c1.4 0 2.5-.6 2.5-2" /><path d="M9 11V7.8l3-1.3 3 1.3V11M9 7.8l3 1.3 3-1.3M12 9.1V11" /><path d="M7 15v1.6" /></B>,
-  key: <B><circle cx="7.5" cy="15.5" r="4.5" /><path d="M10.7 12.3 21 2M17 6l3 3M14.5 8.5l2.5 2.5" /></B>,
+  key: <B><rect x="2" y="7.5" width="8.5" height="9" rx="3" /><circle cx="5.6" cy="12" r="1.3" /><path d="M10.5 10.5h10l1 1.5-1 1.5h-1.3l-1 1.5-1-1.5h-1.4l-1 1.5-1-1.5h-3.3" /></B>,
+  // Clamps: a shield with an inner border.
+  shield2: <B><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z" /><path d="M12 7l3.8 1.6V12c0 2.6-1.6 4.4-3.8 5.3-2.2-.9-3.8-2.7-3.8-5.3V8.6z" /></B>,
   burger: (
     <svg className="burger" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
       <path d="M3.5 10.2C3.5 6.3 7.3 3.5 12 3.5s8.5 2.8 8.5 6.7c0 .5-.4.8-.9.8H4.4c-.5 0-.9-.3-.9-.8z" fill="#f0a84e" />
