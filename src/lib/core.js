@@ -177,7 +177,8 @@ export function playerBadges(id, asOf, noTie) {
   const l3 = last(3), t3 = sumRows(l3), l5 = last(5);
   if (l3.length === 3 && l3.every(s => s.per >= BT.lock)) add('heater', 'LOCKED IN', 'zap', 'gold', `${BT.lock}+ PER in each of their last 3 games.`);
   if (l3.length === 3 && t3.tsa >= BT.autoA && t3.ts >= BT.auto) add('hot', 'Automatic', 'auto', 'green', `${pctTxt(t3.ts)} true shooting over their last 3 games.`);
-  if (best(x => x.pg('pts'))) add('pts', 'Bucket getter', 'ball', 'hot', `Most points a game in ${nm} (${f1(a.pg('pts'))}).`);
+  if (best(x => x.pg('pts'))) add('pts', 'Scoring leader', 'ball', 'hot', `Most points a game in ${nm} (${f1(a.pg('pts'))}).`);
+  if (best(x => x.pg('ftm')) && a.s.ftm > 0) add('ftm', 'Free throw merchant', 'bag', 'hot', `Most points from free throws a game in ${nm} (${f1(a.pg('ftm'))}).`);
   // BAM!: the most points in one game this season, among the starters who played in it.
   const bamOf = x => Math.max(...sg.filter(g => g.rows[x]).map(g => calc(g.rows[x]).pts)), bamPeers = statPlayers().filter(x => sg.some(g => g.rows[x])).map(x => ({ id: x, v: bamOf(x) }));
   const bam = bamOf(id);
@@ -189,7 +190,7 @@ export function playerBadges(id, asOf, noTie) {
   const orGames = sg.filter(g => Object.values(g.rows).some(r => r.oreb !== undefined)).length, orMin = Math.min(3, orGames);
   const oa = orAgg(id), oPeers = statPlayers().map(orAgg).filter(x => x.gp >= Math.min(orMin, oa.gp));
   if (starter && orMin > 0 && oa.gp >= orMin && oa.pg > 0 && oPeers.length > 2 && lead(oPeers, oa, x => x.pg)) add('oreb', 'Crash out', 'bull', 'blue', `Most offensive rebounds a game in ${nm} (${f1(oa.pg)}).`);
-  if (best(x => x.pg('ast'))) add('ast', 'Assistaholic', 'pass', 'blue', `Most assists a game in ${nm} (${f1(a.pg('ast'))}).`);
+  if (best(x => x.pg('ast'))) add('ast', 'Assistaholic', 'hand', 'blue', `Most assists a game in ${nm} (${f1(a.pg('ast'))}).`);
   const def = x => (x.s.stl + x.s.blk) / x.gp;
   // Subs can earn the 3+ a game version: it doesn't compare them with anyone.
   if (a.gp >= 3 && (def(a) >= 3 || best(def))) add('def', 'Clamps', 'shield', 'purple', `${f1(def(a))} steals and blocks a game in ${nm}${best(def) ? ', the most on the team' : ''}.`);
@@ -202,10 +203,10 @@ export function playerBadges(id, asOf, noTie) {
   const pa = prevS && playerAgg(games.filter(g => g.season === prevS), id);
   if (pa && pa.gp >= 3 && a.gp >= 3 && a.pg('per') - pa.pg('per') >= BT.rise) add('rise', 'Let him cook', 'flame', 'gold', `${f1(a.pg('per'))} PER a game in ${nm}, up from ${f1(pa.pg('per'))} in ${prevS}.`);
   const p3 = ratio(a.s.m3, a.s.a3); if (a.s.a3 >= BT.p3A && p3 >= BT.p3) add('3', 'Green bean', 'target', 'green', `${pctTxt(p3)} from three in ${nm} (${a.s.m3} of ${a.s.a3}).`);
-  const ft = ratio(a.s.ftm, a.s.fta); if (a.s.fta >= BT.ftA && ft >= BT.ft) add('ft', 'For free', 'coin', 'green', `${pctTxt(ft)} at the free throw line in ${nm} (${a.s.ftm} of ${a.s.fta}).`);
+  const ft = ratio(a.s.ftm, a.s.fta); if (a.s.fta >= BT.ftA && ft >= BT.ft) add('ft', 'For free?', 'coin', 'green', `${pctTxt(ft)} at the free throw line in ${nm} (${a.s.ftm} of ${a.s.fta}).`);
   if (best(x => x.pg('fta')) && a.s.fta > 0) add('fta', 'Ref\'s best friend', 'whistle', 'red', `Most free throw attempts a game in ${nm} (${f1(a.pg('fta'))}).`);
   const dd = sg.filter(g => g.rows[id]).map(g => calc(g.rows[id])).filter(s => [s.pts, s.reb, s.ast, s.stl, s.blk].filter(v => v >= 10).length >= 2).length;
-  if (dd >= 2) add('dd', 'Double Double', 'layers', 'blue', `${dd} double-doubles in ${nm}.`);
+  if (dd >= 2) add('dd', 'Double Trouble', 'layers', 'blue', `${dd} double-doubles in ${nm}.`);
   const sak = sg.filter(g => g.rows[id]).map(g => calc(g.rows[id])).filter(s => s.pts >= 1 && s.reb >= 1 && s.ast >= 1 && s.stl >= 1).length;
   if (sak >= BT.sak) add('sak', 'Swiss army knife', 'knife', 'blue', `${sak} games in ${nm} with at least a point, a rebound, an assist and a steal.`);
   if (best(x => x.pg('to'), true) && a.gp >= 5) add('safe', 'Safe hands', 'lock', 'blue', `Fewest turnovers a game in ${nm} (${f1(a.pg('to'))}).`);

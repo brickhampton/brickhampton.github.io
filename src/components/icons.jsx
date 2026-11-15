@@ -57,6 +57,8 @@ export const BIC = {
   cal: <B><rect x="3.5" y="5" width="17" height="15.5" rx="2" /><path d="M3.5 10h17M8 3v4M16 3v4" /><path d="m9 15 2 2 4-4" /></B>,
   board: <B><rect x="2" y="4" width="20" height="11" rx="2" /><path d="M9 15v-5h6v5" /><ellipse cx="12" cy="17.6" rx="4.25" ry="1.8" /></B>,
   coin: <B><circle cx="12" cy="12" r="9" /><path d="M14.6 9.2c-.5-.9-1.5-1.4-2.6-1.4-1.5 0-2.6.8-2.6 2s1 1.7 2.6 2.1 2.6.9 2.6 2.1-1.1 2.1-2.6 2.1c-1.2 0-2.2-.5-2.7-1.5M12 6.2v1.6M12 16.2v1.6" /></B>,
+  hand: <B><path d="M18 11V6a2 2 0 0 0-4 0v5M14 10V4a2 2 0 0 0-4 0v6M10 10.5V6a2 2 0 0 0-4 0v8" /><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.9-6-2.3l-3.6-3.6a2 2 0 0 1 2.8-2.8L7 15" /></B>,
+  bag: <B><path d="M5 8h14l-1.2 12a1.5 1.5 0 0 1-1.5 1.4H7.7a1.5 1.5 0 0 1-1.5-1.4z" /><path d="M9 10V6a3 3 0 0 1 6 0v4" /></B>,
   burger: (
     <svg className="burger" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
       <path d="M3.5 10.2C3.5 6.3 7.3 3.5 12 3.5s8.5 2.8 8.5 6.7c0 .5-.4.8-.9.8H4.4c-.5 0-.9-.3-.9-.8z" fill="#f0a84e" />
