@@ -66,6 +66,8 @@ export const BIC = {
   key: <B><g transform="rotate(-45 12 12)"><rect x="2" y="7.5" width="8.5" height="9" rx="3" /><circle cx="5.6" cy="12" r="1.3" /><path d="M10.5 10.5h10l1 1.5-1 1.5h-1.3l-1 1.5-1-1.5h-1.4l-1 1.5-1-1.5h-3.3" /></g></B>,
   // Clamps: a shield with an inner border.
   shield2: <B><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z" /><path d="M12 7l3.8 1.6V12c0 2.6-1.6 4.4-3.8 5.3-2.2-.9-3.8-2.7-3.8-5.3V8.6z" /></B>,
+  // Scoring leader: a sword.
+  sword: <B><path d="M14.5 17.5 3 6V3h3l11.5 11.5" /><path d="M13 19l6-6M16 16l4 4M19 21l2-2" /></B>,
   burger: (
     <svg className="burger" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
       <path d="M3.5 10.2C3.5 6.3 7.3 3.5 12 3.5s8.5 2.8 8.5 6.7c0 .5-.4.8-.9.8H4.4c-.5 0-.9-.3-.9-.8z" fill="#f0a84e" />

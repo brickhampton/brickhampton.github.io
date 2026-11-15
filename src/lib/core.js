@@ -177,7 +177,7 @@ export function playerBadges(id, asOf, noTie) {
   const l3 = last(3), t3 = sumRows(l3), l5 = last(5);
   if (l3.length === 3 && l3.every(s => s.per >= BT.lock)) add('heater', 'LOCKED IN', 'zap', 'gold', `${BT.lock}+ PER in each of their last 3 games.`);
   if (l3.length === 3 && t3.tsa >= BT.autoA && t3.ts >= BT.auto) add('hot', 'Automatic', 'auto', 'green', `${pctTxt(t3.ts)} true shooting over their last 3 games.`);
-  if (best(x => x.pg('pts'))) add('pts', 'Scoring leader', 'ball', 'hot', `Most points a game in ${nm} (${f1(a.pg('pts'))}).`);
+  if (best(x => x.pg('pts'))) add('pts', 'Scoring leader', 'sword', 'hot', `Most points a game in ${nm} (${f1(a.pg('pts'))}).`);
   if (best(x => x.pg('ftm')) && a.s.ftm > 0) add('ftm', 'Free throw merchant', 'bag', 'hot', `Most points from free throws a game in ${nm} (${f1(a.pg('ftm'))}).`);
   // BAM!: the most points in one game this season, among the starters who played in it.
   const bamOf = x => Math.max(...sg.filter(g => g.rows[x]).map(g => calc(g.rows[x]).pts)), bamPeers = statPlayers().filter(x => sg.some(g => g.rows[x])).map(x => ({ id: x, v: bamOf(x) }));
