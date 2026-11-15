@@ -190,13 +190,13 @@ export function playerBadges(id, asOf, noTie) {
   const orGames = sg.filter(g => Object.values(g.rows).some(r => r.oreb !== undefined)).length, orMin = Math.min(3, orGames);
   const oa = orAgg(id), oPeers = statPlayers().map(orAgg).filter(x => x.gp >= Math.min(orMin, oa.gp));
   if (starter && orMin > 0 && oa.gp >= orMin && oa.pg > 0 && oPeers.length > 2 && lead(oPeers, oa, x => x.pg)) add('oreb', 'Crash out', 'bull', 'blue', `Most offensive rebounds a game in ${nm} (${f1(oa.pg)}).`);
-  if (best(x => x.pg('ast'))) add('ast', 'Assistaholic', 'hand', 'blue', `Most assists a game in ${nm} (${f1(a.pg('ast'))}).`);
+  if (best(x => x.pg('ast'))) add('ast', 'Assistaholic', 'hearts', 'blue', `Most assists a game in ${nm} (${f1(a.pg('ast'))}).`);
   const def = x => (x.s.stl + x.s.blk) / x.gp;
   // Subs can earn the 3+ a game version: it doesn't compare them with anyone.
   if (a.gp >= 3 && (def(a) >= 3 || best(def))) add('def', 'Clamps', 'shield', 'purple', `${f1(def(a))} steals and blocks a game in ${nm}${best(def) ? ', the most on the team' : ''}.`);
   const hasDef = out.some(b => b.key === 'def');
   if (!hasDef && a.gp >= 3 && a.pg('stl') >= BT.stl) add('stl', 'Cookiesss', 'cookie', 'purple', `${f1(a.pg('stl'))} steals a game in ${nm}.`);
-  if (!hasDef && a.gp >= 3 && a.pg('blk') >= BT.blk) add('blk', 'Not in my house!', 'house', 'purple', `${f1(a.pg('blk'))} blocks a game in ${nm}.`);
+  if (!hasDef && a.gp >= 3 && a.pg('blk') >= BT.blk) add('blk', 'Not in my house!', 'wag', 'purple', `${f1(a.pg('blk'))} blocks a game in ${nm}.`);
   const snipe = l5.filter(s => s.m3 >= BT.snipe).length; if (snipe) add('snipe', 'Sniper', 'cross', 'green', `${snipe === 1 ? 'A game' : snipe + ' games'} with ${BT.snipe}+ threes in their last ${l5.length}.`);
   if (a.s.tsa >= BT.effA && a.s.ts >= BT.eff) add('eff', 'Clinical', 'syringe', 'green', `${pctTxt(a.s.ts)} true shooting in ${nm}.`);
   const seasons = seasonList().map(x => x.code), prevS = seasons.slice(seasons.indexOf(season) + 1).find(c => mine.some(g => g.season === c));
@@ -210,10 +210,10 @@ export function playerBadges(id, asOf, noTie) {
   const sak = sg.filter(g => g.rows[id]).map(g => calc(g.rows[id])).filter(s => s.pts >= 1 && s.reb >= 1 && s.ast >= 1 && s.stl >= 1).length;
   if (sak >= BT.sak) add('sak', 'Swiss army knife', 'knife', 'blue', `${sak} games in ${nm} with at least a point, a rebound, an assist and a steal.`);
   if (best(x => x.pg('to'), true) && a.gp >= 5) add('safe', 'Safe hands', 'lock', 'blue', `Fewest turnovers a game in ${nm} (${f1(a.pg('to'))}).`);
-  if (best(x => x.pg('to')) && a.gp >= 5) add('butter', 'Butter fingers', 'butter', 'red', `Most turnovers a game in ${nm} (${f1(a.pg('to'))}).`);
+  if (best(x => x.pg('to')) && a.gp >= 5) add('butter', 'Butter fingers', 'pancakes', 'red', `Most turnovers a game in ${nm} (${f1(a.pg('to'))}).`);
   if (best(x => x.pg('tsa'), true)) add('unselfish', 'Unselfish', 'heart', 'blue', `Fewest shot attempts a game in ${nm} (${f1(a.pg('tsa'))} true shooting attempts).`);
   if (best(x => x.pg('tsa'))) add('chuck', 'Possession ends here', 'stop', 'red', `Most shot attempts a game in ${nm} (${f1(a.pg('tsa'))} true shooting attempts).`);
-  if (l5.length === 5 && l5.every(s => s.per >= BT.steady)) add('steady', 'Mr Consistent', 'bars', 'gold', `${BT.steady}+ PER in each of their last 5 games.`);
+  if (l5.length === 5 && l5.every(s => s.per >= BT.steady)) add('steady', 'Mr Consistent', 'key', 'gold', `${BT.steady}+ PER in each of their last 5 games.`);
   if (sg.length >= 5 && a.gp === sg.length) add('ever', 'Ol\' reliable', 'cal', 'grey', `Played all ${sg.length} games in ${nm}.`);
   return asOf ? out : out.slice(0, 6);
 }
