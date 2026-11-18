@@ -227,7 +227,7 @@ function PStage({ p, num, mood, form }) {
     {HOT_LV[form.level] || form.level === 'ice' ? <span className="fmglow" /> : null}
     <svg className="pfig fmback" viewBox="0 0 100 104" aria-hidden="true" key={'fb' + form.level + pet?.kind} onPointerDown={petTap} dangerouslySetInnerHTML={{ __html: layers.back }} />
     <svg className="pfig" viewBox="0 0 100 104" aria-hidden="true" dangerouslySetInnerHTML={{ __html: pxShadow(50, 103.5, 22, 104 / 34) }} />
-    <span className="phop" key={step?.n || 0}><svg className="pfig" viewBox="0 0 100 104" aria-hidden="true" dangerouslySetInnerHTML={{ __html: figure({ ...p, num }, { stage: true, pose: step?.pose || undefined }) + (step?.x ? step.x.split(' ').map(k => trickExtras({ ...p, num }, k)).join('') : '') }} />
+    <span className={`phop${step?.pose === 'dribbleL' ? ' ball-l' : ''}`} key={step?.n || 0}><svg className="pfig" viewBox="0 0 100 104" aria-hidden="true" dangerouslySetInnerHTML={{ __html: figure({ ...p, num }, { stage: true, pose: step?.pose || undefined }) + (step?.x ? step.x.split(' ').map(k => trickExtras({ ...p, num }, k)).join('') : '') }} />
       {layers.mid ? <svg className="pfig" viewBox="0 0 100 104" aria-hidden="true" dangerouslySetInnerHTML={{ __html: layers.mid }} /> : null}</span>
     <svg className="pfig ploose" viewBox="0 0 100 104" aria-hidden="true" key={'b' + (step?.n || 0)} dangerouslySetInnerHTML={{ __html: `<g class="pball" shape-rendering="crispEdges">${LOOSE}</g>` }} />
     {layers.front ? <svg className="pfig fmfront" viewBox="0 0 100 104" aria-hidden="true" key={'ff' + form.level + pet?.kind} onPointerDown={petTap} dangerouslySetInnerHTML={{ __html: layers.front }} /> : null}

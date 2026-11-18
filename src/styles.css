@@ -1603,6 +1603,9 @@ a.vbtn:active,button.vbtn:active{transform:scale(.94)}
 .fm-flame.f1{animation-delay:-.15s}
 /* Sparks off the floor each time the ball lands (heating up and on fire). */
 .fm-sparks .sp{opacity:0}
+/* The sparks go under whichever hand has the ball. */
+.fm-sparks.l,.ball-l .fm-sparks.r{display:none}
+.ball-l .fm-sparks.l{display:inline}
 .f-hot:is(.bounce,.dribble) .fm-sparks .sp{animation:fmSpark .5s steps(5) .22s}
 .f-hot.dribble .fm-sparks .sp{animation-iteration-count:infinite}
 .f-hot.qbounce .fm-sparks .sp{animation:fmSpark .4s steps(4) .13s}

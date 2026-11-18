@@ -219,9 +219,12 @@ export function flamingShoes(raw) {
   return `<g class="fm-shoes">${f(L1, 0)}${f(L1, 1)}${f(L2 + 1, 1)}${f(L2 + 1, 0)}</g>`;
 }
 // Sparks that fly up off the floor where the ball bounces (shown with each bounce).
+// Two sets: under the ball on the right (the usual dribble), and mirrored under the left hand for a crossover.
+const SPARKS = [[-3, -2, '#ffd04a'], [-1, -4, '#fff2b0'], [2, -3, '#ffb02e'], [4, -1, '#ff8a1f'], [0, -6, '#ffd04a']];
 export function sparks(raw) {
-  const { fx } = formGeom(raw), x = fx + 3;
-  return `<g class="fm-sparks">${[[-3, -2, '#ffd04a'], [-1, -4, '#fff2b0'], [2, -3, '#ffb02e'], [4, -1, '#ff8a1f'], [0, -6, '#ffd04a']].map(([dx, dy, c], i) => `<g class="sp sp${i}" style="--dx:${dx}px;--dy:${dy}px">${px(x, 33, 1, 1, c)}</g>`).join('')}</g>`;
+  const { fx, bx } = formGeom(raw), set = (side, x, m) => `<g class="fm-sparks ${side}">${SPARKS.map(([dx, dy, c], i) => `<g class="sp sp${i}" style="--dx:${dx * m}px;--dy:${dy}px">${px(x, 33, 1, 1, c)}</g>`).join('')}</g>`;
+  // Each 2px left of the ball's centre (fx + 5 on the right, as in avatar.js; bx - 5 on the left).
+  return set('r', fx + 3, 1) + set('l', Math.max(bx - 5, 3) - 2, -1);
 }
 // Frosty breath from the mouth, a puff at a time.
 export function frostBreath(raw) {
