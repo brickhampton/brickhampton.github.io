@@ -46,7 +46,7 @@ const run = (L, upto, sc, hot) => { let n = 0; for (let i = upto; i >= 0 && (hot
 
 const DAY = 864e5;
 // A player's form now. Returns the level, the score, how long the hot or cold run is, and what changed last game:
-// melt (a cold player's big game), sad (a hot player's bad game), best ('career' or 'season': their latest game was
+// best ('career' or 'season': their latest game was
 // their best PER ever, or this season, and it was in the last week).
 export function playerForm(id, games = allGames(), now = Date.now()) {
   const L = lines(id, games), i = L.length - 1;
@@ -56,37 +56,30 @@ export function playerForm(id, games = allGames(), now = Date.now()) {
   const f = raw * MISS_FADE ** missed, level = levelOf(f);
   const hot = run(L, i, sc, true), cold = run(L, i, sc, false);
   // What the last game changed, measured against how they stood the game before.
-  const prev = formAt(L, i - 1), prevLevel = levelOf(prev.f), latest = scores[0];
-  const prevHot = prev.sc ? run(L, i - 1, prev.sc, true) : 0;
-  const melt = !missed && prev.f <= -HOT && latest >= FIRE;
-  const sad = !missed && !melt && (prevLevel === 'fire' || (prevLevel === 'heat' && prevHot >= 2)) && latest <= -HOT;
+  const latest = scores[0];
   const recent = now - new Date(lastG.date + 'T12:00:00').getTime() <= 7 * DAY, beats = l => L[i].s.per > l.s.per;
   const season = L.filter(l => l.g.season === lastG.season);
   const best = !recent ? null : L.length > MIN_GAMES && L.slice(0, i).every(beats) ? 'career' : season.length >= MIN_GAMES && season.slice(0, -1).every(beats) ? 'season' : null;
-  return { level, f, n: L.length, hot, cold, missed, melt, sad, best, latest, last: L.slice(-3).map(l => l.s.per).reverse(), lastPer: L[i].s.per };
+  return { level, f, n: L.length, hot, cold, missed, best, latest, last: L.slice(-3).map(l => l.s.per).reverse(), lastPer: L[i].s.per };
 }
 
-// Which pet stands beside the player: a thundercloud for a week after a career or season best, a melting snowman after
-// a comeback, a sad dragon when a hot run ends, a dragon when on fire (full after 4 hot games in a row, a baby before
-// that), a living flame when heating up (bigger with each hot game in a row), a turtle when steady, a little plain
-// snowman when cooling off, or a bigger snowman when ice cold (hat, scarf and arms after 3 cold games in a row).
+// Which pet stands beside the player, if any: a thundercloud for a week after a career or season best, a dragon when
+// on fire (full after 4 hot games in a row, a baby before that), a living flame when heating up (bigger with each hot
+// game in a row), a little plain snowman when cooling off, or a bigger snowman when ice cold (hat, scarf and arms
+// after 3 cold games in a row). Steady has no pet.
 export function petOf(fm) {
   if (fm.best) return { kind: 'storm', size: fm.best === 'career' ? 2 : 1 };
-  if (fm.melt) return { kind: 'melt' };
-  if (fm.sad) return { kind: 'sad' };
   if (fm.level === 'fire') return { kind: 'dragon', size: fm.hot >= 4 ? 2 : 1 };
   if (fm.level === 'heat') return { kind: 'flame', size: Math.min(3, Math.max(1, fm.hot)) };
   if (fm.level === 'ice') return { kind: 'snowman', size: fm.cold >= 3 ? 3 : 2 };
   if (fm.level === 'cool') return { kind: 'snowman', size: 0 };
-  return { kind: 'turtle' };
+  return null;
 }
 
 // What a tap on the pet shows: a headline and a line of detail.
 export function formReason(fm) {
   if (fm.few) return ['No form yet', `Shows after ${MIN_GAMES} games (${fm.n} so far)`];
   const last3 = `Last 3: ${fm.last.map(v => perTxt(v)).join(', ')} PER`;
-  if (fm.melt) return ['Thawing out!', `${perTxt(fm.lastPer)} PER after a cold run`];
-  if (fm.sad) return ["The flame's gone out", `${perTxt(fm.lastPer)} PER after a hot run`];
   if (fm.missed) return [`${LEVELS[fm.level]}, settling back`, `Missed ${fm.missed === 1 ? 'the last game' : `the last ${fm.missed} games`}. ${last3}`];
   const run = fm.level === 'fire' || fm.level === 'heat' ? fm.hot : fm.level === 'ice' || fm.level === 'cool' ? fm.cold : 0;
   const head = fm.best ? `${fm.best === 'career' ? 'Career' : 'Season'}-best ${perTxt(fm.lastPer)} PER!` : `${LEVELS[fm.level]}${run >= 2 ? `: ${run} ${fm.f > 0 ? 'hot' : 'cold'} games in a row` : ''}`;
