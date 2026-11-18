@@ -435,6 +435,8 @@ export function trickExtras(raw, kind) {
   const c = cleanLook(raw), tall = TALL[c.height], hy = 3 + (3 - tall), ty = hy + 11, bx = 8 - Math.ceil(WIDE[c.weight] / 2), fx = bx + 10 + WIDE[c.weight];
   const px = (x, y, w, h, col, o = 1) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${col}" opacity="${o}"/>`;
   let out = '';
+  // 'shot': the ball up on the shooting hand, for a jump shot (the stage animates its release).
+  if (kind === 'shot') BALL.forEach(([o, w], j) => { out += px(fx - 2 + o, hy - 10 + j, w, 1, BALL_C); });
   if (kind === 'spin') out = px(fx - 4, hy - 2, 1, 2, '#fff', .7) + px(fx - 5, hy, 1, 1, '#fff', .45) + px(fx + 6, hy - 1, 1, 2, '#fff', .7) + px(fx + 7, hy - 3, 1, 1, '#fff', .45)
     + px(fx - 1, hy - 5, 3, 1, '#fff', .55);
   // 'shades': sunglasses over the eyes, with a glint.
@@ -481,9 +483,9 @@ export const CASH = (() => {
 const cache = new Map();
 // SVG markup for a player. Round avatars (the default) show the head and the top of the jersey in a 100 × 100 box.
 // opts.stage draws the whole player at their height, feet on the bottom of a 100 × 104 box: the court, the Home
-// photo, the player page and the builder. opts.pose: 'fist', 'fistL' (the other arm), 'fist2' (both), 'ball', 'trophy', 'shoot', 'catch', 'block', 'block1', 'pass', 'pass2', 'dribbleL', 'spin', 'toast', 'sip' (champagne), 'lowball' (arms down, the ball behind the back), 'pointR'/'pointL' (pointing out either side), 'flick1'/'flick2' (flicking notes off a wad), 'down' (arms down), or palming the ball (the default, as in the reference).
+// photo, the player page and the builder. opts.front draws the ball in front of the body. opts.pose: 'fist', 'fistL' (the other arm), 'fist2' (both), 'ball', 'trophy', 'shoot', 'catch', 'block', 'block1', 'pass', 'pass2', 'dribbleL', 'spin', 'toast', 'sip' (champagne), 'lowball' (arms down, the ball behind the back), 'pointR'/'pointL' (pointing out either side), 'flick1'/'flick2' (flicking notes off a wad), 'down' (arms down), or palming the ball (the default, as in the reference).
 export function figure(raw, opts = {}) {
-  const c = cleanLook(raw), key = JSON.stringify([c, raw.num, !!opts.stage, opts.pose || '']);
+  const c = cleanLook(raw), key = JSON.stringify([c, raw.num, !!opts.stage, opts.pose || '', !!opts.front]);
   if (cache.has(key)) return cache.get(key);
   const { g, go, ge, hy, shortsY } = sprite(c, raw.num, opts.pose);
   // The smiling eyes. Behind glasses a smile reads oddly, so glasses wearers keep their own eyes and get a glint of
@@ -505,7 +507,7 @@ export function figure(raw, opts = {}) {
   // On the stage the jersey and arms (everything above the shorts) are their own group, so they can settle a pixel
   // onto the shorts when the player lands from a hop.
   const body = opts.stage ? at(paths(g.map((row, y) => y < cut ? [] : row), 'b')) + `<g class="av-top">${at(paths(g.map((row, y) => y < cut ? row : []), 'b'))}</g>` : at(paths(g, 'b'));
-  const svg = `<g class="av-fig" shape-rendering="crispEdges">${opts.pose === 'ball' ? body + bl : bl + body}`
+  const svg = `<g class="av-fig" shape-rendering="crispEdges">${opts.pose === 'ball' || opts.front ? body + bl : bl + body}`
     + `<g class="av-head">${at(paths(g, 'h'))}<g class="av-eyes">${at(paths(ge, 'e'))}</g><g class="av-smile">${at(paths(smile, 'e'))}</g></g></g>`;
   if (cache.size > 400) cache.clear();
   cache.set(key, svg);
