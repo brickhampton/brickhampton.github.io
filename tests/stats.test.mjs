@@ -117,7 +117,7 @@ test('A game whose reply was lost is recognised as saved, so it is never saved t
 
 // Hot and cold form (src/lib/form.js): built from made-up games so each level can be checked.
 import { playerForm, petOf, formReason } from '../src/lib/form.js';
-test('Hot and cold form: levels, runs, bests and missed games', () => {
+test('Hot and cold form: levels, runs and missed games', () => {
   // 'me' and a teammate. Each game: me makes `m` of 8 twos; the teammate always makes 3 of 8.
   const row = m => ({ m2: m, a2: 8, m3: 0, a3: 0, ftm: 0, fta: 0, reb: 2, ast: 1, stl: 0, blk: 0, to: 1 });
   const games = (ms, extra = 0) => [...ms.map((m, i) => ({ id: 'g' + i, date: '2026-01-04', rows: { me: row(m), mate: row(3) } })),
@@ -135,12 +135,4 @@ test('Hot and cold form: levels, runs, bests and missed games', () => {
   // Missing games fades the form back toward neutral.
   const away = playerForm('me', games([3, 3, 3, 3, 3, 7, 7, 8, 8], 6), later);
   assert.equal(away.missed, 6); assert.equal(away.level, 'neutral'); assert.match(formReason(away)[1], /Missed the last 6 games/);
-  // A career-best game brings the thundercloud for a week.
-  const best = games([3, 3, 3, 3, 8]);
-  assert.equal(playerForm('me', best, Date.parse('2026-01-08')).best, 'career');
-  assert.deepEqual(petOf(playerForm('me', best, Date.parse('2026-01-08'))), { kind: 'storm', size: 2 });
-  assert.equal(playerForm('me', best, Date.parse('2026-01-20')).best, null);
-  // A season best: the best this season but not ever.
-  const sb = games([9, 3, 3, 3, 3, 6]).map((g, i) => ({ ...g, season: i ? 'S26' : 'W25' }));
-  assert.equal(playerForm('me', sb, Date.parse('2026-01-08')).best, 'season');
 });

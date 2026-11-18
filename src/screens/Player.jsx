@@ -146,12 +146,11 @@ const IDLE = ['dribble', 'cross', 'quick', 'dribble', 'cross', 'quick', 'look'],
 const U = 104 / 34, LOOSE = BALL.map(([o, w], j) => `<rect x="${((o - 3.5) * U).toFixed(2)}" y="${((j - 3) * U).toFixed(2)}" width="${(w * U).toFixed(2)}" height="${U.toFixed(2)}" fill="${BALL_C}"/>`).join('');
 // Preview only: ?ptap=<name> picks the trick a tap plays.
 const PTAP = typeof location !== 'undefined' ? new URLSearchParams(location.search).get('ptap') : null;
-// Preview only: ?pform=fire,4 (a level and the length of the run), or best (career) or sbest (season).
+// Preview only: ?pform=fire,4 (a level and the length of the run).
 const PFORM = typeof location !== 'undefined' ? new URLSearchParams(location.search).get('pform') : null;
 function previewForm(fm) {
   const [lv, n] = PFORM.split('+')[0].split(','), k = +n || 1, f = { fire: 1.2, heat: .5, neutral: 0, cool: -.5, ice: -1.2 }[lv] ?? 0;
-  return { ...fm, few: false, level: lv in { fire: 1, heat: 1, cool: 1, ice: 1 } ? lv : 'neutral', f, hot: f > 0 ? k : 0, cold: f < 0 ? k : 0, missed: 0,
-    best: lv === 'best' ? 'career' : lv === 'sbest' ? 'season' : null, last: fm.last.length ? fm.last : [12, 8, 15], lastPer: fm.lastPer ?? 12 };
+  return { ...fm, few: false, level: lv in { fire: 1, heat: 1, cool: 1, ice: 1 } ? lv : 'neutral', f, hot: f > 0 ? k : 0, cold: f < 0 ? k : 0, missed: 0, last: fm.last.length ? fm.last : [12, 8, 15] };
 }
 const HOT_LV = { fire: 1, heat: 1 }, COLD_LV = { cool: 1, ice: 1 };
 function PStage({ p, num, mood, form }) {
@@ -228,7 +227,7 @@ function PStage({ p, num, mood, form }) {
     {HOT_LV[form.level] || form.level === 'ice' ? <span className="fmglow" /> : null}
     <svg className="pfig fmback" viewBox="0 0 100 104" aria-hidden="true" key={'fb' + form.level + pet?.kind} onPointerDown={petTap} dangerouslySetInnerHTML={{ __html: layers.back }} />
     <svg className="pfig" viewBox="0 0 100 104" aria-hidden="true" dangerouslySetInnerHTML={{ __html: pxShadow(50, 103.5, 22, 104 / 34) }} />
-    <span className="phop" key={step?.n || 0}><svg className="pfig" viewBox="0 0 100 104" aria-hidden="true" dangerouslySetInnerHTML={{ __html: figure({ ...p, num }, { stage: true, pose: step?.pose || undefined }) + (step?.x ? step.x.split(' ').map(k => trickExtras({ ...p, num }, k)).join('') : '') }} />
+    <span className={`phop${step?.pose === 'dribbleL' ? ' ball-l' : ''}`} key={step?.n || 0}><svg className="pfig" viewBox="0 0 100 104" aria-hidden="true" dangerouslySetInnerHTML={{ __html: figure({ ...p, num }, { stage: true, pose: step?.pose || undefined }) + (step?.x ? step.x.split(' ').map(k => trickExtras({ ...p, num }, k)).join('') : '') }} />
       {layers.mid ? <svg className="pfig" viewBox="0 0 100 104" aria-hidden="true" dangerouslySetInnerHTML={{ __html: layers.mid }} /> : null}</span>
     <svg className="pfig ploose" viewBox="0 0 100 104" aria-hidden="true" key={'b' + (step?.n || 0)} dangerouslySetInnerHTML={{ __html: `<g class="pball" shape-rendering="crispEdges">${LOOSE}</g>` }} />
     {layers.front ? <svg className="pfig fmfront" viewBox="0 0 100 104" aria-hidden="true" key={'ff' + form.level + pet?.kind} onPointerDown={petTap} dangerouslySetInnerHTML={{ __html: layers.front }} /> : null}
