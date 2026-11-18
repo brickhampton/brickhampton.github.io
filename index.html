@@ -13,7 +13,9 @@
   <meta name="apple-mobile-web-app-title" content="Brickhampton">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <!-- Opened from the Home Screen, the page runs under a see-through status bar, and iOS then reports the
+       status bar's height as the top safe area, which the page pads by (styles.css, first lines). Safari ignores this tag. -->
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <!-- The preview card when the link is shared in WhatsApp, iMessage, Facebook and so on. -->
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Brickhampton Stats">
