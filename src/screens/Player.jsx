@@ -122,7 +122,6 @@ const TRICKS = {
   hop: () => [['hop', '', 700]],
   squash: () => [['squash', '', 800]],
   dribble: bounces,
-  cross: () => [['bounce', '', 520], ['bounce', 'dribbleL', 520], ['bounce', '', 520], ['bounce', 'dribbleL', 520], ['bounce', '', 520]],
   spin: () => [['spin', 'spin', 2000]],
   // Bounced behind the back: pushed down behind the hip, off the floor just behind the heels, up into the other hand.
   behind: () => [['bounce', '', 520], ['behind', '', 260], ['upL', 'dribbleL', 300], ['bounce', 'dribbleL', 520], ['behindR', 'dribbleL', 260], ['upR', '', 300], ['bounce', '', 520]],
