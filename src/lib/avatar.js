@@ -449,6 +449,13 @@ export function trickExtras(raw, kind) {
   return `<g class="av-trick" transform="translate(50 0) scale(${(104 / FEET).toFixed(4)}) translate(-13 0)" shape-rendering="crispEdges">${out}</g>`;
 }
 
+// Where things are on a player, in the sprite's pixels, for the hot and cold form art: the top of the head (hy), the
+// body's back and front edges (bx, fx) and the left edge of each leg (L1, L2).
+export function formGeom(raw) {
+  const c = cleanLook(raw), tall = TALL[c.height], hy = 3 + (3 - tall), bx = 8 - Math.ceil(WIDE[c.weight] / 2), fx = bx + 10 + WIDE[c.weight];
+  return { hy, bx, fx, L1: bx + 1, L2: fx - 3 };
+}
+
 // Making it rain, beat by beat: [pose, extras]. A wind-up, then eight flicks, each sending a note up and out in an arc
 // (alternately long and short) that tumbles down to the floor, lies there a moment and goes. Several are in the air at
 // once, and the last ones are still falling after the hand has stopped.

@@ -1570,3 +1570,86 @@ a.vbtn:active,button.vbtn:active{transform:scale(.94)}
 @keyframes ftTop{0%{translate:0 0}55%{translate:0 3.06px}66%{translate:0 0}}
 @keyframes ftHead{0%{translate:0 0}55%{translate:0 3.06px}78%{translate:0 0}}
 @media (prefers-reduced-motion:reduce){.hfan,.hbn-tail,.av-top{animation:none!important}}
+
+/* ===== Hot and cold form on the player page (src/lib/form.js, src/lib/formArt.js) =====
+   Drawn in the player sprite's pixels, so 1px in these transforms is one sprite pixel. */
+.fm-hit{fill:transparent;pointer-events:all;cursor:pointer}
+/* A warm glow behind a player heating up (stronger on fire), a cold one behind a player who's ice cold. */
+.fmglow{position:absolute;inset:-4% -8% 2%;border-radius:50%;background:radial-gradient(closest-side,rgba(255,138,40,.32),rgba(255,90,30,.12) 60%,transparent);animation:fmGlow 2.4s ease-in-out infinite}
+.f-fire .fmglow{background:radial-gradient(closest-side,rgba(255,120,30,.5),rgba(255,70,20,.18) 60%,transparent);animation-duration:1.4s}
+.f-ice .fmglow{background:radial-gradient(closest-side,rgba(140,200,255,.22),rgba(120,170,255,.08) 60%,transparent);animation-duration:4s}
+@keyframes fmGlow{50%{opacity:.6;transform:scale(.94)}}
+/* The dragon circles the player: side to side and front to back, a quarter-turn apart, so it goes round in an
+   ellipse. On the way right it's in front of the player; on the way back it's behind, facing left. */
+.fm-orbx{animation:fmOrbX 3.2s ease-in-out infinite alternate}
+.fm-orby{animation:fmOrbY 3.2s ease-in-out -1.6s infinite alternate}
+@keyframes fmOrbX{from{transform:translateX(-22px)}to{transform:translateX(22px)}}
+@keyframes fmOrbY{from{transform:translateY(-4px)}to{transform:translateY(5px)}}
+.fm-front{animation:fmFront 6.4s steps(1) infinite}
+.fm-back{animation:fmBack 6.4s steps(1) infinite}
+@keyframes fmFront{0%{visibility:visible}50%{visibility:hidden}}
+@keyframes fmBack{0%{visibility:hidden}50%{visibility:visible}}
+.fm-wu{animation:fmFlap .4s steps(1) infinite}
+.fm-wd{animation:fmFlap .4s steps(1) -.2s infinite}
+.fm-dragon:not(.big) :is(.fm-wu,.fm-wd){animation-duration:.26s}
+.fm-dragon:not(.big) .fm-wd{animation-delay:-.13s}
+@keyframes fmFlap{0%{visibility:visible}50%{visibility:hidden}}
+/* Smoke rings puffed now and then; a burst of fire when tapped. */
+.fm-ring,.fm-jet{opacity:0}
+.fm-ring{transform-box:fill-box;transform-origin:center;animation:fmRing 5s ease-out 1.2s infinite}
+.fm-ring.r2{animation-delay:1.9s}
+.fm-l .fm-ring{--rx:-5px}
+@keyframes fmRing{0%{opacity:0;transform:none}4%{opacity:.9}30%{opacity:0;transform:translate(var(--rx,5px),-5px) scale(1.6)}100%{opacity:0}}
+.f-react .fm-jet{animation:fmJet 1.3s steps(1)}
+@keyframes fmJet{0%,8%{opacity:0}10%,30%,50%,70%{opacity:1}20%,40%,60%{opacity:.75}88%{opacity:1}90%,100%{opacity:0}}
+/* Flaming shoes, flickering between two shapes. */
+.fm-flame{animation:fmFlap .3s steps(1) infinite}
+.fm-flame.f1{animation-delay:-.15s}
+/* Sparks off the floor each time the ball lands (heating up and on fire). */
+.fm-sparks .sp{opacity:0}
+.f-hot:is(.bounce,.dribble) .fm-sparks .sp{animation:fmSpark .5s steps(5) .22s}
+.f-hot.dribble .fm-sparks .sp{animation-iteration-count:infinite}
+.f-hot.qbounce .fm-sparks .sp{animation:fmSpark .4s steps(4) .13s}
+.fm-sparks .sp1,.fm-sparks .sp3{animation-delay:.25s}
+@keyframes fmSpark{0%{opacity:1;transform:none}70%{opacity:1}100%{opacity:0;transform:translate(var(--dx),var(--dy))}}
+/* Cold: frosty breath, flurries (a proper snowfall when ice cold) and a shiver now and then. */
+.fm-breath{opacity:0;animation:fmBreath 3.4s ease-out 1s infinite}
+@keyframes fmBreath{0%{opacity:0;transform:none}6%{opacity:1}45%{opacity:0;transform:translate(3px,-2px)}100%{opacity:0}}
+.fm-flake{animation:fmFall 5s linear infinite}
+@keyframes fmFall{0%{opacity:0;transform:none}10%{opacity:1}50%{transform:translate(var(--sway),21px)}90%{opacity:1}100%{opacity:0;transform:translate(0,42px)}}
+.f-ice .phop>.pfig:first-child{animation:fmShiver 4.5s steps(1) infinite}
+@keyframes fmShiver{0%,78%{transform:none}80%,86%,92%{transform:translateX(2px)}83%,89%,95%{transform:translateX(-2px)}97%{transform:none}}
+/* The snowman's carrot nose falls off when tapped, and pops back. */
+.f-react .fm-nose{animation:fmNose 2.6s linear}
+@keyframes fmNose{0%{transform:none}12%{transform:translate(1px,2px)}30%{transform:translate(2px,var(--fall))}36%{transform:translate(2px,calc(var(--fall) - 1px))}42%,96%{transform:translate(2px,var(--fall))}97%,100%{transform:none}}
+.f-react .fm-snowman>:not(.fm-nose){animation:fmWobble .5s steps(2)}
+@keyframes fmWobble{50%{transform:translateX(-1px)}}
+/* The melted snowman: steam rising; more when tapped. */
+.fm-steam{opacity:0;animation:fmSteam 3s ease-out infinite}
+.fm-steam.st1{animation-delay:1s}.fm-steam.st2{animation-delay:2s}
+.f-react .fm-steam{animation-duration:.9s;animation-iteration-count:3}
+@keyframes fmSteam{0%{opacity:0;transform:none}20%{opacity:1}100%{opacity:0;transform:translateY(-6px)}}
+/* The sad dragon: its tail flame gutters, a tear runs, a sigh; a slow little shake of the head when tapped. */
+.fm-tailfl{animation:fmGutter 3s steps(1) infinite}
+@keyframes fmGutter{0%,40%{opacity:1}42%{opacity:.3}46%,70%{opacity:1}72%,80%{opacity:0}82%{opacity:.6}}
+.fm-tear{opacity:0;animation:fmTear 4s steps(4) 1s infinite}
+@keyframes fmTear{0%{opacity:1;transform:none}20%{opacity:1;transform:translateY(1px)}25%,100%{opacity:0;transform:translateY(1px)}}
+.fm-sigh{opacity:0;animation:fmSigh 5s ease-out 2.5s infinite}
+.f-react .fm-sigh{animation:fmSigh 1.4s ease-out}
+.f-react .fm-sad{animation:fmWobble .6s steps(2) 2}
+@keyframes fmSigh{0%{opacity:0;transform:none}10%{opacity:.9}50%{opacity:0;transform:translate(2px,-3px)}100%{opacity:0}}
+/* The thermometer's mercury wobbles; tapped, it shoots up to the top (or drops to the bottom when cold). */
+.fm-merc{animation:fmMerc 2.6s steps(1) infinite}
+@keyframes fmMerc{0%,100%{transform:none}25%{transform:translateY(-1px)}50%{transform:none}75%{transform:translateY(1px)}}
+.f-react .fm-merc{animation:fmMercUp 1.6s steps(6)}
+@keyframes fmMercUp{40%,70%{transform:translateY(var(--up))}}
+/* A lightning bolt for a career-best game, flashing now and then. */
+.fm-bolt{opacity:0;filter:drop-shadow(0 0 1.5px #fff6a8);animation:fmBolt 5s steps(1) infinite}
+@keyframes fmBolt{0%,4%,8%,11%{opacity:1}2%,6%,13%,100%{opacity:0}}
+/* The one-line reason when the pet's tapped, over the player's head. */
+.pfloat.fmwhy{top:-12%;flex-direction:column;gap:1px;font-size:12px;font-weight:500;white-space:nowrap;width:max-content;max-width:min(300px,86vw);text-align:center;padding:6px 12px;border-radius:12px;background:rgba(20,24,38,.92);border:1px solid var(--lift2);color:var(--bone);animation-duration:3.4s;z-index:3}
+.pfloat.fmwhy b{font-size:14px;font-weight:700}
+.pfloat.fmwhy span{color:var(--granite);white-space:normal}
+.pfloat.fmwhy.hot{border-color:rgba(255,138,40,.6)}.pfloat.fmwhy.hot b{color:#ffc58f}
+.pfloat.fmwhy.cold{border-color:rgba(127,196,255,.55)}.pfloat.fmwhy.cold b{color:#bfe0ff}
+@media (prefers-reduced-motion:reduce){[class^="fm-"],[class*=" fm-"],.fmglow,.f-ice .phop>.pfig:first-child{animation:none!important}.fm-back,.fm-wd{visibility:hidden}.fm-ring{opacity:0}.fm-orbx{transform:translate(-20px,-8px)}}
