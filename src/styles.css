@@ -1578,8 +1578,8 @@ a.vbtn:active,button.vbtn:active{transform:scale(.94)}
    Drawn in the player sprite's pixels, so 1px in these transforms is one sprite pixel. */
 .fm-hit{fill:transparent;pointer-events:all;cursor:pointer}
 /* A warm glow behind a player heating up (stronger on fire), a cold one behind a player who's ice cold. */
-.fmglow{position:absolute;inset:-4% -8% 2%;border-radius:50%;background:radial-gradient(closest-side,rgba(255,138,40,.32),rgba(255,90,30,.12) 60%,transparent);animation:fmGlow 2.4s ease-in-out infinite}
-.f-fire .fmglow{background:radial-gradient(closest-side,rgba(255,120,30,.5),rgba(255,70,20,.18) 60%,transparent);animation-duration:1.4s}
+.fmglow{position:absolute;inset:-4% -8% 2%;border-radius:50%;background:radial-gradient(closest-side,rgba(255,190,110,.14),rgba(255,170,90,.05) 60%,transparent);animation:fmGlow 2.4s ease-in-out infinite}
+.f-fire .fmglow{background:radial-gradient(closest-side,rgba(255,170,80,.24),rgba(255,140,60,.08) 60%,transparent);animation-duration:1.4s}
 .f-ice .fmglow{background:radial-gradient(closest-side,rgba(140,200,255,.22),rgba(120,170,255,.08) 60%,transparent);animation-duration:4s}
 @keyframes fmGlow{50%{opacity:.6;transform:scale(.94)}}
 /* The dragon hovers off to the player's left, bobbing as it flaps, and drifts in a little now and then. */

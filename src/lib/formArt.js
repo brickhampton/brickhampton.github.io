@@ -238,7 +238,7 @@ const FLAME_SMALL = [[
   '..RRR..',
 ]];
 export function flameBuddy(size) {
-  const pal = { R: '#e8401c', O: '#ff8a1f', Y: '#ffd04a', K: '#3a1408' };
+  const pal = { R: '#f08a32', O: '#ffb347', Y: '#ffe08a', K: '#4a2410' };
   const fr = size > 1 ? FLAME_BIG : FLAME_SMALL, h = fr[0].length, w = fr[0][0].length, x = size > 1 ? -18 : -17, y = 33 - h;
   // Happy eyes (^ ^) for the tap: the eye pixels go back to flame and a little arch sits above each.
   const ey = y + (size > 1 ? 7 : 4), ex = size > 1 ? [x + 3, x + 6] : [x + 2, x + 4];
