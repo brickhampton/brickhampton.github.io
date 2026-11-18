@@ -1,6 +1,7 @@
 /* Page reset: the safe areas pad the whole page so the app bar clears the notch. */
 :root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
+.status-edge{position:fixed;top:0;left:0;right:0;height:env(safe-area-inset-top,0px);background:#101010;z-index:60}
 body{margin:0;padding:0}
 img{max-width:100%}
 [hidden]:not([hidden=until-found i]){display:none!important}
