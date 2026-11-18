@@ -5,10 +5,10 @@ import { allGames, calc, perTxt } from './core.js';
 //   60% PER against their own average PER,
 //   25% TS% against their own average TS% (games with fewer than 2 shots count as average),
 //   15% where their PER ranked in the team that night (top = +1.5, bottom = -1.5).
-// Their own average is every game they'd played up to that point, so a bench player's big night counts as much
-// as a star's. Form is the last 3 games they played, weighted 50 / 30 / 20 (latest first), and fades 25% toward
-// neutral for every team game they've missed since. Fewer than 3 games is always neutral.
-export const MIN_GAMES = 3, HOT = .3, FIRE = .75, MISS_FADE = .75;
+// Their own average is their last 15 games up to that point (all of them until they have 15), so it follows how
+// they're playing now, and a bench player's big night counts as much as a star's. Form is the last 3 games they
+// played, weighted 50 / 30 / 20 (latest first), and fades 25% toward neutral for every team game they've missed since. Fewer than 3 games is always neutral.
+export const WINDOW = 15, MIN_GAMES = 3, HOT = .3, FIRE = .75, MISS_FADE = .75;
 const WEIGHTS = [.5, .3, .2];
 // The levels from hottest to coldest, with the score each one needs.
 export const LEVELS = { fire: 'On fire', heat: 'Heating up', neutral: 'Steady', cool: 'Cooling off', ice: 'Ice cold' };
@@ -29,7 +29,7 @@ function lines(id, games) {
 
 // Each game's score, measured against the player's games up to and including the game at index `upto`.
 function scorer(L, upto) {
-  const base = L.slice(0, upto + 1), pers = base.map(l => l.s.per), shots = base.filter(l => l.s.tsa >= 2);
+  const base = L.slice(Math.max(0, upto + 1 - WINDOW), upto + 1), pers = base.map(l => l.s.per), shots = base.filter(l => l.s.tsa >= 2);
   const mPer = mean(pers), sPer = sd(pers, 5);
   const pts = shots.reduce((t, l) => t + l.s.pts, 0), tsa = shots.reduce((t, l) => t + l.s.tsa, 0);
   const mTs = tsa ? pts / (2 * tsa) : 0, sTs = sd(shots.map(l => l.s.ts), .12);
