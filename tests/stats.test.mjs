@@ -114,3 +114,34 @@ test('A game whose reply was lost is recognised as saved, so it is never saved t
   assert.equal(savedCopy(), null);
   clearRecording();
 });
+
+// Hot and cold form (src/lib/form.js): built from made-up games so each level can be checked.
+import { playerForm, petOf, formReason } from '../src/lib/form.js';
+test('Hot and cold form: levels, runs, comebacks and missed games', () => {
+  // 'me' and a teammate. Each game: me makes `m` of 8 twos; the teammate always makes 3 of 8.
+  const row = m => ({ m2: m, a2: 8, m3: 0, a3: 0, ftm: 0, fta: 0, reb: 2, ast: 1, stl: 0, blk: 0, to: 1 });
+  const games = (ms, extra = 0) => [...ms.map((m, i) => ({ id: 'g' + i, date: '2026-01-04', rows: { me: row(m), mate: row(3) } })),
+    ...Array.from({ length: extra }, (_, i) => ({ id: 'x' + i, date: '2026-01-04', rows: { mate: row(3) } }))];
+  const later = Date.parse('2026-06-01');
+  assert.equal(playerForm('me', games([3, 3]), later).level, 'neutral');
+  assert.ok(playerForm('me', games([3, 3]), later).few);
+  const hot = playerForm('me', games([3, 3, 3, 3, 3, 7, 7, 8, 8]), later);
+  assert.equal(hot.level, 'fire'); assert.equal(hot.hot, 4); assert.deepEqual(petOf(hot), { kind: 'dragon', size: 2 });
+  const cold = playerForm('me', games([4, 4, 4, 4, 4, 1, 0, 0]), later);
+  assert.equal(cold.level, 'ice'); assert.equal(cold.cold, 3); assert.deepEqual(petOf(cold), { kind: 'snowman', size: 3 });
+  assert.equal(playerForm('me', games([4, 4, 4, 4, 4, 4]), later).level, 'neutral');
+  // A big game after a cold run melts the snowman; a bad game after a hot run upsets the dragon.
+  assert.ok(playerForm('me', games([4, 4, 4, 4, 4, 1, 0, 0, 8]), later).melt);
+  assert.ok(playerForm('me', games([3, 3, 3, 3, 3, 7, 7, 8, 0]), later).sad);
+  // Missing games fades the form back toward neutral.
+  const away = playerForm('me', games([3, 3, 3, 3, 3, 7, 7, 8, 8], 6), later);
+  assert.equal(away.missed, 6); assert.equal(away.level, 'neutral'); assert.match(formReason(away)[1], /Missed the last 6 games/);
+  // A career-best game brings the thundercloud for a week.
+  const best = games([3, 3, 3, 3, 8]);
+  assert.equal(playerForm('me', best, Date.parse('2026-01-08')).best, 'career');
+  assert.deepEqual(petOf(playerForm('me', best, Date.parse('2026-01-08'))), { kind: 'storm', size: 2 });
+  assert.equal(playerForm('me', best, Date.parse('2026-01-20')).best, null);
+  // A season best: the best this season but not ever.
+  const sb = games([9, 3, 3, 3, 3, 6]).map((g, i) => ({ ...g, season: i ? 'S26' : 'W25' }));
+  assert.equal(playerForm('me', sb, Date.parse('2026-01-08')).best, 'season');
+});

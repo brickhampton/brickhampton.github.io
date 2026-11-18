@@ -16,6 +16,8 @@ import { openSheet, closeSheet } from '../components/Sheet.jsx';
 import { X, Pencil } from '../components/icons.jsx';
 import { isAdmin } from '../lib/admin.js';
 import { AvatarSheet } from '../lazy.jsx';
+import { playerForm, petOf, formReason } from '../lib/form.js';
+import { formLayers } from '../lib/formArt.js';
 
 // Subs who have played, latest game first, with how many games they've played.
 function subsPlayed() {
@@ -144,7 +146,29 @@ const IDLE = ['dribble', 'cross', 'quick', 'dribble', 'cross', 'quick', 'look'],
 const U = 104 / 34, LOOSE = BALL.map(([o, w], j) => `<rect x="${((o - 3.5) * U).toFixed(2)}" y="${((j - 3) * U).toFixed(2)}" width="${(w * U).toFixed(2)}" height="${U.toFixed(2)}" fill="${BALL_C}"/>`).join('');
 // Preview only: ?ptap=<name> picks the trick a tap plays.
 const PTAP = typeof location !== 'undefined' ? new URLSearchParams(location.search).get('ptap') : null;
-function PStage({ p, num, mood }) {
+// Preview only: ?pform=fire,4 (a level and the length of the run), or melt, sad, best (career) or sbest (season).
+const PFORM = typeof location !== 'undefined' ? new URLSearchParams(location.search).get('pform') : null;
+function previewForm(fm) {
+  const [lv, n] = PFORM.split('+')[0].split(','), k = +n || 1, f = { fire: 1.2, heat: .5, neutral: 0, cool: -.5, ice: -1.2 }[lv] ?? 0;
+  return { ...fm, few: false, level: lv in { fire: 1, heat: 1, cool: 1, ice: 1 } ? lv : 'neutral', f, hot: f > 0 ? k : 0, cold: f < 0 ? k : 0, missed: 0,
+    melt: lv === 'melt', sad: lv === 'sad', best: lv === 'best' ? 'career' : lv === 'sbest' ? 'season' : null, last: fm.last.length ? fm.last : [12, 8, 15], lastPer: fm.lastPer ?? 12 };
+}
+const HOT_LV = { fire: 1, heat: 1 }, COLD_LV = { cool: 1, ice: 1 };
+function PStage({ p, num, mood, form }) {
+  // Hot and cold form: the pet beside the player and the weather round them. Tapping the pet makes it react and
+  // shows why they're at that level.
+  const pet = petOf(form), layers = formLayers({ ...p, num }, form, pet);
+  const [why, setWhy] = useState(0), whyT = useRef(0);
+  useEffect(() => () => clearTimeout(whyT.current), []);
+  const petTap = e => {
+    e.stopPropagation(); e.preventDefault();
+    sfx(pet.kind === 'dragon' ? 'trick' : 'blip');
+    // Off for a frame first, so a second tap starts the reaction again.
+    clearTimeout(whyT.current); setWhy(0);
+    requestAnimationFrame(() => requestAnimationFrame(() => { setWhy(Date.now()); whyT.current = setTimeout(() => setWhy(0), 3400); }));
+  };
+  const fcls = ` f-${form.level}${HOT_LV[form.level] ? ' f-hot' : ''}${why ? ' f-react' : ''}`;
+  const tone = form.melt || HOT_LV[form.level] ? 'hot' : form.sad || COLD_LV[form.level] ? 'cold' : '';
   const [step, setStep] = useState(null), timer = useRef(0), busy = useRef(false), last = useRef(''), taps = useRef({ n: 0, at: 0 });
   const m = useRef(mood); m.current = mood;
   // The arena runs past the page's content to the screen's edges and fades out just before them on both sides.
@@ -198,13 +222,18 @@ function PStage({ p, num, mood }) {
     }, RAPID);
   };
   const fx = step?.fx;
-  return <button className={`pstage alive${step ? ' ' + step.cls : ''}`} id="p-stage" aria-label="Wave hello" onPointerDown={tap} onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), tap())}>
+  return <button className={`pstage alive${fcls}${step ? ' ' + step.cls : ''}`} id="p-stage" aria-label="Wave hello" onPointerDown={tap} onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), tap())}>
     <svg className="pcourt" ref={court} viewBox={COURT_VIEW} aria-hidden="true" dangerouslySetInnerHTML={{ __html: COURT }} />
     <span className="pglow" />
+    {HOT_LV[form.level] || form.level === 'ice' ? <span className="fmglow" /> : null}
+    <svg className="pfig fmback" viewBox="0 0 100 104" aria-hidden="true" key={'fb' + form.level + pet.kind} onPointerDown={petTap} dangerouslySetInnerHTML={{ __html: layers.back }} />
     <svg className="pfig" viewBox="0 0 100 104" aria-hidden="true" dangerouslySetInnerHTML={{ __html: pxShadow(50, 103.5, 22, 104 / 34) }} />
-    <span className="phop" key={step?.n || 0}><svg className="pfig" viewBox="0 0 100 104" aria-hidden="true" dangerouslySetInnerHTML={{ __html: figure({ ...p, num }, { stage: true, pose: step?.pose || undefined }) + (step?.x ? step.x.split(' ').map(k => trickExtras({ ...p, num }, k)).join('') : '') }} /></span>
+    <span className="phop" key={step?.n || 0}><svg className="pfig" viewBox="0 0 100 104" aria-hidden="true" dangerouslySetInnerHTML={{ __html: figure({ ...p, num }, { stage: true, pose: step?.pose || undefined }) + (step?.x ? step.x.split(' ').map(k => trickExtras({ ...p, num }, k)).join('') : '') }} />
+      {layers.mid ? <svg className="pfig" viewBox="0 0 100 104" aria-hidden="true" dangerouslySetInnerHTML={{ __html: layers.mid }} /> : null}</span>
     <svg className="pfig ploose" viewBox="0 0 100 104" aria-hidden="true" key={'b' + (step?.n || 0)} dangerouslySetInnerHTML={{ __html: `<g class="pball" shape-rendering="crispEdges">${LOOSE}</g>` }} />
-    {fx ? <span key={'f' + step.n} className={`pfloat ${fx.tone || 'brag'}`} aria-hidden="true">{fx.badge ? <>{BIC[fx.badge.icon]}{fx.badge.name}</> : fx.text}</span> : null}
+    {layers.front ? <svg className="pfig fmfront" viewBox="0 0 100 104" aria-hidden="true" key={'ff' + form.level + pet.kind} onPointerDown={petTap} dangerouslySetInnerHTML={{ __html: layers.front }} /> : null}
+    {why ? <span key={'w' + why} className={`pfloat fmwhy ${tone}`} role="status">{(([h, d]) => <><b>{h}</b><span>{d}</span></>)(formReason(form))}</span> : null}
+    {fx && !why ? <span key={'f' + step.n} className={`pfloat ${fx.tone || 'brag'}`} aria-hidden="true">{fx.badge ? <>{BIC[fx.badge.icon]}{fx.badge.name}</> : fx.text}</span> : null}
   </button>;
 }
 
@@ -242,6 +271,8 @@ export function Player() {
   // The player on the stage celebrates when their latest game's PER beat their own average for that season.
   const lastG = mine[mine.length - 1], lastPer = calc(lastG.rows[id]).per, seasonAvg = playerAgg(games.filter(g => g.season === lastG.season), id).pg('per');
   const mood = { per: lastPer > seasonAvg ? perTxt(lastPer, true) : '', badges: playerBadges(id) };
+  let form = playerForm(id, games);
+  if (PFORM) form = previewForm(form);
 
   // Stat tiles
   const n1 = (v, tot) => tot ? v : f1(v);
@@ -341,7 +372,7 @@ export function Player() {
 
     <div className="phero">
       <div className="pnum-clip" aria-hidden="true"><div className="pnum">{num}</div></div>
-      <div className="pstage-wrap"><PStage p={p} num={num} mood={mood} />
+      <div className="pstage-wrap pet"><PStage key={id} p={p} num={num} mood={mood} form={form} />
         {isAdmin() && <button className="pedit" id="p-edit-avatar" aria-label={`Edit ${p.name}'s avatar`} title="Edit avatar" onClick={() => openSheet(<AvatarSheet id={id} />, { wide: true })}><Pencil width="22" height="22" /></button>}</div>
       <div className="pid"><h1 className="page pname">{p.name}<span className="pno num">#{num}</span></h1>{starter ? null : <p className="psub"><span className="num">{mine.length} game{mine.length > 1 ? 's' : ''}</span><span>Last played {lastG.season} Game {lastG.no}</span></p>}<Badges id={id} key={id} /></div>
     </div>
