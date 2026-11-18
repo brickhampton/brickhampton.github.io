@@ -92,7 +92,7 @@ const SAD = [
 ];
 
 // A dragon, facing right, with its top-left at (x, y): both wing frames (CSS shows one at a time), a flame jet from
-// the snout (shown when tapped) and smoke rings it puffs now and then.
+// the snout: a short puff now and then, a long burst when tapped.
 export function dragon(size, x, y, flip = false) {
   const big = size > 1, up = big ? DRAGON_UP : BABY_UP, dn = big ? DRAGON_DOWN : BABY_DOWN, w = big ? 16 : 11;
   const mouth = big ? [16, 4] : [11, 3], mx = flip ? x - (mouth[0] - w) - 1 : x + mouth[0];
@@ -101,10 +101,9 @@ export function dragon(size, x, y, flip = false) {
   let jet = '';
   const FL = big ? [[0, 1, 1, '#ffe27a'], [1, 1, 2, '#ffd04a'], [2, 1, 2, '#ffb02e'], [3, 0, 3, '#ff8a1f'], [4, 0, 3, '#ff6a1a'], [5, -1, 4, '#f24a17'], [6, -1, 3, '#d63414'], [7, 0, 2, '#b72a12']] : [[0, 0, 2, '#ffd04a'], [1, 0, 2, '#ffb02e'], [2, -1, 3, '#ff7a1f'], [3, -1, 3, '#f24a17'], [4, 0, 2, '#c72f13']];
   FL.forEach(([i, dy, h, c]) => { jet += px(fx(i), y + mouth[1] + dy, 1, h, c); });
-  const ring = (k) => `<g class="fm-ring r${k}">${px(fx(1), y + mouth[1] - 2, 2, 1, '#c9ccd6')}${px(fx(0), y + mouth[1] - 1, 1, 1, '#c9ccd6')}${px(fx(3), y + mouth[1] - 1, 1, 1, '#c9ccd6')}${px(fx(1), y + mouth[1], 2, 1, '#c9ccd6')}</g>`;
   const h = up.length;
   return `<g class="fm-dragon${big ? ' big' : ''}${flip ? ' fm-l' : ''}">${hit(x - 2, y - 2, w + 4, h + 4)}<g class="fm-wu">${art(up, DPAL, x, y, flip)}</g><g class="fm-wd">${art(dn, DPAL, x, y, flip)}</g>`
-    + `<g class="fm-jet">${jet}</g>${ring(1)}${ring(2)}</g>`;
+    + `<g class="fm-jet">${jet}</g></g>`;
 }
 // The sad dragon, sitting to the player's left, with a little flame on its tail that gutters out.
 export function sadDragon() {
@@ -116,15 +115,6 @@ export function sadDragon() {
 
 /* ---------------- the snowman ---------------- */
 const SPAL = { W: '#f4f8ff', S: '#c6d4ea', K: '#1b1b22', O: '#f08a24', R: '#d23b2c', r: '#8f2a20', H: '#3a3a4a', h: '#d23b2c', B: '#7a5230' };
-// Size 1: a single snowball with a face, sitting on the snow.
-const SNOW1 = [
-  '..WWWW..',
-  '.WWWWWW.',
-  'WWKWWKWW',
-  'WWWWWWWW',
-  'SWWWWWWS',
-  '.SSSSSS.',
-];
 // Size 2: two balls.
 const SNOW2 = [
   '...WWWW...',
@@ -158,14 +148,26 @@ const SNOW3 = [
   '..SWWWWWWWWS.',
   '...SSSSSSSS..',
 ];
+// Size 0, for cooling off: a little plain snowman, just two balls, coal eyes and a carrot.
+const SNOW0 = [
+  '..WWW..',
+  '.WKWKW.',
+  '.WWWWW.',
+  '..SSS..',
+  '.WWWWW.',
+  'WWWWWWW',
+  'WWWWWWW',
+  'SWWWWWS',
+  '.SSSSS.',
+];
 // The snowman to the player's left, feet on the floor, with its carrot nose as its own group (it falls off when tapped).
 export function snowman(size) {
-  const rows = size === 1 ? SNOW1 : size === 2 ? SNOW2 : SNOW3, h = rows.length, w = rows[0].length;
-  const x = size === 3 ? -20 : size === 2 ? -17 : -15, y = 34 - h;
+  const rows = [SNOW0, null, SNOW2, SNOW3][size], h = rows.length, w = rows[0].length;
+  const x = [-15, -15, -17, -20][size], y = 34 - h;
   // The nose sits beside the eyes' row, pointing right (toward the player).
-  const ey = y + (size === 1 ? 3 : size === 2 ? 2 : 6), nx = x + (size === 1 ? 6 : size === 2 ? 7 : 8);
+  const ey = y + [1, 3, 2, 6][size], nx = x + [5, 6, 7, 8][size];
   const nose = px(nx, ey, 2, 1, '#f08a24') + px(nx + 2, ey, 1, 1, '#d46a12');
-  return `<g class="fm-snowman s${size}" style="--fall:${33 - ey}px">${hit(x - 2, y - 2, w + 4, h + 3)}${px(x - 1, 33, rows[0].length + 2 + (size === 3 ? 0 : 0), 1, '#e7eefb', .55)}${art(rows, SPAL, x, y)}<g class="fm-nose">${nose}</g></g>`;
+  return `<g class="fm-snowman s${size}" style="--fall:${33 - ey}px">${hit(x - 2, y - 2, w + 4, h + 3)}${px(x - 1, 33, w + 2, 1, '#e7eefb', .55)}${art(rows, SPAL, x, y)}<g class="fm-nose">${nose}</g></g>`;
 }
 // The melting snowman after a comeback: a puddle with the hat, the carrot and two coals in it, and steam rising.
 export function meltedSnowman() {
@@ -235,7 +237,7 @@ const FLAME_SMALL = [[
   '..RRR..',
 ]];
 export function flameBuddy(size) {
-  const pal = { R: '#e8401c', O: '#ff8a1f', Y: '#ffd04a', K: '#3a1408' };
+  const pal = { R: '#f08a32', O: '#ffb347', Y: '#ffe08a', K: '#4a2410' };
   const fr = size > 1 ? FLAME_BIG : FLAME_SMALL, h = fr[0].length, w = fr[0][0].length, x = size > 1 ? -18 : -17, y = 33 - h;
   // Happy eyes (^ ^) for the tap: the eye pixels go back to flame and a little arch sits above each.
   const ey = y + (size > 1 ? 7 : 4), ex = size > 1 ? [x + 3, x + 6] : [x + 2, x + 4];
@@ -265,33 +267,13 @@ export function turtle() {
   const x = -26, y = 28;
   return `<g class="fm-turtle">${hit(x - 3, y - 4, 24, 11)}${px(x, 33, 12, 1, '#000', .3)}<g class="fm-walk">${turtle1(x, y, false)}${turtle1(x, y, true)}</g></g>`;
 }
-// Cooling off: a penguin, the snowman's mate, waddling on the spot. It flaps and hops when tapped.
-const PENG = [
-  '...KKKK...',
-  '..KKKKKK..',
-  '.KKEKKEKK.',
-  '.KPKOOKPK.',
-  '.KKWWWWKK.',
-  '.KWWWWWWK.',
-  '.KWWWWWWK.',
-  '.KWWWWWWK.',
-  '..KWWWWK..',
-  '...KKKK...',
-];
-export function penguin() {
-  const x = -17, y = 22, pal = { K: '#1c2030', E: '#ffffff', O: '#f2a33a', W: '#f4f8ff', P: '#e98aa0' };
-  const fl = up => `<g class="fm-flip ${up ? 'up' : 'dn'}">${up ? px(x - 1, y + 4, 2, 1, pal.K) + px(x - 2, y + 3, 1, 1, pal.K) + px(x + 9, y + 4, 2, 1, pal.K) + px(x + 11, y + 3, 1, 1, pal.K) : px(x, y + 5, 1, 3, pal.K) + px(x + 9, y + 5, 1, 3, pal.K)}</g>`;
-  const feet = k => `<g class="fm-feet f${k}">${k ? px(x + 2, y + 10, 2, 1, pal.O) + px(x + 6, y + 11, 2, 1, pal.O) : px(x + 2, y + 11, 2, 1, pal.O) + px(x + 6, y + 10, 2, 1, pal.O)}</g>`;
-  return `<g class="fm-peng">${hit(x - 3, y - 3, 16, 17)}${px(x + 1, 33, 8, 1, '#000', .3)}<g class="fm-pbody">${feet(0)}${feet(1)}${art(PENG, pal, x, y)}${fl(false)}${fl(true)}</g></g>`;
-}
-
 /* ---------------- weather round the player ---------------- */
-// Flames licking up round both shoes (two frames, flickering).
+// Low flames licking round both shoes (two frames, flickering), no higher than the ankle.
 export function flamingShoes(raw) {
   const { L1, L2 } = formGeom(raw);
   const f = (x, k) => `<g class="fm-flame f${k}">`
-    + (k ? px(x - 2, 31, 1, 1, '#ff6a1a') + px(x - 1, 30, 1, 2, '#ffb02e') + px(x, 29, 1, 3, '#ff8a1f') + px(x + 1, 30, 1, 2, '#ffd04a') + px(x + 2, 29, 1, 2, '#ff6a1a') + px(x + 3, 31, 1, 1, '#ffb02e')
-      : px(x - 2, 30, 1, 2, '#ffb02e') + px(x - 1, 31, 1, 1, '#ff6a1a') + px(x, 30, 1, 2, '#ffd04a') + px(x + 1, 28, 1, 4, '#ff8a1f') + px(x + 2, 31, 1, 1, '#ffb02e') + px(x + 3, 30, 1, 2, '#ff6a1a'))
+    + (k ? px(x - 2, 32, 1, 1, '#ff6a1a') + px(x - 1, 31, 1, 1, '#ffb02e') + px(x + 1, 30, 1, 2, '#ff8a1f') + px(x + 2, 31, 1, 1, '#ffd04a') + px(x + 3, 32, 1, 1, '#ff6a1a')
+      : px(x - 2, 31, 1, 2, '#ffb02e') + px(x, 31, 1, 1, '#ffd04a') + px(x + 1, 31, 1, 1, '#ff6a1a') + px(x + 2, 30, 1, 2, '#ff8a1f') + px(x + 3, 31, 1, 1, '#ffb02e'))
     + '</g>';
   return `<g class="fm-shoes">${f(L1, 0)}${f(L1, 1)}${f(L2 + 1, 1)}${f(L2 + 1, 0)}</g>`;
 }
@@ -369,7 +351,6 @@ export function formLayers(raw, fm, pet) {
   else if (pet.kind === 'sad') back += sadDragon();
   else if (pet.kind === 'flame') back += flameBuddy(pet.size);
   else if (pet.kind === 'storm') back += storm(true);
-  else if (pet.kind === 'penguin') back += penguin();
   else back += turtle();
   if (lv === 'fire') mid += flamingShoes(raw);
   if (hot) mid += sparks(raw);
