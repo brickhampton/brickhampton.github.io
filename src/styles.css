@@ -695,9 +695,6 @@ tr.tot td{font-weight:600;border-top:1px solid var(--stroke)}
 .pstage.comeback .phop{animation-name:pBack}
 @keyframes pBack{from{transform:none;opacity:1}30%{opacity:1}to{transform:translateX(-60%);opacity:0}}
 .pstage:is(.chase,.comeback) .av-fig{animation:idleBob .16s steps(2,jump-none) infinite}
-/* A little two-step. */
-.pstage.dance .phop{transform-origin:50% 92%;animation:pDance 1.4s ease-in-out}
-@keyframes pDance{12%{transform:translate(-5%,-3%) rotate(-6deg)}25%{transform:translateX(-5%) rotate(-4deg)}37%{transform:translate(5%,-3%) rotate(6deg)}50%{transform:translateX(5%) rotate(4deg)}62%{transform:translate(-5%,-3%) rotate(-6deg)}75%{transform:translateX(-5%) rotate(-4deg)}87%{transform:translate(0,-3%)}100%{transform:none}}
 /* Arms up and a jump when their last game's PER beat their season average. */
 .pstage.cheer .phop{animation:hop .65s var(--ease-out) 2}
 /* A look round, left and right, and five quick bounces (idle only). */

@@ -5,7 +5,7 @@ import { shotDetail } from '../lib/prefs.js';
 import { go } from '../lib/nav.js';
 import { drawRadar, drawTrend, P_STATS, P_MORE, SLOT_COL, SC_B, reduced } from '../lib/charts.js';
 import { Avatar, figure } from '../components/Avatar.jsx';
-import { pxShadow, BALL, BALL_C, trickExtras, CASH } from '../lib/avatar.js';
+import { pxShadow, BALL, BALL_C, trickExtras } from '../lib/avatar.js';
 import { playerCourt, COURT_VIEW } from '../lib/playerCourt.js';
 import { Back, BIC, MedalGold } from '../components/icons.jsx';
 import { Chart, SeasonPick, StatChips, MoreBtn, EmptyState, PerPill } from '../components/ui.jsx';
@@ -127,19 +127,15 @@ const TRICKS = {
   // Bounced behind the back: pushed down behind the hip, off the floor just behind the heels, up into the other hand.
   behind: () => [['bounce', '', 520], ['behind', '', 260], ['upL', 'dribbleL', 300], ['bounce', 'dribbleL', 520], ['behindR', 'dribbleL', 260], ['upR', '', 300], ['bounce', '', 520]],
   fumble: () => [['fumble', 'down', 750], ['chase', 'down', 600], ['comeback', '', 600]],
-  dance: () => [['dance', 'down', 1400]],
   mood: (m) => [['cheer', 'block', 1300, { text: `${m.per} PER`, tone: 'pos' }]],
   badge: (m) => { const b = m.badges[Math.floor(Math.random() * m.badges.length)]; return [['brag', '', 1700, { badge: b }]]; },
   look: () => [['look', '', 1900]],
   quick: () => Array.from({ length: 5 }, () => ['qbounce', '', 300]),
-  // Tap only, from the Player of the game: pointing out to the crowd, a money count, sunglasses on for a cool bob.
-  // A fifth item is drawn over the player (see trickExtras).
+  // Tap only, from the Player of the game: pointing out to the crowd. (A step's fifth item is drawn over the player, see trickExtras.)
   point: () => [['eyesR', 'pointR', 1200], ['', 'down', 250], ['away', 'pointL', 1200]],
-  cash: () => CASH.map(([pose, notes]) => ['', pose, 160, null, notes]),
-  shades: () => [['', 'down', 3800, null, 'shades']],
 };
 // The sounds of a trick that follows a tap (idle tricks stay silent): the ball hits the floor halfway through each bounce.
-const STEP_SFX = { bounce: [['dribble', 250]], qbounce: [['dribble', 150]], spin: [['trick', 0]], hop: [['hop', 0]], dance: [['trick', 0]],
+const STEP_SFX = { bounce: [['dribble', 250]], qbounce: [['dribble', 150]], spin: [['trick', 0]], hop: [['hop', 0]],
   upL: [['dribble', 0]], upR: [['dribble', 0]], cheer: [['cheer', 0]], brag: [['trophy', 0]], squash: [['boing', 0]], fumble: [['floor', 200]] };
 const IDLE = ['dribble', 'cross', 'quick', 'dribble', 'cross', 'quick', 'look'], IDLE_ONLY = ['quick', 'look'], RAPID = 320;
 // The ball on its own, for when it leaves the player's hands: centred on (0, 0) in the stage's units.
