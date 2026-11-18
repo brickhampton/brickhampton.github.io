@@ -165,7 +165,7 @@ function PStage({ p, num, mood, form }) {
     sfx(pet.kind === 'dragon' ? 'trick' : 'blip');
     // Off for a frame first, so a second tap starts the reaction again.
     clearTimeout(whyT.current); setWhy(0);
-    requestAnimationFrame(() => requestAnimationFrame(() => { setWhy(Date.now()); whyT.current = setTimeout(() => setWhy(0), 3400); }));
+    requestAnimationFrame(() => requestAnimationFrame(() => { setWhy(Date.now()); whyT.current = setTimeout(() => setWhy(0), pet.kind === 'turtle' ? 6000 : 3400); }));
   };
   const fcls = ` f-${form.level}${HOT_LV[form.level] ? ' f-hot' : ''}${why ? ' f-react' : ''}`;
   const tone = form.melt || HOT_LV[form.level] ? 'hot' : form.sad || COLD_LV[form.level] ? 'cold' : '';
