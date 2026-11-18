@@ -13,9 +13,9 @@
   <meta name="apple-mobile-web-app-title" content="Brickhampton">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
-  <!-- Opened from the Home Screen, the page runs under a see-through status bar, and iOS then reports the
-       status bar's height as the top safe area, which the page pads by (styles.css, first lines). Safari ignores this tag. -->
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <!-- No apple-mobile-web-app-status-bar-style on purpose: with a see-through status bar, iOS 26+ blurs the top ~110px of the
+       Home Screen app over the header. Without it, the app starts below a solid status bar tinted by theme-color, and the
+       top safe area is 0. iOS reads this only when the icon is added, so an old icon must be removed and added again. -->
   <!-- The preview card when the link is shared in WhatsApp, iMessage, Facebook and so on. -->
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Brickhampton Stats">
@@ -32,10 +32,6 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap">
 </head>
 <body>
-  <!-- A solid strip behind the status bar. iOS 26 otherwise blurs the area below the status bar in the Home Screen app,
-       which smudges the header; finding a solid, full-width fixed box at the top edge makes it use that colour instead.
-       Only shown in the Home Screen app (styles.css). -->
-  <div class="status-edge"></div>
   <div id="root"></div>
   <script type="module" src="/src/main.jsx"></script>
 </body>
