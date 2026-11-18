@@ -258,7 +258,8 @@ function turtle1(x, y, flip) {
   const head = art(['.HH.', 'HHKH', 'HHHH'], pal, flip ? x - 4 : x + 12, y + 2, flip);
   const tail = px(flip ? x + 12 : x - 1, y + 4, 1, 1, pal.H);
   const legs = k => `<g class="fm-leg l${k}">${px(x + 1 + k, y + 5, 2, 1, pal.H)}${px(x + 8 + k, y + 5, 2, 1, pal.H)}</g>`;
-  return `<g class="fm-tdir ${flip ? 'fl' : 'fr'}"><g class="fm-tout">${legs(0)}${legs(1)}<g class="fm-thead">${head}</g>${tail}</g>${art(SHELL, pal, x, y)}</g>`;
+  // The shell is drawn last, so a head, tail or legs pulled in slide underneath it. --d is the way the turtle faces.
+  return `<g class="fm-tdir ${flip ? 'fl' : 'fr'}" style="--d:${flip ? -1 : 1}"><g class="fm-tsink"><g class="fm-tlegs">${legs(0)}${legs(1)}</g><g class="fm-thead">${head}</g><g class="fm-ttail">${tail}</g>${art(SHELL, pal, x, y)}</g></g>`;
 }
 export function turtle() {
   const x = -26, y = 28;
