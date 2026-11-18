@@ -1260,7 +1260,7 @@ a.vbtn:active,button.vbtn:active{transform:scale(.94)}
 /* Phone flashes going off now and then in the crowd behind the team. */
 .hflash{opacity:0;animation:hflash var(--fd) steps(1,end) var(--fl) infinite}
 @keyframes hflash{0%,96%{opacity:0}97%,99%{opacity:.85}}
-/* Home skylights: hidden most of the time; about once a minute they drift in, sweep across and fade. They're their own
+/* Home skylights: hidden most of the time; every 30 seconds they drift in, sweep across and fade. They're their own
    layer that only moves and fades, so the device never has to redraw them (or anything under them) while they play. */
 .hrays{pointer-events:none;opacity:0;will-change:transform,opacity;animation:hsweep 30s ease-in-out -8s infinite}
 @keyframes hsweep{0%,72%{opacity:0;transform:translateX(calc(-1 * var(--rs)))}80%{opacity:1}92%{opacity:1}100%{opacity:0;transform:translateX(var(--rs))}}
