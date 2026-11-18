@@ -219,9 +219,12 @@ export function flamingShoes(raw) {
   return `<g class="fm-shoes">${f(L1, 0)}${f(L1, 1)}${f(L2 + 1, 1)}${f(L2 + 1, 0)}</g>`;
 }
 // Sparks that fly up off the floor where the ball bounces (shown with each bounce).
+// Two sets: under the ball on the right (the usual dribble), and mirrored under the left hand for a crossover.
+const SPARKS = [[-3, -2, '#ffd04a'], [-1, -4, '#fff2b0'], [2, -3, '#ffb02e'], [4, -1, '#ff8a1f'], [0, -6, '#ffd04a']];
 export function sparks(raw) {
-  const { fx } = formGeom(raw), x = fx + 3;
-  return `<g class="fm-sparks">${[[-3, -2, '#ffd04a'], [-1, -4, '#fff2b0'], [2, -3, '#ffb02e'], [4, -1, '#ff8a1f'], [0, -6, '#ffd04a']].map(([dx, dy, c], i) => `<g class="sp sp${i}" style="--dx:${dx}px;--dy:${dy}px">${px(x, 33, 1, 1, c)}</g>`).join('')}</g>`;
+  const { fx, bx } = formGeom(raw), set = (side, x, m) => `<g class="fm-sparks ${side}">${SPARKS.map(([dx, dy, c], i) => `<g class="sp sp${i}" style="--dx:${dx * m}px;--dy:${dy}px">${px(x, 33, 1, 1, c)}</g>`).join('')}</g>`;
+  // Each 2px left of the ball's centre (fx + 5 on the right, as in avatar.js; bx - 5 on the left).
+  return set('r', fx + 3, 1) + set('l', Math.max(bx - 5, 3) - 2, -1);
 }
 // Frosty breath from the mouth, a puff at a time.
 export function frostBreath(raw) {
@@ -237,50 +240,6 @@ export function snowfall(heavy) {
   }
   return `<g class="fm-snow">${out.join('')}</g>`;
 }
-// A small lightning bolt beside the head, flashing now and then, to go with the thundercloud.
-export function bolt(raw, gold) {
-  const { hy } = formGeom(raw), x = 21, y = hy - 4;
-  return `<g class="fm-bolt">${art([
-    '..YY',
-    '.YY.',
-    'YYYY',
-    '..Y.',
-    '.Y..',
-    'Y...',
-  ], { Y: gold ? '#ffd23a' : '#eef4ff' }, x, y)}${px(x + 1, y + 2, 1, 1, '#fff')}</g>`;
-}
-
-/* ---------------- the thundercloud (a career or season best) ---------------- */
-// A proud little thundercloud with a gold crown floating to the player's left, zapping gold bolts onto the floor. The
-// same for a career best and a season best (only the label differs). Tapped, it rumbles and lets off three.
-const CLOUD = [
-  '.....LLLL.......',
-  '...LLLCCLL.LLL..',
-  '..LCCCCCCCLCCCL.',
-  '.LCCCCCCCCCCCCCL',
-  'LCCCBKCCCCBKCCCC',
-  'CCCCCCCCCCCCCCCC',
-  'CCCCCCCKKCCCCCCD',
-  '.DDDDDDDDDDDDDD.',
-];
-// A bolt from the cloud's bottom (x, y) down to the floor, zigzagging.
-function zig(x, y, col) {
-  const steps = [[0, 4], [-2, 0], [0, 4], [3, 0], [0, 4], [-2, 0], [0, 6]];
-  let out = '', cx = x, cy = y;
-  for (const [dx, dy] of steps) {
-    if (dy) { out += px(cx, cy, 2, dy, col); cy += dy; }
-    else { const l = Math.min(cx, cx + dx); out += px(l, cy - 1, Math.abs(dx) + 2, 2, col); cx += dx; }
-  }
-  return out + px(cx - 2, 33, 5, 1, col, .55) + px(cx - 4, 33, 9, 1, col, .2);
-}
-export function storm(career) {
-  const x = -27, y = 3, col = career ? '#ffd23a' : '#eef4ff';
-  const pal = { C: '#7f889e', L: '#aab2c4', D: '#4d5468', K: '#1c2030', B: '#ffffff' };
-  const crown = career ? art(['G.G.G', 'GGGGG'], { G: '#ffd23a' }, x + 5, y - 2) : '';
-  const bolts = [[x + 5, 'z0'], [x + 11, 'z1']].map(([bx, k]) => `<g class="fm-zap ${k}">${zig(bx, y + 8, col)}</g>`).join('');
-  return `<g class="fm-storm${career ? ' gold' : ''}">${hit(x - 2, y - 4, 20, 36)}${bolts}<g class="fm-cloud">${crown}${art(CLOUD, pal, x, y)}</g></g>`;
-}
-
 // Everything for one player's form, in three layers: behind the player, moving with the player (shoes, breath,
 // sparks), and in front. fm is from playerForm, pet from petOf.
 export function formLayers(raw, fm, pet) {
@@ -290,10 +249,8 @@ export function formLayers(raw, fm, pet) {
   if (kind === 'dragon') front += `<g class="fm-hover">${dragon(pet.size, pet.size > 1 ? -27 : -22, pet.size > 1 ? 6 : 10)}</g>`;
   else if (kind === 'snowman') back += snowman(pet.size);
   else if (kind === 'flame') back += flameBuddy(pet.size);
-  else if (kind === 'storm') back += storm(true);
   if (lv === 'fire') mid += flamingShoes(raw);
   if (hot) mid += sparks(raw);
   if (cold) { mid += frostBreath(raw); front += snowfall(lv === 'ice'); }
-  if (fm.best) front += bolt(raw, true);
   return { back: wrap(back), mid: mid && wrap(mid), front: front && wrap(front) };
 }
