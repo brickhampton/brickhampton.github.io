@@ -1,7 +1,8 @@
 // The pixel art for hot and cold form on the player page: the dragon, the snowman, the thermometer and the weather
 // round the player. Everything is drawn in the player sprite's pixels (34 to the player's height, feet on row 34,
 // the player's back at the left and their face at the right, around x 8-19) and placed with the same transform as
-// the player, so it lines up with any player's look. Animations live in styles.css under "Hot and cold form".
+// the player, so it lines up with any player's look. The pets stand off to the player's left (x -27 to -6), clear of
+// the player; the stage makes room for them (.pstage-wrap.pet). Animations live in styles.css under "Hot and cold form".
 import { formGeom } from './avatar.js';
 
 const TF = `translate(50 0) scale(${(104 / 34).toFixed(4)}) translate(-13 0)`;
@@ -107,7 +108,7 @@ export function dragon(size, x, y, flip = false) {
 }
 // The sad dragon, sitting to the player's left, with a little flame on its tail that gutters out.
 export function sadDragon() {
-  const x = -13, y = 25;
+  const x = -23, y = 25;
   return `<g class="fm-sad">${hit(x - 2, y - 2, 20, 12)}${art(SAD, DPAL, x, y)}<g class="fm-tailfl">${px(x - 1, y + 4, 1, 2, '#ffb02e')}${px(x - 1, y + 3, 1, 1, '#f24a17')}</g>`
     + `<g class="fm-tear">${px(x + 13, y + 7, 1, 1, '#7fc4ff')}</g>`
     + `<g class="fm-sigh">${px(x + 16, y + 5, 1, 1, '#c9ccd6')}${px(x + 17, y + 4, 2, 1, '#c9ccd6')}</g></g>`;
@@ -160,7 +161,7 @@ const SNOW3 = [
 // The snowman to the player's left, feet on the floor, with its carrot nose as its own group (it falls off when tapped).
 export function snowman(size) {
   const rows = size === 1 ? SNOW1 : size === 2 ? SNOW2 : SNOW3, h = rows.length, w = rows[0].length;
-  const x = size === 3 ? -10 : size === 2 ? -8 : -6, y = 34 - h;
+  const x = size === 3 ? -20 : size === 2 ? -17 : -15, y = 34 - h;
   // The nose sits beside the eyes' row, pointing right (toward the player).
   const ey = y + (size === 1 ? 3 : size === 2 ? 2 : 6), nx = x + (size === 1 ? 6 : size === 2 ? 7 : 8);
   const nose = px(nx, ey, 2, 1, '#f08a24') + px(nx + 2, ey, 1, 1, '#d46a12');
@@ -168,7 +169,7 @@ export function snowman(size) {
 }
 // The melting snowman after a comeback: a puddle with the hat, the carrot and two coals in it, and steam rising.
 export function meltedSnowman() {
-  const x = -11, y = 25;
+  const x = -22, y = 25;
   const lump = art([
     '....HHHH........',
     '....HHHH........',
@@ -184,23 +185,103 @@ export function meltedSnowman() {
   return `<g class="fm-melt">${hit(x - 2, y - 3, 19, 13)}${px(x - 1, 33, 18, 1, '#7fb0e8', .35)}${lump}${steam}</g>`;
 }
 
-/* ---------------- the thermometer ---------------- */
-// A garden thermometer in the floor to the player's left. The mercury shows the form: t from -1 (ice cold) to 1 (on fire).
-export function thermometer(t, tone = t >= .3 ? 'hot' : t <= -.3 ? 'cold' : '') {
-  const x = -5, top = 17, bulbY = 30, tube = bulbY - top - 1;
-  const lvl = Math.max(1, Math.min(tube - 1, Math.round((t + 1) / 2 * (tube - 2)) + 1));
-  const col = tone === 'hot' ? '#ff4a2a' : tone === 'cold' ? '#5fa8ff' : '#ff6a4a';
-  const glass = '#d9e1f0', back = '#2a3048';
-  let s = px(x, top, 3, tube + 1, glass) + px(x + 1, top + 1, 1, tube, back);
-  // Ticks down the side.
-  for (let j = top + 2; j < bulbY - 1; j += 3) s += px(x + 3, j, 1, 1, '#8b93a8');
-  s += px(x - 1, bulbY - 1, 5, 4, glass) + px(x, bulbY, 3, 2, col) + px(x, bulbY - 1, 3, 1, glass) + px(x + 1, bulbY - 1, 1, 1, col);
-  // The stake into the floor.
-  s += px(x + 1, bulbY + 3, 1, 1, '#8b93a8');
-  // The mercury: its own group so it can wobble, or shoot up when tapped.
-  const up = tone === 'cold' ? lvl - 1 : -(tube - 1 - lvl);
-  const merc = `<g class="fm-merc" style="--up:${up}px">${px(x + 1, bulbY - 1 - lvl, 1, lvl, col)}</g>`;
-  return `<g class="fm-thermo ${tone}">${hit(x - 3, top - 2, 9, 34 - top + 2)}${s}${merc}${px(x + 1, top + 1, 1, 1, '#fff', .5)}</g>`;
+/* ---------------- the in-between pets ---------------- */
+// Heating up: a little living flame with eyes, bouncing beside the player. It's bigger after 2 hot games in a row and
+// throws off embers after 3. Two flicker frames for the tips; tapped, it jumps and flares.
+const FLAME_BIG = [[
+  '....R....',
+  '...RO.R..',
+  '...ROROR.',
+  '..ROOOOR.',
+  '.ROOYOOR.',
+  '.ROYYYOOR',
+  'ROOYYYYOR',
+  'ROYKYYKYR',
+  'ROYYYYYOR',
+  'ROOYYYOOR',
+  '.ROOOOOR.',
+  '..RRRRR..',
+], [
+  '.R.......',
+  '.RR..R...',
+  '..RORR...',
+  '..ROOOR..',
+  '.ROOYOOR.',
+  '.ROYYYOOR',
+  'ROOYYYYOR',
+  'ROYKYYKYR',
+  'ROYYYYYOR',
+  'ROOYYYOOR',
+  '.ROOOOOR.',
+  '..RRRRR..',
+]];
+const FLAME_SMALL = [[
+  '...R...',
+  '..ROR..',
+  '.ROYOR.',
+  'ROYYYOR',
+  'RYKYKYR',
+  'ROYYYOR',
+  '.ROOOR.',
+  '..RRR..',
+], [
+  '.R.....',
+  '..RR.R.',
+  '.ROYOR.',
+  'ROYYYOR',
+  'RYKYKYR',
+  'ROYYYOR',
+  '.ROOOR.',
+  '..RRR..',
+]];
+export function flameBuddy(size) {
+  const pal = { R: '#e8401c', O: '#ff8a1f', Y: '#ffd04a', K: '#3a1408' };
+  const fr = size > 1 ? FLAME_BIG : FLAME_SMALL, h = fr[0].length, w = fr[0][0].length, x = size > 1 ? -18 : -17, y = 33 - h;
+  // Happy eyes (^ ^) for the tap: the eye pixels go back to flame and a little arch sits above each.
+  const ey = y + (size > 1 ? 7 : 4), ex = size > 1 ? [x + 3, x + 6] : [x + 2, x + 4];
+  const happy = ex.map(e => px(e, ey, 1, 1, pal.Y) + px(e - 1, ey, 1, 1, pal.K) + px(e, ey - 1, 1, 1, pal.K) + px(e + 1, ey, 1, 1, pal.K)).join('');
+  const embers = size > 2 ? [[-2, 2, '#ffd04a'], [w + 1, 4, '#ff8a1f'], [1, -2, '#ffb02e'], [w - 1, -1, '#ffd04a']].map(([dx, dy, c], i) => `<g class="fm-ember e${i}">${px(x + dx, y + dy, 1, 1, c)}</g>`).join('') : '';
+  return `<g class="fm-flamebud s${size}">${hit(x - 3, y - 4, w + 6, h + 6)}<g class="fm-fsh">${px(x + 1, 33, w - 2, 1, '#000', .3)}</g>`
+    + `<g class="fm-fbody"><g class="fm-ff f0">${art(fr[0], pal, x, y)}</g><g class="fm-ff f1">${art(fr[1], pal, x, y)}</g><g class="fm-happy">${happy}</g></g>${embers}</g>`;
+}
+
+// Steady: a turtle plodding up and back beside the player. It hides in its shell when tapped.
+const SHELL = [
+  '....SSSS....',
+  '..SSsSSsSS..',
+  '.SsSSSSSSsS.',
+  'SSSSsSSsSSSS',
+  'BBBBBBBBBBBB',
+];
+function turtle1(x, y, flip) {
+  const pal = { S: '#4f9a52', s: '#2f6d37', B: '#d8c27a', H: '#9bd46e', K: '#16121a' };
+  const head = art(['.HH.', 'HHKH', 'HHHH'], pal, flip ? x - 4 : x + 12, y + 2, flip);
+  const tail = px(flip ? x + 12 : x - 1, y + 4, 1, 1, pal.H);
+  const legs = k => `<g class="fm-leg l${k}">${px(x + 1 + k, y + 5, 2, 1, pal.H)}${px(x + 8 + k, y + 5, 2, 1, pal.H)}</g>`;
+  return `<g class="fm-tdir ${flip ? 'fl' : 'fr'}"><g class="fm-tout">${legs(0)}${legs(1)}<g class="fm-thead">${head}</g>${tail}</g>${art(SHELL, pal, x, y)}</g>`;
+}
+export function turtle() {
+  const x = -26, y = 28;
+  return `<g class="fm-turtle">${hit(x - 3, y - 4, 24, 11)}${px(x, 33, 12, 1, '#000', .3)}<g class="fm-walk">${turtle1(x, y, false)}${turtle1(x, y, true)}</g></g>`;
+}
+// Cooling off: a penguin, the snowman's mate, waddling on the spot. It flaps and hops when tapped.
+const PENG = [
+  '...KKKK...',
+  '..KKKKKK..',
+  '.KKEKKEKK.',
+  '.KPKOOKPK.',
+  '.KKWWWWKK.',
+  '.KWWWWWWK.',
+  '.KWWWWWWK.',
+  '.KWWWWWWK.',
+  '..KWWWWK..',
+  '...KKKK...',
+];
+export function penguin() {
+  const x = -17, y = 22, pal = { K: '#1c2030', E: '#ffffff', O: '#f2a33a', W: '#f4f8ff', P: '#e98aa0' };
+  const fl = up => `<g class="fm-flip ${up ? 'up' : 'dn'}">${up ? px(x - 1, y + 4, 2, 1, pal.K) + px(x - 2, y + 3, 1, 1, pal.K) + px(x + 9, y + 4, 2, 1, pal.K) + px(x + 11, y + 3, 1, 1, pal.K) : px(x, y + 5, 1, 3, pal.K) + px(x + 9, y + 5, 1, 3, pal.K)}</g>`;
+  const feet = k => `<g class="fm-feet f${k}">${k ? px(x + 2, y + 10, 2, 1, pal.O) + px(x + 6, y + 11, 2, 1, pal.O) : px(x + 2, y + 11, 2, 1, pal.O) + px(x + 6, y + 10, 2, 1, pal.O)}</g>`;
+  return `<g class="fm-peng">${hit(x - 3, y - 3, 16, 17)}${px(x + 1, 33, 8, 1, '#000', .3)}<g class="fm-pbody">${feet(0)}${feet(1)}${art(PENG, pal, x, y)}${fl(false)}${fl(true)}</g></g>`;
 }
 
 /* ---------------- weather round the player ---------------- */
@@ -227,13 +308,13 @@ export function frostBreath(raw) {
 export function snowfall(heavy) {
   const n = heavy ? 16 : 7, out = [];
   for (let i = 0; i < n; i++) {
-    const x = -12 + ((i * 37) % 44), d = 4 + (i * 7) % 5, del = -((i * 1.37) % d).toFixed(2), big = heavy && i % 3 === 0;
+    const x = -28 + ((i * 37) % 56), d = 4 + (i * 7) % 5, del = -((i * 1.37) % d).toFixed(2), big = heavy && i % 3 === 0;
     out.push(`<g class="fm-flake" style="animation-duration:${d}s;animation-delay:${del}s;--sway:${i % 2 ? 2 : -2}px">${px(x, -8, big ? 2 : 1, big ? 2 : 1, '#f4f8ff', big ? .9 : .75)}</g>`);
   }
   return `<g class="fm-snow">${out.join('')}</g>`;
 }
-// A lightning bolt beside the head for a career-best game (flashes now and then).
-export function bolt(raw) {
+// A small lightning bolt beside the head, flashing now and then, to go with the thundercloud.
+export function bolt(raw, gold) {
   const { hy } = formGeom(raw), x = 21, y = hy - 4;
   return `<g class="fm-bolt">${art([
     '..YY',
@@ -242,7 +323,38 @@ export function bolt(raw) {
     '..Y.',
     '.Y..',
     'Y...',
-  ], { Y: '#ffe45a' }, x, y)}${px(x + 1, y + 2, 1, 1, '#fff')}</g>`;
+  ], { Y: gold ? '#ffd23a' : '#eef4ff' }, x, y)}${px(x + 1, y + 2, 1, 1, '#fff')}</g>`;
+}
+
+/* ---------------- the thundercloud (a career or season best) ---------------- */
+// A proud little thundercloud with a gold crown floating to the player's left, zapping gold bolts onto the floor. The
+// same for a career best and a season best (only the label differs). Tapped, it rumbles and lets off three.
+const CLOUD = [
+  '.....LLLL.......',
+  '...LLLCCLL.LLL..',
+  '..LCCCCCCCLCCCL.',
+  '.LCCCCCCCCCCCCCL',
+  'LCCCBKCCCCBKCCCC',
+  'CCCCCCCCCCCCCCCC',
+  'CCCCCCCKKCCCCCCD',
+  '.DDDDDDDDDDDDDD.',
+];
+// A bolt from the cloud's bottom (x, y) down to the floor, zigzagging.
+function zig(x, y, col) {
+  const steps = [[0, 4], [-2, 0], [0, 4], [3, 0], [0, 4], [-2, 0], [0, 6]];
+  let out = '', cx = x, cy = y;
+  for (const [dx, dy] of steps) {
+    if (dy) { out += px(cx, cy, 2, dy, col); cy += dy; }
+    else { const l = Math.min(cx, cx + dx); out += px(l, cy - 1, Math.abs(dx) + 2, 2, col); cx += dx; }
+  }
+  return out + px(cx - 2, 33, 5, 1, col, .55) + px(cx - 4, 33, 9, 1, col, .2);
+}
+export function storm(career) {
+  const x = -27, y = 3, col = career ? '#ffd23a' : '#eef4ff';
+  const pal = { C: '#7f889e', L: '#aab2c4', D: '#4d5468', K: '#1c2030', B: '#ffffff' };
+  const crown = career ? art(['G.G.G', 'GGGGG'], { G: '#ffd23a' }, x + 5, y - 2) : '';
+  const bolts = [[x + 5, 'z0'], [x + 11, 'z1']].map(([bx, k]) => `<g class="fm-zap ${k}">${zig(bx, y + 8, col)}</g>`).join('');
+  return `<g class="fm-storm${career ? ' gold' : ''}">${hit(x - 2, y - 4, 20, 36)}${bolts}<g class="fm-cloud">${crown}${art(CLOUD, pal, x, y)}</g></g>`;
 }
 
 // Everything for one player's form, in three layers: behind the player, moving with the player (shoes, breath,
@@ -250,18 +362,17 @@ export function bolt(raw) {
 export function formLayers(raw, fm, pet) {
   let back = '', mid = '', front = '';
   const lv = fm.level, hot = lv === 'fire' || lv === 'heat', cold = lv === 'cool' || lv === 'ice';
-  if (pet.kind === 'dragon') {
-    const big = pet.size > 1, x = big ? 5 : 8, y = big ? 12 : 14;
-    const orbit = (inner, cls) => `<g class="fm-orbx"><g class="fm-orby"><g class="${cls}">${inner}</g></g></g>`;
-    back += orbit(dragon(pet.size, x, y, true), 'fm-back');
-    front += orbit(dragon(pet.size, x, y), 'fm-front');
-  } else if (pet.kind === 'snowman') back += snowman(pet.size);
+  if (pet.kind === 'dragon') front += `<g class="fm-hover">${dragon(pet.size, pet.size > 1 ? -27 : -22, pet.size > 1 ? 6 : 10)}</g>`;
+  else if (pet.kind === 'snowman') back += snowman(pet.size);
   else if (pet.kind === 'melt') back += meltedSnowman();
   else if (pet.kind === 'sad') back += sadDragon();
-  else back += thermometer(Math.max(-1, Math.min(1, fm.f / 1.1)), hot ? 'hot' : cold ? 'cold' : '');
+  else if (pet.kind === 'flame') back += flameBuddy(pet.size);
+  else if (pet.kind === 'storm') back += storm(true);
+  else if (pet.kind === 'penguin') back += penguin();
+  else back += turtle();
   if (lv === 'fire') mid += flamingShoes(raw);
   if (hot) mid += sparks(raw);
   if (cold) { mid += frostBreath(raw); front += snowfall(lv === 'ice'); }
-  if (fm.bolt) front += bolt(raw);
+  if (fm.best) front += bolt(raw, true);
   return { back: wrap(back), mid: mid && wrap(mid), front: front && wrap(front) };
 }

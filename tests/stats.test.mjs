@@ -136,8 +136,12 @@ test('Hot and cold form: levels, runs, comebacks and missed games', () => {
   // Missing games fades the form back toward neutral.
   const away = playerForm('me', games([3, 3, 3, 3, 3, 7, 7, 8, 8], 6), later);
   assert.equal(away.missed, 6); assert.equal(away.level, 'neutral'); assert.match(formReason(away)[1], /Missed the last 6 games/);
-  // A career-best game lights the bolt for a week.
+  // A career-best game brings the thundercloud for a week.
   const best = games([3, 3, 3, 3, 8]);
-  assert.ok(playerForm('me', best, Date.parse('2026-01-08')).bolt);
-  assert.ok(!playerForm('me', best, Date.parse('2026-01-20')).bolt);
+  assert.equal(playerForm('me', best, Date.parse('2026-01-08')).best, 'career');
+  assert.deepEqual(petOf(playerForm('me', best, Date.parse('2026-01-08'))), { kind: 'storm', size: 2 });
+  assert.equal(playerForm('me', best, Date.parse('2026-01-20')).best, null);
+  // A season best: the best this season but not ever.
+  const sb = games([9, 3, 3, 3, 3, 6]).map((g, i) => ({ ...g, season: i ? 'S26' : 'W25' }));
+  assert.equal(playerForm('me', sb, Date.parse('2026-01-08')).best, 'season');
 });

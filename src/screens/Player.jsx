@@ -146,12 +146,12 @@ const IDLE = ['dribble', 'cross', 'quick', 'dribble', 'cross', 'quick', 'look'],
 const U = 104 / 34, LOOSE = BALL.map(([o, w], j) => `<rect x="${((o - 3.5) * U).toFixed(2)}" y="${((j - 3) * U).toFixed(2)}" width="${(w * U).toFixed(2)}" height="${U.toFixed(2)}" fill="${BALL_C}"/>`).join('');
 // Preview only: ?ptap=<name> picks the trick a tap plays.
 const PTAP = typeof location !== 'undefined' ? new URLSearchParams(location.search).get('ptap') : null;
-// Preview only: ?pform=fire,4 (a level and the length of the run), or melt, sad; add +bolt for the career-best bolt.
+// Preview only: ?pform=fire,4 (a level and the length of the run), or melt, sad, best (career) or sbest (season).
 const PFORM = typeof location !== 'undefined' ? new URLSearchParams(location.search).get('pform') : null;
 function previewForm(fm) {
   const [lv, n] = PFORM.split('+')[0].split(','), k = +n || 1, f = { fire: 1.2, heat: .5, neutral: 0, cool: -.5, ice: -1.2 }[lv] ?? 0;
   return { ...fm, few: false, level: lv in { fire: 1, heat: 1, cool: 1, ice: 1 } ? lv : 'neutral', f, hot: f > 0 ? k : 0, cold: f < 0 ? k : 0, missed: 0,
-    melt: lv === 'melt', sad: lv === 'sad', bolt: PFORM.includes('+bolt'), last: fm.last.length ? fm.last : [12, 8, 15], lastPer: fm.lastPer ?? 12 };
+    melt: lv === 'melt', sad: lv === 'sad', best: lv === 'best' ? 'career' : lv === 'sbest' ? 'season' : null, last: fm.last.length ? fm.last : [12, 8, 15], lastPer: fm.lastPer ?? 12 };
 }
 const HOT_LV = { fire: 1, heat: 1 }, COLD_LV = { cool: 1, ice: 1 };
 function PStage({ p, num, mood, form }) {
@@ -372,7 +372,7 @@ export function Player() {
 
     <div className="phero">
       <div className="pnum-clip" aria-hidden="true"><div className="pnum">{num}</div></div>
-      <div className="pstage-wrap"><PStage key={id} p={p} num={num} mood={mood} form={form} />
+      <div className="pstage-wrap pet"><PStage key={id} p={p} num={num} mood={mood} form={form} />
         {isAdmin() && <button className="pedit" id="p-edit-avatar" aria-label={`Edit ${p.name}'s avatar`} title="Edit avatar" onClick={() => openSheet(<AvatarSheet id={id} />, { wide: true })}><Pencil width="22" height="22" /></button>}</div>
       <div className="pid"><h1 className="page pname">{p.name}<span className="pno num">#{num}</span></h1>{starter ? null : <p className="psub"><span className="num">{mine.length} game{mine.length > 1 ? 's' : ''}</span><span>Last played {lastG.season} Game {lastG.no}</span></p>}<Badges id={id} key={id} /></div>
     </div>
