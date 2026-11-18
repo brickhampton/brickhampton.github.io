@@ -684,6 +684,32 @@ tr.tot td{font-weight:600;border-top:1px solid var(--stroke)}
 .pstage.upR .av-ball,.potg-stage .pk-buR .av-ball{--bx:calc(var(--mid) * -1);animation:pxBehindUp .3s cubic-bezier(0,0,.5,1) both}
 @keyframes pxBehindDown{to{transform:translate(var(--bx),var(--drop))}}
 @keyframes pxBehindUp{from{transform:translate(var(--bx),var(--drop))}}
+/* Basketball moves. One sprite pixel is 1/34 of the stage (2.94%) or 3.06 of the figure's units. */
+/* Killer crossover: lean and look right on a slower bounce, then the ball crosses hard in front, off the floor between the feet, to the other hand while
+   they lean and look left, two quick low bounces, and back across. */
+.pstage.kfake .phop{transform:translateX(2.94%)}
+.pstage.kfake .av-ball{animation:pxDribble .42s cubic-bezier(.5,0,.5,1)}
+.pstage:is(.kfake) :is(.av-eyes,.av-smile){transform:translateX(3.06px)}
+.pstage:is(.kcross,.klow) .phop{transform:translateX(-2.94%)}
+.pstage:is(.kcross,.klow) :is(.av-eyes,.av-smile){transform:translateX(-3.06px)}
+.pstage.kcross .av-ball{animation:pxCrossL .3s linear both}
+.pstage.kback .av-ball{animation:pxCrossR .32s linear both}
+@keyframes pxCrossL{from{transform:translate(calc(var(--mid) * 2),0);animation-timing-function:ease-in}50%{transform:translate(var(--mid),var(--drop));animation-timing-function:ease-out}to{transform:none}}
+@keyframes pxCrossR{from{transform:translate(calc(var(--mid) * -2),0);animation-timing-function:ease-in}50%{transform:translate(calc(var(--mid) * -1),var(--drop));animation-timing-function:ease-out}to{transform:none}}
+.pstage.klow .av-ball{animation:pxDribble .24s cubic-bezier(.5,0,.5,1)}
+/* Between the legs: the ball goes down in front to the floor between the feet, then up behind into the other hand
+   (upL/upR, as behind the back). */
+.pstage.legs .av-ball{--bx:calc(var(--mid) * -1);animation:pxBehindDown .26s cubic-bezier(.5,0,1,1) both}
+.pstage.legsR .av-ball{--bx:var(--mid);animation:pxBehindDown .26s cubic-bezier(.5,0,1,1) both}
+/* Jump shot: a dip, then up, the ball released off the top at the peak while they drop back down. */
+.pstage.dip .phop{transform:translateY(2.94%)}
+.pstage.jumpshot .phop{animation:pJump .95s both}
+@keyframes pJump{0%{transform:none;animation-timing-function:cubic-bezier(.2,.7,.4,1)}35%{transform:translateY(-14%);animation-timing-function:ease-in}62%,100%{transform:none}}
+.pstage.jumpshot .av-trick{animation:pShot .95s both}
+/* (translate, not transform, so the group's own transform attribute stays put.) */
+@keyframes pShot{0%,30%{translate:0 0;opacity:1;animation-timing-function:cubic-bezier(.3,.6,.6,1)}75%{opacity:1}85%,100%{translate:0 -42px;opacity:0}}
+.pstage.catchback .av-ball{animation:pCatch .42s cubic-bezier(.5,0,1,1) both}
+@keyframes pCatch{from{transform:translateY(-120px);opacity:0}25%{opacity:1}to{transform:none}}
 /* A fumble: the ball slips and rolls off, the player runs after it and comes back with it from the other side. */
 .pstage.fumble .pball{animation:pFumble .75s linear both}
 @keyframes pFumble{0%{opacity:1;transform:translate(80px,73px);animation-timing-function:ease-in}30%{transform:translate(86px,98px);animation-timing-function:ease-out}50%{transform:translate(92px,86px);animation-timing-function:ease-in}68%{transform:translate(97px,98px)}85%{opacity:1}100%{opacity:0;transform:translate(130px,98px)}}
@@ -695,9 +721,6 @@ tr.tot td{font-weight:600;border-top:1px solid var(--stroke)}
 .pstage.comeback .phop{animation-name:pBack}
 @keyframes pBack{from{transform:none;opacity:1}30%{opacity:1}to{transform:translateX(-60%);opacity:0}}
 .pstage:is(.chase,.comeback) .av-fig{animation:idleBob .16s steps(2,jump-none) infinite}
-/* A little two-step. */
-.pstage.dance .phop{transform-origin:50% 92%;animation:pDance 1.4s ease-in-out}
-@keyframes pDance{12%{transform:translate(-5%,-3%) rotate(-6deg)}25%{transform:translateX(-5%) rotate(-4deg)}37%{transform:translate(5%,-3%) rotate(6deg)}50%{transform:translateX(5%) rotate(4deg)}62%{transform:translate(-5%,-3%) rotate(-6deg)}75%{transform:translateX(-5%) rotate(-4deg)}87%{transform:translate(0,-3%)}100%{transform:none}}
 /* Arms up and a jump when their last game's PER beat their season average. */
 .pstage.cheer .phop{animation:hop .65s var(--ease-out) 2}
 /* A look round, left and right, and five quick bounces (idle only). */
@@ -1610,6 +1633,14 @@ a.vbtn:active,button.vbtn:active{transform:scale(.94)}
 .f-hot.dribble .fm-sparks .sp{animation-iteration-count:infinite}
 .f-hot.qbounce .fm-sparks .sp{animation:fmSpark .4s steps(4) .13s}
 .fm-sparks .sp1,.fm-sparks .sp3{animation-delay:.25s}
+/* Moves that bounce the ball between the feet put the sparks in the middle, timed to the bounce. */
+.fm-sparks.c,.f-hot:is(.kcross,.kback,.upL,.upR) .fm-sparks:is(.r,.l){display:none}
+.f-hot:is(.kcross,.kback,.upL,.upR) .fm-sparks.c{display:inline}
+.f-hot.kcross .fm-sparks .sp{animation:fmSpark .45s steps(5) .15s}
+.f-hot.kback .fm-sparks .sp{animation:fmSpark .45s steps(5) .16s}
+.f-hot:is(.upL,.upR) .fm-sparks .sp{animation:fmSpark .45s steps(5)}
+.f-hot.kfake .fm-sparks .sp{animation:fmSpark .5s steps(5) .21s}
+.f-hot.klow .fm-sparks .sp{animation:fmSpark .4s steps(4) .12s}
 @keyframes fmSpark{0%{opacity:1;transform:none}70%{opacity:1}100%{opacity:0;transform:translate(var(--dx),var(--dy))}}
 /* Cold: frosty breath, flurries (a proper snowfall when ice cold) and a shiver now and then. */
 .fm-breath{opacity:0;animation:fmBreath 3.4s ease-out 1s infinite}

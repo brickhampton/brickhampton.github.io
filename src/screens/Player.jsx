@@ -5,7 +5,7 @@ import { shotDetail } from '../lib/prefs.js';
 import { go } from '../lib/nav.js';
 import { drawRadar, drawTrend, P_STATS, P_MORE, SLOT_COL, SC_B, reduced } from '../lib/charts.js';
 import { Avatar, figure } from '../components/Avatar.jsx';
-import { pxShadow, BALL, BALL_C, trickExtras, CASH } from '../lib/avatar.js';
+import { pxShadow, BALL, BALL_C, trickExtras } from '../lib/avatar.js';
 import { playerCourt, COURT_VIEW } from '../lib/playerCourt.js';
 import { Back, BIC, MedalGold } from '../components/icons.jsx';
 import { Chart, SeasonPick, StatChips, MoreBtn, EmptyState, PerPill } from '../components/ui.jsx';
@@ -126,22 +126,28 @@ const TRICKS = {
   spin: () => [['spin', 'spin', 2000]],
   // Bounced behind the back: pushed down behind the hip, off the floor just behind the heels, up into the other hand.
   behind: () => [['bounce', '', 520], ['behind', '', 260], ['upL', 'dribbleL', 300], ['bounce', 'dribbleL', 520], ['behindR', 'dribbleL', 260], ['upR', '', 300], ['bounce', '', 520]],
+  // A killer crossover: a slow bounce leaning right with the eyes selling it, then a hard, low cross in front to the
+  // left hand, leaning and looking left, two quick low bounces, and back across.
+  killer: () => [['bounce', '', 520], ['kfake', '', 420], ['kcross', 'dribbleL', 300], ['klow', 'dribbleL', 240], ['klow', 'dribbleL', 240], ['bounce', 'dribbleL', 520], ['kback', '', 320]],
+  // Between the legs: down in front, off the floor between the feet, up behind into the other hand, and back again.
+  legs: () => [['bounce', '', 520], ['legs', '', 260], ['upL', 'dribbleL', 300], ['bounce', 'dribbleL', 520], ['legsR', 'dribbleL', 260], ['upR', '', 300], ['bounce', '', 520]],
+  // A jump shot: a dip, up and release (the ball flies off the top), arms down to watch, and the ball comes back down to them.
+  shot: () => [['dip', 'ball', 260], ['jumpshot', 'shoot', 950, null, 'shot'], ['', 'down', 450], ['catchback', '', 420]],
   fumble: () => [['fumble', 'down', 750], ['chase', 'down', 600], ['comeback', '', 600]],
-  dance: () => [['dance', 'down', 1400]],
   mood: (m) => [['cheer', 'block', 1300, { text: `${m.per} PER`, tone: 'pos' }]],
   badge: (m) => { const b = m.badges[Math.floor(Math.random() * m.badges.length)]; return [['brag', '', 1700, { badge: b }]]; },
   look: () => [['look', '', 1900]],
   quick: () => Array.from({ length: 5 }, () => ['qbounce', '', 300]),
-  // Tap only, from the Player of the game: pointing out to the crowd, a money count, sunglasses on for a cool bob.
-  // A fifth item is drawn over the player (see trickExtras).
+  // Tap only, from the Player of the game: pointing out to the crowd. (A step's fifth item is drawn over the player, see trickExtras.)
   point: () => [['eyesR', 'pointR', 1200], ['', 'down', 250], ['away', 'pointL', 1200]],
-  cash: () => CASH.map(([pose, notes]) => ['', pose, 160, null, notes]),
-  shades: () => [['', 'down', 3800, null, 'shades']],
 };
 // The sounds of a trick that follows a tap (idle tricks stay silent): the ball hits the floor halfway through each bounce.
-const STEP_SFX = { bounce: [['dribble', 250]], qbounce: [['dribble', 150]], spin: [['trick', 0]], hop: [['hop', 0]], dance: [['trick', 0]],
-  upL: [['dribble', 0]], upR: [['dribble', 0]], cheer: [['cheer', 0]], brag: [['trophy', 0]], squash: [['boing', 0]], fumble: [['floor', 200]] };
-const IDLE = ['dribble', 'cross', 'quick', 'dribble', 'cross', 'quick', 'look'], IDLE_ONLY = ['quick', 'look'], RAPID = 320;
+const STEP_SFX = { bounce: [['dribble', 250]], qbounce: [['dribble', 150]], spin: [['trick', 0]], hop: [['hop', 0]],
+  upL: [['dribble', 0]], upR: [['dribble', 0]], kfake: [['dribble', 210]], kcross: [['dribble', 150]], klow: [['dribble', 120]], kback: [['dribble', 160]],
+  legs: [['dribble', 260]], legsR: [['dribble', 260]], jumpshot: [['hop', 0], ['swish', 750]], catchback: [['grab', 400]], cheer: [['cheer', 0]], brag: [['trophy', 0]], squash: [['boing', 0]], fumble: [['floor', 200]] };
+// Steps where the ball passes in front of the body.
+const FRONT = new Set(['kcross', 'kback', 'legs', 'legsR']);
+const IDLE = ['dribble', 'cross', 'quick', 'dribble', 'cross', 'quick', 'look', 'killer', 'legs', 'shot'], IDLE_ONLY = ['quick', 'look'], RAPID = 320;
 // The ball on its own, for when it leaves the player's hands: centred on (0, 0) in the stage's units.
 const U = 104 / 34, LOOSE = BALL.map(([o, w], j) => `<rect x="${((o - 3.5) * U).toFixed(2)}" y="${((j - 3) * U).toFixed(2)}" width="${(w * U).toFixed(2)}" height="${U.toFixed(2)}" fill="${BALL_C}"/>`).join('');
 // Preview only: ?ptap=<name> picks the trick a tap plays.
@@ -227,7 +233,7 @@ function PStage({ p, num, mood, form }) {
     {HOT_LV[form.level] || form.level === 'ice' ? <span className="fmglow" /> : null}
     <svg className="pfig fmback" viewBox="0 0 100 104" aria-hidden="true" key={'fb' + form.level + pet?.kind} onPointerDown={petTap} dangerouslySetInnerHTML={{ __html: layers.back }} />
     <svg className="pfig" viewBox="0 0 100 104" aria-hidden="true" dangerouslySetInnerHTML={{ __html: pxShadow(50, 103.5, 22, 104 / 34) }} />
-    <span className={`phop${step?.pose === 'dribbleL' ? ' ball-l' : ''}`} key={step?.n || 0}><svg className="pfig" viewBox="0 0 100 104" aria-hidden="true" dangerouslySetInnerHTML={{ __html: figure({ ...p, num }, { stage: true, pose: step?.pose || undefined }) + (step?.x ? step.x.split(' ').map(k => trickExtras({ ...p, num }, k)).join('') : '') }} />
+    <span className={`phop${step?.pose === 'dribbleL' ? ' ball-l' : ''}`} key={step?.n || 0}><svg className="pfig" viewBox="0 0 100 104" aria-hidden="true" dangerouslySetInnerHTML={{ __html: figure({ ...p, num }, { stage: true, pose: step?.pose || undefined, front: FRONT.has(step?.cls.split(' ')[0]) }) + (step?.x ? step.x.split(' ').map(k => trickExtras({ ...p, num }, k)).join('') : '') }} />
       {layers.mid ? <svg className="pfig" viewBox="0 0 100 104" aria-hidden="true" dangerouslySetInnerHTML={{ __html: layers.mid }} /> : null}</span>
     <svg className="pfig ploose" viewBox="0 0 100 104" aria-hidden="true" key={'b' + (step?.n || 0)} dangerouslySetInnerHTML={{ __html: `<g class="pball" shape-rendering="crispEdges">${LOOSE}</g>` }} />
     {layers.front ? <svg className="pfig fmfront" viewBox="0 0 100 104" aria-hidden="true" key={'ff' + form.level + pet?.kind} onPointerDown={petTap} dangerouslySetInnerHTML={{ __html: layers.front }} /> : null}
