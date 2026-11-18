@@ -1262,8 +1262,8 @@ a.vbtn:active,button.vbtn:active{transform:scale(.94)}
 @keyframes hflash{0%,96%{opacity:0}97%,99%{opacity:.85}}
 /* Home skylights: hidden most of the time; about once a minute they drift in, sweep across and fade. They're their own
    layer that only moves and fades, so the device never has to redraw them (or anything under them) while they play. */
-.hrays{pointer-events:none;opacity:0;will-change:transform,opacity;animation:hsweep 60s ease-in-out -38s infinite}
-@keyframes hsweep{0%,86%{opacity:0;transform:translateX(calc(-1 * var(--rs)))}90%{opacity:1}96%{opacity:1}100%{opacity:0;transform:translateX(var(--rs))}}
+.hrays{pointer-events:none;opacity:0;will-change:transform,opacity;animation:hsweep 30s ease-in-out -8s infinite}
+@keyframes hsweep{0%,72%{opacity:0;transform:translateX(calc(-1 * var(--rs)))}80%{opacity:1}92%{opacity:1}100%{opacity:0;transform:translateX(var(--rs))}}
 /* Admin > Supporter: her outfit and camera choices, drawn like the avatar builder's options. */
 .sup-card{display:flex;flex-direction:column;gap:8px}
 .sup-card .sup-opts{grid-template-columns:repeat(auto-fill,minmax(96px,120px));margin-bottom:8px}
