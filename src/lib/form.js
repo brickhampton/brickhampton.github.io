@@ -66,17 +66,18 @@ export function playerForm(id, games = allGames(), now = Date.now()) {
   return { level, f, n: L.length, hot, cold, missed, melt, sad, best, latest, last: L.slice(-3).map(l => l.s.per).reverse(), lastPer: L[i].s.per };
 }
 
-// Which pet stands beside the player: a thundercloud for a week after a career or season best; a dragon when on fire (full after 4 hot games in a row, a baby before that), a
-// living flame when heating up (bigger with each hot game in a row), a turtle when steady, a penguin when cooling off, a
-// snowman when ice cold (growing with the cold run), a melting snowman after a comeback, or a sad dragon.
+// Which pet stands beside the player: a thundercloud for a week after a career or season best, a melting snowman after
+// a comeback, a sad dragon when a hot run ends, a dragon when on fire (full after 4 hot games in a row, a baby before
+// that), a living flame when heating up (bigger with each hot game in a row), a turtle when steady, a little plain
+// snowman when cooling off, or a bigger snowman when ice cold (hat, scarf and arms after 3 cold games in a row).
 export function petOf(fm) {
   if (fm.best) return { kind: 'storm', size: fm.best === 'career' ? 2 : 1 };
   if (fm.melt) return { kind: 'melt' };
   if (fm.sad) return { kind: 'sad' };
   if (fm.level === 'fire') return { kind: 'dragon', size: fm.hot >= 4 ? 2 : 1 };
   if (fm.level === 'heat') return { kind: 'flame', size: Math.min(3, Math.max(1, fm.hot)) };
-  if (fm.level === 'ice') return { kind: 'snowman', size: Math.min(3, Math.max(1, fm.cold)) };
-  if (fm.level === 'cool') return { kind: 'penguin' };
+  if (fm.level === 'ice') return { kind: 'snowman', size: fm.cold >= 3 ? 3 : 2 };
+  if (fm.level === 'cool') return { kind: 'snowman', size: 0 };
   return { kind: 'turtle' };
 }
 

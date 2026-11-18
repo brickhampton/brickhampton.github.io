@@ -1668,20 +1668,6 @@ a.vbtn:active,button.vbtn:active{transform:scale(.94)}
 @keyframes fmTTail{0%,15%{transform:none}18%,90%{transform:translateX(calc(var(--d) * 1px))}93%,100%{transform:none}}
 @keyframes fmTLegs{0%,17%{transform:none}20%,89%{transform:translateY(-1px)}92%,100%{transform:none}}
 @keyframes fmTSink{0%,20%{transform:none}23%,88%{transform:translateY(1px)}91%,100%{transform:none}}
-/* The penguin waddles on the spot and flaps now and then; tapped, it flaps and hops. */
-.fm-pbody{animation:fmWaddle 1s steps(1) infinite}
-@keyframes fmWaddle{0%{transform:translateX(-1px)}50%{transform:translateX(1px)}}
-.fm-feet.f0{animation:fmFlap 1s steps(1) infinite}
-.fm-feet.f1{animation:fmFlap 1s steps(1) -.5s infinite}
-.fm-flip.up{visibility:hidden;animation:fmPFlap 4s steps(1) infinite}
-.fm-flip.dn{animation:fmPFlap 4s steps(1) -.15s infinite}
-@keyframes fmPFlap{0%,80%,86%,92%{visibility:hidden}83%,89%{visibility:visible}}
-.fm-flip.dn{animation-name:fmPFlapD}
-@keyframes fmPFlapD{0%,80%,86%,92%{visibility:visible}83%,89%{visibility:hidden}}
-.f-react .fm-peng{animation:fmPHop .5s steps(3) 3}
-@keyframes fmPHop{40%{transform:translateY(-3px)}}
-.f-react .fm-flip.up{animation:fmFlap .2s steps(1) 7}
-.f-react .fm-flip.dn{animation:fmFlap .2s steps(1) -.1s 7}
 /* The thundercloud bobs and zaps a bolt to the floor every few seconds (twice as often, in gold, for a career best),
    with the little bolt by the player's head flashing too. Tapped, it shakes and lets off three. */
 .fm-cloud{animation:fmHover 2s steps(2,jump-none) infinite}
@@ -1706,4 +1692,4 @@ a.vbtn:active,button.vbtn:active{transform:scale(.94)}
 .pfloat.fmwhy span{color:var(--granite);white-space:normal}
 .pfloat.fmwhy.hot{border-color:rgba(255,138,40,.6)}.pfloat.fmwhy.hot b{color:#ffc58f}
 .pfloat.fmwhy.cold{border-color:rgba(127,196,255,.55)}.pfloat.fmwhy.cold b{color:#bfe0ff}
-@media (prefers-reduced-motion:reduce){[class^="fm-"],[class*=" fm-"],.fmglow,.f-ice .phop>.pfig:first-child{animation:none!important}.fm-tdir.fl{opacity:0}.fm-wd,.fm-flip.up,.fm-feet.f1,.fm-leg.l1,.fm-ff.f1{visibility:hidden}.fm-ring{opacity:0}}
+@media (prefers-reduced-motion:reduce){[class^="fm-"],[class*=" fm-"],.fmglow,.f-ice .phop>.pfig:first-child{animation:none!important}.fm-tdir.fl{opacity:0}.fm-wd,.fm-leg.l1,.fm-ff.f1{visibility:hidden}.fm-ring{opacity:0}}
