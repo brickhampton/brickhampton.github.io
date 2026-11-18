@@ -92,7 +92,7 @@ const SAD = [
 ];
 
 // A dragon, facing right, with its top-left at (x, y): both wing frames (CSS shows one at a time), a flame jet from
-// the snout (shown when tapped) and smoke rings it puffs now and then.
+// the snout: a short puff now and then, a long burst when tapped.
 export function dragon(size, x, y, flip = false) {
   const big = size > 1, up = big ? DRAGON_UP : BABY_UP, dn = big ? DRAGON_DOWN : BABY_DOWN, w = big ? 16 : 11;
   const mouth = big ? [16, 4] : [11, 3], mx = flip ? x - (mouth[0] - w) - 1 : x + mouth[0];
@@ -101,10 +101,9 @@ export function dragon(size, x, y, flip = false) {
   let jet = '';
   const FL = big ? [[0, 1, 1, '#ffe27a'], [1, 1, 2, '#ffd04a'], [2, 1, 2, '#ffb02e'], [3, 0, 3, '#ff8a1f'], [4, 0, 3, '#ff6a1a'], [5, -1, 4, '#f24a17'], [6, -1, 3, '#d63414'], [7, 0, 2, '#b72a12']] : [[0, 0, 2, '#ffd04a'], [1, 0, 2, '#ffb02e'], [2, -1, 3, '#ff7a1f'], [3, -1, 3, '#f24a17'], [4, 0, 2, '#c72f13']];
   FL.forEach(([i, dy, h, c]) => { jet += px(fx(i), y + mouth[1] + dy, 1, h, c); });
-  const ring = (k) => `<g class="fm-ring r${k}">${px(fx(1), y + mouth[1] - 2, 2, 1, '#c9ccd6')}${px(fx(0), y + mouth[1] - 1, 1, 1, '#c9ccd6')}${px(fx(3), y + mouth[1] - 1, 1, 1, '#c9ccd6')}${px(fx(1), y + mouth[1], 2, 1, '#c9ccd6')}</g>`;
   const h = up.length;
   return `<g class="fm-dragon${big ? ' big' : ''}${flip ? ' fm-l' : ''}">${hit(x - 2, y - 2, w + 4, h + 4)}<g class="fm-wu">${art(up, DPAL, x, y, flip)}</g><g class="fm-wd">${art(dn, DPAL, x, y, flip)}</g>`
-    + `<g class="fm-jet">${jet}</g>${ring(1)}${ring(2)}</g>`;
+    + `<g class="fm-jet">${jet}</g></g>`;
 }
 // The sad dragon, sitting to the player's left, with a little flame on its tail that gutters out.
 export function sadDragon() {
@@ -269,12 +268,12 @@ export function turtle() {
   return `<g class="fm-turtle">${hit(x - 3, y - 4, 24, 11)}${px(x, 33, 12, 1, '#000', .3)}<g class="fm-walk">${turtle1(x, y, false)}${turtle1(x, y, true)}</g></g>`;
 }
 /* ---------------- weather round the player ---------------- */
-// Flames licking up round both shoes (two frames, flickering).
+// Low flames licking round both shoes (two frames, flickering), no higher than the ankle.
 export function flamingShoes(raw) {
   const { L1, L2 } = formGeom(raw);
   const f = (x, k) => `<g class="fm-flame f${k}">`
-    + (k ? px(x - 2, 31, 1, 1, '#ff6a1a') + px(x - 1, 30, 1, 2, '#ffb02e') + px(x, 29, 1, 3, '#ff8a1f') + px(x + 1, 30, 1, 2, '#ffd04a') + px(x + 2, 29, 1, 2, '#ff6a1a') + px(x + 3, 31, 1, 1, '#ffb02e')
-      : px(x - 2, 30, 1, 2, '#ffb02e') + px(x - 1, 31, 1, 1, '#ff6a1a') + px(x, 30, 1, 2, '#ffd04a') + px(x + 1, 28, 1, 4, '#ff8a1f') + px(x + 2, 31, 1, 1, '#ffb02e') + px(x + 3, 30, 1, 2, '#ff6a1a'))
+    + (k ? px(x - 2, 32, 1, 1, '#ff6a1a') + px(x - 1, 31, 1, 1, '#ffb02e') + px(x + 1, 30, 1, 2, '#ff8a1f') + px(x + 2, 31, 1, 1, '#ffd04a') + px(x + 3, 32, 1, 1, '#ff6a1a')
+      : px(x - 2, 31, 1, 2, '#ffb02e') + px(x, 31, 1, 1, '#ffd04a') + px(x + 1, 31, 1, 1, '#ff6a1a') + px(x + 2, 30, 1, 2, '#ff8a1f') + px(x + 3, 31, 1, 1, '#ffb02e'))
     + '</g>';
   return `<g class="fm-shoes">${f(L1, 0)}${f(L1, 1)}${f(L2 + 1, 1)}${f(L2 + 1, 0)}</g>`;
 }

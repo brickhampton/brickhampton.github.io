@@ -1591,12 +1591,9 @@ a.vbtn:active,button.vbtn:active{transform:scale(.94)}
 .fm-dragon:not(.big) :is(.fm-wu,.fm-wd){animation-duration:.26s}
 .fm-dragon:not(.big) .fm-wd{animation-delay:-.13s}
 @keyframes fmFlap{0%{visibility:visible}50%{visibility:hidden}}
-/* Smoke rings puffed now and then; a burst of fire when tapped. */
-.fm-ring,.fm-jet{opacity:0}
-.fm-ring{transform-box:fill-box;transform-origin:center;animation:fmRing 5s ease-out 1.2s infinite}
-.fm-ring.r2{animation-delay:1.9s}
-.fm-l .fm-ring{--rx:-5px}
-@keyframes fmRing{0%{opacity:0;transform:none}4%{opacity:.9}30%{opacity:0;transform:translate(var(--rx,5px),-5px) scale(1.6)}100%{opacity:0}}
+/* A short puff of fire now and then; a long burst when tapped. No smoke. */
+.fm-jet{opacity:0;animation:fmPuff 5s steps(1) 1.2s infinite}
+@keyframes fmPuff{0%,2%,6%{opacity:1}4%{opacity:.75}8%,100%{opacity:0}}
 .f-react .fm-jet{animation:fmJet 1.3s steps(1)}
 @keyframes fmJet{0%,8%{opacity:0}10%,30%,50%,70%{opacity:1}20%,40%,60%{opacity:.75}88%{opacity:1}90%,100%{opacity:0}}
 /* Flaming shoes, flickering between two shapes. */
@@ -1692,4 +1689,4 @@ a.vbtn:active,button.vbtn:active{transform:scale(.94)}
 .pfloat.fmwhy span{color:var(--granite);white-space:normal}
 .pfloat.fmwhy.hot{border-color:rgba(255,138,40,.6)}.pfloat.fmwhy.hot b{color:#ffc58f}
 .pfloat.fmwhy.cold{border-color:rgba(127,196,255,.55)}.pfloat.fmwhy.cold b{color:#bfe0ff}
-@media (prefers-reduced-motion:reduce){[class^="fm-"],[class*=" fm-"],.fmglow,.f-ice .phop>.pfig:first-child{animation:none!important}.fm-tdir.fl{opacity:0}.fm-wd,.fm-leg.l1,.fm-ff.f1{visibility:hidden}.fm-ring{opacity:0}}
+@media (prefers-reduced-motion:reduce){[class^="fm-"],[class*=" fm-"],.fmglow,.f-ice .phop>.pfig:first-child{animation:none!important}.fm-tdir.fl{opacity:0}.fm-wd,.fm-leg.l1,.fm-ff.f1{visibility:hidden}}
