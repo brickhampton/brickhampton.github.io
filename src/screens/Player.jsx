@@ -112,7 +112,7 @@ function SeasonCmp({ id, seasonsPlayed }) {
 }
 
 // The big player on the player page, bobbing like the player on the recording court. Every few seconds they bounce the
-// ball a few times (or five quick ones), cross it over, or look around. Tapping them gets a
+// ball a few times (or five quick ones), bounce it behind the back, or look around. Tapping them gets a
 // reaction like the team photo on Home: a bob with each tap, then a random trick after a single tap. Rapid taps
 // always smile; a single tap smiles only some of the time.
 // Each trick is a few steps: a class that animates it, a pose, how long it lasts, and something to float over their
@@ -122,7 +122,6 @@ const TRICKS = {
   hop: () => [['hop', '', 700]],
   squash: () => [['squash', '', 800]],
   dribble: bounces,
-  cross: () => [['bounce', '', 520], ['bounce', 'dribbleL', 520], ['bounce', '', 520], ['bounce', 'dribbleL', 520], ['bounce', '', 520]],
   spin: () => [['spin', 'spin', 2000]],
   // Bounced behind the back: pushed down behind the hip, off the floor just behind the heels, up into the other hand.
   behind: () => [['bounce', '', 520], ['behind', '', 260], ['upL', 'dribbleL', 300], ['bounce', 'dribbleL', 520], ['behindR', 'dribbleL', 260], ['upR', '', 300], ['bounce', '', 520]],
@@ -147,7 +146,7 @@ const STEP_SFX = { bounce: [['dribble', 250]], qbounce: [['dribble', 150]], spin
   legs: [['dribble', 260]], legsR: [['dribble', 260]], jumpshot: [['hop', 0], ['swish', 750]], catchback: [['grab', 400]], cheer: [['cheer', 0]], brag: [['trophy', 0]], squash: [['boing', 0]], fumble: [['floor', 200]] };
 // Steps where the ball passes in front of the body.
 const FRONT = new Set(['kcross', 'kback', 'legs', 'legsR']);
-const IDLE = ['dribble', 'cross', 'quick', 'dribble', 'cross', 'quick', 'look', 'killer', 'legs', 'shot'], IDLE_ONLY = ['quick', 'look'], RAPID = 320;
+const IDLE = ['dribble', 'behind', 'quick', 'dribble', 'behind', 'quick', 'look', 'killer', 'legs', 'shot'], IDLE_ONLY = ['quick', 'look'], RAPID = 320;
 // The ball on its own, for when it leaves the player's hands: centred on (0, 0) in the stage's units.
 const U = 104 / 34, LOOSE = BALL.map(([o, w], j) => `<rect x="${((o - 3.5) * U).toFixed(2)}" y="${((j - 3) * U).toFixed(2)}" width="${(w * U).toFixed(2)}" height="${U.toFixed(2)}" fill="${BALL_C}"/>`).join('');
 // Preview only: ?ptap=<name> picks the trick a tap plays.
