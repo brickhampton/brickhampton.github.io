@@ -18,8 +18,8 @@ const TRICKS = {
   spin: [['down', 0, 0, 0], ...Array.from({ length: 12 }, (_, i) => ['spin', 0, 0, 0, i % 2 ? 'spin' : null]), ['down', 0, 0, 0]],
   // Sunglasses on, a cool bob, sunglasses off.
   shades: bob('down', 12, 'shades'),
-  // The ball from one hand round the back to the other, and back again.
-  behind: [['dribble', 0, 0, 0], ['dribble', 0, 1, 0], ['lowball', 0, 0, 0], ['dribbleL', 0, 0, 0], ['dribbleL', 0, 1, 0], ['lowball', 0, 0, 0], ['dribble', 0, 0, 0], ['dribble', 0, 1, 0]],
+  // The ball bounced behind the back, off the floor just behind the heels, from one hand to the other and back again.
+  behind: [['dribble', 0, 0, 0], ['dribble', 0, 1, 0], ['dribble', 0, 0, 0, 'bdR'], ['dribbleL', 0, 0, 0, 'buL'], ['dribbleL', 0, 1, 0], ['dribbleL', 0, 0, 0, 'bdL'], ['dribble', 0, 0, 0, 'buR'], ['dribble', 0, 1, 0]],
   // Pointing out to the crowd on one side, then the other, looking where he points.
   point: [...rep(['pointR', 0, 0, 0, 'eyesR'], 4), ['down', 0, 0, 0], ...rep(['pointL', 0, 0, 0, 'away'], 4), ['down', 0, 0, 0]],
   // Making it rain: notes flicked off the top of a wad held just right of his number, arcing out and tumbling to the floor.
@@ -33,7 +33,7 @@ TRICKS.look = Array.from({ length: 6 }, () => ['dribble', 0, 0, 0, 'look']);
 // A shrug (only for a tap after a loss): palms up for a moment, head tipped down a touch, the ball left at his feet.
 TRICKS.shrug = Array.from({ length: 6 }, () => ['shrug', 0, 0, 0, 'shrug']);
 const CALM_KEYS = ['bounce', 'behind', 'look'];
-const CLASS_EXTRAS = new Set(['bounce', 'look', 'shrug', 'down', 'eyesR', 'away']);
+const CLASS_EXTRAS = new Set(['bounce', 'look', 'shrug', 'down', 'eyesR', 'away', 'bdR', 'buL', 'bdL', 'buR']);
 // After a loss there's no celebrating: arms by his sides, nodding along, no smile, no confetti.
 const NOD = [['down', 0, 0, 0], ['down', 0, 1, 0]];
 // A tap: a double fist pump, jumping with both fists up, twice.

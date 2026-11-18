@@ -671,10 +671,15 @@ tr.tot td{font-weight:600;border-top:1px solid var(--stroke)}
 .pstage.squash .phop{transform-origin:50% 92%;animation:tSquash .8s ease-out}
 .ploose{pointer-events:none}
 .pball{opacity:0}
-/* The ball behind the back: it slides from one hand to the other, hidden behind the body halfway. */
-.pstage.behind .av-ball{animation:pxBehind .36s ease-in-out both}
-.pstage.behindR .av-ball{animation:pxBehind .36s ease-in-out reverse both}
-@keyframes pxBehind{from{transform:translateX(30px)}to{transform:translateX(-30px)}}
+/* The ball bounced behind the back: pushed down behind the hip to the floor just behind the heels (hidden by the legs
+   on the way), then up from there into the other hand. --mid is half the way from one hand to the other.
+   The Player of the game's idle trick does the same, with its pk-bdR/buL/bdL/buR classes. */
+.pstage.behind .av-ball,.potg-stage .pk-bdR .av-ball{--bx:calc(var(--mid) * -1);animation:pxBehindDown .26s cubic-bezier(.5,0,1,1) both}
+.pstage.behindR .av-ball,.potg-stage .pk-bdL .av-ball{--bx:var(--mid);animation:pxBehindDown .26s cubic-bezier(.5,0,1,1) both}
+.pstage.upL .av-ball,.potg-stage .pk-buL .av-ball{--bx:var(--mid);animation:pxBehindUp .3s cubic-bezier(0,0,.5,1) both}
+.pstage.upR .av-ball,.potg-stage .pk-buR .av-ball{--bx:calc(var(--mid) * -1);animation:pxBehindUp .3s cubic-bezier(0,0,.5,1) both}
+@keyframes pxBehindDown{to{transform:translate(var(--bx),var(--drop))}}
+@keyframes pxBehindUp{from{transform:translate(var(--bx),var(--drop))}}
 /* A fumble: the ball slips and rolls off, the player runs after it and comes back with it from the other side. */
 .pstage.fumble .pball{animation:pFumble .75s linear both}
 @keyframes pFumble{0%{opacity:1;transform:translate(80px,73px);animation-timing-function:ease-in}30%{transform:translate(86px,98px);animation-timing-function:ease-out}50%{transform:translate(92px,86px);animation-timing-function:ease-in}68%{transform:translate(97px,98px)}85%{opacity:1}100%{opacity:0;transform:translate(130px,98px)}}

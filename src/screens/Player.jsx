@@ -122,7 +122,8 @@ const TRICKS = {
   dribble: bounces,
   cross: () => [['bounce', '', 520], ['bounce', 'dribbleL', 520], ['bounce', '', 520], ['bounce', 'dribbleL', 520], ['bounce', '', 520]],
   spin: () => [['spin', 'spin', 2000]],
-  behind: () => [['bounce', '', 520], ['behind', 'lowball', 360], ['bounce', 'dribbleL', 520], ['behindR', 'lowball', 360], ['bounce', '', 520]],
+  // Bounced behind the back: pushed down behind the hip, off the floor just behind the heels, up into the other hand.
+  behind: () => [['bounce', '', 520], ['behind', '', 260], ['upL', 'dribbleL', 300], ['bounce', 'dribbleL', 520], ['behindR', 'dribbleL', 260], ['upR', '', 300], ['bounce', '', 520]],
   fumble: () => [['fumble', 'down', 750], ['chase', 'down', 600], ['comeback', '', 600]],
   dance: () => [['dance', 'down', 1400]],
   mood: (m) => [['cheer', 'block', 1300, { text: `${m.per} PER`, tone: 'pos' }]],
@@ -137,7 +138,7 @@ const TRICKS = {
 };
 // The sounds of a trick that follows a tap (idle tricks stay silent): the ball hits the floor halfway through each bounce.
 const STEP_SFX = { bounce: [['dribble', 250]], qbounce: [['dribble', 150]], spin: [['trick', 0]], hop: [['hop', 0]], dance: [['trick', 0]],
-  cheer: [['cheer', 0]], brag: [['trophy', 0]], squash: [['boing', 0]], fumble: [['floor', 200]] };
+  upL: [['dribble', 0]], upR: [['dribble', 0]], cheer: [['cheer', 0]], brag: [['trophy', 0]], squash: [['boing', 0]], fumble: [['floor', 200]] };
 const IDLE = ['dribble', 'cross', 'quick', 'dribble', 'cross', 'quick', 'look'], IDLE_ONLY = ['quick', 'look'], RAPID = 320;
 // The ball on its own, for when it leaves the player's hands: centred on (0, 0) in the stage's units.
 const U = 104 / 34, LOOSE = BALL.map(([o, w], j) => `<rect x="${((o - 3.5) * U).toFixed(2)}" y="${((j - 3) * U).toFixed(2)}" width="${(w * U).toFixed(2)}" height="${U.toFixed(2)}" fill="${BALL_C}"/>`).join('');

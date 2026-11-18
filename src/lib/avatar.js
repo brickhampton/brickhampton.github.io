@@ -491,7 +491,10 @@ export function figure(raw, opts = {}) {
   // animations work in the box's units. The smiling eyes stay hidden until an animation shows them.
   const tf = opts.stage ? `translate(50 0) scale(${(104 / FEET).toFixed(4)}) translate(-13 0)` : `scale(6.25) translate(-5 ${3 - hy})`, at = s => `<g transform="${tf}">${s}</g>`;
   // A palmed ball sits behind the hand; a ball held in front of the chest sits over the body.
-  const bl = `<g class="av-ball" style="--drop:${((5 + TALL[c.height]) * 104 / FEET).toFixed(1)}px">${at(paths(go, 'o'))}</g>`, cut = shortsY + TOPM;
+  // --drop is how far the palmed ball falls to bounce off the floor; --mid how far across to the floor just behind the
+  // player's heels, from either hand (the player page's bounce behind the back).
+  const wb = WIDE[c.weight], bxx = 8 - Math.ceil(wb / 2), mid = (bxx + 10 + wb + 5 - Math.max(bxx - 5, 3)) / 2;
+  const bl = `<g class="av-ball" style="--drop:${((5 + TALL[c.height]) * 104 / FEET).toFixed(1)}px;--mid:${(mid * 104 / FEET).toFixed(1)}px">${at(paths(go, 'o'))}</g>`, cut = shortsY + TOPM;
   // On the stage the jersey and arms (everything above the shorts) are their own group, so they can settle a pixel
   // onto the shorts when the player lands from a hop.
   const body = opts.stage ? at(paths(g.map((row, y) => y < cut ? [] : row), 'b')) + `<g class="av-top">${at(paths(g.map((row, y) => y < cut ? row : []), 'b'))}</g>` : at(paths(g, 'b'));
