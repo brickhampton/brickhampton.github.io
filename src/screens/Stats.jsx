@@ -1,5 +1,5 @@
 import { S, set } from '../lib/store.js';
-import { allGames, seasonList, seasonName, statPlayers, playerAgg, sumRows, ratio, pctTxt, perTxt, tier, aggTier, enoughShots, f1, calc, P, numIn } from '../lib/core.js';
+import { allGames, seasonList, seasonName, statPlayers, playerAgg, sumRows, ratio, pctTxt, perTxt, tier, aggTier, enoughShots, f1, calc, P, numIn, perGame } from '../lib/core.js';
 import { go, openPlayer } from '../lib/nav.js';
 import { shotDetail, rebSplit } from '../lib/prefs.js';
 import { drawTrend, drawScatter, drawSeasonBars, STATS, TB_STATS, SLOT_COL, SC_B } from '../lib/charts.js';
@@ -58,7 +58,7 @@ function Rankings({ aggs, team, tot, pctOnly, split }) {
       return <td key={k} className={aggTier(k, pct, a) || undefined}>{shot(a, k, 0)}-{at}<span className="sp">{pctTxt(pct)}</span></td>;
     }
     const all = aggs.map(x => val(x, k)), top = !isTeam && (k === 'to' ? v === Math.min(...all) : v === Math.max(...all));
-    return <td key={k}><span className={`n${top && aggs.length > 1 ? ' hi' : ''}`}>{tot ? v : f1(v)}</span></td>;
+    return <td key={k}><span className={`n${top && v !== null && aggs.length > 1 ? ' hi' : ''}`}>{v === null ? '–' : tot ? v : f1(v)}</span></td>;
   };
   const arrow = k => sk === k ? <span className="arr">{dir < 0 ? '▼' : '▲'}</span> : null;
   const aria = k => sk === k ? (dir < 0 ? 'descending' : 'ascending') : undefined;
@@ -135,7 +135,7 @@ export function Stats() {
   const split = rebSplit() && !all && inSeason.some(g => Object.values(g.rows).some(r => r.oreb !== undefined));
   // The team row counts everyone who played, subs included, across the games with stats.
   const teamS = sumRows(inSeason.flatMap(g => Object.values(g.rows)));
-  const team = { id: 'team', gp: inSeason.length, s: teamS, pg: k => teamS[k] / inSeason.length };
+  const team = { id: 'team', gp: inSeason.length, s: teamS, pg: k => perGame(teamS, k, inSeason.length) };
   const minGP = Math.min(3, Math.max(...aggs.map(a => a.gp))), qual = aggs.filter(a => a.gp >= minGP);
   const pickable = statPlayers();
   // The trend chart starts with the season's top 3 by PER, so a phone isn't a tangle of 7 lines. The chips add more.
