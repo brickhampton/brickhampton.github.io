@@ -193,7 +193,8 @@ export function playerBadges(id, asOf, noTie) {
   if (best(x => x.pg('ast'))) add('ast', 'Assistaholic', 'hearts', 'blue', `Most assists a game in ${nm} (${f1(a.pg('ast'))}).`);
   const def = x => (x.s.stl + x.s.blk) / x.gp;
   // Subs can earn the 3+ a game version: it doesn't compare them with anyone.
-  if (a.gp >= 3 && (def(a) >= 3 || best(def))) add('def', 'Clamps', 'shield2', 'purple', `${f1(def(a))} steals and blocks a game in ${nm}${best(def) ? ', the most on the team' : ''}.`);
+  // Needs 1+ block that season, so a steals-only player gets Cookiesss instead (Geoff, 2026-11-28).
+  if (a.gp >= 3 && a.s.blk >= 1 && (def(a) >= 3 || best(def))) add('def', 'Clamps', 'shield2', 'purple', `${f1(def(a))} steals and blocks a game in ${nm}${best(def) ? ', the most on the team' : ''}.`);
   const hasDef = out.some(b => b.key === 'def');
   if (!hasDef && a.gp >= 3 && a.pg('stl') >= BT.stl) add('stl', 'Cookiesss', 'cookie', 'purple', `${f1(a.pg('stl'))} steals a game in ${nm}.`);
   if (!hasDef && a.gp >= 3 && a.pg('blk') >= BT.blk) add('blk', 'Not in my house!', 'wag', 'purple', `${f1(a.pg('blk'))} blocks a game in ${nm}.`);
