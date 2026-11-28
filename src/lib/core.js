@@ -61,9 +61,16 @@ const SUMK = ['m2', 'a2', 'm3', 'a3', 'ftm', 'fta', 'ast', 'stl', 'blk', 'to'];
 export function sumRows(list) {
   const c = Object.fromEntries(SUMK.map(k => [k, 0])); c.reb = 0;
   c._per = 0;
-  for (const r of list) { SUMK.forEach(k => c[k] += r[k]); c.reb += r.reb === undefined ? r.oreb + r.dreb : r.reb; c._per += calc(r).per; }
+  let oreb = 0, dreb = 0;
+  for (const r of list) {
+    SUMK.forEach(k => c[k] += r[k]); c._per += calc(r).per;
+    // Games with only total REB count every rebound as defensive in the OREB/DREB sums.
+    if (r.reb === undefined || (r.split === true && r.oreb != null)) { c.reb += r.oreb + r.dreb; oreb += r.oreb; dreb += r.dreb; }
+    else { c.reb += r.reb; dreb += r.reb; }
+  }
   // Each game's own PER is added up, so totals mixing old (REB) and new (OREB/DREB) games stay right.
-  return calc(c);
+  // oreb/dreb are only for showing the split; PER never uses them here.
+  return { ...calc(c), oreb, dreb };
 }
 export const ratio = (m, a) => a ? m / a : null;
 export const pctTxt = v => v === null || v === undefined ? '–' : Math.round(v * 100) + '%';

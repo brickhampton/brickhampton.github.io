@@ -1,7 +1,7 @@
 import { S, set } from '../lib/store.js';
 import { allGames, seasonList, seasonName, statPlayers, playerAgg, sumRows, ratio, pctTxt, perTxt, tier, aggTier, enoughShots, f1, calc, P, numIn } from '../lib/core.js';
 import { go, openPlayer } from '../lib/nav.js';
-import { shotDetail } from '../lib/prefs.js';
+import { shotDetail, rebSplit } from '../lib/prefs.js';
 import { drawTrend, drawScatter, drawSeasonBars, STATS, TB_STATS, SLOT_COL, SC_B } from '../lib/charts.js';
 import { Avatar } from '../components/Avatar.jsx';
 import { TrophyGold } from '../components/icons.jsx';
@@ -23,8 +23,10 @@ const DCOLS = RCOLS.flatMap(c => c[0] === 'fg' ? [c, ['fgm', 'FGM'], ['fga', 'FG
   : c[0] === 'ft' ? [c, ['ftm', 'FTM'], ['fta', 'FTA']] : c[0] === 'ts' ? [c, ['tsm', 'TS'], ['tsa', 'TSA']] : [c]);
 
 // pctOnly: All time Totals show shooting as just the % (made-attempts get too big).
-function Rankings({ aggs, team, tot, pctOnly }) {
-  const detail = shotDetail(), cols = detail ? DCOLS : RCOLS;
+// split: REB shows as OREB and DREB (Settings option, seasons that recorded the split).
+const splitCols = cols => cols.flatMap(c => c[0] === 'reb' ? [['oreb', 'OREB'], ['dreb', 'DREB']] : [c]);
+function Rankings({ aggs, team, tot, pctOnly, split }) {
+  const detail = shotDetail(), base = detail ? DCOLS : RCOLS, cols = split ? splitCols(base) : base;
   const dash = tot && !pctOnly && !detail;
   const cnt = (a, k) => k === 'tsm' ? (tot ? Math.round(a.s.pts / 2) : a.pg('pts') / 2) : k === 'tsa' && tot ? Math.round(a.s.tsa) : tot ? a.s[CNT[k]] : a.pg(CNT[k]);
   const val = (a, k) => CNT[k] ? cnt(a, k) : tot ? (SHOTS[k] && !dash ? aggVal(a, k) : totVal(a, k)) : aggVal(a, k);
@@ -129,6 +131,8 @@ export function Stats() {
     <SeasonPick id="s-chips" value={S.sSeason} seasons={codes} onPick={v => set({ sSeason: v })} /></div>;
   if (!aggs.length) return <>{head}<EmptyState title={`No ${S.sSeason} stats yet`} text="Leaders, rankings and charts appear here after the first game of the season is recorded." /></>;
   const totals = !!S.sTotals;
+  // With Rebounds set to Split, a season with any OREB/DREB game shows them. All time keeps one REB column.
+  const split = rebSplit() && !all && inSeason.some(g => Object.values(g.rows).some(r => r.oreb !== undefined));
   // The team row counts everyone who played, subs included, across the games with stats.
   const teamS = sumRows(inSeason.flatMap(g => Object.values(g.rows)));
   const team = { id: 'team', gp: inSeason.length, s: teamS, pg: k => teamS[k] / inSeason.length };
@@ -156,7 +160,7 @@ export function Stats() {
         <div className={`tog${totals ? ' r' : ''}`} id="s-mode" role="group" aria-label="Averages or totals">
           <button data-m="avg" aria-pressed={!totals} onClick={() => set({ sTotals: !totals })}>Averages</button>
           <button data-m="tot" aria-pressed={totals} onClick={() => set({ sTotals: !totals })}>Totals</button></div></div>
-      <div id="rank-wrap"><Rankings aggs={aggs} team={team} tot={totals} pctOnly={all} /></div></div>
+      <div id="rank-wrap"><Rankings aggs={aggs} team={team} tot={totals} pctOnly={all} split={split} /></div></div>
 
     <div className="sec"><h3>{all ? 'Season by season' : 'Trend over the season'}</h3>
       <div className="card" id="trend-card"><div className="ctrl"><div className="chips" id="t-players">{pickable.map(id => (
