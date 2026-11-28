@@ -214,7 +214,11 @@ export function playerBadges(id, asOf, noTie) {
   const pa = prevS && playerAgg(games.filter(g => g.season === prevS), id);
   if (pa && pa.gp >= 3 && a.gp >= 3 && a.pg('per') - pa.pg('per') >= BT.rise) add('rise', 'Let him cook', 'flame', 'gold', `${f1(a.pg('per'))} PER a game in ${nm}, up from ${f1(pa.pg('per'))} in ${prevS}.`);
   const p3 = ratio(a.s.m3, a.s.a3); if (a.s.a3 >= BT.p3A && p3 >= BT.p3) add('3', 'Green bean', 'target', 'green', `${pctTxt(p3)} from three in ${nm} (${a.s.m3} of ${a.s.a3}).`);
-  const ft = ratio(a.s.ftm, a.s.fta); if (a.s.fta >= BT.ftA && ft >= BT.ft) add('ft', 'For free?', 'piggy', 'green', `${pctTxt(ft)} at the free throw line in ${nm} (${a.s.ftm} of ${a.s.fta}).`);
+  // For free?: 60%+ at the line, or the best free throw % on the team (Geoff, 2026-11-28). Both need 5+ attempts.
+  // The team-best part follows the usual rules: starters with 3+ games, compared with others who also have 5+ attempts.
+  const ftPct = x => ratio(x.s.ftm, x.s.fta), ft = ftPct(a), ftPeers = peers.filter(x => x.s.fta >= BT.ftA);
+  const ftTop = a.s.fta >= BT.ftA && starter && a.gp >= 3 && ftPeers.length > 2 && lead(ftPeers, a, ftPct);
+  if (a.s.fta >= BT.ftA && (ft >= BT.ft || ftTop)) add('ft', 'For free?', 'piggy', 'green', `${pctTxt(ft)} at the free throw line in ${nm} (${a.s.ftm} of ${a.s.fta})${ftTop ? ', the best on the team' : ''}.`);
   if (best(x => x.pg('fta')) && a.s.fta > 0) add('fta', 'Ref\'s best friend', 'whistle', 'red', `Most free throw attempts a game in ${nm} (${f1(a.pg('fta'))}).`);
   const dd = sg.filter(g => g.rows[id]).map(g => calc(g.rows[id])).filter(s => [s.pts, s.reb, s.ast, s.stl, s.blk].filter(v => v >= 10).length >= 2).length;
   if (dd >= 1) add('dd', 'Double trouble', 'cards', 'blue', `${dd === 1 ? 'A double-double' : dd + ' double-doubles'} in ${nm}.`);
