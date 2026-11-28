@@ -61,9 +61,17 @@ const SUMK = ['m2', 'a2', 'm3', 'a3', 'ftm', 'fta', 'ast', 'stl', 'blk', 'to'];
 export function sumRows(list) {
   const c = Object.fromEntries(SUMK.map(k => [k, 0])); c.reb = 0;
   c._per = 0;
-  for (const r of list) { SUMK.forEach(k => c[k] += r[k]); c.reb += r.reb === undefined ? r.oreb + r.dreb : r.reb; c._per += calc(r).per; }
+  let oreb = 0, dreb = 0, ogp = 0;
+  for (const r of list) {
+    SUMK.forEach(k => c[k] += r[k]); c._per += calc(r).per;
+    // Games with only total REB count every rebound as defensive in the OREB/DREB sums.
+    if (r.reb === undefined || (r.split === true && r.oreb != null)) { c.reb += r.oreb + r.dreb; oreb += r.oreb; dreb += r.dreb; ogp++; }
+    else { c.reb += r.reb; dreb += r.reb; }
+  }
   // Each game's own PER is added up, so totals mixing old (REB) and new (OREB/DREB) games stay right.
-  return calc(c);
+  // oreb/dreb are only for showing the split; PER never uses them here.
+  // ogp: games that recorded OREB, so the OREB average skips games that only had total REB.
+  return { ...calc(c), oreb, dreb, ogp };
 }
 export const ratio = (m, a) => a ? m / a : null;
 export const pctTxt = v => v === null || v === undefined ? '–' : Math.round(v * 100) + '%';
@@ -84,11 +92,13 @@ export const RES = { W: 'Win', L: 'Loss', D: 'Draw', U: 'Result unknown' };
 export const esc = v => String(v ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
 export const ORD = n => n + (n % 100 >= 11 && n % 100 <= 13 ? 'th' : ['th', 'st', 'nd', 'rd'][n % 10] || 'th');
 
+// OREB a game counts only the games that recorded it (null if none).
+export const perGame = (s, k, gp) => k === 'oreb' ? (s.ogp ? s.oreb / s.ogp : null) : s[k] / gp;
 export function playerAgg(games, id) {
   const list = games.filter(g => g.rows[id]).map(g => g.rows[id]);
   if (!list.length) return null;
   const s = sumRows(list); const gp = list.length;
-  return { id, gp, s, pg: k => s[k] / gp };
+  return { id, gp, s, pg: k => perGame(s, k, gp) };
 }
 export const topPer = g => Object.entries(g.rows).map(([id, c]) => ({ id, s: calc(c) })).reduce((a, b) => b.s.per > a.s.per ? b : a);
 // One stat from a box score line (or summed lines), including shooting percentages.
